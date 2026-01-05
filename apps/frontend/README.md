@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 3Dēx Frontend
 
-## Getting Started
+This is the *frontend application* for 3Dēx, built with *Next.js* and *Tailwind CSS*.
 
-First, run the development server:
+It handles:
+- UI & UX
+- Page routing
+- Client‑side rendering
+- API consumption
+- 3D previews (later)
 
+---
+
+## 🧱 Tech Stack
+- Next.js (App Router)
+- React
+- Tailwind CSS
+- TypeScript
+
+---
+
+## 📂 Structure
+```
+src/ 
+├─ app/            # Pages & routes 
+├─ components/     # Reusable UI components 
+├─ features/       # Feature‑based UI logic 
+├─ lib/            # Helpers (fetchers, utils) 
+└─ styles/         # Global styles
+```
+---
+
+## ⚙️ Setup
+
+### 1. Install dependencies
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+```
+### 2. Environment variables
+
+Create .env.local:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:4000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+▶️ Run Development Server
+```bash
+npm run dev
+```
+Open:
+```
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🎨 Design Workflow
 
-To learn more about Next.js, take a look at the following resources:
+1. UI is based on Figma designs
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. Figma is a reference, not auto‑generated code
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. Build UI component‑by‑component
 
-## Deploy on Vercel
+4. Match layout & spacing, not pixel‑perfect perfection
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+---
+
+## ⚠️ Notes
+
+- Do NOT put secrets in frontend
+
+- Only variables starting with `NEXT_PUBLIC_` are accessible in browser
+---
