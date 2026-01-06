@@ -65,7 +65,7 @@ Health check:
 http://localhost:4000/health
 ```
 Expected:
-```
+```json
 { "status": "ok" }
 ```
 
