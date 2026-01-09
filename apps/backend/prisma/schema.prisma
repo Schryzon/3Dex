@@ -5,18 +5,67 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  CUSTOMER
+  ARTIST
+  ADMIN
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
+  username  String   @unique
   password  String
-  role      String
+  role      Role     @default(CUSTOMER)
+
+  models    Model[]      @relation("ArtistModels")
+  purchases Purchase[]
+
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Model {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  price       Int      // in cents
+  fileUrl     String
+  previewUrl  String?
+
+  artistId    String
+  artist      User     @relation("ArtistModels", fields: [artistId], references: [id])
+
+  purchases   Purchase[]
+
+  createdAt   DateTime @default(now())
+}
+
+enum LicenseType {
+  PERSONAL_USE
+  COMMERCIAL_USE
+}
+
+model Purchase {
+  id        String   @id @default(uuid())
+
+  userId    String
+  modelId   String
+
+  user      User     @relation(fields: [userId], references: [id])
+  model     Model    @relation(fields: [modelId], references: [id])
+
+  pricePaid Int
+  license   LicenseType @default(PERSONAL_USE)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, modelId])
 }
