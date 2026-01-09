@@ -87,11 +87,11 @@ Windows: https://git-scm.com/download/win
 
 Linux:
 
-```bash
+```sh
 sudo apt install git
 ```
 Verify:
-```bash
+```sh
 git --version
 ```
 
@@ -103,7 +103,7 @@ https://nodejs.org (choose LTS)
 
 
 Verify:
-```bash
+```sh
 node -v
 npm -v
 ```
@@ -116,11 +116,11 @@ Windows: https://www.postgresql.org/download/windows/
 
 Linux:
 
-```bash
+```sh
 sudo apt install postgresql postgresql-contrib
 ```
 Verify:
-```bash
+```sh
 psql --version
 pg_isready
 ```
@@ -133,7 +133,7 @@ accepting connections
 ---
 
 ## Clone the Project
-```bash
+```sh
 git clone https://github.com/Schryzon/3Dex.git
 cd 3Dex
 ```
@@ -162,7 +162,7 @@ If this works, you are officially a baby developer 👶✨
 
 ### Backend (`apps/backend/.env`)
 ```env
-DATABASE_URL="postgresql://YOUR_USERNAME:YOUR_PASSWORD@localhost:5432/postgres"
+DATABASE_URL="postgresql://YOUR_USERNAME:YOUR_PASSWORD@localhost:5432/threedex"
 PORT=4000
 ```
 ### Frontend (`apps/frontend/.env.local`)
@@ -179,7 +179,7 @@ They are already in `.gitignore`.
 ## Database Setup (PostgreSQL + Prisma)
 
 If you're not using PostgreSQL as a service:
-```bash
+```sh
 pg_ctl start -D "PATH_TO_DATA_FOLDER"
 ```
 The data folder usually comes with the installation.
@@ -189,14 +189,15 @@ Its path can be invoked via the following environment variable names:
 - `$PGDATA` (Linux)
 
 Example:
-```bash
+```powershell
 pg_ctl start -D $env:PGDATA
 ```
 
 Then, from apps/backend:
-```bash
+```sh
 npm install
 npx prisma migrate dev --name init
+npx prisma generate
 ```
 If this succeeds:
 
@@ -207,7 +208,7 @@ If this succeeds:
 - You are safe 🟢
 
 If you want to stop PostgreSQL, do:
-```bash
+```sh
 pg_ctl stop
 ```
 
@@ -216,7 +217,7 @@ pg_ctl stop
 ## Running the Project
 
 ### Backend
-```bash
+```sh
 cd apps/backend
 npm run dev
 ```
@@ -232,7 +233,7 @@ Expected:
 ---
 
 ### Frontend
-```bash
+```sh
 cd apps/frontend
 npm install
 npm run dev
@@ -265,13 +266,13 @@ If YES → you are fully set up 🎉
 ## Daily Git Workflow (NO COLLISIONS)
 
 ### Start work
-```bash
+```sh
 git checkout dev
 git pull origin dev
 git checkout -b feature/your-task-name
 ```
 ### Save work
-```bash
+```sh
 git add .
 git commit -m "clear description"
 git push -u origin feature/your-task-name
@@ -282,7 +283,7 @@ git push -u origin feature/your-task-name
 ## Working From a NON‑Existing Folder
 
 If you never cloned before:
-```bash
+```sh
 git clone https://github.com/Schryzon/3Dex.git
 cd 3Dex
 git checkout dev
@@ -295,12 +296,12 @@ Then follow setup steps above.
 ## Working From an EXISTING Folder
 
 If you already cloned before:
-```bash
+```sh
 git checkout dev
 git pull origin dev
 ```
 Then create your feature branch:
-```bash
+```sh
 git checkout -b feature/new-task
 ```
 
@@ -309,12 +310,12 @@ git checkout -b feature/new-task
 ## Merging Your Work Safely
 
 Step 1: Update dev
-```bash
+```sh
 git checkout dev
 git pull origin dev
 ```
 Step 2: Merge dev into your branch
-```bash
+```sh
 git checkout feature/your-task
 git merge dev
 ```
@@ -324,13 +325,13 @@ Fix conflicts here, not on dev.
 ---
 
 Step 3: Merge into dev
-```bash
+```sh
 git checkout dev
 git merge feature/your-task
 git push origin dev
 ```
 Step 4: Delete branch
-```bash
+```sh
 git branch -d feature/your-task
 git push origin --delete feature/your-task
 ```
@@ -346,7 +347,7 @@ Clean. Safe. Professional.
 You didn’t commit before pulling.
 
 Fix:
-```bash
+```sh
 git add .
 git commit -m "wip"
 git pull
@@ -361,13 +362,13 @@ Postgres isn’t running or port isn’t `5432`.
 Fix:
 
 1. Check if PostgreSQL is running
-```bash
+```sh
 pg_isready
 ```
 
 2. If not, start it manually at a certain port (`-p 5432`)
 Example: (Powershell)
-```bash
+```powershell
 pg_ctl -o "-p 5432" start -D $env:PGDATA
 ```
 ---
