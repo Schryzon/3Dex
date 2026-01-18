@@ -5,18 +5,69 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  CUSTOMER
+  ARTIST
+  ADMIN
+}
+
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  role      String
-  createdAt DateTime @default(now())
+  id       String @id @default(uuid())
+  email    String @unique
+  username String @unique
+  password String
+  role     Role   @default(CUSTOMER)
+
+  models    Model[]    @relation("artist_models")
+  purchases Purchase[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Model {
+  id          String  @id @default(uuid())
+  title       String
+  description String?
+  price       Int // in cents
+  file_url    String
+  preview_url String?
+
+  artist_id String
+  artist    User   @relation("artist_models", fields: [artist_id], references: [id])
+
+  purchases Purchase[]
+
+  created_at DateTime @default(now())
+}
+
+enum License_Type {
+  PERSONAL_USE
+  COMMERCIAL_USE
+}
+
+model Purchase {
+  id String @id @default(uuid())
+
+  user_id  String
+  model_id String
+
+  user  User  @relation(fields: [user_id], references: [id])
+  model Model @relation(fields: [model_id], references: [id])
+
+  price_paid Int
+  license    License_Type @default(PERSONAL_USE)
+
+  created_at DateTime @default(now())
+
+  @@unique([user_id, model_id])
+  @@index([user_id])
+  @@index([model_id])
 }

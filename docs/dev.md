@@ -7,22 +7,22 @@
 
 📌 Table of Contents
 
-1. [What Is This Project?](what-is-this-project)
-2. [Tech Stack Overview](tech-stack-overview)
-3. [Before You Start (VERY IMPORTANT)](before-you-start-very-important)
-4. [Install Everything (Windows & Linux)](install-everything-windows--linux)
-5. [Clone the Project](clone-the-project)
-6. [Project Structure Explained](project-structure-explained)
-7. [Environment Variables (.env)](environment-variables-env)
-8. [Database Setup (PostgreSQL + Prisma)](database-setup-postgresql--prisma)
-9. [Running the Project](running-the-project)
-10. [Testing That Everything Works](testing-that-everything-works)
-11. [Daily Git Workflow (NO COLLISIONS)](daily-git-workflow-no-collisions)
-12. [Working From a NON‑Existing Folder](working-from-a-nonexisting-folder)
-13. [Working From an EXISTING Folder](working-from-an-existing-folder)
-14. [Merging Your Work Safely](merging-your-work-safely)
-15. [Common Mistakes & Fixes](common-mistakes--fixes)
-16. [Golden Rules (READ THIS TWICE)](golden-rules-read-this-twice)
+1. [What Is This Project?](#what-is-this-project)
+2. [Tech Stack Overview](#tech-stack-overview)
+3. [Before You Start (VERY IMPORTANT)](#before-you-start-very-important)
+4. [Install Everything (Windows & Linux)](#install-everything-windows--linux)
+5. [Clone the Project](#clone-the-project)
+6. [Project Structure Explained](#project-structure-explained)
+7. [Environment Variables (.env)](#environment-variables-env)
+8. [Database Setup (PostgreSQL + Prisma)](#database-setup-postgresql--prisma)
+9. [Running the Project](#running-the-project)
+10. [Testing That Everything Works](#testing-that-everything-works)
+11. [Daily Git Workflow (NO COLLISIONS)](#daily-git-workflow-no-collisions)
+12. [Working From a NON‑Existing Folder](#working-from-a-nonexisting-folder)
+13. [Working From an EXISTING Folder](#working-from-an-existing-folder)
+14. [Merging Your Work Safely](#merging-your-work-safely)
+15. [Common Mistakes & Fixes](#common-mistakes--fixes)
+16. [Golden Rules (READ THIS TWICE)](#golden-rules-read-this-twice)
 
 
 
@@ -87,11 +87,11 @@ Windows: https://git-scm.com/download/win
 
 Linux:
 
-```bash
+```sh
 sudo apt install git
 ```
 Verify:
-```bash
+```sh
 git --version
 ```
 
@@ -103,7 +103,7 @@ https://nodejs.org (choose LTS)
 
 
 Verify:
-```bash
+```sh
 node -v
 npm -v
 ```
@@ -116,11 +116,11 @@ Windows: https://www.postgresql.org/download/windows/
 
 Linux:
 
-```bash
+```sh
 sudo apt install postgresql postgresql-contrib
 ```
 Verify:
-```bash
+```sh
 psql --version
 pg_isready
 ```
@@ -128,11 +128,12 @@ Expected:
 ```
 accepting connections
 ```
+*Note: This is only if you installed PostgreSQL as a service, otherwise you have to start it manually.*
 
 ---
 
 ## Clone the Project
-```bash
+```sh
 git clone https://github.com/Schryzon/3Dex.git
 cd 3Dex
 ```
@@ -157,14 +158,14 @@ If this works, you are officially a baby developer 👶✨
 
 ---
 
-## Environment Variables (.env)
+## Environment Variables (`.env`)
 
-Backend (apps/backend/.env)
+### Backend (`apps/backend/.env`)
 ```env
-DATABASE_URL="postgresql://YOUR_USERNAME:YOUR_PASSWORD@localhost:5432/postgres"
+DATABASE_URL="postgresql://YOUR_USERNAME:YOUR_PASSWORD@localhost:5432/threedex"
 PORT=4000
 ```
-Frontend (apps/frontend/.env.local)
+### Frontend (`apps/frontend/.env.local`)
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:4000
 ```
@@ -177,10 +178,26 @@ They are already in `.gitignore`.
 
 ## Database Setup (PostgreSQL + Prisma)
 
-From apps/backend:
-```bash
+If you're not using PostgreSQL as a service:
+```sh
+pg_ctl start -D "PATH_TO_DATA_FOLDER"
+```
+The data folder usually comes with the installation.
+Its path can be invoked via the following environment variable names:
+- `%PGDATA%` (Command Prompt)
+- `$env:PGDATA` (Powershell) 
+- `$PGDATA` (Linux)
+
+Example:
+```powershell
+pg_ctl start -D $env:PGDATA
+```
+
+Then, from apps/backend:
+```sh
 npm install
 npx prisma migrate dev --name init
+npx prisma generate
 ```
 If this succeeds:
 
@@ -190,14 +207,17 @@ If this succeeds:
 
 - You are safe 🟢
 
-
+If you want to stop PostgreSQL, do:
+```sh
+pg_ctl stop
+```
 
 ---
 
 ## Running the Project
 
 ### Backend
-```bash
+```sh
 cd apps/backend
 npm run dev
 ```
@@ -206,14 +226,14 @@ Check:
 http://localhost:4000/health
 ```
 Expected:
-```
+```json
 { "status": "ok" }
 ```
 
 ---
 
 ### Frontend
-```bash
+```sh
 cd apps/frontend
 npm install
 npm run dev
@@ -246,13 +266,13 @@ If YES → you are fully set up 🎉
 ## Daily Git Workflow (NO COLLISIONS)
 
 ### Start work
-```bash
+```sh
 git checkout dev
 git pull origin dev
 git checkout -b feature/your-task-name
 ```
 ### Save work
-```bash
+```sh
 git add .
 git commit -m "clear description"
 git push -u origin feature/your-task-name
@@ -263,7 +283,7 @@ git push -u origin feature/your-task-name
 ## Working From a NON‑Existing Folder
 
 If you never cloned before:
-```bash
+```sh
 git clone https://github.com/Schryzon/3Dex.git
 cd 3Dex
 git checkout dev
@@ -276,12 +296,12 @@ Then follow setup steps above.
 ## Working From an EXISTING Folder
 
 If you already cloned before:
-```bash
+```sh
 git checkout dev
 git pull origin dev
 ```
 Then create your feature branch:
-```bash
+```sh
 git checkout -b feature/new-task
 ```
 
@@ -290,12 +310,12 @@ git checkout -b feature/new-task
 ## Merging Your Work Safely
 
 Step 1: Update dev
-```bash
+```sh
 git checkout dev
 git pull origin dev
 ```
 Step 2: Merge dev into your branch
-```bash
+```sh
 git checkout feature/your-task
 git merge dev
 ```
@@ -305,13 +325,13 @@ Fix conflicts here, not on dev.
 ---
 
 Step 3: Merge into dev
-```bash
+```sh
 git checkout dev
 git merge feature/your-task
 git push origin dev
 ```
 Step 4: Delete branch
-```bash
+```sh
 git branch -d feature/your-task
 git push origin --delete feature/your-task
 ```
@@ -327,7 +347,7 @@ Clean. Safe. Professional.
 You didn’t commit before pulling.
 
 Fix:
-```bash
+```sh
 git add .
 git commit -m "wip"
 git pull
@@ -341,10 +361,16 @@ Postgres isn’t running or port isn’t `5432`.
 
 Fix:
 
-```bash
+1. Check if PostgreSQL is running
+```sh
 pg_isready
 ```
 
+2. If not, start it manually at a certain port (`-p 5432`)
+Example: (Powershell)
+```powershell
+pg_ctl -o "-p 5432" start -D $env:PGDATA
+```
 ---
 
 ## Golden Rules (READ THIS TWICE)
