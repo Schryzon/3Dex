@@ -19,53 +19,55 @@ enum Role {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  username  String   @unique
-  password  String
-  role      Role     @default(CUSTOMER)
+  id       String @id @default(uuid())
+  email    String @unique
+  username String @unique
+  password String
+  role     Role   @default(CUSTOMER)
 
-  models    Model[]      @relation("ArtistModels")
+  models    Model[]    @relation("artist_models")
   purchases Purchase[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model Model {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   title       String
   description String?
-  price       Int      // in cents
-  fileUrl     String
-  previewUrl  String?
+  price       Int // in cents
+  file_url    String
+  preview_url String?
 
-  artistId    String
-  artist      User     @relation("ArtistModels", fields: [artistId], references: [id])
+  artist_id String
+  artist    User   @relation("artist_models", fields: [artist_id], references: [id])
 
-  purchases   Purchase[]
+  purchases Purchase[]
 
-  createdAt   DateTime @default(now())
+  created_at DateTime @default(now())
 }
 
-enum LicenseType {
+enum License_Type {
   PERSONAL_USE
   COMMERCIAL_USE
 }
 
 model Purchase {
-  id        String   @id @default(uuid())
+  id String @id @default(uuid())
 
-  userId    String
-  modelId   String
+  user_id  String
+  model_id String
 
-  user      User     @relation(fields: [userId], references: [id])
-  model     Model    @relation(fields: [modelId], references: [id])
+  user  User  @relation(fields: [user_id], references: [id])
+  model Model @relation(fields: [model_id], references: [id])
 
-  pricePaid Int
-  license   LicenseType @default(PERSONAL_USE)
+  price_paid Int
+  license    License_Type @default(PERSONAL_USE)
 
-  createdAt DateTime @default(now())
+  created_at DateTime @default(now())
 
-  @@unique([userId, modelId])
+  @@unique([user_id, model_id])
+  @@index([user_id])
+  @@index([model_id])
 }
