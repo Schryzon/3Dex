@@ -12,7 +12,7 @@ export default function Footer() {
               <div className="w-12 h-12 bg-white text-black flex items-center justify-center font-black text-2xl">
                 R
               </div>
-              <span className="text-yellow-400 font-bold text-3xl">ReleBook</span>
+              <span className="text-yellow-400 font-bold text-3xl">3Dex</span>
             </div>
             <p className="text-gray-400 text-sm leading-relaxed">
               Connect and access the best 3D resources

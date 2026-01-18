@@ -1,12 +1,18 @@
-// src/app/page.tsx
+'use client';
+
+import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import Footer from '@/components/Footer';
+import LoginModal from '@/components/LoginModal';
+import RegisterModal from '@/components/RegisterModal';
 
 export default function Home() {
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+
   return (
     <main className="min-h-screen bg-black">
-      {/* Navbar dengan Register Modal */}
       <Navbar 
         logo="3Dēx"
         navItems={[
@@ -14,9 +20,10 @@ export default function Home() {
           { label: "CG Models", href: "/cg-models", badge: "NEW" },
           { label: "Textures", href: "/textures" }
         ]}
+        onLoginClick={() => setShowLoginModal(true)}
+        onRegisterClick={() => setShowRegisterModal(true)}
       />
 
-      {/* Hero Section dengan Background Image */}
       <Hero 
         backgroundImage="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1920&q=80"
         stats="1.8M"
@@ -27,11 +34,27 @@ export default function Home() {
         ctaHref="/register"
       />
 
-      {/* Tambahkan section lain di sini kalau perlu */}
-      {/* Contoh: Featured Models, Categories, dll */}
-
-      {/* Footer dengan 5 kolom dan Payment Methods */}
       <Footer />
+
+      {/* Login Modal */}
+      <LoginModal 
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onSwitchToRegister={() => {
+          setShowLoginModal(false);
+          setShowRegisterModal(true);
+        }}
+      />
+
+      {/* Register Modal */}
+      <RegisterModal 
+        isOpen={showRegisterModal}
+        onClose={() => setShowRegisterModal(false)}
+        onSwitchToLogin={() => {
+          setShowRegisterModal(false);
+          setShowLoginModal(true);
+        }}
+      />
     </main>
   );
 }

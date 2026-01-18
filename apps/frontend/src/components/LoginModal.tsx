@@ -4,37 +4,35 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { X, Eye, EyeOff } from 'lucide-react';
 
-interface RegisterModalProps {
+interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSwitchToLogin?: () => void;
+  onSwitchToRegister?: () => void;
 }
 
-export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModalProps) {
+export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    username: '',
     email: '',
     password: '',
-    agreeToTerms: false,
-    receiveNewsletter: false
+    rememberMe: false
   });
-  
+
   //TODO: KONEKSI KE BACKEND
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Register:', formData);
+    console.log('Login:', formData);
     
-    // Simulate registration success and auto-login
+    // Simulate login success
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('userEmail', formData.email);
     
-    // Close modal and reload
+    // Close modal and reload to update auth state
     onClose();
     window.location.reload();
   };
 
-  //TODO: KONEKSI KE GOOLE
+  //TODO: KONEKSI KE GOOGLE
   const handleGoogleSignIn = () => {
     console.log('Sign in with Google');
     // Add Google OAuth logic here
@@ -63,31 +61,16 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
         {/* Content */}
         <div className="p-8">
           {/* Header */}
-          <h2 className="text-3xl font-bold text-white mb-2">Register</h2>
+          <h2 className="text-3xl font-bold text-white mb-2">Login</h2>
           <p className="text-gray-400 mb-6">
-            Already a user?{' '}
-            <button onClick={onSwitchToLogin} className="text-yellow-400 hover:text-yellow-300">
-              Login
+            New to 3Dēx?{' '}
+            <button onClick={onSwitchToRegister} className="text-yellow-400 hover:text-yellow-300">
+              Register
             </button>
           </p>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Username */}
-            <div>
-              <label className="block text-white mb-2">
-                Username <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="50 characters or less"
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20 placeholder-gray-500"
-                required
-              />
-            </div>
-
+          <div className="space-y-5">
             {/* Email */}
             <div>
               <label className="block text-white mb-2">
@@ -95,11 +78,10 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
               </label>
               <input
                 type="email"
-                placeholder="50 characters or less"
+                placeholder="Enter your email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20 placeholder-gray-500"
-                required
               />
             </div>
 
@@ -111,12 +93,10 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Minimum of 8 characters"
+                  placeholder="Enter your password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20 placeholder-gray-500"
-                  required
-                  minLength={8}
                 />
                 <button
                   type="button"
@@ -128,12 +108,31 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
               </div>
             </div>
 
-            {/* Register Button */}
+            {/* Remember Me & Forgot Password */}
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={formData.rememberMe}
+                  onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })}
+                  className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-yellow-400 focus:ring-yellow-400"
+                />
+                <span className="text-sm text-gray-400 group-hover:text-gray-300">
+                  Remember me
+                </span>
+              </label>
+
+              <Link href="/forgot-password" className="text-sm text-yellow-400 hover:text-yellow-300">
+                Forgot password?
+              </Link>
+            </div>
+
+            {/* Login Button */}
             <button
-              type="submit"
+              onClick={handleSubmit}
               className="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-3 rounded-lg transition-colors"
             >
-              Register
+              Login
             </button>
 
             {/* Divider */}
@@ -142,7 +141,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
                 <div className="w-full border-t border-gray-700"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gray-900 text-gray-400">or sign in with</span>
+                <span className="px-2 bg-gray-900 text-gray-400">or continue with</span>
               </div>
             </div>
 
@@ -172,42 +171,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
               </svg>
               Google
             </button>
-
-            {/* Checkboxes */}
-            <div className="space-y-3">
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={formData.agreeToTerms}
-                  onChange={(e) => setFormData({ ...formData, agreeToTerms: e.target.checked })}
-                  className="mt-1 w-4 h-4 rounded border-gray-600 bg-gray-800 text-yellow-400 focus:ring-yellow-400"
-                  required
-                />
-                <span className="text-sm text-gray-400 group-hover:text-gray-300">
-                  I agree to the{' '}
-                  <Link href="/terms" className="text-white hover:text-yellow-400">
-                    Terms of Use
-                  </Link>{' '}
-                  and{' '}
-                  <Link href="/privacy" className="text-white hover:text-yellow-400">
-                    Privacy Policy
-                  </Link>
-                </span>
-              </label>
-
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={formData.receiveNewsletter}
-                  onChange={(e) => setFormData({ ...formData, receiveNewsletter: e.target.checked })}
-                  className="mt-1 w-4 h-4 rounded border-gray-600 bg-gray-800 text-yellow-400 focus:ring-yellow-400"
-                />
-                <span className="text-sm text-gray-400 group-hover:text-gray-300">
-                  Receive tips, news, and community content in newsletter
-                </span>
-              </label>
-            </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
