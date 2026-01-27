@@ -47,7 +47,7 @@ If this is your first time working on the project, *read this first*:
 
 ---
 
-## 👶 For Contributors
+## 😽 For Contributors
 - Do NOT work on master
 - Always branch from dev
 - One task = one feature branch
@@ -62,3 +62,8 @@ You are free to use, study, modify, and distribute this software under the terms
 Any distributed modifications must also be licensed under GPL‑3.0.
 
 See the [LICENSE](./LICENSE) file for full details.
+
+## 👥 Primary Contributors
+- **I Nyoman Widiyasa Jayananda** "[Schryzon](https://github.com/Schryzon)" (Backend, Dockerization, Documentation)
+- **I Kadek Mahesa Permana Putra** "[Vuxyn](https://github.com/Vuxyn)" (Frontend & UI/UX)
+- **Thoriq Abdillah Falian Kusuma** "[ganijack](https://github.com/ganijack)" (Frontend & All-rounder)

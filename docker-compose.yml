@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:16
+    container_name: threedex
+    restart: always
+    environment:
+      POSTGRES_USER: threedex
+      POSTGRES_PASSWORD: "3Dex!"
+      POSTGRES_DB: threedex
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    build: ./apps/backend
+    container_name: 3dex-api
+    restart: always
+    env_file:
+      - .env.docker
+    depends_on:
+      - db
+    ports:
+      - "4000:4000"
+    command: sh -c "npx prisma migrate deploy && node dist/src/app.js"
+
+volumes:
+  pgdata:
