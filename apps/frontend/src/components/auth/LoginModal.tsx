@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { X, Eye, EyeOff } from 'lucide-react';
+import { X, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useAuth } from './AuthProvider';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -11,23 +12,31 @@ interface LoginModalProps {
 }
 
 export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     rememberMe: false
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login:', formData);
-    
-    // Simulate login success
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userEmail', formData.email);
-    
-    onClose();
-    window.location.reload();
+    setError('');
+    setIsLoading(true);
+
+    try {
+      await login({ email: formData.email, password: formData.password });
+      onClose();
+      // Reset form
+      setFormData({ email: '', password: '', rememberMe: false });
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleSignIn = () => {
@@ -39,7 +48,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         onClick={onClose}
       />
@@ -67,6 +76,13 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
+
             {/* Email */}
             <div>
               <label className="block text-white mb-2">
@@ -79,6 +95,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20 placeholder-gray-500"
                 required
+                disabled={isLoading}
               />
             </div>
 
@@ -95,11 +112,13 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20 placeholder-gray-500"
                   required
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  disabled={isLoading}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -128,9 +147,11 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
             {/* Login Button */}
             <button
               type="submit"
-              className="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-3 rounded-lg transition-colors"
+              disabled={isLoading}
+              className="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Login
+              {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
+              {isLoading ? 'Logging in...' : 'Login'}
             </button>
 
             {/* Divider */}

@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { X, Eye, EyeOff } from 'lucide-react';
+import { X, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useAuth } from './AuthProvider';
 
 interface RegisterModalProps {
   isOpen: boolean;
@@ -11,7 +12,10 @@ interface RegisterModalProps {
 }
 
 export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModalProps) {
+  const { register } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -19,16 +23,32 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
     agreeToTerms: false,
     receiveNewsletter: false
   });
-  
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Register:', formData);
-    
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userEmail', formData.email);
-    
-    onClose();
-    window.location.reload();
+    setError('');
+    setIsLoading(true);
+
+    try {
+      await register({
+        email: formData.email,
+        username: formData.username,
+        password: formData.password
+      });
+      onClose();
+      // Reset form
+      setFormData({
+        username: '',
+        email: '',
+        password: '',
+        agreeToTerms: false,
+        receiveNewsletter: false
+      });
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleSignIn = () => {
@@ -40,7 +60,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         onClick={onClose}
       />
@@ -68,6 +88,13 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
+
             {/* Username */}
             <div>
               <label className="block text-white mb-2">
@@ -81,6 +108,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
                 className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20 placeholder-gray-500"
                 required
                 maxLength={50}
+                disabled={isLoading}
               />
             </div>
 
@@ -97,6 +125,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
                 className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20 placeholder-gray-500"
                 required
                 maxLength={50}
+                disabled={isLoading}
               />
             </div>
 
@@ -114,11 +143,13 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
                   className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20 placeholder-gray-500"
                   required
                   minLength={8}
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  disabled={isLoading}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -128,9 +159,11 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
             {/* Register Button */}
             <button
               type="submit"
-              className="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-3 rounded-lg transition-colors"
+              disabled={isLoading}
+              className="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Register
+              {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
+              {isLoading ? 'Registering...' : 'Register'}
             </button>
 
             {/* Divider */}

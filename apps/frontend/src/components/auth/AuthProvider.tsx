@@ -1,13 +1,20 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import LoginModal from './LoginModal';
 import RegisterModal from './RegisterModal';
+import { authService, User, LoginCredentials, RegisterData } from '@/lib/services/auth.service';
 
 interface AuthContextType {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
   showLogin: () => void;
   showRegister: () => void;
   hideModals: () => void;
+  login: (credentials: LoginCredentials) => Promise<void>;
+  register: (data: RegisterData) => Promise<void>;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,8 +28,38 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+
+  // Load user from localStorage on mount
+  useEffect(() => {
+    const storedUser = authService.getStoredUser();
+    const storedToken = authService.getStoredToken();
+
+    if (storedUser && storedToken) {
+      setUser(storedUser);
+    }
+    setIsLoading(false);
+  }, []);
+
+  const login = async (credentials: LoginCredentials) => {
+    const { token, user: userData } = await authService.login(credentials);
+    authService.storeAuth(token, userData);
+    setUser(userData);
+  };
+
+  const register = async (data: RegisterData) => {
+    await authService.register(data);
+    // After registration, auto-login
+    await login({ email: data.email, password: data.password });
+  };
+
+  const logout = () => {
+    authService.logout();
+    setUser(null);
+  };
 
   const showLogin = () => {
     setShowRegisterModal(false);
@@ -40,7 +77,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ showLogin, showRegister, hideModals }}>
+    <AuthContext.Provider value={{
+      user,
+      isAuthenticated: !!user,
+      isLoading,
+      showLogin,
+      showRegister,
+      hideModals,
+      login,
+      register,
+      logout
+    }}>
       {children}
 
       {/* Global Modals */}
