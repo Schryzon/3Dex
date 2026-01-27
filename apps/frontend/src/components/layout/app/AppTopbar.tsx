@@ -12,9 +12,10 @@ export default function AppTopbar({ onMenuClick }: AppTopbarProps) {
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#111] border-b border-gray-800">
       <div className="flex items-center gap-4 px-6 py-4">
         {/* Menu Toggle */}
-        <button 
+        <button
           onClick={onMenuClick}
-          className="lg:hidden p-2 hover:bg-gray-800 rounded-lg"
+          className="lg:hidden p-2 hover:bg-gray-800 rounded-lg cursor-pointer"
+          style={{ touchAction: 'manipulation' }}
         >
           <Menu className="w-6 h-6" />
         </button>
@@ -35,7 +36,7 @@ export default function AppTopbar({ onMenuClick }: AppTopbarProps) {
               placeholder="Search for 3D assets..."
               className="w-full bg-[#1a1a1a] text-white px-6 py-3 pr-12 rounded-full outline-none focus:ring-2 focus:ring-blue-500 border border-gray-800"
             />
-            <button className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
+            <button className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white cursor-pointer">
               <Search className="w-5 h-5" />
             </button>
           </div>
@@ -50,7 +51,7 @@ export default function AppTopbar({ onMenuClick }: AppTopbarProps) {
             </span>
           </Link>
 
-          <button className="p-2 text-gray-400 hover:text-white">
+          <button className="p-2 text-gray-400 hover:text-white cursor-pointer">
             <User className="w-6 h-6" />
           </button>
         </div>

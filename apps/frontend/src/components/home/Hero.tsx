@@ -40,7 +40,7 @@ export default function Hero() {
         {/* CTA Button */}
         <Link
           href="/catalog"
-          className="inline-block px-8 md:px-12 py-3 md:py-4 bg-yellow-400 text-black font-bold text-base md:text-lg rounded-full hover:bg-yellow-300 transition-all hover:scale-105 shadow-2xl"
+          className="inline-block px-8 md:px-12 py-3 md:py-4 bg-yellow-400 text-black font-bold text-base md:text-lg rounded-full hover:bg-yellow-300 transition-all hover:scale-105 shadow-2xl cursor-pointer"
         >
           Browse Models
         </Link>

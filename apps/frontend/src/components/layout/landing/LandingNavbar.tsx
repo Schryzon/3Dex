@@ -1,20 +1,30 @@
 'use client';
 
 import Link from 'next/link';
-import { Search, ShoppingCart, Menu, X, User, LogOut, Package } from 'lucide-react';
+import { Search, ShoppingCart, Menu, X, User, LogOut, Package, Settings, FolderOpen } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import ProtectedLink from '@/components/common/ProtectedLink';
-import { useState } from 'react';
+import MyAssetsPreview from '@/components/common/MyAssetsPreview';
+import { useState, useCallback } from 'react';
 
 export default function LandingNavbar() {
   const { showLogin, showRegister, isAuthenticated, user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [assetsPreviewOpen, setAssetsPreviewOpen] = useState(false);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout();
     setUserMenuOpen(false);
-  };
+  }, [logout]);
+
+  const toggleMobileMenu = useCallback(() => {
+    setMobileMenuOpen(prev => !prev);
+  }, []);
+
+  const toggleUserMenu = useCallback(() => {
+    setUserMenuOpen(prev => !prev);
+  }, []);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-md border-b border-gray-800">
@@ -66,7 +76,7 @@ export default function LandingNavbar() {
                 placeholder="Search Keywords"
                 className="w-full bg-gray-800 text-white px-4 py-2.5 pr-10 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 border border-gray-700 placeholder-gray-400"
               />
-              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
+              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white cursor-pointer">
                 <Search className="w-5 h-5" />
               </button>
             </div>
@@ -74,8 +84,24 @@ export default function LandingNavbar() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-2 md:gap-4">
+            {/* My Assets - Protected, only show when authenticated */}
+            {isAuthenticated && (
+              <div className="relative">
+                <button
+                  onMouseEnter={() => setAssetsPreviewOpen(true)}
+                  className="text-gray-300 hover:text-white transition-colors p-2 cursor-pointer"
+                >
+                  <Package className="w-6 h-6" />
+                </button>
+                <MyAssetsPreview
+                  isOpen={assetsPreviewOpen}
+                  onClose={() => setAssetsPreviewOpen(false)}
+                />
+              </div>
+            )}
+
             {/* Cart - Protected */}
-            <ProtectedLink href="/cart" className="text-gray-300 hover:text-white transition-colors p-2">
+            <ProtectedLink href="/cart" className="text-gray-300 hover:text-white transition-colors p-2 cursor-pointer">
               <ShoppingCart className="w-6 h-6" />
             </ProtectedLink>
 
@@ -84,14 +110,14 @@ export default function LandingNavbar() {
               <>
                 <button
                   onClick={showLogin}
-                  className="hidden sm:block text-white hover:text-gray-300 px-4 py-2 transition-colors"
+                  className="hidden sm:block text-white hover:text-gray-300 px-4 py-2 transition-colors cursor-pointer"
                 >
                   Login
                 </button>
 
                 <button
                   onClick={showRegister}
-                  className="hidden sm:flex relative px-4 md:px-6 py-2 bg-white text-black rounded-full font-semibold hover:bg-gray-100 transition-colors text-sm md:text-base"
+                  className="hidden sm:flex relative px-4 md:px-6 py-2 bg-white text-black rounded-full font-semibold hover:bg-gray-100 transition-colors text-sm md:text-base cursor-pointer"
                 >
                   Register
                   <span className="absolute -top-1 -right-1 px-2 py-0.5 bg-yellow-400 text-black text-xs font-bold rounded">
@@ -103,8 +129,8 @@ export default function LandingNavbar() {
               /* User Menu */
               <div className="relative">
                 <button
-                  onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+                  onClick={toggleUserMenu}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors cursor-pointer"
                 >
                   <div className="w-8 h-8 bg-yellow-400 text-black rounded-full flex items-center justify-center font-bold">
                     {user?.username?.[0]?.toUpperCase() || 'U'}
@@ -120,15 +146,36 @@ export default function LandingNavbar() {
                       <p className="text-gray-400 text-xs">{user?.email}</p>
                     </div>
                     <ProtectedLink
+                      href="/my-assets"
+                      className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors cursor-pointer"
+                    >
+                      <FolderOpen className="w-4 h-4" />
+                      <span className="text-sm">My Assets</span>
+                    </ProtectedLink>
+                    <ProtectedLink
+                      href="/my-collections"
+                      className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors cursor-pointer"
+                    >
+                      <Package className="w-4 h-4" />
+                      <span className="text-sm">My Collections</span>
+                    </ProtectedLink>
+                    <ProtectedLink
                       href="/orders"
-                      className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors cursor-pointer"
                     >
                       <Package className="w-4 h-4" />
                       <span className="text-sm">My Orders</span>
                     </ProtectedLink>
+                    <ProtectedLink
+                      href="/profile/settings"
+                      className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors cursor-pointer"
+                    >
+                      <Settings className="w-4 h-4" />
+                      <span className="text-sm">Settings</span>
+                    </ProtectedLink>
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+                      className="w-full flex items-center gap-2 px-4 py-2 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors cursor-pointer"
                     >
                       <LogOut className="w-4 h-4" />
                       <span className="text-sm">Logout</span>
@@ -140,8 +187,9 @@ export default function LandingNavbar() {
 
             {/* Mobile Menu Toggle */}
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 text-gray-300 hover:text-white"
+              onClick={toggleMobileMenu}
+              className="lg:hidden p-2 text-gray-300 hover:text-white cursor-pointer active:bg-gray-800 transition-colors"
+              style={{ touchAction: 'manipulation' }}
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -156,7 +204,7 @@ export default function LandingNavbar() {
               placeholder="Search Keywords"
               className="w-full bg-gray-800 text-white px-4 py-2.5 pr-10 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 border border-gray-700 placeholder-gray-400"
             />
-            <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
+            <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white cursor-pointer">
               <Search className="w-5 h-5" />
             </button>
           </div>
@@ -210,7 +258,8 @@ export default function LandingNavbar() {
                     showLogin();
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full px-4 py-3 text-white hover:bg-gray-800 rounded-lg transition-colors text-left"
+                  className="w-full px-4 py-3 text-white hover:bg-gray-800 rounded-lg transition-colors text-left cursor-pointer"
+                  style={{ touchAction: 'manipulation' }}
                 >
                   Login
                 </button>
@@ -219,7 +268,8 @@ export default function LandingNavbar() {
                     showRegister();
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full px-4 py-3 bg-yellow-400 text-black font-semibold rounded-lg hover:bg-yellow-300 transition-colors"
+                  className="w-full px-4 py-3 bg-yellow-400 text-black font-semibold rounded-lg hover:bg-yellow-300 transition-colors cursor-pointer"
+                  style={{ touchAction: 'manipulation' }}
                 >
                   Register
                 </button>
