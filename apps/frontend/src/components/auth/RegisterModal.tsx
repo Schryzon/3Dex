@@ -35,8 +35,8 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
         username: formData.username,
         password: formData.password
       });
+      // Only close modal and reset form if registration AND auto-login succeed
       onClose();
-      // Reset form
       setFormData({
         username: '',
         email: '',
@@ -45,7 +45,11 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
         receiveNewsletter: false
       });
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      console.error('Registration error:', err);
+      // Extract error message from response
+      const errorMessage = err.response?.data?.message || err.message || 'Registration failed. Please try again.';
+      setError(errorMessage);
+      // Don't close modal on error - let user see the error message
     } finally {
       setIsLoading(false);
     }

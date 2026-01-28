@@ -38,16 +38,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const storedUser = authService.getStoredUser();
     const storedToken = authService.getStoredToken();
 
+    // Debug logging
+    console.log(' AuthProvider - Checking stored auth:', {
+      hasUser: !!storedUser,
+      hasToken: !!storedToken,
+      user: storedUser,
+      tokenPreview: storedToken ? storedToken.substring(0, 20) + '...' : null
+    });
+
     if (storedUser && storedToken) {
       setUser(storedUser);
+      console.log(' User restored from localStorage:', storedUser.username);
+    } else {
+      console.log(' No stored auth found');
     }
     setIsLoading(false);
   }, []);
 
   const login = async (credentials: LoginCredentials) => {
+    console.log('🔐 Login attempt:', credentials.email);
     const { token, user: userData } = await authService.login(credentials);
     authService.storeAuth(token, userData);
     setUser(userData);
+    console.log(' Login successful:', userData.username, 'Token stored:', !!token);
   };
 
   const register = async (data: RegisterData) => {
