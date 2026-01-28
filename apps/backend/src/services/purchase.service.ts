@@ -18,3 +18,30 @@ export async function has_purchased(user_id: string, model_id: string) {
 
   return !!existing;
 }
+
+// Same thing as above tbh, but not bool
+export async function get_purchase(user_id: string, model_id: string) {
+  return prisma.purchase.findFirst({
+    where: { user_id, model_id },
+  });
+}
+
+export async function get_user_purchases(user_id: string) {
+  return prisma.purchase.findMany({
+    where: { user_id },
+    orderBy: { created_at: "desc" },
+    select: {
+      id: true,
+      price_paid: true,
+      license: true,
+      created_at: true,
+      model: {
+        select: {
+          id: true,
+          title: true,
+          preview_url: true,
+        },
+      },
+    },
+  });
+}

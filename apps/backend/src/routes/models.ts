@@ -3,9 +3,13 @@ import {
   list_models,
   upload_model,
   get_model_detail,
+  download_model
 } from "../controllers/model.controller";
 import { require_auth } from "../middlewares/auth.middleware";
 import { require_artist } from "../middlewares/role.middleware";
+import { validate } from "../middlewares/validate.middleware";
+import { upload_model_schema, model_id_param } from "../validators/model.validator";
+import { buy_model_schema } from "../validators/purchase.validator";
 
 const router = Router();
 
@@ -21,6 +25,39 @@ const router = Router();
  *         description: List of models
  */
 router.get("/", list_models);
+
+/**
+ * @openapi
+ * /models/{id}/download:
+ *   get:
+ *     summary: Download model (only if purchased)
+ *     tags:
+ *       - Models
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Download link
+ *       403:
+ *         description: Not purchased
+ *       404:
+ *         description: Model not found
+ */
+router.get("/:id/download", require_auth, validate(model_id_param), download_model);
+
+/* NOT IMPLEMENTED YET, /:id/buy DOES NOT EXIST
+router.post(
+  "/:id/buy",
+  require_auth,
+  validate(model_id_param, "params"),
+  validate(buy_model_schema, "body"),
+  buy_model
+);
+*/
 
 /**
  * @openapi
@@ -43,6 +80,6 @@ router.get("/", list_models);
  */
 router.get("/:id", get_model_detail);
 
-router.post("/", require_auth, require_artist, upload_model);
+router.post("/", require_auth, require_artist, validate(upload_model_schema), upload_model);
 
 export default router;
