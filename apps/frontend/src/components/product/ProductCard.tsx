@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { HeartIcon, CartIcon, EyeIcon } from '@/components/common/icons';
 
 interface Product {
   id: string;
@@ -77,19 +78,10 @@ export default function ProductCard({ product, onAddToCart, onToggleFavorite, is
             onClick={handleToggleFavorite}
             className="absolute top-3 right-3 bg-gray-900/80 hover:bg-gray-800 p-2 rounded-lg backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
           >
-            <svg
+            <HeartIcon
               className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-white'}`}
-              fill={isFavorite ? 'currentColor' : 'none'}
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-              />
-            </svg>
+              filled={isFavorite}
+            />
           </button>
 
           {/* Thumbnail Navigation */}
@@ -103,9 +95,8 @@ export default function ProductCard({ product, onAddToCart, onToggleFavorite, is
                     e.stopPropagation();
                     setImageIndex(index);
                   }}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    imageIndex === index ? 'bg-white w-6' : 'bg-white/50 hover:bg-white/75'
-                  }`}
+                  className={`w-2 h-2 rounded-full transition-all ${imageIndex === index ? 'bg-white w-6' : 'bg-white/50 hover:bg-white/75'
+                    }`}
                 />
               ))}
             </div>
@@ -118,14 +109,7 @@ export default function ProductCard({ product, onAddToCart, onToggleFavorite, is
                 onClick={handleAddToCart}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition-all flex items-center justify-center gap-2"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
+                <CartIcon className="w-5 h-5" />
                 Add to Cart
               </button>
             </div>
@@ -191,20 +175,7 @@ export default function ProductCard({ product, onAddToCart, onToggleFavorite, is
               }}
               className="text-gray-400 hover:text-white transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                />
-              </svg>
+              <EyeIcon className="w-5 h-5" />
             </button>
           </div>
         </div>
