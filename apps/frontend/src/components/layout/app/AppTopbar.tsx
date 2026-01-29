@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, ShoppingCart, User, Menu } from 'lucide-react';
+import { Search, ShoppingCart, Menu } from 'lucide-react';
 import Link from 'next/link';
 
 interface AppTopbarProps {
@@ -43,17 +43,21 @@ export default function AppTopbar({ onMenuClick }: AppTopbarProps) {
         </div>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-4">
-          <Link href="/cart" className="p-2 text-gray-400 hover:text-white relative">
+        <div className="flex items-center gap-3">
+          {/* Cart */}
+          <Link href="/cart" className="p-2 text-gray-400 hover:text-white relative transition-colors">
             <ShoppingCart className="w-6 h-6" />
             <span className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 text-black text-xs font-bold rounded-full flex items-center justify-center">
               0
             </span>
           </Link>
 
-          <button className="p-2 text-gray-400 hover:text-white cursor-pointer">
-            <User className="w-6 h-6" />
-          </button>
+          {/* User Profile Avatar */}
+          <Link href="/profile" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm border-2 border-gray-700">
+              U
+            </div>
+          </Link>
         </div>
       </div>
     </header>

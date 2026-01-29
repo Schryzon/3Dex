@@ -3,7 +3,7 @@ import "./globals.css";
 import { AuthProvider } from '@/components/auth/AuthProvider';
 
 export const metadata: Metadata = {
-  title: "3Dēx - 3D Marketplace",
+  title: "3Dēx | 3D Marketplace",
   description: "The grandest 3D asset collection",
 };
 
