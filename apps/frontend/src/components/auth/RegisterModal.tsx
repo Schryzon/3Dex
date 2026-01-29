@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { X, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useAuth } from './AuthProvider';
+import Button from '@/components/common/Button';
+import Input from '@/components/common/Input';
 
 interface RegisterModalProps {
   isOpen: boolean;
@@ -100,75 +102,66 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
             )}
 
             {/* Username */}
-            <div>
-              <label className="block text-white mb-2">
-                Username <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="50 characters or less"
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20 placeholder-gray-500"
-                required
-                maxLength={50}
-                disabled={isLoading}
-              />
-            </div>
+            <Input
+              label="Username"
+              type="text"
+              placeholder="50 characters or less"
+              value={formData.username}
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              required
+              maxLength={50}
+              disabled={isLoading}
+              fullWidth
+            />
 
             {/* Email */}
-            <div>
-              <label className="block text-white mb-2">
-                Email address <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                placeholder="50 characters or less"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20 placeholder-gray-500"
-                required
-                maxLength={50}
-                disabled={isLoading}
-              />
-            </div>
+            <Input
+              label="Email address"
+              type="email"
+              placeholder="50 characters or less"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              required
+              maxLength={50}
+              disabled={isLoading}
+              fullWidth
+            />
 
             {/* Password */}
-            <div>
-              <label className="block text-white mb-2">
-                Password <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Minimum of 8 characters"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20 placeholder-gray-500"
-                  required
-                  minLength={8}
-                  disabled={isLoading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
-                  disabled={isLoading}
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
+            <div className="relative">
+              <Input
+                label="Password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Minimum of 8 characters"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required
+                minLength={8}
+                disabled={isLoading}
+                fullWidth
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-[42px] text-gray-400 hover:text-white"
+                disabled={isLoading}
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
             </div>
 
             {/* Register Button */}
-            <button
+            <Button
               type="submit"
+              variant="primary"
+              size="lg"
+              fullWidth
+              isLoading={isLoading}
               disabled={isLoading}
-              className="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="bg-yellow-400 hover:bg-yellow-300 text-black"
             >
-              {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
               {isLoading ? 'Registering...' : 'Register'}
-            </button>
+            </Button>
 
             {/* Divider */}
             <div className="relative my-6">

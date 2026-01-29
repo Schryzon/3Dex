@@ -21,11 +21,11 @@ export default function Button({
     const baseStyles = 'font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2';
 
     const variantStyles = {
-        primary: 'bg-blue-600 hover:bg-blue-700 text-white',
-        secondary: 'bg-gray-700 hover:bg-gray-600 text-white',
-        outline: 'border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white',
-        ghost: 'text-gray-400 hover:text-white hover:bg-gray-800',
-        danger: 'bg-red-600 hover:bg-red-700 text-white',
+        primary: 'bg-blue-600 hover:bg-blue-700 text-black',
+        secondary: 'bg-gray-700 hover:bg-gray-600 text-black',
+        outline: 'border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-black',
+        ghost: 'text-gray-400 hover:text-black hover:bg-gray-800',
+        danger: 'bg-red-600 hover:bg-red-700 text-black',
     };
 
     const sizeStyles = {
