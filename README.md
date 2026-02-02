@@ -9,7 +9,11 @@ This repository contains *both frontend and backend* for the platform.
 ## ✨ Features (MVP)
 - User authentication (Client / Seller)
 - 3D services marketplace
-- Asset marketplace
+- Asset marketplace with **Advanced Search & Filtering**
+- **Reviews & Ratings**
+- **Wishlists**
+- **Artist Analytics Dashboard**
+- **Secure File Storage (MinIO/S3)**
 - Client‑side 3D previews
 - Order & workflow management
 
@@ -20,6 +24,7 @@ This repository contains *both frontend and backend* for the platform.
 - *Backend*: Node.js, Express
 - *Database*: PostgreSQL
 - *ORM*: Prisma
+- *Storage*: MinIO (S3 Compatible)
 - *Version Control*: Git & GitHub
 
 ---
