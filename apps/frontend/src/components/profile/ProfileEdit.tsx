@@ -1,24 +1,34 @@
 'use client';
 
 import { useState } from 'react';
-import { User, Wallet, FolderOpen, Download, TrendingUp, Upload, FileText, Settings } from 'lucide-react';
+import { User, Wallet, FolderOpen, Download, TrendingUp, Upload, FileText, Settings, Camera, X } from 'lucide-react';
 
-export default function UserProfilePage() {
-  const [activeSection, setActiveSection] = useState<'account'>('account');
+type ProfileSection = 'wallet' | 'collections' | 'download' | 'consumption' | 'upload' | 'upload-records' | 'account' | 'edit';
+
+interface ProfileEditPageProps {
+  onNavigate?: (section: ProfileSection) => void;
+}
+
+export default function ProfileEditPage({ onNavigate }: ProfileEditPageProps) {
+  const [activeSection] = useState<'account'>('account');
+  const [profileImage, setProfileImage] = useState<string>('');
   const [formData, setFormData] = useState({
     username: '',
-    userId: '',
+    displayName: '',
     email: '',
-    password: '',
-    newsletterSubscribed: false,
-    memberSince: ''
+    bio: '',
+    website: '',
+    location: '',
+    skills: [] as string[],
+    socialLinks: {
+      twitter: '',
+      instagram: '',
+      artstation: '',
+      behance: ''
+    }
   });
 
-  const [isEditing, setIsEditing] = useState({
-    username: false,
-    email: false,
-    password: false
-  });
+  const [newSkill, setNewSkill] = useState('');
 
   const menuItems = [
     { id: 'wallet', label: 'My wallet', icon: Wallet },
@@ -30,13 +40,38 @@ export default function UserProfilePage() {
     { id: 'account', label: 'Account settings', icon: Settings, active: true }
   ];
 
-  const handleEdit = (field: 'username' | 'email' | 'password') => {
-    setIsEditing({ ...isEditing, [field]: !isEditing[field] });
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
-  const handleSave = (field: 'username' | 'email' | 'password') => {
+  const addSkill = () => {
+    if (newSkill.trim() && !formData.skills.includes(newSkill.trim())) {
+      setFormData({
+        ...formData,
+        skills: [...formData.skills, newSkill.trim()]
+      });
+      setNewSkill('');
+    }
+  };
+
+  const removeSkill = (skillToRemove: string) => {
+    setFormData({
+      ...formData,
+      skills: formData.skills.filter(skill => skill !== skillToRemove)
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     // Add save logic here
-    setIsEditing({ ...isEditing, [field]: false });
+    console.log('Form submitted:', formData);
   };
 
   return (
@@ -112,14 +147,8 @@ export default function UserProfilePage() {
               <User className="w-8 h-8 text-gray-400" />
             </div>
             <div>
-              <h1 className="text-xl sm:text-2xl font-semibold">
-                Hi! {formData.username ? formData.username.split('_')[0] + '...' : 'Guest'}
-              </h1>
+              <h1 className="text-xl sm:text-2xl font-semibold">Hi! Guest</h1>
             </div>
-          </div>
-          <div className="mt-4">
-            <h2 className="text-2xl sm:text-3xl font-bold">Your account</h2>
-            <p className="text-gray-400 mt-1">Manage your personal information and settings</p>
           </div>
         </div>
 
@@ -133,7 +162,7 @@ export default function UserProfilePage() {
                 return (
                   <button
                     key={item.id}
-                    onClick={() => setActiveSection(item.id as any)}
+                    onClick={() => onNavigate?.(item.id as ProfileSection)}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
                       item.active
                         ? 'bg-gray-800 text-white'
@@ -150,116 +179,226 @@ export default function UserProfilePage() {
 
           {/* Main Content Area */}
           <div className="lg:col-span-3">
-            <div className="bg-gray-900/30 rounded-lg p-6 sm:p-8">
-              <div className="space-y-8">
-                {/* Username Field */}
+            <div className="bg-gray-900/30 rounded-lg border border-gray-800 p-6 sm:p-8">
+              <h2 className="text-2xl font-bold mb-8">Edit Profile</h2>
+
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Profile Image */}
                 <div>
-                  <label className="block text-sm text-gray-400 mb-3">User name</label>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <input
-                      type="text"
-                      value={formData.username}
-                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                      disabled={!isEditing.username}
-                      className="flex-1 bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20 disabled:opacity-60 disabled:cursor-not-allowed"
-                    />
-                    <button
-                      onClick={() => isEditing.username ? handleSave('username') : handleEdit('username')}
-                      className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors whitespace-nowrap"
-                    >
-                      {isEditing.username ? 'Save' : 'Edit'}
-                    </button>
+                  <label className="block text-sm text-gray-400 mb-4">Profile Picture</label>
+                  <div className="flex items-center gap-6">
+                    <div className="relative">
+                      <div className="w-24 h-24 rounded-full bg-gray-800 flex items-center justify-center overflow-hidden">
+                        {profileImage ? (
+                          <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                          <User className="w-12 h-12 text-gray-600" />
+                        )}
+                      </div>
+                      <label className="absolute bottom-0 right-0 p-2 bg-yellow-400 hover:bg-yellow-300 rounded-full cursor-pointer transition-colors">
+                        <Camera className="w-4 h-4 text-black" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-400 mb-2">
+                        Upload a profile picture. Recommended size: 400x400px
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setProfileImage('')}
+                        className="text-sm text-red-400 hover:text-red-300 transition-colors"
+                      >
+                        Remove picture
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                {/* User ID Field */}
+                {/* Username */}
                 <div>
-                  <label className="block text-sm text-gray-400 mb-3">User ID</label>
+                  <label className="block text-sm text-gray-400 mb-3">Username *</label>
                   <input
                     type="text"
-                    value={formData.userId}
-                    disabled
-                    className="w-full bg-gray-800 text-gray-400 px-4 py-3 rounded-lg border border-gray-700 cursor-not-allowed"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20"
+                    placeholder="Enter username"
+                    required
                   />
                 </div>
 
-                {/* Email Field */}
+                {/* Display Name */}
                 <div>
-                  <label className="block text-sm text-gray-400 mb-3">Email address</label>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      disabled={!isEditing.email}
-                      className="flex-1 bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20 disabled:opacity-60 disabled:cursor-not-allowed"
-                    />
-                    <button
-                      onClick={() => isEditing.email ? handleSave('email') : handleEdit('email')}
-                      className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors whitespace-nowrap"
-                    >
-                      {isEditing.email ? 'Save' : 'Edit'}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Newsletter Checkbox */}
-                <div className="flex items-start gap-3">
+                  <label className="block text-sm text-gray-400 mb-3">Display Name</label>
                   <input
-                    type="checkbox"
-                    id="newsletter"
-                    checked={formData.newsletterSubscribed}
-                    onChange={(e) => setFormData({ ...formData, newsletterSubscribed: e.target.checked })}
-                    className="mt-1 w-4 h-4 bg-gray-800 border-gray-700 rounded focus:ring-yellow-400 focus:ring-2"
+                    type="text"
+                    value={formData.displayName}
+                    onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
+                    className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20"
+                    placeholder="Enter display name"
                   />
-                  <label htmlFor="newsletter" className="text-sm text-gray-400 cursor-pointer">
-                    Receive tips, news, and community content in newsletter
-                  </label>
                 </div>
 
-                {/* Password Field */}
+                {/* Email */}
                 <div>
-                  <label className="block text-sm text-gray-400 mb-3">Password</label>
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  <label className="block text-sm text-gray-400 mb-3">Email *</label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20"
+                    placeholder="Enter email address"
+                    required
+                  />
+                </div>
+
+                {/* Bio */}
+                <div>
+                  <label className="block text-sm text-gray-400 mb-3">Bio</label>
+                  <textarea
+                    value={formData.bio}
+                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                    rows={4}
+                    className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20 resize-none"
+                    placeholder="Tell us about yourself and your work..."
+                  />
+                  <p className="text-xs text-gray-500 mt-2">{formData.bio.length}/500 characters</p>
+                </div>
+
+                {/* Location */}
+                <div>
+                  <label className="block text-sm text-gray-400 mb-3">Location</label>
+                  <input
+                    type="text"
+                    value={formData.location}
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20"
+                    placeholder="City, Country"
+                  />
+                </div>
+
+                {/* Website */}
+                <div>
+                  <label className="block text-sm text-gray-400 mb-3">Website</label>
+                  <input
+                    type="url"
+                    value={formData.website}
+                    onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                    className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20"
+                    placeholder="https://yourwebsite.com"
+                  />
+                </div>
+
+                {/* Skills */}
+                <div>
+                  <label className="block text-sm text-gray-400 mb-3">Skills</label>
+                  <div className="flex gap-2 mb-3">
                     <input
-                      type="password"
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      disabled={!isEditing.password}
-                      className="flex-1 bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                      type="text"
+                      value={newSkill}
+                      onChange={(e) => setNewSkill(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
+                      className="flex-1 bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20"
+                      placeholder="e.g., 3D Modeling, Texturing, Animation"
                     />
                     <button
-                      onClick={() => isEditing.password ? handleSave('password') : handleEdit('password')}
-                      className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors whitespace-nowrap"
+                      type="button"
+                      onClick={addSkill}
+                      className="bg-yellow-400 hover:bg-yellow-300 text-black px-6 py-3 rounded-lg transition-colors font-semibold"
                     >
-                      {isEditing.password ? 'Save' : 'Edit'}
+                      Add
                     </button>
                   </div>
+                  {formData.skills.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {formData.skills.map((skill) => (
+                        <span
+                          key={skill}
+                          className="bg-gray-800 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-2 border border-gray-700"
+                        >
+                          {skill}
+                          <button
+                            type="button"
+                            onClick={() => removeSkill(skill)}
+                            className="hover:text-red-400 transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                {/* Member Since */}
+                {/* Social Links */}
                 <div>
-                  <label className="block text-sm text-gray-400 mb-3">Member since</label>
-                  <div className="text-white">
-                    {formData.memberSince 
-                      ? new Date(formData.memberSince).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })
-                      : 'N/A'
-                    }
+                  <label className="block text-sm text-gray-400 mb-4">Social Links</label>
+                  <div className="space-y-3">
+                    <input
+                      type="url"
+                      value={formData.socialLinks.twitter}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        socialLinks: { ...formData.socialLinks, twitter: e.target.value }
+                      })}
+                      className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20"
+                      placeholder="Twitter URL"
+                    />
+                    <input
+                      type="url"
+                      value={formData.socialLinks.instagram}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        socialLinks: { ...formData.socialLinks, instagram: e.target.value }
+                      })}
+                      className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20"
+                      placeholder="Instagram URL"
+                    />
+                    <input
+                      type="url"
+                      value={formData.socialLinks.artstation}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        socialLinks: { ...formData.socialLinks, artstation: e.target.value }
+                      })}
+                      className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20"
+                      placeholder="ArtStation URL"
+                    />
+                    <input
+                      type="url"
+                      value={formData.socialLinks.behance}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        socialLinks: { ...formData.socialLinks, behance: e.target.value }
+                      })}
+                      className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/20"
+                      placeholder="Behance URL"
+                    />
                   </div>
                 </div>
 
-                {/* Danger Zone */}
-                <div className="pt-6 border-t border-gray-800">
-                  <h3 className="text-lg font-semibold mb-4 text-red-400">Danger Zone</h3>
-                  <button className="px-6 py-3 bg-red-600/10 hover:bg-red-600/20 text-red-400 border border-red-600/30 rounded-lg transition-colors">
-                    Delete Account
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-800">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-yellow-400 hover:bg-yellow-300 text-black font-semibold py-3 rounded-lg transition-colors"
+                  >
+                    Save Changes
+                  </button>
+                  <button
+                    type="button"
+                    className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-lg transition-colors"
+                  >
+                    Cancel
                   </button>
                 </div>
-              </div>
+              </form>
             </div>
           </div>
         </div>
