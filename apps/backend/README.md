@@ -3,10 +3,13 @@
 This is the *backend API* for 3Dēx.
 
 It handles:
-- Authentication & authorization
-- Business logic
-- Database access
-- File & order management
+- Authentication & authorization (JWT, Roles)
+- Business logic (Orders, models, etc.)
+- Database access (Prisma)
+- Advanced Search & Filtering (Catalog)
+- Social Features (Reviews, Wishlists)
+- Analytics (Artist Dashboard)
+- File Storage (MinIO/S3 Presigned URLs)
 - API endpoints for frontend
 
 ---
@@ -16,6 +19,7 @@ It handles:
 - Express
 - PostgreSQL
 - Prisma ORM
+- AWS SDK (S3 / MinIO)
 
 ---
 
@@ -43,6 +47,12 @@ Create .env:
 ```env
 DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/postgres"
 PORT=4000
+
+# Storage (MinIO / S3)
+STORAGE_ENDPOINT="http://127.0.0.1:9000"
+STORAGE_ACCESS_KEY="minioadmin"
+STORAGE_SECRET_KEY="minioadmin"
+STORAGE_BUCKET="3dex-models"
 ```
 
 ---

@@ -53,6 +53,7 @@ Frontend  ->  Next.js (React), Tailwind CSS
 Backend   ->  Node.js, Express
 Database  ->  PostgreSQL
 ORM       ->  Prisma
+Storage   ->  MinIO (S3 Compatible)
 Versions  ->  Git + GitHub
 ```
 
@@ -66,6 +67,8 @@ Versions  ->  Git + GitHub
 - Code is shared
 
 - Database data is NOT shared
+
+- **Storage bucket is NOT shared (local dev)**
 
 - Secrets are NEVER committed
 
@@ -132,6 +135,17 @@ accepting connections
 
 ---
 
+4. Install MinIO (Optional for local dev, prevents errors)
+
+You can run it via Docker:
+```sh
+docker run -p 9000:9000 -p 9001:9001 minio/minio server /data --console-address ":9001"
+```
+Or just install the binary.
+
+
+---
+
 ## Clone the Project
 ```sh
 git clone https://github.com/Schryzon/3Dex.git
@@ -148,6 +162,7 @@ If this works, you are officially a baby developer 👶✨
 ├─ apps/
 │  ├─ frontend/   # Next.js + Tailwind
 │  └─ backend/    # Express + Prisma
+├─ docs/          # Documentation
 ├─ dev.md
 └─ README.md
 ```
@@ -164,6 +179,12 @@ If this works, you are officially a baby developer 👶✨
 ```env
 DATABASE_URL="postgresql://YOUR_USERNAME:YOUR_PASSWORD@localhost:5432/threedex"
 PORT=4000
+
+# Storage
+STORAGE_ENDPOINT="http://127.0.0.1:9000"
+STORAGE_ACCESS_KEY="minioadmin"
+STORAGE_SECRET_KEY="minioadmin"
+STORAGE_BUCKET="3dex-models"
 ```
 ### Frontend (`apps/frontend/.env.local`)
 ```env
