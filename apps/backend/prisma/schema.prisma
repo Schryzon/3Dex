@@ -19,6 +19,12 @@ enum Role {
   ADMIN
 }
 
+enum ModelStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id       String @id @default(uuid())
   email    String @unique
@@ -28,6 +34,8 @@ model User {
 
   models    Model[]    @relation("artist_models")
   purchases Purchase[]
+  reviews   Review[]
+  wishlist  Wishlist[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -40,11 +48,19 @@ model Model {
   price       Int // in cents
   file_url    String
   preview_url String?
+  
+  status      ModelStatus @default(PENDING)
 
   artist_id String
   artist    User   @relation("artist_models", fields: [artist_id], references: [id])
 
+  category_id String?
+  category    Category? @relation(fields: [category_id], references: [id])
+
   purchases Purchase[]
+  reviews   Review[]
+  wishlist  Wishlist[]
+  tags      Tag[]
 
   created_at DateTime @default(now())
 }
@@ -71,4 +87,54 @@ model Purchase {
   @@unique([user_id, model_id])
   @@index([user_id])
   @@index([model_id])
+}
+
+model Category {
+  id   String @id @default(uuid())
+  name String @unique
+  slug String @unique
+
+  models Model[]
+
+  created_at DateTime @default(now())
+}
+
+model Tag {
+  id   String @id @default(uuid())
+  name String @unique
+
+  models Model[]
+
+  created_at DateTime @default(now())
+}
+
+model Review {
+  id      String @id @default(uuid())
+  rating  Int    // 1-5
+  comment String?
+
+  user_id  String
+  model_id String
+
+  user  User  @relation(fields: [user_id], references: [id])
+  model Model @relation(fields: [model_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  
+  @@unique([user_id, model_id]) // One review per model per user
+}
+
+model Wishlist {
+  id String @id @default(uuid())
+
+  user_id  String
+  model_id String
+
+  user  User  @relation(fields: [user_id], references: [id])
+  model Model @relation(fields: [model_id], references: [id])
+
+  created_at DateTime @default(now())
+
+  @@unique([user_id, model_id])
 }

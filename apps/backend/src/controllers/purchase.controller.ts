@@ -5,7 +5,7 @@ import { get_model_by_id } from "../services/model.service";
 export async function buy_model(req: Request, res: Response) {
   // Funny ass hack to make it accept string | string[]
   const id = String(req.params.id);
-  
+
   const license = String(req.body.license) as "PERSONAL_USE" | "COMMERCIAL_USE";
   const user_id = String((req as any).user.user_id);
 
@@ -45,7 +45,7 @@ export async function buy_model(req: Request, res: Response) {
     });
 
     res.status(201).json({
-      message: "Purchase successful",
+      message: "Purchase successful!",
       purchase,
     });
   } catch (error: any) {
@@ -55,14 +55,14 @@ export async function buy_model(req: Request, res: Response) {
   }
 }
 
-export async function my_purchases(req: Request, res: Response){
+export async function my_purchases(req: Request, res: Response) {
   const user_id = String((req as any).user.user_id);
-  
-  try{
+
+  try {
     const purchases = await get_user_purchases(user_id);
     res.json(purchases);
 
-  }catch (error: any) {
+  } catch (error: any) {
     res.status(500).json({
       message: error.message,
     });

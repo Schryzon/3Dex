@@ -47,3 +47,9 @@ export function get_model_by_id(model_id: string) {
     },
   });
 }
+
+export function delete_model_by_id(model_id: string) {
+  return prisma.model.delete({
+    where: { id: model_id },
+  });
+}

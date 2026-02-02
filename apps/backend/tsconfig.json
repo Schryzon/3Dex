@@ -4,9 +4,15 @@
     "moduleResolution": "node",
     "target": "ES2020",
     "module": "CommonJS",
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "esModuleInterop": true,
     "skipLibCheck": true,
   },
+  "include": [
+    "src",
+    "prisma"
+  ]
   // ... other options
 }

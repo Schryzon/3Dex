@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { verify_token } from "../utils/jwt";
 
 export interface Auth_Request extends Request {
-  user?: any;
+  user: Express.Auth_User;
 }
 
 export function require_auth(
@@ -21,7 +21,7 @@ export function require_auth(
   const token = header.split(" ")[1];
 
   try {
-    const payload = verify_token(token);
+    const payload = verify_token(token) as Express.Auth_User;
     req.user = payload;
     next();
   } catch {
