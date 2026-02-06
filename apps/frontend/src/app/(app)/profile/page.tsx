@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/components/auth/AuthProvider';
-import { FolderOpen, Bookmark, ShoppingCart, Sparkles, CheckCircle, XCircle, Upload, BarChart3, Settings, Camera } from 'lucide-react';
+import { FolderOpen, Heart, ShoppingCart, Sparkles, CheckCircle, XCircle, Upload, BarChart3, Settings, Camera } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -11,13 +11,16 @@ export default function ProfilePage() {
     const searchParams = useSearchParams();
     const [upgrading, setUpgrading] = useState(false);
     const [upgradeStatus, setUpgradeStatus] = useState<'idle' | 'success' | 'error'>('idle');
-    const [activeTab, setActiveTab] = useState<'collections' | 'bookmarks' | 'uploads' | 'settings'>('collections');
+    const [activeTab, setActiveTab] = useState<'collections' | 'saved' | 'uploads' | 'settings'>('collections');
 
     // Set active tab from URL query parameter
     useEffect(() => {
-        const tabParam = searchParams.get('tab') as 'collections' | 'bookmarks' | 'uploads' | 'settings' | null;
-        if (tabParam && ['collections', 'bookmarks', 'uploads', 'settings'].includes(tabParam)) {
+        const tabParam = searchParams.get('tab') as 'collections' | 'saved' | 'uploads' | 'settings' | null;
+        const validTabs = ['collections', 'saved', 'uploads', 'settings'];
+        if (tabParam && validTabs.includes(tabParam)) {
             setActiveTab(tabParam);
+        } else {
+            setActiveTab('saved');
         }
     }, [searchParams]);
 
@@ -40,7 +43,7 @@ export default function ProfilePage() {
 
     const tabs = [
         { id: 'collections' as const, label: 'Collections', icon: FolderOpen, count: 0 },
-        { id: 'bookmarks' as const, label: 'Bookmarks', icon: Bookmark, count: 0 },
+        { id: 'saved' as const, label: 'Saved', icon: Heart, count: 0 },
         ...(user?.role === 'ARTIST' || user?.role === 'ADMIN' ? [
             { id: 'uploads' as const, label: 'Uploads', icon: Upload, count: 0 },
         ] : []),
@@ -89,7 +92,7 @@ export default function ProfilePage() {
                             </div>
                             <div>
                                 <p className="text-2xl font-bold text-white">0</p>
-                                <p className="text-sm text-gray-400">Bookmarks</p>
+                                <p className="text-sm text-gray-400">Saved</p>
                             </div>
                             {(user?.role === 'ARTIST' || user?.role === 'ADMIN') && (
                                 <div>
@@ -203,11 +206,11 @@ export default function ProfilePage() {
                         </div>
                     )}
 
-                    {activeTab === 'bookmarks' && (
+                    {activeTab === 'saved' && (
                         <div className="text-center py-20">
-                            <Bookmark className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                            <h3 className="text-xl font-semibold text-white mb-2">No bookmarks yet</h3>
-                            <p className="text-gray-400 mb-6">Save your favorite models for later</p>
+                            <Heart className="w-16 h-16 text-gray-800 mx-auto mb-4" />
+                            <h3 className="text-xl font-semibold text-white mb-2">No saved assets yet</h3>
+                            <p className="text-gray-400 mb-6">Explore our catalog and heart your favorite models</p>
                             <Link
                                 href="/catalog"
                                 className="inline-block px-6 py-3 bg-yellow-400 text-black font-semibold rounded-lg hover:bg-yellow-300 transition-colors"

@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/components/auth/AuthProvider';
-import { FolderOpen, Bookmark, Settings, Upload, BarChart3, LogOut } from 'lucide-react';
+import { FolderOpen, Heart, Settings, Upload, BarChart3, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -13,9 +13,9 @@ const menuItems = [
         description: 'Your purchased assets',
     },
     {
-        label: 'Bookmarks',
-        href: '/bookmarks',
-        icon: Bookmark,
+        label: 'Saved',
+        href: '/saved',
+        icon: Heart,
         description: 'Saved for later',
     },
     {
@@ -75,8 +75,8 @@ export default function ProfileSidebar() {
                                 key={item.href}
                                 href={item.href}
                                 className={`group flex items-start gap-3 p-3 rounded-lg transition-all duration-200 ${isActive
-                                        ? 'bg-yellow-400/10 border border-yellow-400/20'
-                                        : 'hover:bg-gray-800/50 border border-transparent'
+                                    ? 'bg-yellow-400/10 border border-yellow-400/20'
+                                    : 'hover:bg-gray-800/50 border border-transparent'
                                     }`}
                             >
                                 <Icon

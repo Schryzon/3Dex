@@ -3,34 +3,39 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useCart } from '@/lib/hooks/useCart';
 import {
     Search,
     ShoppingCart,
     Home,
     Grid3x3,
-    Users,
     Folder,
     Download,
-    Clock,
     Menu,
     X,
     PanelLeftClose,
     PanelLeftOpen,
     LogOut,
-    Settings
+    Settings,
+    User,
+    ChevronDown,
+    Package,
+    Heart,
+    Boxes,
+    Bell
 } from 'lucide-react';
 
 // Sidebar menu items
 const SIDEBAR_MENU = [
     { id: 'home', label: 'Home', icon: Home, href: '/' },
-    { id: 'catalog', label: 'Catalog', icon: Grid3x3, href: '/catalog', active: true },
-    { id: 'community', label: 'Community', icon: Users, href: '/community' },
+    { id: 'browse', label: 'Catalog', icon: Grid3x3, href: '/catalog', active: true },
+    { id: 'print', label: 'Print Services', icon: Boxes, href: '/print-services' },
 ];
 
-const SIDEBAR_PINNED = [
-    { id: 'collections', label: 'My Collections', icon: Folder, href: '/collections' },
+const SIDEBAR_MY_STUFF = [
     { id: 'downloads', label: 'Downloads', icon: Download, href: '/downloads' },
-    { id: 'history', label: 'History', icon: Clock, href: '/history' },
+    { id: 'orders', label: 'My Orders', icon: Package, href: '/orders' },
+    { id: 'saved', label: 'Saved', icon: Heart, href: '/saved' },
 ];
 
 const SIDEBAR_BOTTOM = [
@@ -44,12 +49,23 @@ export default function CatalogLayout({
     children: React.ReactNode;
 }) {
     const pathname = usePathname();
-    const [isSidebarOpen, setSidebarOpen] = useState(true); // Desktop state
-    const [isMobileOpen, setMobileOpen] = useState(false);  // Mobile state
+    const [isSidebarOpen, setSidebarOpen] = useState(true);
+    const [isMobileOpen, setMobileOpen] = useState(false);
+    const [isMobileSearchOpen, setMobileSearchOpen] = useState(false);
+    const [isAvatarDropdownOpen, setAvatarDropdownOpen] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
-    // Close mobile menu on path change
+    const { items } = useCart();
+
+    // 🔴 MOCK: Replace with real auth state from context/API
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const mockUser = { name: 'John Doe', email: 'john@example.com', initials: 'JD' };
+
+    // Close overlays on path change
     useEffect(() => {
+        setMounted(true);
         setMobileOpen(false);
+        setMobileSearchOpen(false);
     }, [pathname]);
 
     return (
@@ -62,40 +78,92 @@ export default function CatalogLayout({
                 />
             )}
 
+            {/* Mobile Search Modal */}
+            {isMobileSearchOpen && (
+                <div className="fixed inset-0 z-[60] lg:hidden bg-[#0a0a0a] animate-in fade-in duration-200">
+                    <div className="flex flex-col h-full">
+                        {/* Search Header */}
+                        <div className="flex items-center gap-3 p-4 border-b border-gray-800">
+                            <div className="flex-1 relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                                <input
+                                    type="text"
+                                    placeholder="Search models, textures, services..."
+                                    autoFocus
+                                    className="w-full pl-10 pr-4 py-2.5 bg-[#1a1a1a] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 text-sm"
+                                />
+                            </div>
+                            <button
+                                onClick={() => setMobileSearchOpen(false)}
+                                className="p-2 text-gray-400 hover:text-white"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* Quick Categories */}
+                        <div className="p-4">
+                            <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">Quick Search</p>
+                            <div className="flex flex-wrap gap-2">
+                                {['3D Models', 'Print Ready', 'Textures', 'Print Services'].map((cat) => (
+                                    <button
+                                        key={cat}
+                                        className="px-3 py-1.5 bg-[#1a1a1a] text-gray-400 text-sm rounded-lg border border-gray-800 hover:border-gray-600 hover:text-white transition-colors"
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Recent Searches Placeholder */}
+                        <div className="p-4 border-t border-gray-800">
+                            <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">Recent Searches</p>
+                            <p className="text-gray-600 text-sm">No recent searches</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Sidebar (Desktop & Mobile) */}
             <aside
                 className={`fixed top-0 left-0 h-full bg-[#141414] border-r border-gray-800 z-50 transition-all duration-300 ease-in-out overflow-x-hidden
                     ${isMobileOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64'} 
-                    lg:translate-x-0 ${isSidebarOpen ? 'lg:w-64' : 'lg:w-20'}
+                    lg:translate-x-0 ${isSidebarOpen ? 'lg:w-64' : 'lg:w-16'}
                 `}
             >
-                {/* Logo Section */}
-                <div className={`h-16 flex items-center ${isSidebarOpen ? 'justify-between px-4' : 'justify-center'} border-b border-gray-800 min-w-[16rem] lg:min-w-0 transition-all duration-300`}>
-                    <Link href="/" className={`flex items-center gap-2 overflow-hidden whitespace-nowrap ${!isSidebarOpen ? 'hidden' : 'flex'}`}>
-                        <div className="min-w-8 w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center shrink-0">
-                            <span className="text-black font-bold text-sm">3D</span>
+                {/* Logo Section  */}
+                <div className="h-14 flex items-center justify-between px-4 border-b border-gray-800">
+                    {/* Logo - Hidden when collapsed */}
+                    {isSidebarOpen ? (
+                        <Link href="/" className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center shrink-0">
+                                <span className="text-black font-bold text-sm">3D</span>
+                            </div>
+                            <span className="text-white font-bold text-lg">3Dēx</span>
+                        </Link>
+                    ) : (
+                        <div className="w-full flex justify-center">
+                            {/* Empty space for centering toggle */}
                         </div>
-                        <span className="text-white font-bold text-lg">
-                            3Dēx
-                        </span>
-                    </Link>
+                    )}
 
                     {/* Toggle Button */}
                     <button
                         onClick={() => setSidebarOpen(!isSidebarOpen)}
-                        className={`hidden lg:flex items-center justify-center transition-colors cursor-pointer text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg p-2`}
+                        className={`hidden lg:flex items-center justify-center transition-colors cursor-pointer text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg p-2 ${!isSidebarOpen ? 'absolute left-1/2 -translate-x-1/2' : ''}`}
                         title={isSidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
                     >
                         {isSidebarOpen ? (
                             <PanelLeftClose className="w-5 h-5" />
                         ) : (
-                            <PanelLeftOpen className="w-6 h-6" />
+                            <PanelLeftOpen className="w-5 h-5" />
                         )}
                     </button>
 
                     {/* Mobile Close */}
                     <button
-                        className="lg:hidden text-gray-400 hover:text-white"
+                        className="lg:hidden text-gray-400 hover:text-white p-2"
                         onClick={() => setMobileOpen(false)}
                     >
                         <X className="w-5 h-5" />
@@ -107,7 +175,7 @@ export default function CatalogLayout({
                     {/* Main Menu */}
                     <div>
                         {isSidebarOpen && (
-                            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-3 lg:block hidden">
+                            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-3">
                                 Main Menu
                             </div>
                         )}
@@ -138,15 +206,15 @@ export default function CatalogLayout({
                         </div>
                     </div>
 
-                    {/* Pinned Section */}
+                    {/* My Stuff Section */}
                     <div>
                         {isSidebarOpen && (
-                            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-3 lg:block hidden">
-                                Library
+                            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-3">
+                                My Stuff
                             </div>
                         )}
                         <div className="space-y-1">
-                            {SIDEBAR_PINNED.map((item) => {
+                            {SIDEBAR_MY_STUFF.map((item) => {
                                 const Icon = item.icon;
                                 return (
                                     <Link
@@ -194,11 +262,11 @@ export default function CatalogLayout({
 
             {/* Main Content Area */}
             <main
-                className={`flex-1 min-w-0 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'lg:ml-64' : 'lg:ml-20'}`}
+                className={`flex-1 min-w-0 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'lg:ml-64' : 'lg:ml-16'}`}
             >
-                {/* Top Bar - Catalog Specific */}
-                <header className="sticky top-0 z-30 bg-[#0a0a0a]/95 backdrop-blur-sm border-b border-gray-800">
-                    <div className="flex items-center justify-between px-4 md:px-6 py-3">
+                {/* Top Bar - Same height as sidebar header (h-14) */}
+                <header className="sticky top-0 z-30 h-14 bg-[#0a0a0a]/95 backdrop-blur-sm border-b border-gray-800">
+                    <div className="h-full flex items-center justify-between px-4 md:px-6">
                         {/* Left: Mobile Menu Trigger & Logo */}
                         <div className="flex items-center gap-3 lg:hidden">
                             <button
@@ -214,7 +282,7 @@ export default function CatalogLayout({
                             </Link>
                         </div>
 
-                        {/* Center: Search */}
+                        {/* Center: Search - Desktop only */}
                         <div className="flex-1 max-w-2xl mx-4 hidden md:block">
                             <div className="relative">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
@@ -226,27 +294,122 @@ export default function CatalogLayout({
                             </div>
                         </div>
 
-                        {/* Mobile Search Icon (visible on small screens) */}
-                        <button className="md:hidden p-2 text-gray-400 hover:text-white">
-                            <Search className="w-6 h-6" />
-                        </button>
+                        {/* Spacer for mobile to push actions to right */}
+                        <div className="flex-1 md:hidden" />
 
                         {/* Right: Actions */}
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1 md:gap-3">
+                            {/* Mobile Search Icon */}
+                            <button
+                                onClick={() => setMobileSearchOpen(true)}
+                                className="md:hidden p-2 text-gray-400 hover:text-white cursor-pointer"
+                            >
+                                <Search className="w-5 h-5" />
+                            </button>
+
                             {/* Cart */}
                             <Link href="/cart" className="p-2 text-gray-400 hover:text-white relative transition-colors">
                                 <ShoppingCart className="w-5 h-5" />
-                                <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 text-black text-xs font-bold rounded-full flex items-center justify-center">
-                                    0
-                                </span>
+                                {mounted && items.length > 0 && (
+                                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-yellow-400 text-black text-[10px] font-bold rounded-full flex items-center justify-center">
+                                        {items.length}
+                                    </span>
+                                )}
                             </Link>
 
-                            {/* User Avatar */}
-                            <Link href="/profile" className="hover:opacity-80 transition-opacity">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-xs border-2 border-gray-700">
-                                    U
+
+                            {/* User Section */}
+                            {isLoggedIn ? (
+                                /* Logged In: Avatar with Dropdown */
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setAvatarDropdownOpen(!isAvatarDropdownOpen)}
+                                        className="flex items-center gap-1.5 hover:opacity-80 transition-opacity cursor-pointer"
+                                    >
+                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-xs border-2 border-gray-700">
+                                            {mockUser.initials}
+                                        </div>
+                                        <ChevronDown className={`w-3 h-3 text-gray-400 hidden md:block transition-transform ${isAvatarDropdownOpen ? 'rotate-180' : ''}`} />
+                                    </button>
+
+                                    {/* Avatar Dropdown */}
+                                    {isAvatarDropdownOpen && (
+                                        <>
+                                            <div
+                                                className="fixed inset-0 z-40"
+                                                onClick={() => setAvatarDropdownOpen(false)}
+                                            />
+                                            <div className="absolute right-0 top-full mt-2 w-56 bg-[#1a1a1a] border border-gray-800 rounded-xl shadow-2xl z-50 overflow-hidden">
+                                                {/* User Info */}
+                                                <div className="px-4 py-3 border-b border-gray-800">
+                                                    <p className="text-white text-sm font-medium">{mockUser.name}</p>
+                                                    <p className="text-gray-500 text-xs">{mockUser.email}</p>
+                                                </div>
+
+                                                {/* Menu Items */}
+                                                <div className="py-1">
+                                                    <Link href="/notifications" className="flex items-center justify-between px-4 py-2.5 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+                                                        <div className="flex items-center gap-3">
+                                                            <Bell className="w-4 h-4" />
+                                                            <span className="text-sm">Notifications</span>
+                                                        </div>
+                                                        <span className="px-1.5 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full">
+                                                            3
+                                                        </span>
+                                                    </Link>
+                                                    <Link href="/profile" className="flex items-center gap-3 px-4 py-2.5 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+                                                        <User className="w-4 h-4" />
+                                                        <span className="text-sm">My Profile</span>
+                                                    </Link>
+                                                    <Link href="/downloads" className="flex items-center gap-3 px-4 py-2.5 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+                                                        <Download className="w-4 h-4" />
+                                                        <span className="text-sm">My Downloads</span>
+                                                    </Link>
+                                                    <Link href="/orders" className="flex items-center gap-3 px-4 py-2.5 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+                                                        <Package className="w-4 h-4" />
+                                                        <span className="text-sm">My Orders</span>
+                                                    </Link>
+                                                    <Link href="/saved" className="flex items-center gap-3 px-4 py-2.5 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+                                                        <Heart className="w-4 h-4" />
+                                                        <span className="text-sm">Saved</span>
+                                                    </Link>
+                                                    <Link href="/settings" className="flex items-center gap-3 px-4 py-2.5 text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+                                                        <Settings className="w-4 h-4" />
+                                                        <span className="text-sm">Settings</span>
+                                                    </Link>
+                                                </div>
+
+                                                {/* Logout */}
+                                                <div className="border-t border-gray-800 py-1">
+                                                    <button
+                                                        onClick={() => setIsLoggedIn(false)}
+                                                        className="flex items-center gap-3 px-4 py-2.5 text-red-400 hover:bg-gray-800 hover:text-red-300 transition-colors w-full cursor-pointer"
+                                                    >
+                                                        <LogOut className="w-4 h-4" />
+                                                        <span className="text-sm">Log Out</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
-                            </Link>
+                            ) : (
+                                /* Not Logged In: Login Button */
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => setIsLoggedIn(true)} // 🔴 MOCK: Replace with login modal
+                                        className="hidden md:block px-3 py-1.5 text-sm text-gray-400 hover:text-white transition-colors cursor-pointer"
+                                    >
+                                        Log In
+                                    </button>
+                                    <button
+                                        onClick={() => setIsLoggedIn(true)} // 🔴 MOCK: Replace with signup modal
+                                        className="px-3 py-1.5 bg-yellow-400 hover:bg-yellow-300 text-black text-sm font-medium rounded-lg transition-colors cursor-pointer"
+                                    >
+                                        Sign Up
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </header>

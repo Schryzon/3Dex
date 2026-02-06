@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, ShoppingCart, Menu, X, LogOut, Settings, FolderOpen, Bookmark, Upload, BarChart3, Users, FileText, LayoutDashboard } from 'lucide-react';
+import { Search, ShoppingCart, Menu, X, LogOut, Settings, FolderOpen, Heart, Upload, BarChart3, Users, FileText, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import ProtectedLink from '@/components/common/ProtectedLink';
 import CategoryMegaMenu from '@/components/common/CategoryMegaMenu';
 import { useState, useCallback, useEffect } from 'react';
+import { useCart } from '@/lib/hooks/useCart';
 
 export default function LandingNavbar() {
   const router = useRouter();
@@ -15,6 +16,15 @@ export default function LandingNavbar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [megaMenuOpen, setMegaMenuOpen] = useState<'3d-models' | 'cg-models' | 'textures' | null>(null);
   const [megaMenuCloseTimeout, setMegaMenuCloseTimeout] = useState<NodeJS.Timeout | null>(null);
+
+  const { items } = useCart();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const cartItemCount = mounted ? items.length : 0;
 
 
   const handleLogout = useCallback(() => {
@@ -51,9 +61,10 @@ export default function LandingNavbar() {
 
     if (role === 'ARTIST') {
       return [
+        { icon: Upload, label: 'Upload Asset', href: '/upload' },
         { icon: FolderOpen, label: 'Collections', href: '/profile?tab=collections' },
-        { icon: Bookmark, label: 'Bookmarks', href: '/profile?tab=bookmarks' },
-        { icon: Upload, label: 'My Uploads', href: '/profile?tab=uploads' },
+        { icon: Heart, label: 'Saved Assets', href: '/saved' },
+        { icon: LayoutDashboard, label: 'My Uploads', href: '/profile?tab=uploads' },
         { icon: BarChart3, label: 'Analytics', href: '/artist/analytics' },
       ];
     }
@@ -61,7 +72,7 @@ export default function LandingNavbar() {
     // CUSTOMER (default)
     return [
       { icon: FolderOpen, label: 'Collections', href: '/profile?tab=collections' },
-      { icon: Bookmark, label: 'Bookmarks', href: '/profile?tab=bookmarks' },
+      { icon: Heart, label: 'Saved Assets', href: '/saved' },
       { icon: ShoppingCart, label: 'My Orders', href: '/orders' },
     ];
   };
@@ -162,8 +173,13 @@ export default function LandingNavbar() {
           {/* Right Actions */}
           <div className="flex items-center gap-2 md:gap-3">
             {/* Cart - Protected */}
-            <ProtectedLink href="/cart" className="text-gray-300 hover:text-white transition-colors p-2 cursor-pointer">
+            <ProtectedLink href="/cart" className="text-gray-300 hover:text-white transition-colors p-2 cursor-pointer relative group">
               <ShoppingCart className="w-6 h-6" />
+              {cartItemCount > 0 && (
+                <span className="absolute top-0 right-0 w-4 h-4 bg-yellow-400 text-black text-[10px] font-black rounded-full flex items-center justify-center border-2 border-black group-hover:scale-110 transition-transform">
+                  {cartItemCount}
+                </span>
+              )}
             </ProtectedLink>
 
             {/* Auth Buttons or User Menu */}
@@ -330,12 +346,12 @@ export default function LandingNavbar() {
                   Collections
                 </Link>
                 <Link
-                  href="/bookmarks"
+                  href="/saved"
                   className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <Bookmark className="w-5 h-5" />
-                  Bookmarks
+                  <Heart className="w-5 h-5 text-red-500" />
+                  Saved
                 </Link>
               </div>
             )}

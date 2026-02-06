@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Navbar from '@/components/layout/landing/LandingNavbar';
-import Footer from '@/components/layout/landing/LandingFooter';
 import ShoppingCartPage from '@/components/cart/Cart';
 import LoginModal from '@/components/auth/LoginModal';
 import RegisterModal from '@/components/auth/RegisterModal';
@@ -18,7 +16,7 @@ export default function CartPage() {
   useEffect(() => {
     // Check localStorage or your auth state
     const userLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    
+
     if (!userLoggedIn) {
       // Show login modal if not logged in
       setShowLoginModal(true);
@@ -38,17 +36,6 @@ export default function CartPage() {
 
   return (
     <main className="min-h-screen bg-black">
-      <Navbar 
-        logo="3Dēx"
-        navItems={[
-          { label: "3D Models", href: "/models" },
-          { label: "CG Models", href: "/cg-models", badge: "NEW" },
-          { label: "Textures", href: "/textures" }
-        ]}
-        onLoginClick={() => setShowLoginModal(true)}
-        onRegisterClick={() => setShowRegisterModal(true)}
-      />
-
       {/* Only show cart if logged in */}
       {isLoggedIn ? (
         <ShoppingCartPage />
@@ -66,10 +53,8 @@ export default function CartPage() {
         </div>
       )}
 
-      <Footer />
-
       {/* Login Modal */}
-      <LoginModal 
+      <LoginModal
         isOpen={showLoginModal}
         onClose={handleLoginClose}
         onSwitchToRegister={() => {
@@ -79,7 +64,7 @@ export default function CartPage() {
       />
 
       {/* Register Modal */}
-      <RegisterModal 
+      <RegisterModal
         isOpen={showRegisterModal}
         onClose={() => setShowRegisterModal(false)}
         onSwitchToLogin={() => {
