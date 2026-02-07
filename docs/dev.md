@@ -176,22 +176,26 @@ If this works, you are officially a baby developer 👶✨
 ## Environment Variables (`.env`)
 
 ### Backend (`apps/backend/.env`)
+Copy `apps/backend/.env.example` to `apps/backend/.env`.
 ```env
 DATABASE_URL="postgresql://YOUR_USERNAME:YOUR_PASSWORD@localhost:5432/threedex"
 PORT=4000
-
-# Storage
-STORAGE_ENDPOINT="http://127.0.0.1:9000"
-STORAGE_ACCESS_KEY="minioadmin"
-STORAGE_SECRET_KEY="minioadmin"
-STORAGE_BUCKET="3dex-models"
+# ... see .env.example for full list
 ```
+
 ### Frontend (`apps/frontend/.env.local`)
+Copy `apps/frontend/.env.local.example` to `apps/frontend/.env.local`.
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:4000
+# ... see .env.local.example for full list
 ```
-🚨 NEVER COMMIT THESE FILES
 
+### Docker (`.env.docker`)
+**For Docker Compose Only**.
+Copy `.env.docker.example` to `.env.docker`.
+This file combines both Backend and Frontend variables for the containerized environment.
+
+🚨 NEVER COMMIT THESE FILES
 They are already in `.gitignore`.
 
 

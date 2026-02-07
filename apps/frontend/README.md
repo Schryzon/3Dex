@@ -38,9 +38,9 @@ npm install
 ```
 ### 2. Environment variables
 
-Create .env.local:
-```env
-NEXT_PUBLIC_API_URL=http://localhost:4000
+Copy `.env.local.example` to `.env.local` and fill in your values:
+```bash
+cp .env.local.example .env.local
 ```
 
 ---

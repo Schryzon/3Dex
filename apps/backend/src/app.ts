@@ -14,6 +14,7 @@ import catalog_routes from "./routes/catalog";
 import wishlist_routes from "./routes/wishlist";
 import analytics_routes from "./routes/analytics";
 import storage_routes from "./routes/storage";
+import order_routes from "./routes/orders";
 
 // Initialize Backend
 const app = express();
@@ -32,5 +33,6 @@ app.use("/catalog", catalog_routes);
 app.use("/wishlist", wishlist_routes);
 app.use("/analytics", analytics_routes);
 app.use("/storage", storage_routes);
+app.use("/orders", order_routes);
 
 export default app;

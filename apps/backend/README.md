@@ -43,16 +43,9 @@ npm install
 ```
 ### 2. Environment variables
 
-Create .env:
-```env
-DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/postgres"
-PORT=4000
-
-# Storage (MinIO / S3)
-STORAGE_ENDPOINT="http://127.0.0.1:9000"
-STORAGE_ACCESS_KEY="minioadmin"
-STORAGE_SECRET_KEY="minioadmin"
-STORAGE_BUCKET="3dex-models"
+Copy `.env.example` to `.env` and fill in your values:
+```bash
+cp .env.example .env
 ```
 
 ---

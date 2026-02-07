@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { AuthProvider } from '@/components/auth/AuthProvider';
 
@@ -18,6 +19,15 @@ export default function RootLayout({
         <AuthProvider>
           {children}
         </AuthProvider>
+        <Script
+          src={process.env.NODE_ENV === 'production'
+            ? "https://app.midtrans.com/snap/snap.js"
+            : "https://app.sandbox.midtrans.com/snap/snap.js"}
+          data-client-key={process.env.NODE_ENV === 'production'
+            ? process.env.NEXT_PUBLIC_PROD_MIDTRANS_CLIENT_KEY
+            : process.env.NEXT_PUBLIC_SB_MIDTRANS_CLIENT_KEY}
+          strategy="lazyOnload"
+        />
       </body>
     </html>
   );

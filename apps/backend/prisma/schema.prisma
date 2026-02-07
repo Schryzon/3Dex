@@ -6,7 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  binaryTargets = ["native", "linux-musl"]
+  binaryTargets = ["native", "linux-musl", "windows"]
 }
 
 datasource db {
@@ -25,6 +25,7 @@ enum ModelStatus {
   REJECTED
 }
 
+
 model User {
   id       String @id @default(uuid())
   email    String @unique
@@ -36,6 +37,7 @@ model User {
   purchases Purchase[]
   reviews   Review[]
   wishlist  Wishlist[]
+  orders    Order[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -45,7 +47,7 @@ model Model {
   id          String  @id @default(uuid())
   title       String
   description String?
-  price       Int // in cents
+  price       Int // in IDR
   file_url    String
   preview_url String?
   
@@ -57,10 +59,11 @@ model Model {
   category_id String?
   category    Category? @relation(fields: [category_id], references: [id])
 
-  purchases Purchase[]
-  reviews   Review[]
-  wishlist  Wishlist[]
-  tags      Tag[]
+  purchases  Purchase[]
+  reviews    Review[]
+  wishlist   Wishlist[]
+  tags       Tag[]
+  order_items Order_Item[]
 
   created_at DateTime @default(now())
 }
@@ -79,7 +82,7 @@ model Purchase {
   user  User  @relation(fields: [user_id], references: [id])
   model Model @relation(fields: [model_id], references: [id])
 
-  price_paid Int
+  price_paid Int // in IDR
   license    License_Type @default(PERSONAL_USE)
 
   created_at DateTime @default(now())
@@ -138,3 +141,67 @@ model Wishlist {
 
   @@unique([user_id, model_id])
 }
+
+enum Order_Type {
+  ASSET
+  PRINT_JOB
+}
+
+enum Order_Status {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+}
+
+model Order {
+  id String @id @default(uuid())
+
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id])
+
+  total_amount Int          @default(0) // IDR
+  status       Order_Status @default(PENDING)
+  type         Order_Type   @default(ASSET)
+
+  snap_token   String?
+  snap_redirect_url String?
+
+  items    Order_Item[]
+  payments Payment[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Order_Item {
+  id String @id @default(uuid())
+
+  order_id String
+  order    Order  @relation(fields: [order_id], references: [id])
+
+  model_id String?
+  model    Model? @relation(fields: [model_id], references: [id])
+
+  price Int // IDR at time of purchase
+
+  created_at DateTime @default(now())
+}
+
+model Payment {
+  id String @id @default(uuid())
+
+  order_id String
+  order    Order  @relation(fields: [order_id], references: [id])
+
+  transaction_id      String   @unique // Midtrans Transaction ID
+  payment_type        String
+  gross_amount        Int      // IDR
+  transaction_status  String
+  fraud_status        String?
+  
+  raw_response        Json?
+
+  created_at DateTime @default(now())
+}
+
