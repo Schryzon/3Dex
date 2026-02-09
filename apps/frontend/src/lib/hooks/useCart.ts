@@ -6,9 +6,11 @@ import type { CartItem } from '@/lib/types';
 export function useCart() {
     const queryClient = useQueryClient();
 
+    // TEMPORARY: Disabled cart API calls until backend cart routes are implemented
     const { data: items = [], isLoading } = useQuery({
         queryKey: QUERY_KEYS.CART,
-        queryFn: () => cartService.getCart(),
+        queryFn: () => Promise.resolve([]), // Return empty array instead of API call
+        enabled: false, // Disable query
     });
 
     const addToCartMutation = useMutation({
