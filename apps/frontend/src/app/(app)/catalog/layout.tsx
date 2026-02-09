@@ -39,7 +39,7 @@ const SIDEBAR_MY_STUFF = [
 ];
 
 const SIDEBAR_BOTTOM = [
-    { id: 'settings', label: 'Settings', icon: Settings, href: '/settings' },
+    { id: 'settings', label: 'Settings', icon: Settings, href: '/profile?tab=settings' },
     { id: 'logout', label: 'Log Out', icon: LogOut, href: '/logout' },
 ];
 
