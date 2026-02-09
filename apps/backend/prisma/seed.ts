@@ -12,10 +12,11 @@ const prisma = new PrismaClient({ adapter });
 
 async function main() {
     console.log('🌱 Starting seed...')
+    const p = prisma as any;
 
     // 1. Create Artist
     const artistEmail = 'artist@3dex.com'
-    const artist = await prisma.user.upsert({
+    const artist = await p.user.upsert({
         where: { email: artistEmail },
         update: {},
         create: {
@@ -27,24 +28,23 @@ async function main() {
     })
     console.log(`👤 Created user: ${artist.username}`)
 
-    // 2. Create Categories
     const categories = await Promise.all([
-        prisma.category.upsert({
+        p.category.upsert({
             where: { name: 'Characters' },
             update: {},
             create: { name: 'Characters', slug: 'characters' },
         }),
-        prisma.category.upsert({
+        p.category.upsert({
             where: { name: 'Vehicles' },
             update: {},
             create: { name: 'Vehicles', slug: 'vehicles' },
         }),
-        prisma.category.upsert({
+        p.category.upsert({
             where: { name: 'Architecture' },
             update: {},
             create: { name: 'Architecture', slug: 'architecture' },
         }),
-        prisma.category.upsert({
+        p.category.upsert({
             where: { name: 'Nature' },
             update: {},
             create: { name: 'Nature', slug: 'nature' },
@@ -121,7 +121,7 @@ async function main() {
     ]
 
     for (const modelData of models) {
-        await prisma.model.create({
+        await p.model.create({
             data: {
                 title: modelData.title,
                 description: modelData.description,
@@ -130,17 +130,17 @@ async function main() {
                 preview_url: modelData.preview_url,
                 status: 'APPROVED',
                 artist_id: artist.id,
-                category_id: modelData.category.id,
+                category_id: (modelData.category as any).id,
             },
         })
-        console.log(`� Created model: ${modelData.title}`)
+        console.log(`📦 Created model: ${modelData.title}`)
     }
 
     console.log(`✅ Created ${models.length} models`)
 
     // 4. Create Customer (for login testing)
     const customerEmail = 'meow@a.com'
-    const customer = await prisma.user.upsert({
+    const customer = await p.user.upsert({
         where: { email: customerEmail },
         update: {},
         create: {

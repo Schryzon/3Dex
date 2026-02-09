@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import ProductCard from './ProductCard';
+import { ChevronRight } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -47,11 +48,11 @@ export default function RelatedProducts({ productId, categories }: Props) {
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Related Products</h2>
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold text-white">Related Products</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="bg-[#141414] rounded-lg overflow-hidden animate-pulse">
+            <div key={i} className="bg-gray-900 rounded-lg overflow-hidden animate-pulse">
               <div className="aspect-[4/3] bg-gray-800"></div>
               <div className="p-4 space-y-3">
                 <div className="h-4 bg-gray-800 rounded w-3/4"></div>
@@ -72,12 +73,10 @@ export default function RelatedProducts({ productId, categories }: Props) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Related Products</h2>
-        <button className="text-blue-500 hover:text-blue-400 text-sm font-medium flex items-center gap-1">
+        <h2 className="text-2xl font-bold text-white">Related Products</h2>
+        <button className="text-yellow-500 hover:text-yellow-400 text-sm font-semibold flex items-center gap-1 transition-colors duration-300 group">
           View All
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
+          <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
         </button>
       </div>
 

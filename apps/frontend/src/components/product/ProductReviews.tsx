@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface Review {
   id: string;
@@ -138,9 +138,8 @@ export default function ProductReviews({ productId }: Props) {
             {[...Array(5)].map((_, i) => (
               <svg
                 key={i}
-                className={`w-6 h-6 ${
-                  i < Math.round(stats.averageRating) ? 'text-yellow-500' : 'text-gray-600'
-                }`}
+                className={`w-6 h-6 ${i < Math.round(stats.averageRating) ? 'text-yellow-500' : 'text-gray-600'
+                  }`}
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -161,9 +160,8 @@ export default function ProductReviews({ productId }: Props) {
               <button
                 key={rating}
                 onClick={() => setFilterRating(filterRating === rating ? null : rating)}
-                className={`flex items-center gap-3 w-full hover:bg-gray-800/50 p-2 rounded transition-all ${
-                  filterRating === rating ? 'bg-gray-800' : ''
-                }`}
+                className={`flex items-center gap-3 w-full hover:bg-gray-800/50 p-2 rounded transition-all ${filterRating === rating ? 'bg-gray-800' : ''
+                  }`}
               >
                 <div className="flex items-center gap-1 w-16">
                   <span className="text-sm">{rating}</span>
@@ -201,9 +199,8 @@ export default function ProductReviews({ productId }: Props) {
                   className="focus:outline-none"
                 >
                   <svg
-                    className={`w-8 h-8 transition-colors ${
-                      rating <= newReview.rating ? 'text-yellow-500' : 'text-gray-600'
-                    }`}
+                    className={`w-8 h-8 transition-colors ${rating <= newReview.rating ? 'text-yellow-500' : 'text-gray-600'
+                      }`}
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -267,25 +264,22 @@ export default function ProductReviews({ productId }: Props) {
         <span className="text-gray-400">Sort by:</span>
         <button
           onClick={() => setSortBy('recent')}
-          className={`px-3 py-1 rounded-lg transition-all ${
-            sortBy === 'recent' ? 'bg-blue-600' : 'bg-gray-800 hover:bg-gray-700'
-          }`}
+          className={`px-3 py-1 rounded-lg transition-all ${sortBy === 'recent' ? 'bg-blue-600' : 'bg-gray-800 hover:bg-gray-700'
+            }`}
         >
           Most Recent
         </button>
         <button
           onClick={() => setSortBy('helpful')}
-          className={`px-3 py-1 rounded-lg transition-all ${
-            sortBy === 'helpful' ? 'bg-blue-600' : 'bg-gray-800 hover:bg-gray-700'
-          }`}
+          className={`px-3 py-1 rounded-lg transition-all ${sortBy === 'helpful' ? 'bg-blue-600' : 'bg-gray-800 hover:bg-gray-700'
+            }`}
         >
           Most Helpful
         </button>
         <button
           onClick={() => setSortBy('rating')}
-          className={`px-3 py-1 rounded-lg transition-all ${
-            sortBy === 'rating' ? 'bg-blue-600' : 'bg-gray-800 hover:bg-gray-700'
-          }`}
+          className={`px-3 py-1 rounded-lg transition-all ${sortBy === 'rating' ? 'bg-blue-600' : 'bg-gray-800 hover:bg-gray-700'
+            }`}
         >
           Highest Rating
         </button>
@@ -324,9 +318,8 @@ export default function ProductReviews({ productId }: Props) {
                       {[...Array(5)].map((_, i) => (
                         <svg
                           key={i}
-                          className={`w-5 h-5 ${
-                            i < review.rating ? 'text-yellow-500' : 'text-gray-600'
-                          }`}
+                          className={`w-5 h-5 ${i < review.rating ? 'text-yellow-500' : 'text-gray-600'
+                            }`}
                           fill="currentColor"
                           viewBox="0 0 20 20"
                         >
