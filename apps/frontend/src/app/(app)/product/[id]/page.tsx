@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useProduct, useProductReviews } from '@/lib/hooks/useProducts';
+import { useCart } from '@/lib/hooks/useCart';
 import { ArrowLeft, ShoppingCart, Heart, Download, Share2, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { Button, Badge } from '@/components/ui';
@@ -18,9 +19,29 @@ export default function ProductDetailPage() {
 
     const { data: product, isLoading, error } = useProduct(productId);
     const { data: reviews } = useProductReviews(productId);
+    const { addToCart, isAddingToCart } = useCart();
 
     const [selectedImage, setSelectedImage] = useState(0);
     const [isInWishlist, setIsInWishlist] = useState(false);
+
+    const handleAddToCart = async () => {
+        try {
+            await addToCart({ modelId: productId });
+            // Could add toast notification here
+            alert('Added to cart!');
+        } catch (error) {
+            alert('Failed to add to cart. Please try again.');
+        }
+    };
+
+    const handleBuyNow = async () => {
+        try {
+            await addToCart({ modelId: productId });
+            router.push('/cart');
+        } catch (error) {
+            alert('Failed to proceed. Please try again.');
+        }
+    };
 
     if (isLoading) {
         return (
@@ -100,8 +121,8 @@ export default function ProductDetailPage() {
                                         key={idx}
                                         onClick={() => setSelectedImage(idx)}
                                         className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${selectedImage === idx
-                                                ? 'border-yellow-400 scale-105'
-                                                : 'border-gray-800 hover:border-gray-700'
+                                            ? 'border-yellow-400 scale-105'
+                                            : 'border-gray-800 hover:border-gray-700'
                                             }`}
                                     >
                                         <img
@@ -214,14 +235,27 @@ export default function ProductDetailPage() {
                                 variant="primary"
                                 size="lg"
                                 className="flex-1 gap-2"
+                                onClick={handleAddToCart}
+                                disabled={isAddingToCart}
                             >
-                                <ShoppingCart className="w-5 h-5" />
-                                Add to Cart
+                                {isAddingToCart ? (
+                                    <>
+                                        <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                                        Adding...
+                                    </>
+                                ) : (
+                                    <>
+                                        <ShoppingCart className="w-5 h-5" />
+                                        Add to Cart
+                                    </>
+                                )}
                             </Button>
                             <Button
                                 variant="secondary"
                                 size="lg"
                                 className="gap-2"
+                                onClick={handleBuyNow}
+                                disabled={isAddingToCart}
                             >
                                 <Download className="w-5 h-5" />
                                 Buy Now

@@ -1,82 +1,61 @@
-'use client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { cartService } from '@/lib/api/services';
+import { QUERY_KEYS } from '@/lib/constants/api';
+import type { CartItem } from '@/lib/types';
 
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+export function useCart() {
+    const queryClient = useQueryClient();
 
-export interface CartItem {
-    id: string;
-    title: string;
-    price: number;
-    image: string;
-    author: string;
+    const { data: items = [], isLoading } = useQuery({
+        queryKey: QUERY_KEYS.CART,
+        queryFn: () => cartService.getCart(),
+    });
+
+    const addToCartMutation = useMutation({
+        mutationFn: ({ modelId, quantity = 1 }: { modelId: string; quantity?: number }) =>
+            cartService.addToCart(modelId, quantity),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CART });
+        },
+    });
+
+    const updateQuantityMutation = useMutation({
+        mutationFn: ({ itemId, quantity }: { itemId: string; quantity: number }) =>
+            cartService.updateQuantity(itemId, quantity),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CART });
+        },
+    });
+
+    const removeItemMutation = useMutation({
+        mutationFn: (itemId: string) => cartService.removeItem(itemId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CART });
+        },
+    });
+
+    const clearCartMutation = useMutation({
+        mutationFn: () => cartService.clearCart(),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CART });
+        },
+    });
+
+    // Computed values
+    const itemCount = items.reduce((total, item) => total + item.quantity, 0);
+    const total = items.reduce((sum, item) => sum + (item.model.price * item.quantity), 0);
+
+    return {
+        items,
+        isLoading,
+        itemCount,
+        total,
+        addToCart: addToCartMutation.mutateAsync,
+        updateQuantity: updateQuantityMutation.mutateAsync,
+        removeItem: removeItemMutation.mutateAsync,
+        clearCart: clearCartMutation.mutateAsync,
+        isAddingToCart: addToCartMutation.isPending,
+        isUpdating: updateQuantityMutation.isPending,
+        isRemoving: removeItemMutation.isPending,
+    };
 }
-
-export interface OrderRecord {
-    id: string;
-    total: number;
-    items: CartItem[];
-    date: string;
-    paymentMethod: string;
-}
-
-interface CartState {
-    items: CartItem[];
-    orders: OrderRecord[];
-    addItem: (item: CartItem) => void;
-    removeItem: (id: string) => void;
-    clearCart: () => void;
-    completeOrder: (paymentMethod: string) => void;
-    total: number;
-}
-
-export const useCart = create<CartState>()(
-    persist(
-        (set, get) => ({
-            items: [],
-            orders: [],
-            total: 0,
-            addItem: (item) => {
-                const items = get().items;
-                const isItemInCart = items.some((i) => i.id === item.id);
-
-                if (!isItemInCart) {
-                    const newItems = [...items, item];
-                    set({
-                        items: newItems,
-                        total: Number(newItems.reduce((acc, curr) => acc + curr.price, 0).toFixed(2))
-                    });
-                }
-            },
-            removeItem: (id) => {
-                const items = get().items;
-                const newItems = items.filter((i) => i.id !== id);
-                set({
-                    items: newItems,
-                    total: Number(newItems.reduce((acc, curr) => acc + curr.price, 0).toFixed(2))
-                });
-            },
-            clearCart: () => set({ items: [], total: 0 }),
-            completeOrder: (paymentMethod) => {
-                const { items, total, orders } = get();
-                if (items.length === 0) return;
-
-                const newOrder: OrderRecord = {
-                    id: `ORD-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
-                    total,
-                    items: [...items],
-                    date: new Date().toISOString(),
-                    paymentMethod
-                };
-
-                set({
-                    orders: [newOrder, ...orders],
-                    items: [],
-                    total: 0
-                });
-            }
-        }),
-        {
-            name: 'cart-storage',
-        }
-    )
-);

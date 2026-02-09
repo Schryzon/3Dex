@@ -37,6 +37,15 @@ export const API_ENDPOINTS = {
         STATUS: (id: string) => `/payments/${id}/status`,
     },
 
+    // Cart
+    CART: {
+        LIST: '/cart',
+        ADD: '/cart/add',
+        UPDATE: (id: string) => `/cart/${id}`,
+        REMOVE: (id: string) => `/cart/${id}`,
+        CLEAR: '/cart/clear',
+    },
+
     // Wishlist
     WISHLIST: {
         LIST: '/wishlist',
@@ -73,6 +82,7 @@ export const QUERY_KEYS = {
     ORDERS: ['orders'],
     ORDER_DETAIL: (id: string) => ['orders', id],
     WISHLIST: ['wishlist'],
+    CART: ['cart'],
     PURCHASES: ['purchases'],
     USER_PROFILE: ['user', 'profile'],
 } as const;
