@@ -1,0 +1,78 @@
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+export const MINIO_BASE_URL = process.env.NEXT_PUBLIC_MINIO_URL || 'http://localhost:9000';
+export const MIDTRANS_CLIENT_KEY = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || '';
+
+export const API_ENDPOINTS = {
+    // Auth
+    AUTH: {
+        LOGIN: '/auth/login',
+        REGISTER: '/auth/register',
+        LOGOUT: '/auth/logout',
+        ME: '/auth/me',
+    },
+
+    // Models/Products
+    MODELS: {
+        LIST: '/models',
+        DETAIL: (id: string) => `/models/${id}`,
+        UPLOAD: '/models',
+        UPDATE: (id: string) => `/models/${id}`,
+        DELETE: (id: string) => `/models/${id}`,
+        DOWNLOAD: (id: string) => `/models/${id}/download`,
+        REVIEWS: (id: string) => `/models/${id}/reviews`,
+    },
+
+    // Orders
+    ORDERS: {
+        LIST: '/orders',
+        CREATE: '/orders',
+        DETAIL: (id: string) => `/orders/${id}`,
+        TRACKING: (id: string) => `/orders/${id}/tracking`,
+    },
+
+    // Payments
+    PAYMENTS: {
+        CREATE: '/payments/create',
+        CALLBACK: '/payments/callback',
+        STATUS: (id: string) => `/payments/${id}/status`,
+    },
+
+    // Wishlist
+    WISHLIST: {
+        LIST: '/wishlist',
+        ADD: '/wishlist',
+        REMOVE: (id: string) => `/wishlist/${id}`,
+    },
+
+    // Purchases
+    PURCHASES: {
+        LIST: '/purchases',
+        DETAIL: (id: string) => `/purchases/${id}`,
+    },
+
+    // Users
+    USERS: {
+        PROFILE: '/users/profile',
+        UPDATE: '/users/profile',
+    },
+
+    // Admin
+    ADMIN: {
+        STATS: '/admin/stats',
+        USERS: '/admin/users',
+        MODELS: '/admin/models',
+        APPROVE_MODEL: (id: string) => `/admin/models/${id}/approve`,
+        REJECT_MODEL: (id: string) => `/admin/models/${id}/reject`,
+    },
+} as const;
+
+export const QUERY_KEYS = {
+    AUTH: ['auth'],
+    MODELS: ['models'],
+    MODEL_DETAIL: (id: string) => ['models', id],
+    ORDERS: ['orders'],
+    ORDER_DETAIL: (id: string) => ['orders', id],
+    WISHLIST: ['wishlist'],
+    PURCHASES: ['purchases'],
+    USER_PROFILE: ['user', 'profile'],
+} as const;
