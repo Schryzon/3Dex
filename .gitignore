@@ -1,3 +1,4 @@
 # Why even
 *.env*
 !.env.docker.example
+node_modules/

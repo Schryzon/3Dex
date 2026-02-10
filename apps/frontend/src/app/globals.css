@@ -24,3 +24,13 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background-color: rgb(75 85 99); /* gray-600 */
 }
+
+/* Utility: Hide scrollbar but keep scrollable */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera */
+}

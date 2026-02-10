@@ -20,7 +20,11 @@ export async function list_pending_models(req: Request, res: Response) {
 }
 
 export async function approve_model(req: Request, res: Response) {
-    const id = req.params.id;
+    const { id } = req.params;
+
+    if (typeof id !== 'string') {
+        return res.status(400).json({ message: "Invalid ID format" });
+    }
 
     try {
         const model = await prisma.model.update({
@@ -34,7 +38,11 @@ export async function approve_model(req: Request, res: Response) {
 }
 
 export async function reject_model(req: Request, res: Response) {
-    const id = req.params.id;
+    const { id } = req.params;
+
+    if (typeof id !== 'string') {
+        return res.status(400).json({ message: "Invalid ID format" });
+    }
 
     try {
         const model = await prisma.model.update({
