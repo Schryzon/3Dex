@@ -74,7 +74,7 @@ export default function ShoppingCartPage() {
     try {
       // 1. Create Order
       const order = await orderService.createOrder({
-        items: items.map(item => ({
+        items: items.map((item: CartItem) => ({
           modelId: item.modelId,
           quantity: item.quantity
         }))

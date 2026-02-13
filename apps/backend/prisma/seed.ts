@@ -147,7 +147,7 @@ async function main() {
             email: customerEmail,
             username: 'MeowCustomer',
             password: 'meowfish',
-            role: 'CUSTOMER',
+            role: 'ARTIST',
         },
     })
     console.log(`👤 Created customer: ${customer.username}`)

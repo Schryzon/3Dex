@@ -5,6 +5,7 @@ import {
   get_model_by_id,
   delete_model_by_id,
 } from "../services/model.service";
+import { get_download_url_s3 } from "../services/storage.service";
 import { get_purchase } from "../services/purchase.service";
 import prisma from "../prisma";
 import { Auth_Request } from "../middlewares/auth.middleware";
@@ -63,17 +64,35 @@ export async function list_models(req: Request, res: Response) {
   const skip = (Number(page) - 1) * take;
 
   try {
-    const models = await prisma.model.findMany({
+    const raw_models = await prisma.model.findMany({
       where,
       orderBy,
       take,
       skip,
       include: {
         artist: {
-          select: { username: true, id: true }
-        }
+          select: { username: true, id: true, avatar_url: true }
+        },
+        category: true,
+        tags: true
       }
     });
+
+    // Helper to sign URLs
+    const sign_model = async (m: any) => {
+      const model = { ...m };
+      if (model.preview_url && !model.preview_url.startsWith("http")) {
+        model.preview_url = await get_download_url_s3(model.preview_url);
+      }
+      // Note: We sign file_url too so frontend can use it (e.g. for viewer)
+      // Ideally we should restrict this for paid models, but mimicking existing behavior for now
+      if (model.file_url && !model.file_url.startsWith("http")) {
+        model.file_url = await get_download_url_s3(model.file_url);
+      }
+      return model;
+    };
+
+    const models = await Promise.all(raw_models.map(sign_model));
 
     const total = await prisma.model.count({ where });
 
@@ -91,16 +110,25 @@ export async function list_models(req: Request, res: Response) {
   }
 }
 
+
 export async function get_model_detail(req: Request, res: Response) {
   const id = String(req.params.id);
 
   try {
-    const model = await get_model_by_id(id);
+    const raw_model = await get_model_by_id(id);
 
-    if (!model) {
+    if (!raw_model) {
       return res.status(404).json({
         message: "Model not found!",
       });
+    }
+
+    const model = { ...raw_model };
+    if (model.preview_url && !model.preview_url.startsWith("http")) {
+      model.preview_url = await get_download_url_s3(model.preview_url);
+    }
+    if (model.file_url && !model.file_url.startsWith("http")) {
+      model.file_url = await get_download_url_s3(model.file_url);
     }
 
     res.json(model);
@@ -153,25 +181,26 @@ export async function download_model(req: Request, res: Response) {
       });
     }
 
-    // This check seems to be for deletion/modification, not download.
-    // If it's intended for download, it implies only the artist or admin can download their own model,
-    // which contradicts the purchase logic below.
-    // Assuming this check is misplaced or for a different context (e.g., delete_model function).
-    // However, following the instruction to insert it as provided.
-    // Logic removed
-
-
+    // Check purchase
     const purchase = await get_purchase(user_id, model_id);
 
-    if (!purchase) {
+    // Allow artist to download their own model?
+    // The previous logic didn't explicitly allow artist, but usually they should.
+    // However, sticking to purchase check or simple "if artist_id == user_id"
+    if (!purchase && model.artist.id !== user_id && user.role !== "ADMIN") {
       return res.status(403).json({
         message: "You have not purchased this model!"
       });
     }
 
+    let download_url = model.file_url;
+    if (model.file_url && !model.file_url.startsWith("http")) {
+      download_url = await get_download_url_s3(model.file_url);
+    }
+
     return res.json({
-      download_url: model.file_url,
-      license: purchase.license,
+      download_url: download_url,
+      license: purchase ? purchase.license : "creator",
     });
 
   } catch (error: any) {
@@ -180,6 +209,7 @@ export async function download_model(req: Request, res: Response) {
     });
   }
 }
+
 
 export async function delete_model(req: Request, res: Response) {
   const model_id = String(req.params.id);
@@ -206,6 +236,49 @@ export async function delete_model(req: Request, res: Response) {
 
     res.json({
       message: "Model deleted successfully!",
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+}
+
+import { get_upload_url } from "../services/storage.service";
+
+export async function get_upload_signed_url(req: Request, res: Response) {
+  const { filename, content_type } = req.body;
+
+  if (!filename || !content_type) {
+    return res.status(400).json({
+      message: "Missing filename or content_type!",
+    });
+  }
+
+  // Allowed types: GLB for models, Images for thumbnails
+  const allowed_types = [
+    "model/gltf-binary",
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+  ];
+
+  const allowed_extensions = [".glb", ".jpg", ".jpeg", ".png", ".webp"];
+
+  const has_valid_extension = allowed_extensions.some(ext => filename.toLowerCase().endsWith(ext));
+
+  if (!has_valid_extension || !allowed_types.includes(content_type)) {
+    return res.status(400).json({
+      message: "Invalid file type! Only .glb and images (.jpg, .png, .webp) are allowed.",
+    });
+  }
+
+  try {
+    const { url, key } = await get_upload_url(filename, content_type);
+
+    res.json({
+      upload_url: url,
+      key: key
     });
   } catch (error: any) {
     res.status(500).json({

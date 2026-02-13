@@ -8,6 +8,31 @@ import type {
     Review
 } from '@/lib/types';
 
+
+const mapModel = (item: any): Model => ({
+    id: item.id,
+    title: item.title,
+    description: item.description || '',
+    price: item.price,
+    thumbnails: item.preview_url ? [item.preview_url] : [],
+    modelFileUrl: item.file_url,
+    fileFormat: ['GLB'],
+    category: item.category?.name || 'Uncategorized',
+    tags: item.tags ? item.tags.map((t: any) => t.name) : [],
+    isPrintable: false,
+    status: item.status,
+    artistId: item.artist_id,
+    artist: {
+        id: item.artist?.id || '',
+        username: item.artist?.username || 'Unknown',
+        avatar: item.artist?.avatar_url
+    },
+    createdAt: item.created_at,
+    updatedAt: item.updated_at,
+    rating: 0,
+    reviewCount: 0
+});
+
 export const productService = {
     async getProducts(filters?: ModelFilters): Promise<PaginatedResponse<Model>> {
         try {
@@ -21,6 +46,7 @@ export const productService = {
                 if (filters.format) filters.format.forEach(f => params.append('format', f));
                 if (filters.isPrintable !== undefined) params.append('isPrintable', filters.isPrintable.toString());
                 if (filters.sort) params.append('sort', filters.sort);
+                if (filters.artistId) params.append('artist_id', filters.artistId);
                 if (filters.page) params.append('page', filters.page.toString());
                 if (filters.limit) params.append('limit', filters.limit.toString());
             }
@@ -28,7 +54,17 @@ export const productService = {
             const queryString = params.toString();
             const url = queryString ? `${API_ENDPOINTS.MODELS.LIST}?${queryString}` : API_ENDPOINTS.MODELS.LIST;
 
-            return await apiClient.get<PaginatedResponse<Model>>(url);
+            const response = await apiClient.get<any>(url);
+
+            return {
+                data: response.data.map(mapModel),
+                pagination: {
+                    page: response.meta.page,
+                    limit: response.meta.limit,
+                    total: response.meta.total,
+                    totalPages: response.meta.pages
+                }
+            };
         } catch (error) {
             console.warn('API Error in getProducts, falling back to mock data:', error);
             // Path 2: Return mock data as fallback
@@ -50,7 +86,8 @@ export const productService = {
 
     async getProductById(id: string): Promise<Model> {
         try {
-            return await apiClient.get<Model>(API_ENDPOINTS.MODELS.DETAIL(id));
+            const data = await apiClient.get<any>(API_ENDPOINTS.MODELS.DETAIL(id));
+            return mapModel(data);
         } catch (error) {
             console.warn(`API Error in getProductById(${id}), falling back to mock data:`, error);
             const model = MOCK_MODELS.find(m => m.id === id);

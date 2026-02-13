@@ -133,6 +133,7 @@ export interface ModelFilters {
     format?: string[];
     isPrintable?: boolean;
     sort?: 'price_asc' | 'price_desc' | 'newest' | 'oldest' | 'popular';
+    artistId?: string;
     page?: number;
     limit?: number;
 }

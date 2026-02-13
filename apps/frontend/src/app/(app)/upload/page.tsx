@@ -1,16 +1,19 @@
-'use client';
-
+'use client'
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Box, Info, Tag, DollarSign, Check, ChevronRight, Layout } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Box, Info, Tag, DollarSign, Check, ChevronRight, Layout, Loader2 } from 'lucide-react';
 import FileUploader from '@/components/upload/FileUploader';
+import { api } from '@/lib/api';
 
 type Step = 'files' | 'details' | 'pricing';
 
 export default function UploadPage() {
+    const router = useRouter();
     const [currentStep, setCurrentStep] = useState<Step>('files');
     const [modelFile, setModelFile] = useState<File | null>(null);
     const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     // Form Data
     const [formData, setFormData] = useState({
@@ -31,6 +34,80 @@ export default function UploadPage() {
         { id: 'details', label: 'Asset Details', icon: Info },
         { id: 'pricing', label: 'Pricing & Publish', icon: DollarSign },
     ];
+
+    const getPresignedUrl = async (file: File) => {
+        const { data } = await api.post('/models/upload-url', {
+            filename: file.name,
+            content_type: file.type || (file.name.endsWith('.glb') ? 'model/gltf-binary' : 'image/jpeg')
+        });
+        return data; // { upload_url, key }
+    };
+
+    const uploadFileToMinIO = async (file: File, url: string) => {
+        await fetch(url, {
+            method: 'PUT',
+            body: file,
+            headers: {
+                'Content-Type': file.type || (file.name.endsWith('.glb') ? 'model/gltf-binary' : 'image/jpeg')
+            }
+        });
+    };
+
+    const handlePublish = async () => {
+        if (!modelFile) return;
+
+        try {
+            setIsLoading(true);
+
+            // 1. Upload Model
+            const modelUpload = await getPresignedUrl(modelFile);
+            await uploadFileToMinIO(modelFile, modelUpload.upload_url);
+
+            // 2. Upload Thumbnail (if exists)
+            let thumbnailKey = '';
+            if (thumbnailFile) {
+                const thumbUpload = await getPresignedUrl(thumbnailFile);
+                await uploadFileToMinIO(thumbnailFile, thumbUpload.upload_url);
+                thumbnailKey = thumbUpload.key;
+            }
+
+            // 3. Create Model Record
+            // Need artist_id. Assuming derived from token or user info in local storage if API needs it explicit.
+            // But usually API extracts it from token. 
+            // However, the controller generic 'upload_model' checks `req.body.artist_id`.
+            // We need to fetch current user ID. 
+            // Ideally useAuth hook, but for now retrieving from localStorage as per api.ts hint
+            const userStr = localStorage.getItem('user');
+            const user = userStr ? JSON.parse(userStr) : null;
+
+            if (!user || !user.id) {
+                alert("You must be logged in!");
+                setIsLoading(false);
+                return;
+            }
+
+            await api.post('/models', {
+                title: formData.title,
+                description: formData.description,
+                price: formData.isFree ? 0 : Number(formData.price),
+                file_url: modelUpload.key, // Store KEY, not signed URL
+                preview_url: thumbnailKey,
+                artist_id: user.id, // Explicitly sending artist_id as required by backend
+                category: formData.category,
+                tags: formData.tags.split(',').map(t => t.trim()),
+                license: formData.license
+            });
+
+            // Success
+            router.push('/profile');
+
+        } catch (error: any) {
+            console.error(error);
+            alert(`Upload failed: ${error.response?.data?.message || error.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-black text-white pb-20">
@@ -61,7 +138,7 @@ export default function UploadPage() {
                         return (
                             <div key={step.id} className="relative z-10 flex flex-col items-center">
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isActive ? 'bg-yellow-400 text-black scale-110 shadow-[0_0_20px_rgba(250,204,21,0.3)]' :
-                                        isPast ? 'bg-green-500 text-white' : 'bg-gray-900 text-gray-500 border border-gray-800'
+                                    isPast ? 'bg-green-500 text-white' : 'bg-gray-900 text-gray-500 border border-gray-800'
                                     }`}>
                                     {isPast ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
                                 </div>
@@ -262,9 +339,11 @@ export default function UploadPage() {
                                     Back
                                 </button>
                                 <button
-                                    className="px-10 py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 text-black font-black rounded-xl shadow-[0_10px_40px_rgba(250,204,21,0.2)] flex items-center gap-3 transition-all hover:scale-[1.02] cursor-pointer"
+                                    onClick={handlePublish}
+                                    disabled={isLoading}
+                                    className="px-10 py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 text-black font-black rounded-xl shadow-[0_10px_40px_rgba(250,204,21,0.2)] flex items-center gap-3 transition-all hover:scale-[1.02] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    Publish Asset
+                                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Publish Asset'}
                                 </button>
                             </div>
                         </div>
@@ -274,3 +353,4 @@ export default function UploadPage() {
         </div>
     );
 }
+

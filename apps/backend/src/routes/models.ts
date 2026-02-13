@@ -4,7 +4,8 @@ import {
   upload_model,
   get_model_detail,
   download_model,
-  delete_model
+  delete_model,
+  get_upload_signed_url
 } from "../controllers/model.controller";
 import { require_auth } from "../middlewares/auth.middleware";
 import { require_artist } from "../middlewares/role.middleware";
@@ -145,6 +146,34 @@ router.post("/", require_auth, require_artist, validate(upload_model_schema), up
  *         description: Forbidden
  */
 router.delete("/:id", require_auth, delete_model);
+
+/**
+ * @openapi
+ * /models/upload-url:
+ *   post:
+ *     summary: Get presigned upload URL for GLB files (Artist only)
+ *     tags:
+ *       - Models
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               filename:
+ *                 type: string
+ *               content_type:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Presigned URL and Key
+ *       400:
+ *         description: Invalid file type or missing fields
+ */
+router.post("/upload-url", require_auth, require_artist, get_upload_signed_url);
 
 // REVIEWS
 // REVIEWS
