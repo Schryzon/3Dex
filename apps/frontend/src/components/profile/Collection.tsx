@@ -34,9 +34,7 @@ export default function Collection() {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    fetchCollections();
-  }, [sortBy, filterCategory]);
+  useEffect(() => { fetchCollections(); }, [sortBy, filterCategory]);
 
   const fetchCollections = async () => {
     try {

@@ -1,7 +1,12 @@
-import { Request, Response } from "express";
+import bcrypt from "bcrypt";
+import { Response } from "express";
+import { Auth_Request } from "../middlewares/auth.middleware";
 import prisma from "../prisma";
 
-export async function list_users(req: Request, res: Response) {
+/**
+ * List all users (Admin only)
+ */
+export async function list_users(req: Auth_Request, res: Response): Promise<void> {
     const users = await prisma.user.findMany({
         orderBy: {
             created_at: 'desc'
@@ -17,4 +22,88 @@ export async function list_users(req: Request, res: Response) {
     });
 
     res.json(users);
+}
+
+/**
+ * Update current user profile
+ */
+export async function update_profile(req: Auth_Request, res: Response): Promise<void> {
+    const { id } = req.user;
+    const {
+        display_name,
+        bio,
+        location,
+        website,
+        social_twitter,
+        social_instagram,
+        social_artstation,
+        social_behance
+    } = req.body;
+
+    const user = await prisma.user.update({
+        where: { id },
+        data: {
+            display_name,
+            bio,
+            location,
+            website,
+            social_twitter,
+            social_instagram,
+            social_artstation,
+            social_behance
+        }
+    });
+
+    res.json(user);
+}
+
+/**
+ * Change user password
+ */
+export async function change_password(req: Auth_Request, res: Response): Promise<void> {
+    const { id } = req.user;
+    const { old_pass, new_pass } = req.body;
+
+    if (!old_pass || !new_pass) {
+        res.status(400).json({ message: "Missing passwords!" });
+        return;
+    }
+
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) {
+        res.status(404).json({ message: "User not found!" });
+        return;
+    }
+
+    const valid = await bcrypt.compare(old_pass, user.password);
+    if (!valid) {
+        res.status(401).json({ message: "Wrong current password!" });
+        return;
+    }
+
+    const hashed = await bcrypt.hash(new_pass, 10);
+    await prisma.user.update({
+        where: { id },
+        data: { password: hashed }
+    });
+
+    res.json({ message: "Password updated successfully!" });
+}
+
+/**
+ * Toggle 2FA status
+ */
+export async function toggle_2fa(req: Auth_Request, res: Response): Promise<void> {
+    const { id } = req.user;
+    const { enabled } = req.body;
+
+    const user = await prisma.user.update({
+        where: { id },
+        data: { two_factor_enabled: !!enabled }
+    });
+
+    res.json({
+        message: enabled ? "2FA enabled!" : "2FA disabled!",
+        two_factor_enabled: user.two_factor_enabled
+    });
 }

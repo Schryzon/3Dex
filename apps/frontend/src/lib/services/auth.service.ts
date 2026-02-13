@@ -16,6 +16,16 @@ export interface User {
     email: string;
     username: string;
     role: string;
+    display_name?: string;
+    bio?: string;
+    avatar_url?: string;
+    location?: string;
+    website?: string;
+    social_twitter?: string;
+    social_instagram?: string;
+    social_artstation?: string;
+    social_behance?: string;
+    two_factor_enabled?: boolean;
 }
 
 export interface AuthResponse {

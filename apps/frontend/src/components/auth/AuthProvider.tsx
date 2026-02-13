@@ -15,6 +15,7 @@ interface AuthContextType {
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
+  setUser: (user: User | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,7 +29,7 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUserState] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
@@ -47,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     if (storedUser && storedToken) {
-      setUser(storedUser);
+      setUserState(storedUser);
       console.log(' User restored from localStorage:', storedUser.username);
     } else {
       console.log(' No stored auth found');
@@ -56,10 +57,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (credentials: LoginCredentials) => {
-    console.log('🔐 Login attempt:', credentials.email);
+    console.log('Login attempt:', credentials.email);
     const { token, user: userData } = await authService.login(credentials);
     authService.storeAuth(token, userData);
-    setUser(userData);
+    setUserState(userData);
     console.log(' Login successful:', userData.username, 'Token stored:', !!token);
   };
 
@@ -71,7 +72,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     authService.logout();
-    setUser(null);
+    setUserState(null);
+  };
+
+  const setUser = (newUser: User | null) => {
+    setUserState(newUser);
+    if (newUser) {
+      localStorage.setItem('user', JSON.stringify(newUser));
+    } else {
+      localStorage.removeItem('user');
+    }
   };
 
   const showLogin = () => {
@@ -99,7 +109,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       hideModals,
       login,
       register,
-      logout
+      logout,
+      setUser
     }}>
       {children}
 

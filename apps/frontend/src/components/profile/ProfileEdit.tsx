@@ -85,9 +85,9 @@ export default function ProfileEditPage({ onNavigate }: ProfileEditPageProps) {
               <a href="#" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
                 <div className="w-5 h-5">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                    <path d="M2 17l10 5 10-5"/>
-                    <path d="M2 12l10 5 10-5"/>
+                    <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                    <path d="M2 17l10 5 10-5" />
+                    <path d="M2 12l10 5 10-5" />
                   </svg>
                 </div>
                 3D Models
@@ -95,9 +95,9 @@ export default function ProfileEditPage({ onNavigate }: ProfileEditPageProps) {
               <a href="#" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
                 <div className="w-5 h-5">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="2" y="3" width="20" height="14" rx="2"/>
-                    <path d="M8 21h8"/>
-                    <path d="M12 17v4"/>
+                    <rect x="2" y="3" width="20" height="14" rx="2" />
+                    <path d="M8 21h8" />
+                    <path d="M12 17v4" />
                   </svg>
                 </div>
                 CG Models
@@ -105,9 +105,9 @@ export default function ProfileEditPage({ onNavigate }: ProfileEditPageProps) {
               <a href="#" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
                 <div className="w-5 h-5">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="3" width="18" height="18" rx="2"/>
-                    <path d="M3 9h18"/>
-                    <path d="M9 21V9"/>
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <path d="M3 9h18" />
+                    <path d="M9 21V9" />
                   </svg>
                 </div>
                 Textures
@@ -117,21 +117,21 @@ export default function ProfileEditPage({ onNavigate }: ProfileEditPageProps) {
           <div className="flex items-center gap-4">
             <button className="p-2 hover:bg-gray-800 rounded-lg transition-colors">
               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="8"/>
-                <path d="M21 21l-4.35-4.35"/>
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" />
               </svg>
             </button>
             <button className="p-2 hover:bg-gray-800 rounded-lg transition-colors">
               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="9" cy="21" r="1"/>
-                <circle cx="20" cy="21" r="1"/>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                <circle cx="9" cy="21" r="1" />
+                <circle cx="20" cy="21" r="1" />
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
               </svg>
             </button>
             <button className="p-2 hover:bg-gray-800 rounded-lg transition-colors">
               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
               </svg>
             </button>
           </div>
@@ -163,11 +163,10 @@ export default function ProfileEditPage({ onNavigate }: ProfileEditPageProps) {
                   <button
                     key={item.id}
                     onClick={() => onNavigate?.(item.id as ProfileSection)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                      item.active
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${item.active
                         ? 'bg-gray-800 text-white'
                         : 'text-gray-400 hover:bg-gray-800/50 hover:text-white'
-                    }`}
+                      }`}
                   >
                     <Icon className="w-5 h-5" />
                     <span className="text-sm">{item.label}</span>

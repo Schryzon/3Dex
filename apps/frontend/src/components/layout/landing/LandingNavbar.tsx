@@ -8,6 +8,7 @@ import ProtectedLink from '@/components/common/ProtectedLink';
 import CategoryMegaMenu from '@/components/common/CategoryMegaMenu';
 import { useState, useCallback, useEffect } from 'react';
 import { useCart } from '@/lib/hooks/useCart';
+import UserAvatar from '@/components/common/UserAvatar';
 
 export default function LandingNavbar() {
   const router = useRouter();
@@ -102,9 +103,9 @@ export default function LandingNavbar() {
       <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-4">
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+          <Link href={isAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-2 flex-shrink-0">
             <div className="w-10 h-10 bg-yellow-400 text-black flex items-center justify-center font-black text-xl rounded">
-              R
+              3D
             </div>
             <span className="text-white font-bold text-xl md:text-2xl">3Dēx</span>
           </Link>
@@ -113,7 +114,7 @@ export default function LandingNavbar() {
           <div className="hidden lg:flex items-center gap-6 mega-menu-container">
             <button
               onClick={() => handleMegaMenuClick('3d-models')}
-              className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
+              className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors cursor-pointer"
             >
               <span className="text-gray-500">○</span>
               <span>3D Models</span>
@@ -121,18 +122,15 @@ export default function LandingNavbar() {
 
             <button
               onClick={() => handleMegaMenuClick('cg-models')}
-              className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
+              className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors cursor-pointer"
             >
               <span className="text-gray-500">○</span>
-              <span>CG Models</span>
-              <span className="px-2 py-0.5 bg-green-500 text-black text-xs font-bold rounded">
-                NEW
-              </span>
+              <span>3D Printer</span>
             </button>
 
             <button
               onClick={() => handleMegaMenuClick('textures')}
-              className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
+              className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors cursor-pointer"
             >
               <span className="text-gray-500">○</span>
               <span>Textures</span>
@@ -149,10 +147,10 @@ export default function LandingNavbar() {
 
           {/* Search Dropdown - Desktop */}
           <div className="hidden md:block">
-            <select className="bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 outline-none focus:border-yellow-400 cursor-pointer text-sm">
+            <select className="bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-500 outline:none focus:border-gray-400 cursor-pointer text-sm">
               <option>3D Models</option>
               <option>Textures</option>
-              <option>CG Models</option>
+              <option>3D Printer</option>
             </select>
           </div>
 
@@ -197,9 +195,6 @@ export default function LandingNavbar() {
                   className="hidden sm:flex relative px-4 md:px-6 py-2 bg-white text-black rounded-full font-semibold hover:bg-gray-100 transition-colors text-sm md:text-base cursor-pointer"
                 >
                   Register
-                  <span className="absolute -top-1 -right-1 px-2 py-0.5 bg-yellow-400 text-black text-xs font-bold rounded">
-                    Freebie
-                  </span>
                 </button>
               </>
             ) : (
@@ -209,9 +204,7 @@ export default function LandingNavbar() {
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors cursor-pointer z-50 relative"
                 >
-                  <div className="w-8 h-8 bg-yellow-400 text-black rounded-full flex items-center justify-center font-bold">
-                    {user?.username?.[0]?.toUpperCase() || 'U'}
-                  </div>
+                  <UserAvatar user={user} size="sm" />
                   <span className="hidden md:block text-white text-sm">{user?.username}</span>
                 </button>
 
@@ -322,7 +315,6 @@ export default function LandingNavbar() {
             >
               <div className="flex items-center gap-2">
                 CG Models
-                <span className="px-2 py-0.5 bg-green-500 text-black text-xs font-bold rounded">NEW</span>
               </div>
             </Link>
 
@@ -337,6 +329,22 @@ export default function LandingNavbar() {
             {/* Collections & Bookmarks - Mobile */}
             {isAuthenticated && (
               <div className="border-t border-gray-800 pt-3 space-y-2">
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <LayoutDashboard className="w-5 h-5 text-yellow-400" />
+                  <span className="text-sm font-semibold">Dashboard</span>
+                </Link>
+                <Link
+                  href="/profile"
+                  className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <UserAvatar user={user} size="sm" className="border-2 border-gray-700" />
+                  <span className="text-sm font-semibold">{user?.username}</span>
+                </Link>
                 <Link
                   href="/collections"
                   className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors"

@@ -16,6 +16,7 @@ datasource db {
 enum Role {
   CUSTOMER
   ARTIST
+  PROVIDER
   ADMIN
 }
 
@@ -33,6 +34,23 @@ model User {
   password String
   role     Role   @default(CUSTOMER)
 
+  // Profile fields
+  display_name String?
+  bio          String?
+  avatar_url   String?
+  location     String?
+  website      String?
+  
+  // Social links (stored as JSON for flexibility or separate fields)
+  social_twitter   String?
+  social_instagram String?
+  social_artstation String?
+  social_behance    String?
+
+  // Security
+  two_factor_enabled Boolean @default(false)
+  last_login_at      DateTime?
+  
   models    Model[]    @relation("artist_models")
   purchases Purchase[]
   reviews   Review[]

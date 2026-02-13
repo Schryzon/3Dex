@@ -2,13 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useCart, CartItem, OrderRecord } from '@/lib/hooks/useCart';
+import { useCart } from '@/lib/hooks/useCart';
 import { api } from '@/lib/api';
 import {
   ShoppingCart,
   ArrowLeft,
-  CreditCard,
-  Building2,
   Trash2,
   CheckCircle,
   Package,
@@ -17,8 +15,13 @@ import {
   Loader2,
   ShieldCheck,
   ChevronRight,
-  ShoppingBag
+  ShoppingBag,
+  CreditCard,
+  Building2
 } from 'lucide-react';
+import { useOrders } from '@/lib/hooks/useOrders';
+import { orderService, paymentService } from '@/lib/api/services';
+import type { CartItem, Order } from '@/lib/types';
 
 declare global {
   interface Window {
@@ -41,7 +44,8 @@ export default function ShoppingCartPage() {
   });
 
   // Use real cart data
-  const { items, removeItem, total, clearCart, completeOrder, orders } = useCart();
+  const { items, removeItem, total, clearCart } = useCart();
+  const { orders } = useOrders();
 
   useEffect(() => {
     setMounted(true);
@@ -65,28 +69,26 @@ export default function ShoppingCartPage() {
   const handleCheckout = async () => {
     if (isCartEmpty) return;
 
-    // Simple validation (can be expanded)
-    // if (!formData.firstName) {
-    //   alert('Please fill in your details.');
-    //   return;
-    // }
-
     setIsProcessing(true);
 
     try {
-      // 1. Initiate Order on Backend
-      const response = await api.post('/orders/checkout', {
-        model_ids: items.map((item: CartItem) => item.id)
+      // 1. Create Order
+      const order = await orderService.createOrder({
+        items: items.map(item => ({
+          modelId: item.modelId,
+          quantity: item.quantity
+        }))
       });
 
-      const { token } = response.data;
+      // 2. Create Payment Token
+      const { token } = await paymentService.createPayment(order.id);
 
-      // 2. Trigger Snap Popup
+      // 3. Trigger Snap Popup
       if (window.snap) {
         window.snap.pay(token, {
           onSuccess: function (result: any) {
             console.log('Payment Success:', result);
-            completeOrder('Midtrans'); // Clear cart and add to local records (backend handles real logic)
+            clearCart();
             setIsSuccess(true);
             setIsProcessing(false);
           },
@@ -128,16 +130,15 @@ export default function ShoppingCartPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between py-6 gap-4">
             <div>
               <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-                <ShoppingBag className="w-8 h-8 text-yellow-400" />
+                <ShoppingBag className="w-8 h-8 text-yellow-500" />
                 Shopping Cart
               </h1>
-              <p className="text-xs text-gray-500 mt-1 uppercase tracking-widest font-bold">Review items and secure checkout</p>
             </div>
 
             <div className="flex bg-gray-900/50 p-1 rounded-xl border border-gray-800 self-start">
               <button
                 onClick={() => setActiveTab('cart')}
-                className={`px-6 py-2 rounded-lg text-sm font-bold transition-all cursor-pointer ${activeTab === 'cart' ? 'bg-yellow-400 text-black shadow-lg' : 'text-gray-400 hover:text-white'
+                className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${activeTab === 'cart' ? 'bg-gray-300 text-black shadow-lg' : 'text-gray-400 hover:text-white'
                   }`}
               >
                 Products ({items.length})
@@ -163,27 +164,27 @@ export default function ShoppingCartPage() {
                 <>
                   <div className="flex items-center justify-between py-2 border-b border-gray-900">
                     <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Selected Assets</span>
-                    <button onClick={clearCart} className="text-[10px] font-bold text-red-400/60 hover:text-red-400 uppercase tracking-widest cursor-pointer">Flush Cart</button>
+                    <button onClick={() => clearCart()} className="text-[10px] font-bold text-red-400/60 hover:text-red-400 uppercase tracking-widest cursor-pointer">Flush Cart</button>
                   </div>
 
                   {items.map((item: CartItem) => {
-                    const price = formatPrice(item.price);
+                    const price = formatPrice(item.model.price);
                     return (
                       <div key={item.id} className="group relative flex gap-6 p-4 rounded-3xl bg-gray-900/20 border border-white/5 hover:border-white/10 transition-all">
                         <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden shrink-0 bg-black border border-white/5">
-                          <img src={item.image} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                          <img src={item.model.thumbnails[0] || '/placeholder.jpg'} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                         </div>
                         <div className="flex-1 flex flex-col justify-between py-1">
                           <div>
                             <div className="flex justify-between items-start">
-                              <h3 className="text-lg sm:text-xl font-bold text-white leading-tight group-hover:text-yellow-400 transition-colors">{item.title}</h3>
+                              <h3 className="text-lg sm:text-xl font-bold text-white leading-tight group-hover:text-yellow-400 transition-colors uppercase">{item.model.title}</h3>
                               <button onClick={() => removeItem(item.id)} className="p-2 text-gray-700 hover:text-red-400 transition-colors cursor-pointer"><Trash2 className="w-4 h-4" /></button>
                             </div>
-                            <p className="text-sm text-gray-500">Artist: <span className="text-gray-300">@{item.author}</span></p>
+                            <p className="text-sm text-gray-500">Artist: <span className="text-gray-300">@{item.model.artist.username}</span></p>
                           </div>
                           <div className="flex items-center justify-between">
                             <div className="flex gap-2">
-                              <span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-[9px] font-bold text-gray-400 uppercase">.GLB</span>
+                              <span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-[9px] font-bold text-gray-400 uppercase">{item.model.fileFormat[0] || 'GLB'}</span>
                               <span className="px-2 py-0.5 bg-yellow-400/10 border border-yellow-400/20 rounded text-[9px] font-bold text-yellow-500 uppercase">License: PRO</span>
                             </div>
                             <div className="text-right">
@@ -296,15 +297,21 @@ export default function ShoppingCartPage() {
                 <p className="text-gray-500 text-sm mt-2">Your purchase history will appear here.</p>
               </div>
             ) : (
-              orders.map((order: OrderRecord) => {
-                const totalFormatted = formatPrice(order.total);
+              orders.map((order: Order) => {
+                const totalFormatted = formatPrice(order.totalAmount);
                 return (
                   <div key={order.id} className="bg-gray-900/20 border border-gray-800 rounded-[32px] overflow-hidden">
                     <div className="p-6 bg-gray-900/40 border-b border-gray-800 flex justify-between items-center">
                       <div>
-                        <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">Invoice #{order.id}</p>
-                        <div className="flex items-center gap-3 text-sm font-bold text-white">
-                          <Calendar className="w-4 h-4 text-gray-500" /> {new Date(order.date).toLocaleDateString()}
+                        <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">Invoice #{order.id.slice(-8).toUpperCase()}</p>
+                        <div className="flex items-center gap-3 text-sm font-bold text-white uppercase tracking-tighter">
+                          <Calendar className="w-4 h-4 text-gray-500" /> {new Date(order.createdAt).toLocaleDateString()}
+                          <span className={`px-2 py-0.5 rounded text-[10px] ${order.status === 'PAID' || order.status === 'COMPLETED' ? 'bg-green-500/10 text-green-400 border border-green-500/20' :
+                            order.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' :
+                              'bg-red-500/10 text-red-400 border border-red-500/20'
+                            }`}>
+                            {order.status}
+                          </span>
                         </div>
                       </div>
                       <div className="text-right">
@@ -313,18 +320,20 @@ export default function ShoppingCartPage() {
                       </div>
                     </div>
                     <div className="p-6 space-y-4">
-                      {order.items.map((item: CartItem) => (
+                      {order.items.map((item) => (
                         <div key={item.id} className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
-                            <img src={item.image} className="w-12 h-12 rounded-lg object-cover bg-black" alt="" />
+                            <img src={item.model.thumbnails[0] || '/placeholder.jpg'} className="w-12 h-12 rounded-lg object-cover bg-black" alt="" />
                             <div>
-                              <p className="font-bold text-white">{item.title}</p>
-                              <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-0.5">@{item.author}</p>
+                              <p className="font-bold text-white uppercase text-sm">{item.model.title}</p>
+                              <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-0.5">@{item.model.artist.username}</p>
                             </div>
                           </div>
-                          <button className="px-5 py-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase rounded-lg hover:bg-blue-500/20 transition-all flex items-center gap-2 cursor-pointer">
-                            <ExternalLink className="w-3 h-3" /> Download Assets
-                          </button>
+                          {(order.status === 'PAID' || order.status === 'COMPLETED') && (
+                            <button className="px-5 py-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase rounded-lg hover:bg-blue-500/20 transition-all flex items-center gap-2 cursor-pointer">
+                              <ExternalLink className="w-3 h-3" /> Download Assets
+                            </button>
+                          )}
                         </div>
                       ))}
                     </div>

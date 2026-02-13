@@ -16,4 +16,4 @@ RUN npm run build
 
 EXPOSE 4000
 
-CMD ["node", "dist/src/app.js"] # Point it to src because I can't make the rootDir "src" due to prisma
+CMD ["node", "dist/src/server.js"] # Point it to src because I can't make the rootDir "src" due to prisma
