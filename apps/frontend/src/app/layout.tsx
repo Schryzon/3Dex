@@ -6,7 +6,7 @@ import { ReactQueryProvider } from '@/components/providers/ReactQueryProvider';
 
 export const metadata: Metadata = {
   title: "3Dēx | 3D Marketplace",
-  description: "The grandest 3D asset collection",
+  description: "3D asset collection",
 };
 
 export default function RootLayout({

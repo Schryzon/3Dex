@@ -115,8 +115,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="h-14 flex items-center justify-between px-4 border-b border-gray-800">
           {isSidebarOpen ? (
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center shrink-0">
-                <span className="text-black font-bold text-sm">3D</span>
+              <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                <img src="/icon.png" alt="3Dex" className="w-full h-full object-contain" />
               </div>
               <span className="text-white font-bold text-lg">3Dēx</span>
             </Link>
@@ -304,8 +304,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <Menu className="w-6 h-6" />
               </button>
               <Link href="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center">
-                  <span className="text-black font-bold text-sm">3D</span>
+                <div className="w-8 h-8 flex items-center justify-center">
+                  <img src="/icon.png" alt="3Dex" className="w-full h-full object-contain" />
                 </div>
               </Link>
             </div>

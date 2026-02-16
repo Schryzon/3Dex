@@ -2,6 +2,7 @@
 
 import { Search, ShoppingCart, Menu } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface AppTopbarProps {
   onMenuClick: () => void;
@@ -22,10 +23,7 @@ export default function AppTopbar({ onMenuClick }: AppTopbarProps) {
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 text-yellow-400 font-bold text-xl">
-          <div className="w-8 h-8 bg-yellow-400 text-black flex items-center justify-center font-black">
-            R
-          </div>
-          3Dēx
+          <Image src="/icon.png" alt="3Dex" width={50} height={50}></Image>
         </Link>
 
         {/* Search Bar */}

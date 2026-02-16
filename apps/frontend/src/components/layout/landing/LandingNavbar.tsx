@@ -9,6 +9,7 @@ import CategoryMegaMenu from '@/components/common/CategoryMegaMenu';
 import { useState, useCallback, useEffect } from 'react';
 import { useCart } from '@/lib/hooks/useCart';
 import UserAvatar from '@/components/common/UserAvatar';
+import Image from 'next/image';
 
 export default function LandingNavbar() {
   const router = useRouter();
@@ -104,8 +105,8 @@ export default function LandingNavbar() {
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
           <Link href={isAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-10 h-10 bg-yellow-400 text-black flex items-center justify-center font-black text-xl rounded">
-              3D
+            <div className="w-10 h-10 text-black flex items-center justify-center">
+              <Image src="/icon.png" alt="3Dex" width={50} height={50}></Image>
             </div>
             <span className="text-white font-bold text-xl md:text-2xl">3Dēx</span>
           </Link>

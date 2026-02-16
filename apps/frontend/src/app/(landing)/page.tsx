@@ -10,14 +10,14 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function LandingPage() {
-  const { isAuthenticated } = useAuth();
+  const isAuthenticated = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.replace('/dashboard');
-    }
-  }, [isAuthenticated, router]);
+  // useEffect(() => {
+  //   if (isAuthenticated) {
+  //     router.replace('/dashboard');
+  //   }
+  // }, [isAuthenticated, router]);
 
   return (
     <>
