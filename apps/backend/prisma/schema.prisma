@@ -28,10 +28,11 @@ enum ModelStatus {
 
 
 model User {
-  id       String @id @default(uuid())
-  email    String @unique
-  username String @unique
-  password String
+  id        String  @id @default(uuid())
+  email     String  @unique
+  username  String  @unique
+  password  String?
+  google_id String? @unique
   role     Role   @default(CUSTOMER)
 
   // Account Status

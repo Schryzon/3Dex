@@ -12,6 +12,11 @@ export const authService = {
         return response.data;
     },
 
+    async googleLogin(credential: string): Promise<AuthResponse> {
+        const response = await api.post<AuthResponse>('/auth/google', { credential });
+        return response.data;
+    },
+
     logout() {
         localStorage.removeItem('auth_token');
         localStorage.removeItem('user');

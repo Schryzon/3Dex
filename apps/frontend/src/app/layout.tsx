@@ -23,6 +23,10 @@ export default function RootLayout({
           </AuthProvider>
         </ReactQueryProvider>
         <Script
+          src="https://accounts.google.com/gsi/client"
+          strategy="afterInteractive"
+        />
+        <Script
           src={process.env.NODE_ENV === 'production'
             ? "https://app.midtrans.com/snap/snap.js"
             : "https://app.sandbox.midtrans.com/snap/snap.js"}

@@ -15,6 +15,7 @@ interface AuthContextType {
   hideModals: () => void;
   login: (credentials: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
+  googleLogin: (credential: string) => Promise<void>;
   logout: () => void;
   setUser: (user: User | null) => void;
   updateUser: (user: User) => void;
@@ -72,6 +73,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await login({ email: data.email, password: data.password });
   };
 
+  const googleLoginHandler = async (credential: string) => {
+    console.log('Google login attempt');
+    const { token, user: userData } = await authService.googleLogin(credential);
+    authService.storeAuth(token, userData);
+    setUserState(userData);
+    console.log(' Google login successful:', userData.username);
+  };
+
   const logout = () => {
     authService.logout();
     setUserState(null);
@@ -111,6 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       hideModals,
       login,
       register,
+      googleLogin: googleLoginHandler,
       logout,
       setUser,
       updateUser: setUser

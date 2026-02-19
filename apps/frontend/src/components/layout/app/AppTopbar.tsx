@@ -3,12 +3,17 @@
 import { Search, ShoppingCart, Menu } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 interface AppTopbarProps {
   onMenuClick: () => void;
 }
 
 export default function AppTopbar({ onMenuClick }: AppTopbarProps) {
+  const { user } = useAuth();
+
+  const userInitial = user?.display_name?.charAt(0) || user?.username?.charAt(0) || 'U';
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#111] border-b border-gray-800">
       <div className="flex items-center gap-4 px-6 py-4">
@@ -52,9 +57,18 @@ export default function AppTopbar({ onMenuClick }: AppTopbarProps) {
 
           {/* User Profile Avatar */}
           <Link href="/profile" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm border-2 border-gray-700">
-              U
-            </div>
+            {user?.avatar_url ? (
+              <img
+                src={user.avatar_url}
+                alt={user.display_name || user.username || 'User'}
+                className="w-9 h-9 rounded-full border-2 border-gray-700 object-cover"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm border-2 border-gray-700">
+                {userInitial.toUpperCase()}
+              </div>
+            )}
           </Link>
         </div>
       </div>
