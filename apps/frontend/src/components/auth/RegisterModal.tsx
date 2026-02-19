@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { X, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import Button from '@/components/common/Button';
@@ -15,6 +16,7 @@ interface RegisterModalProps {
 
 export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModalProps) {
   const { register } = useAuth();
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -46,6 +48,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
         agreeToTerms: false,
         receiveNewsletter: false
       });
+      router.push('/dashboard');
     } catch (err: any) {
       console.error('Registration error:', err);
       // Extract error message from response
@@ -72,28 +75,28 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
       />
 
       {/* Modal */}
-      <div className="relative bg-gray-900 rounded-lg shadow-2xl w-full max-w-md border border-gray-800 max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-gray-900/50 backdrop-blur-md rounded-lg shadow-2xl w-full max-w-md border border-gray-800">
         {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-10"
         >
-          <X className="w-6 h-6" />
+          <X className="cursor-pointer w-6 h-6" />
         </button>
 
         {/* Content */}
-        <div className="p-8">
+        <div className="p-6">
           {/* Header */}
-          <h2 className="text-3xl font-bold text-white mb-2">Register</h2>
-          <p className="text-gray-400 mb-6">
+          <h2 className="text-2xl font-bold text-white mb-1">Register</h2>
+          <p className="text-gray-400 mb-4">
             Already a user?{' '}
-            <button onClick={onSwitchToLogin} className="text-yellow-400 hover:text-yellow-300">
+            <button onClick={onSwitchToLogin} className="text-yellow-400 cursor-pointer hover:text-yellow-300">
               Login
             </button>
           </p>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-3">
             {/* Error Message */}
             {error && (
               <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-lg text-sm">
@@ -146,7 +149,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
                 className="absolute right-3 top-[42px] text-gray-400 hover:text-white"
                 disabled={isLoading}
               >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                {showPassword ? <EyeOff className="w-5 h-5 cursor-pointer" /> : <Eye className="w-5 h-5 cursor-pointer" />}
               </button>
             </div>
 
@@ -158,13 +161,13 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
               fullWidth
               isLoading={isLoading}
               disabled={isLoading}
-              className="bg-yellow-400 hover:bg-yellow-300 text-black"
+              className="bg-yellow-400 hover:bg-yellow-300 text-black font-bold cursor-pointer"
             >
               {isLoading ? 'Registering...' : 'Register'}
             </Button>
 
             {/* Divider */}
-            <div className="relative my-6">
+            <div className="relative my-3">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-700"></div>
               </div>
@@ -177,7 +180,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
             <button
               type="button"
               onClick={handleGoogleSignIn}
-              className="w-full bg-gray-800 hover:bg-gray-700 text-white py-3 rounded-lg transition-colors flex items-center justify-center gap-3 border border-gray-700"
+              className="w-full bg-gray-800 hover:bg-gray-700 text-white py-3 rounded-lg transition-colors flex items-center justify-center gap-3 border border-gray-700 cursor-pointer"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -201,22 +204,22 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
             </button>
 
             {/* Checkboxes */}
-            <div className="space-y-3 pt-2">
+            <div className="space-y-2 pt-1">
               <label className="flex items-start gap-3 cursor-pointer group">
                 <input
                   type="checkbox"
                   checked={formData.agreeToTerms}
                   onChange={(e) => setFormData({ ...formData, agreeToTerms: e.target.checked })}
-                  className="mt-1 w-4 h-4 rounded border-gray-600 bg-gray-800 text-yellow-400 focus:ring-yellow-400"
+                  className="mt-1 w-4 h-4 rounded border-gray-600 bg-gray-800 text-yellow-400 cursor-pointer focus:ring-yellow-400"
                   required
                 />
-                <span className="text-sm text-gray-400 group-hover:text-gray-300">
+                <span className="text-sm text-gray-400">
                   I agree to the{' '}
-                  <Link href="/terms" className="text-white hover:text-yellow-400">
+                  <Link href="/terms" className="text-white hover:text-yellow-400 cursor-pointer ">
                     Terms of Use
                   </Link>{' '}
                   and{' '}
-                  <Link href="/privacy" className="text-white hover:text-yellow-400">
+                  <Link href="/privacy" className="text-white hover:text-yellow-400 cursor-pointer">
                     Privacy Policy
                   </Link>
                 </span>
@@ -227,9 +230,9 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
                   type="checkbox"
                   checked={formData.receiveNewsletter}
                   onChange={(e) => setFormData({ ...formData, receiveNewsletter: e.target.checked })}
-                  className="mt-1 w-4 h-4 rounded border-gray-600 bg-gray-800 text-yellow-400 focus:ring-yellow-400"
+                  className="mt-1 w-4 h-4 rounded border-gray-600 bg-gray-800 text-yellow-400 cursor-pointer focus:ring-yellow-400"
                 />
-                <span className="text-sm text-gray-400 group-hover:text-gray-300">
+                <span className="text-sm text-gray-400 ">
                   Receive tips, news, and community content in newsletter
                 </span>
               </label>

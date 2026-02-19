@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { X, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import Button from '@/components/common/Button';
@@ -15,6 +16,7 @@ interface LoginModalProps {
 
 export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
   const { login } = useAuth();
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -34,6 +36,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
       onClose();
       // Reset form
       setFormData({ email: '', password: '', rememberMe: false });
+      router.push('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
     } finally {
@@ -56,28 +59,28 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
       />
 
       {/* Modal */}
-      <div className="relative bg-gray-900 rounded-lg shadow-2xl w-full max-w-md border border-gray-800">
+      <div className="relative bg-gray-900/50 backdrop-blur-md rounded-lg shadow-2xl w-full max-w-md border border-gray-800">
         {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
         >
-          <X className="w-6 h-6" />
+          <X className="cursor-pointer w-6 h-6" />
         </button>
 
         {/* Content */}
-        <div className="p-8">
+        <div className="p-6">
           {/* Header */}
-          <h2 className="text-3xl font-bold text-white mb-2">Login</h2>
-          <p className="text-gray-400 mb-6">
+          <h2 className="text-2xl font-bold text-white mb-1">Login</h2>
+          <p className="text-gray-400 mb-4">
             New to 3Dēx?{' '}
-            <button onClick={onSwitchToRegister} className="text-yellow-400 hover:text-yellow-300">
+            <button onClick={onSwitchToRegister} className="text-yellow-400 cursor-pointer hover:text-yellow-300">
               Register
             </button>
           </p>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-3">
             {/* Error Message */}
             {error && (
               <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-lg text-sm">
@@ -112,7 +115,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-[42px] text-gray-400 hover:text-white"
+                className="absolute right-3 top-[26px] bottom-0 my-auto h-fit text-gray-400 hover:text-white cursor-pointer"
                 disabled={isLoading}
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -126,7 +129,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
                   type="checkbox"
                   checked={formData.rememberMe}
                   onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })}
-                  className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-yellow-400 focus:ring-yellow-400"
+                  className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-yellow-400 cursor-pointer focus:ring-yellow-400"
                 />
                 <span className="text-sm text-gray-400 group-hover:text-gray-300">
                   Remember me
@@ -146,7 +149,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
               fullWidth
               isLoading={isLoading}
               disabled={isLoading}
-              className="bg-yellow-400 hover:bg-yellow-300 text-black"
+              className="bg-yellow-400 hover:bg-yellow-300 text-black font-bold cursor-pointer"
             >
               {isLoading ? 'Logging in...' : 'Login'}
             </Button>
@@ -165,7 +168,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
             <button
               type="button"
               onClick={handleGoogleSignIn}
-              className="w-full bg-gray-800 hover:bg-gray-700 text-white py-3 rounded-lg transition-colors flex items-center justify-center gap-3 border border-gray-700"
+              className="w-full bg-gray-800 hover:bg-gray-700 text-white py-3 rounded-lg transition-colors flex items-center justify-center gap-3 border border-gray-700 cursor-pointer"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path

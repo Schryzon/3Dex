@@ -82,12 +82,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   const { items } = useCart();
-  const { user, isAuthenticated: isLoggedIn, logout, showLogin, showRegister } = useAuth();
+  const { user, isAuthenticated: isLoggedIn, isLoading: isAuthLoading, logout, showLogin, showRegister } = useAuth();
 
   const handleLogout = () => {
     logout();
-    router.push('/');
+    router.replace('/');
   };
+
+  // Auth guard: redirect unauthenticated users to landing page
+  useEffect(() => {
+    if (!isAuthLoading && !isLoggedIn) {
+      router.replace('/');
+    }
+  }, [isAuthLoading, isLoggedIn, router]);
 
   useEffect(() => {
     setMounted(true);
