@@ -3,7 +3,9 @@ import {
     list_users,
     update_profile,
     change_password,
-    toggle_2fa
+    toggle_2fa,
+    apply_for_role,
+    get_public_profile
 } from "../controllers/user.controller";
 import { require_auth } from "../middlewares/auth.middleware";
 import { require_admin } from "../middlewares/role.middleware";
@@ -69,5 +71,33 @@ router.post("/security/password", require_auth, change_password);
  *         description: 2FA status updated
  */
 router.post("/security/2fa", require_auth, toggle_2fa);
+
+/**
+ * @openapi
+ * /users/apply-role:
+ *   post:
+ *     summary: Apply for Artist or Provider role
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Application submitted
+ */
+router.post("/apply-role", require_auth, apply_for_role);
+
+/**
+ * @openapi
+ * /users/{username}:
+ *   get:
+ *     summary: Get public profile
+ *     tags:
+ *       - Users
+ *     responses:
+ *       200:
+ *         description: User profile
+ */
+router.get("/:username", get_public_profile);
 
 export default router;

@@ -42,40 +42,14 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import UserAvatar from '@/components/common/UserAvatar';
 import ProfileSidebar from '@/components/profile/ProfileSidebar';
+import ServiceTab from '@/components/profile/ServiceTab';
+import JobsTab from '@/components/profile/JobsTab';
 import { useProducts } from '@/lib/hooks/useProducts';
+import { api } from '@/lib/api';
+
+import ModelGrid from '@/components/model/ModelGrid';
 
 function UploadsTab({ userId }: { userId?: string }) {
-    const { data, isLoading } = useProducts({ artistId: userId });
-    const router = useRouter(); // Need to import useRouter if not available in scope, but it is imported below?
-    // Wait, UploadsTab is outside ProfilePage? 
-    // Yes.
-    // useRouter needs to be imported. It is imported in ProfilePage file.
-
-    if (isLoading) {
-        return (
-            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-white">My Assets</h3>
-                    <Link href="/upload" className="flex items-center gap-2 px-4 py-2 bg-yellow-400 hover:bg-yellow-300 text-black font-bold rounded-lg transition-all">
-                        <Upload className="w-4 h-4" />
-                        Upload New
-                    </Link>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[1, 2, 3].map((i) => (
-                        <div key={i} className="bg-gray-900/40 border border-gray-800 rounded-2xl overflow-hidden group">
-                            <div className="aspect-square bg-gray-800 relative animate-pulse" />
-                            <div className="p-4">
-                                <div className="h-4 bg-gray-800 rounded w-3/4 mb-2 animate-pulse" />
-                                <div className="h-3 bg-gray-800 rounded w-1/2 animate-pulse" />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
             <div className="flex items-center justify-between">
@@ -85,49 +59,7 @@ function UploadsTab({ userId }: { userId?: string }) {
                     Upload New
                 </Link>
             </div>
-
-            {data?.data.length === 0 ? (
-                <div className="text-center py-20 bg-gray-900/20 rounded-2xl border border-gray-800 border-dashed">
-                    <Box className="w-16 h-16 text-gray-700 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-white mb-2">No uploads yet</h3>
-                    <p className="text-gray-400 mb-8 max-w-sm mx-auto">Upload your first 3D model to start selling.</p>
-                    <Link href="/upload" className="inline-flex items-center gap-2 px-6 py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-all">
-                        Upload Asset
-                    </Link>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {data?.data.map((model) => (
-                        <Link href={`/catalog/${model.id}`} key={model.id} className="bg-gray-900/40 border border-gray-800 rounded-2xl overflow-hidden group hover:border-yellow-400/50 transition-all">
-                            <div className="aspect-square bg-gray-800 relative">
-                                {model.thumbnails[0] ? (
-                                    <img src={model.thumbnails[0]} alt={model.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-gray-800 text-gray-600">
-                                        <Box className="w-12 h-12" />
-                                    </div>
-                                )}
-                                <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-xs font-bold text-white">
-                                    {model.price === 0 ? 'Free' : `$${model.price}`}
-                                </div>
-                                <div className={`absolute top-2 left-2 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${model.status === 'APPROVED' ? 'bg-green-500/20 text-green-400 border border-green-500/20' :
-                                    model.status === 'PENDING' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/20' :
-                                        'bg-red-500/20 text-red-400 border border-red-500/20'
-                                    }`}>
-                                    {model.status}
-                                </div>
-                            </div>
-                            <div className="p-4">
-                                <h4 className="font-bold text-white mb-1 truncate">{model.title}</h4>
-                                <div className="flex items-center justify-between text-xs text-gray-400">
-                                    <span>{model.category}</span>
-                                    <span>{new Date(model.createdAt).toLocaleDateString()}</span>
-                                </div>
-                            </div>
-                        </Link>
-                    ))}
-                </div>
-            )}
+            <ModelGrid artistId={userId} showUpload={true} />
         </div>
     );
 }
@@ -136,19 +68,18 @@ function UploadsTab({ userId }: { userId?: string }) {
 type TabType = 'profile' | 'settings' | 'security' | 'collections' | 'bookmarks' | 'notifications' | 'uploads' | 'analytics' | 'billing' | 'shipping' | 'service' | 'jobs' | 'workshop';
 
 export default function ProfilePage() {
-    const { user } = useAuth();
+    const { user, setUser } = useAuth();
     const searchParams = useSearchParams();
     const [upgrading, setUpgrading] = useState(false);
     const [upgradeStatus, setUpgradeStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [activeTab, setActiveTab] = useState<TabType>('profile');
 
-    // Profile edit form state
     const [formData, setFormData] = useState({
         username: user?.username || '',
         email: user?.email || '',
-        displayName: '',
-        bio: '',
-        location: '',
+        displayName: user?.display_name || '',
+        bio: user?.bio || '',
+        location: user?.location || '',
         address1: '',
         address2: '',
         address3: '',
@@ -158,7 +89,7 @@ export default function ProfilePage() {
         detailedAddress: '',
         courierPreference: 'JNE',
         ecoPackaging: true,
-        website: '',
+        website: user?.website || '',
         skills: [] as string[],
         socialLinks: {
             twitter: user?.social_twitter || '',
@@ -191,10 +122,28 @@ export default function ProfilePage() {
     const handleSaveSettings = async () => {
         setIsSaving(true);
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log('Settings saved:', formData);
+            const payload = {
+                username: formData.username,
+                display_name: formData.displayName,
+                bio: formData.bio,
+                location: formData.location,
+                // Simplify social links flattened
+                social_twitter: formData.socialLinks.twitter,
+                social_instagram: formData.socialLinks.instagram,
+                social_artstation: formData.socialLinks.artstation,
+                social_behance: formData.socialLinks.behance,
+                // Check if backend supports addresses update here or separate
+                // Addresses might be separate endpoint usually, but let's assume separate or ignore for now if complex.
+                // For this MVP, let's focus on basic profile.
+                // two_factor_enabled might be separate too.
+            };
+
+            const res = await api.patch('/users/profile', payload);
+            setUser(res.data);
+            alert('Settings saved successfully');
         } catch (error) {
             console.error('Failed to save settings:', error);
+            alert('Failed to save settings');
         } finally {
             setIsSaving(false);
         }
@@ -212,10 +161,26 @@ export default function ProfilePage() {
         setUpgradeStatus('idle');
 
         try {
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            await api.post('/users/apply-role', { role: 'ARTIST' });
+            // Refresh user or show success
             setUpgradeStatus('success');
+            alert('Application submitted!');
         } catch (error) {
             setUpgradeStatus('error');
+            alert('Application failed');
+        } finally {
+            setUpgrading(false);
+        }
+    };
+
+    const handleUpgradeToProvider = async () => {
+        if (!confirm('Apply to become a printing provider?')) return;
+        setUpgrading(true);
+        try {
+            await api.post('/users/apply-role', { role: 'PROVIDER' });
+            alert('Application submitted!');
+        } catch (error) {
+            alert('Application failed');
         } finally {
             setUpgrading(false);
         }
@@ -243,14 +208,24 @@ export default function ProfilePage() {
                         <div className="mb-8 flex items-center justify-between">
                             <h2 className="text-3xl font-bold text-white capitalize">{activeTab}</h2>
                             {activeTab === 'profile' && user?.role === 'CUSTOMER' && (
-                                <button
-                                    onClick={handleUpgradeToArtist}
-                                    disabled={upgrading}
-                                    className="flex items-center gap-2 px-4 py-2 bg-yellow-400 hover:bg-yellow-300 text-black font-semibold rounded-lg transition-all"
-                                >
-                                    <Sparkles className="w-4 h-4" />
-                                    {upgrading ? 'Upgrading..' : 'Upgrade to Artist'}
-                                </button>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={handleUpgradeToArtist}
+                                        disabled={upgrading}
+                                        className="flex items-center gap-2 px-4 py-2 bg-yellow-400 hover:bg-yellow-300 text-black font-semibold rounded-lg transition-all disabled:opacity-50"
+                                    >
+                                        <Sparkles className="w-4 h-4" />
+                                        Artist
+                                    </button>
+                                    <button
+                                        onClick={handleUpgradeToProvider}
+                                        disabled={upgrading}
+                                        className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-black font-semibold rounded-lg transition-all disabled:opacity-50"
+                                    >
+                                        <Printer className="w-4 h-4" />
+                                        Provider
+                                    </button>
+                                </div>
                             )}
                         </div>
 
@@ -539,31 +514,14 @@ export default function ProfilePage() {
                         )}
 
                         {activeTab === 'service' && (
-                            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                <div className="bg-gray-900/40 rounded-2xl border border-gray-800 p-8 flex flex-col items-center text-center">
-                                    <Printer className="w-16 h-16 text-yellow-400 mb-4" />
-                                    <h3 className="text-xl font-bold text-white mb-2">My Printing Service</h3>
-                                    <p className="text-gray-400 max-w-sm mb-8">Manage your available materials, colors, and pricing for 3D printing jobs.</p>
-                                    <button className="px-8 py-3 bg-yellow-400 text-black font-bold rounded-xl hover:bg-yellow-300 transition-all">
-                                        Configure Service
-                                    </button>
-                                </div>
+                            <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                <ServiceTab />
                             </div>
                         )}
 
                         {activeTab === 'jobs' && (
-                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="text-xl font-bold text-white">Active Print Jobs</h3>
-                                    <div className="flex gap-2">
-                                        <span className="px-3 py-1 bg-yellow-400/10 text-yellow-400 text-xs font-bold rounded-full border border-yellow-400/20">2 Pending</span>
-                                        <span className="px-3 py-1 bg-blue-400/10 text-blue-400 text-xs font-bold rounded-full border border-blue-400/20">5 In Progress</span>
-                                    </div>
-                                </div>
-                                <div className="bg-gray-900/40 rounded-2xl border border-gray-800 p-12 text-center">
-                                    <Box className="w-12 h-12 text-gray-700 mx-auto mb-4" />
-                                    <p className="text-gray-500">No active print jobs at the moment.</p>
-                                </div>
+                            <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                <JobsTab />
                             </div>
                         )}
 

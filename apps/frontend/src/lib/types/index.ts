@@ -1,10 +1,49 @@
+export interface Address {
+    label: string;
+    city: string;
+    region: string;
+    country: string;
+    details: string;
+    postalCode?: string;
+}
+
+export interface ProviderConfig {
+    materials: string[];
+    colors: string[];
+    printerTypes: string[];
+    basePrice?: number;
+    maxDimensions?: { x: number; y: number; z: number };
+}
+
+export interface PortfolioItem {
+    url: string;
+    description?: string;
+    title?: string;
+}
+
 export interface User {
     id: string;
     email: string;
     username: string;
-    role: 'CUSTOMER' | 'ARTIST' | 'PRINTER' | 'ADMIN';
+    display_name?: string;
+    bio?: string;
+    website?: string;
+    location?: string;
+    role: 'CUSTOMER' | 'ARTIST' | 'PROVIDER' | 'ADMIN';
+    avatar_url?: string;
     avatar?: string;
-    createdAt: string;
+    created_at: string;
+    account_status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    addresses: Address[];
+    provider_config?: ProviderConfig;
+    portfolio?: PortfolioItem[];
+    rating: number;
+    review_count: number;
+    social_twitter?: string;
+    social_instagram?: string;
+    social_artstation?: string;
+    social_behance?: string;
+    two_factor_enabled?: boolean;
 }
 
 export interface Model {
@@ -13,94 +52,154 @@ export interface Model {
     description: string;
     price: number;
     thumbnails: string[];
-    modelFileUrl: string;
-    fileFormat: string[];
-    polyCount?: number;
+    model_file_url: string;
+    file_format: string[];
+    poly_count?: number;
     category: string;
     tags: string[];
-    isPrintable: boolean;
+    is_printable: boolean;
     status: 'PENDING' | 'APPROVED' | 'REJECTED';
-    artistId: string;
+    artist_id: string;
     artist: {
         id: string;
         username: string;
-        avatar?: string;
+        avatar_url?: string;
     };
-    createdAt: string;
-    updatedAt: string;
+    created_at: string;
+    updated_at: string;
     rating?: number;
-    reviewCount?: number;
+    review_count?: number;
 }
 
 export interface Review {
     id: string;
     rating: number;
     comment: string;
-    userId: string;
+    user_id: string;
     user: {
         username: string;
-        avatar?: string;
+        avatar_url?: string;
     };
-    modelId: string;
-    createdAt: string;
+    model_id: string;
+    created_at: string;
 }
 
-export interface Order {
+export interface UserReview {
     id: string;
-    userId: string;
-    items: OrderItem[];
-    totalAmount: number;
-    status: 'PENDING' | 'PAID' | 'PROCESSING' | 'COMPLETED' | 'CANCELLED';
-    paymentMethod?: string;
-    shippingAddress?: string;
-    createdAt: string;
-    updatedAt: string;
+    rating: number;
+    comment: string;
+    reviewer_id: string;
+    reviewer: {
+        id: string;
+        username: string;
+        avatar_url?: string;
+    };
+    target_user_id: string;
+    created_at: string;
+}
+
+export interface Post {
+    id: string;
+    user_id: string;
+    user?: {
+        id: string;
+        username: string;
+        avatar_url?: string;
+    };
+    caption?: string;
+    media_urls: string[];
+    like_count: number;
+    comment_count: number;
+    created_at: string;
+    liked_by_me?: boolean;
+}
+
+export interface PostComment {
+    id: string;
+    post_id: string;
+    user_id: string;
+    user: {
+        id: string;
+        username: string;
+        avatar_url?: string;
+    };
+    content: string;
+    created_at: string;
+}
+
+export interface PrintConfig {
+    material: string;
+    color: string;
+    scale: number;
+    infill?: number;
+    layerHeight?: number;
 }
 
 export interface OrderItem {
     id: string;
-    modelId: string;
-    model: Model;
+    model_id: string;
+    model?: Model;
     quantity: number;
     price: number;
+    print_config?: PrintConfig;
+    print_status?: 'PENDING' | 'ACCEPTED' | 'PRINTING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+}
+
+export interface Order {
+    id: string;
+    user_id: string;
+    provider_id?: string;
+    provider?: User;
+    items: OrderItem[];
+    total_amount: number;
+    status: 'PENDING' | 'PAID' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+    type: 'PURCHASE' | 'PRINT_JOB';
+    payment_method?: string;
+    shipping_address?: Address;
+    courier_name?: string;
+    tracking_number?: string;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface Purchase {
     id: string;
-    userId: string;
-    modelId: string;
+    user_id: string;
+    model_id: string;
     model: Model;
     amount: number;
-    downloadCount: number;
-    maxDownloads: number;
-    expiresAt: string;
-    createdAt: string;
+    download_count: number;
+    max_downloads: number;
+    expires_at: string;
+    created_at: string;
 }
 
 export interface WishlistItem {
     id: string;
-    userId: string;
-    modelId: string;
+    user_id: string;
+    model_id: string;
     model: Model;
-    createdAt: string;
+    created_at: string;
 }
 
 export interface CartItem {
     id: string;
-    modelId: string;
+    model_id: string;
     model: Model;
     quantity: number;
+    print_config?: PrintConfig;
+    type?: 'DIGITAL' | 'PRINT';
 }
 
 export interface ApiResponse<T> {
     data: T;
     message?: string;
-    success: boolean;
+    status?: string;
 }
 
 export interface PaginatedResponse<T> {
     data: T[];
-    pagination: {
+    pagination?: {
         page: number;
         limit: number;
         total: number;
@@ -114,26 +213,22 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
-    email: string;
     username: string;
+    email: string;
     password: string;
-    role?: 'CUSTOMER' | 'ARTIST';
+    role?: 'CUSTOMER' | 'ARTIST' | 'PROVIDER';
 }
 
 export interface AuthResponse {
-    user: User;
     token: string;
+    user: User;
 }
 
-export interface ModelFilters {
-    search?: string;
-    category?: string;
-    minPrice?: number;
-    maxPrice?: number;
-    format?: string[];
-    isPrintable?: boolean;
-    sort?: 'price_asc' | 'price_desc' | 'newest' | 'oldest' | 'popular';
-    artistId?: string;
+export interface ProviderFilters {
+    city?: string;
+    country?: string;
+    material?: string;
+    sort?: string;
     page?: number;
     limit?: number;
 }

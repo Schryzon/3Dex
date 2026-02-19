@@ -3,7 +3,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import LoginModal from './LoginModal';
 import RegisterModal from './RegisterModal';
-import { authService, User, LoginCredentials, RegisterData } from '@/lib/services/auth.service';
+import { authService } from '@/lib/services/auth.service';
+import { User, LoginRequest, RegisterRequest } from '@/lib/types';
 
 interface AuthContextType {
   user: User | null;
@@ -12,10 +13,11 @@ interface AuthContextType {
   showLogin: () => void;
   showRegister: () => void;
   hideModals: () => void;
-  login: (credentials: LoginCredentials) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
+  login: (credentials: LoginRequest) => Promise<void>;
+  register: (data: RegisterRequest) => Promise<void>;
   logout: () => void;
   setUser: (user: User | null) => void;
+  updateUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -56,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const login = async (credentials: LoginCredentials) => {
+  const login = async (credentials: LoginRequest) => {
     console.log('Login attempt:', credentials.email);
     const { token, user: userData } = await authService.login(credentials);
     authService.storeAuth(token, userData);
@@ -64,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     console.log(' Login successful:', userData.username, 'Token stored:', !!token);
   };
 
-  const register = async (data: RegisterData) => {
+  const register = async (data: RegisterRequest) => {
     await authService.register(data);
     // After registration, auto-login
     await login({ email: data.email, password: data.password });
@@ -110,7 +112,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login,
       register,
       logout,
-      setUser
+      setUser,
+      updateUser: setUser
     }}>
       {children}
 

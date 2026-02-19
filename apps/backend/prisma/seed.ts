@@ -6,12 +6,17 @@ import { Pool } from "pg";
 
 fs.writeFileSync('seed_debug.log', 'Seed script started\n');
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+// Force 127.0.0.1 to avoid Windows IPv6 localhost issues
+const connectionString = process.env.DATABASE_URL?.replace('localhost', '127.0.0.1');
+
+const pool = new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
     console.log('🌱 Starting seed...')
+    console.log('DB URL (Effective):', connectionString ? connectionString.replace(/:[^:]*@/, ':****@') : 'UNDEFINED');
+
     const p = prisma as any;
 
     // 1. Create Artist
@@ -138,19 +143,99 @@ async function main() {
 
     console.log(`✅ Created ${models.length} models`)
 
-    // 4. Create Customer (for login testing)
-    const customerEmail = 'meow@a.com'
+    // 4. Create Provider
+    const providerEmail = 'provider@3dex.com'
+    const provider = await p.user.upsert({
+        where: { email: providerEmail },
+        update: {},
+        create: {
+            email: providerEmail,
+            username: '3DexProvider',
+            display_name: 'Pro Prints',
+            password: 'password123',
+            role: 'PROVIDER',
+            provider_config: {
+                materials: ['PLA', 'ABS', 'Resin'],
+                colors: ['Black', 'White', 'Grey', 'Red', 'Blue'],
+                printerTypes: ['FDM', 'SLA'],
+                basePrice: 50000,
+                maxDimensions: { x: 300, y: 300, z: 400 }
+            }
+        },
+    })
+    console.log(`👤 Created provider: ${provider.username}`)
+
+    // 5. Create Customer
+    const customerEmail = 'customer@3dex.com'
     const customer = await p.user.upsert({
         where: { email: customerEmail },
         update: {},
         create: {
             email: customerEmail,
-            username: 'MeowCustomer',
-            password: 'meowfish',
-            role: 'ARTIST',
+            username: '3DexFan',
+            display_name: 'Fan Boy',
+            password: 'password123',
+            role: 'CUSTOMER',
         },
     })
     console.log(`👤 Created customer: ${customer.username}`)
+
+    // 6. Create Social Posts
+    // Artist Posts
+    await p.post.create({
+        data: {
+            user_id: artist.id,
+            caption: 'Working on a new mech design! 🤖 #3dmodeling #scifi',
+            media_urls: ['https://picsum.photos/600/400?random=10'],
+            created_at: new Date(Date.now() - 86400000), // yesterday
+        }
+    });
+
+    await p.post.create({
+        data: {
+            user_id: artist.id,
+            caption: 'Just released the Low Poly Tree pack! Check it out in the store. 🌲',
+            media_urls: ['https://picsum.photos/600/400?random=11'],
+        }
+    });
+
+    // Provider Posts
+    const provPost = await p.post.create({
+        data: {
+            user_id: provider.id,
+            caption: 'New Resin printer arrived! Accepting high-detail orders now. 🖨️✨',
+            media_urls: ['https://picsum.photos/600/400?random=12'],
+        }
+    });
+
+    // 7. Interactions
+    // Customer likes provider post
+    await p.post_Like.create({
+        data: {
+            user_id: customer.id,
+            post_id: provPost.id
+        }
+    });
+    // Update count manually since seed doesn't run controller logic
+    await p.post.update({
+        where: { id: provPost.id },
+        data: { like_count: 1 }
+    });
+
+    // Customer comments
+    await p.post_Comment.create({
+        data: {
+            user_id: customer.id,
+            post_id: provPost.id,
+            content: 'Awesome! I might order some minis soon.'
+        }
+    });
+    await p.post.update({
+        where: { id: provPost.id },
+        data: { comment_count: 1 }
+    });
+
+    console.log('💬 Created social interactions')
 
     console.log('✅ Seed complete!')
 }

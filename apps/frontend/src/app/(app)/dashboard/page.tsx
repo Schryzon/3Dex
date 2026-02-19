@@ -1,11 +1,23 @@
 'use client';
 
 import { useAuth } from '@/components/auth/AuthProvider';
-import { Sparkles, Package, Download, Heart, ArrowRight, LayoutDashboard, Clock, Star } from 'lucide-react';
+import { api } from '@/lib/api';
+import { useQuery } from '@tanstack/react-query';
+import { Sparkles, Package, Download, Heart, ArrowRight, LayoutDashboard, Clock, Star, Users, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 
 export default function DashboardPage() {
     const { user } = useAuth();
+    const isCreator = user?.role === 'ARTIST' || user?.role === 'PROVIDER';
+
+    const { data: engagementStats, isLoading: isLoadingStats } = useQuery({
+        queryKey: ['dashboard-stats'],
+        queryFn: async () => {
+            const res = await api.get('/posts/stats');
+            return res.data;
+        },
+        enabled: isCreator
+    });
 
     const stats = [
         { label: 'Total Downloads', value: '0', icon: Download, color: 'text-blue-400', bg: 'bg-blue-400/10' },
@@ -28,6 +40,58 @@ export default function DashboardPage() {
                     Explore Catalog <ArrowRight className="w-4 h-4" />
                 </Link>
             </div>
+
+            {/* Creator Engagement Stats */}
+            {isCreator && engagementStats && (
+                <div className="bg-[#141414] border border-gray-800 p-6 rounded-2xl relative overflow-hidden">
+                    {/* Background Glow */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 blur-[100px] pointer-events-none" />
+
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-purple-500/10 rounded-lg">
+                                <Users className="w-5 h-5 text-purple-400" />
+                            </div>
+                            <h2 className="text-lg font-bold text-white">Community Engagement</h2>
+                        </div>
+                        <Link href="/community" className="text-sm text-gray-500 hover:text-white transition-colors flex items-center gap-1">
+                            Go to Feed <ArrowRight className="w-3 h-3" />
+                        </Link>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Month Stats */}
+                        <div className="bg-black/20 rounded-xl p-4 border border-gray-800/50">
+                            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-3">Past 30 Days</p>
+                            <div className="flex gap-6">
+                                <div className="flex items-center gap-2">
+                                    <Heart className="w-4 h-4 text-red-400" />
+                                    <span className="text-xl font-bold text-white">{engagementStats.month.likes}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <MessageSquare className="w-4 h-4 text-blue-400" />
+                                    <span className="text-xl font-bold text-white">{engagementStats.month.comments}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Year Stats */}
+                        <div className="bg-black/20 rounded-xl p-4 border border-gray-800/50">
+                            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-3">Past Year</p>
+                            <div className="flex gap-6">
+                                <div className="flex items-center gap-2">
+                                    <Heart className="w-4 h-4 text-gray-400" />
+                                    <span className="text-xl font-bold text-white">{engagementStats.year.likes}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <MessageSquare className="w-4 h-4 text-gray-400" />
+                                    <span className="text-xl font-bold text-white">{engagementStats.year.comments}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -1,45 +1,13 @@
 import { api } from '../api';
-
-export interface LoginCredentials {
-    email: string;
-    password: string;
-}
-
-export interface RegisterData {
-    email: string;
-    username: string;
-    password: string;
-}
-
-export interface User {
-    id: string;
-    email: string;
-    username: string;
-    role: string;
-    display_name?: string;
-    bio?: string;
-    avatar_url?: string;
-    location?: string;
-    website?: string;
-    social_twitter?: string;
-    social_instagram?: string;
-    social_artstation?: string;
-    social_behance?: string;
-    two_factor_enabled?: boolean;
-}
-
-export interface AuthResponse {
-    token: string;
-    user: User;
-}
+import { User, LoginRequest, RegisterRequest, AuthResponse } from '@/lib/types';
 
 export const authService = {
-    async login(credentials: LoginCredentials): Promise<AuthResponse> {
+    async login(credentials: LoginRequest): Promise<AuthResponse> {
         const response = await api.post<AuthResponse>('/auth/login', credentials);
         return response.data;
     },
 
-    async register(data: RegisterData): Promise<{ id: string; email: string }> {
+    async register(data: RegisterRequest): Promise<{ id: string; email: string }> {
         const response = await api.post('/auth/register', data);
         return response.data;
     },

@@ -41,6 +41,7 @@ const SIDEBAR_MENU = [
   { id: 'home', label: 'Home', icon: Home, href: '/' },
   { id: 'browse', label: 'Catalog', icon: Grid3x3, href: '/catalog' },
   { id: 'print', label: 'Print Services', icon: Boxes, href: '/print-services' },
+  { id: 'community', label: 'Community', icon: Users, href: '/community' },
 ];
 
 const SIDEBAR_MY_STUFF = [

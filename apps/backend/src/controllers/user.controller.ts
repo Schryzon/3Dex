@@ -37,8 +37,13 @@ export async function update_profile(req: Auth_Request, res: Response): Promise<
         social_twitter,
         social_instagram,
         social_artstation,
-        social_behance
+        social_behance,
+        addresses, // Json[]
+        provider_config, // Json
+        avatar_url
     } = req.body;
+
+    // Validate addresses if provided? (Basic structure check logic could be here)
 
     const user = await prisma.user.update({
         where: { id },
@@ -50,9 +55,86 @@ export async function update_profile(req: Auth_Request, res: Response): Promise<
             social_twitter,
             social_instagram,
             social_artstation,
-            social_behance
+            social_behance,
+            addresses: addresses ? addresses : undefined,
+            provider_config: provider_config ? provider_config : undefined,
+            avatar_url
         }
     });
+
+    res.json(user);
+}
+
+/**
+ * Apply for Artist or Provider role
+ */
+export async function apply_for_role(req: Auth_Request, res: Response): Promise<void> {
+    const { id } = req.user;
+    const { role, portfolio } = req.body; // role: 'ARTIST' | 'PROVIDER'
+
+    if (!['ARTIST', 'PROVIDER'].includes(role)) {
+        res.status(400).json({ message: "Invalid role! Must be ARTIST or PROVIDER." });
+        return;
+    }
+
+    if (role === 'ARTIST' && (!portfolio || !Array.isArray(portfolio) || portfolio.length === 0)) {
+        res.status(400).json({ message: "Portfolio is required for Artist application!" });
+        return;
+    }
+
+    // Update user to the requested role but set status to PENDING
+    const user = await prisma.user.update({
+        where: { id },
+        data: {
+            role: role,
+            account_status: 'PENDING',
+            portfolio: portfolio,
+            status_history: {
+                push: {
+                    status: 'PENDING',
+                    timestamp: new Date().toISOString(),
+                    reason: 'User applied for role'
+                }
+            }
+        }
+    });
+
+    res.json({ message: "Application submitted successfully!", user });
+}
+
+/**
+ * Get Public Profile
+ */
+export async function get_public_profile(req: Auth_Request, res: Response): Promise<void> {
+    const username = req.params.username as string;
+
+    const user = await prisma.user.findUnique({
+        where: { username },
+        select: {
+            id: true,
+            username: true,
+            display_name: true,
+            avatar_url: true,
+            bio: true,
+            role: true,
+            account_status: true,
+            location: true,
+            website: true,
+            social_twitter: true,
+            social_instagram: true,
+            social_artstation: true,
+            provider_config: true,
+            rating: true,
+            review_count: true,
+            created_at: true,
+            portfolio: true // Public portfolio
+        }
+    });
+
+    if (!user) {
+        res.status(404).json({ message: "User not found!" });
+        return;
+    }
 
     res.json(user);
 }
