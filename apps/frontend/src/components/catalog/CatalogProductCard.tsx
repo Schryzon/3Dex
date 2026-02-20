@@ -54,8 +54,8 @@ export default function CatalogProductCard({
     const [isHovered, setIsHovered] = useState(false);
     const [imageLoaded, setImageLoaded] = useState(false);
 
-    const { addItem, items } = useCart();
-    const isInCart = items.some(item => item.id === id);
+    const { addToCart, items } = useCart();
+    const isInCart = items.some(item => item.model_id === id);
 
     const displayPrice = isFree ? 'Free' : price ? `$${price.toFixed(0)}` : null;
     const hasDiscount = discount && originalPrice;
@@ -229,7 +229,7 @@ export default function CatalogProductCard({
                                     e.preventDefault();
                                     e.stopPropagation();
                                     if (!isInCart) {
-                                        addItem({ id, title, price: price || 0, image, author: author || 'Unknown' });
+                                        addToCart({ modelId: id });
                                     }
                                 }}
                                 className={`p-2 cursor-pointer rounded-lg backdrop-blur-md transition-all ${isInCart

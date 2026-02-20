@@ -17,6 +17,7 @@ api.interceptors.request.use(
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+        console.log(`[API Request] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
         return config;
     },
     (error: AxiosError) => {
@@ -28,11 +29,19 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response: AxiosResponse) => response,
     (error: AxiosError) => {
+        console.error(`[API Error] ${error.config?.method?.toUpperCase()} ${error.config?.url}:`, error.response?.status, error.response?.data);
+
         if (error.response?.status === 401) {
+            const hasToken = !!localStorage.getItem('auth_token');
+            const isLandingPage = window.location.pathname === '/' || window.location.pathname === '';
+
             // Token expired or invalid
             localStorage.removeItem('auth_token');
             localStorage.removeItem('user');
-            window.location.href = '/';
+
+            if (hasToken && !isLandingPage) {
+                window.location.href = '/';
+            }
         }
         return Promise.reject(error);
     }

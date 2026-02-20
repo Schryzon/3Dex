@@ -1,14 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cartService } from '@/lib/api/services';
 import { QUERY_KEYS } from '@/lib/constants/api';
+import { useAuth } from '@/components/auth/AuthProvider';
 import type { CartItem } from '@/lib/types';
 
 export function useCart() {
     const queryClient = useQueryClient();
+    const { isAuthenticated } = useAuth();
 
     const { data: items = [], isLoading } = useQuery<CartItem[]>({
         queryKey: QUERY_KEYS.CART,
         queryFn: () => cartService.getCart(),
+        enabled: isAuthenticated,
     });
 
     const addToCartMutation = useMutation({
@@ -43,7 +46,7 @@ export function useCart() {
 
     // Computed values
     const itemCount = items.reduce((total, item) => total + item.quantity, 0);
-    const total = items.reduce((sum, item) => sum + (item.model.price * item.quantity), 0);
+    const total = items.reduce((sum, item) => sum + ((item.model?.price ?? 0) * item.quantity), 0);
 
     return {
         items,

@@ -65,7 +65,7 @@ export default function ModelGrid({ artistId, showUpload = false }: ModelGridPro
                         <h4 className="font-bold text-white mb-1 truncate">{model.title}</h4>
                         <div className="flex items-center justify-between text-xs text-gray-400">
                             <span>{model.category}</span>
-                            <span>{new Date(model.created_at).toLocaleDateString()}</span>
+                            <span>{new Date(model.createdAt).toLocaleDateString()}</span>
                         </div>
                     </div>
                 </Link>

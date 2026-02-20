@@ -39,31 +39,22 @@ export default function CheckoutPage() {
         setError(null);
 
         try {
-            // 1. Create order
-            const orderData = {
-                items: items.map(item => ({
-                    modelId: item.model.id,
-                    quantity: item.quantity,
-                })),
-            };
-
-            const order = await orderService.createOrder(orderData);
-
-            // 2. Create payment
-            const payment = await paymentService.createPayment(order.id);
+            // Initiate unified checkout
+            const modelIds = items.map(item => item.model.id);
+            const { orderId, token } = await orderService.checkout(modelIds);
 
             // 3. Open Midtrans Snap
             if (window.snap) {
-                window.snap.pay(payment.token, {
+                window.snap.pay(token, {
                     onSuccess: function (result: any) {
                         clearCart();
-                        router.push(`/checkout/success?order=${order.id}`);
+                        router.push(`/checkout/success?order=${orderId}`);
                     },
                     onPending: function (result: any) {
-                        router.push(`/checkout/pending?order=${order.id}`);
+                        router.push(`/checkout/pending?order=${orderId}`);
                     },
                     onError: function (result: any) {
-                        router.push(`/checkout/failed?order=${order.id}`);
+                        router.push(`/checkout/failed?order=${orderId}`);
                     },
                     onClose: function () {
                         setIsProcessing(false);
@@ -145,7 +136,7 @@ export default function CheckoutPage() {
                                                     Qty: {item.quantity}
                                                 </span>
                                                 <span className="font-semibold text-white">
-                                                    {formatPrice(item.model.price * item.quantity)}
+                                                    {formatPrice(item.model.price * item.quantity).idr}
                                                 </span>
                                             </div>
                                         </div>
@@ -180,49 +171,49 @@ export default function CheckoutPage() {
                             <div className="space-y-3 mb-6">
                                 <div className="flex justify-between text-gray-300">
                                     <span>Subtotal ({items.length} items)</span>
-                                    <span>{formatPrice(total)}</span>
+                                    <span>{formatPrice(total).idr}</span>
                                 </div>
                                 <div className="flex justify-between text-gray-300">
                                     <span>Processing Fee</span>
-                                    <span>{formatPrice(0)}</span>
+                                    <span>{formatPrice(0).idr}</span>
                                 </div>
                                 <div className="border-t border-gray-700 pt-3 mt-3">
                                     <div className="flex justify-between text-xl font-bold text-white">
                                         <span>Total</span>
-                                        <span className="text-yellow-400">{formatPrice(total)}</span>
+                                        <span className="text-yellow-400">{formatPrice(total).idr}</span>
                                     </div>
                                 </div>
-                            </div>
 
-                            {error && (
-                                <div className="mb-4 p-3 bg-red-900/20 border border-red-800 rounded-lg">
-                                    <p className="text-sm text-red-400">{error}</p>
-                                </div>
-                            )}
-
-                            <Button
-                                variant="primary"
-                                size="lg"
-                                className="w-full gap-2"
-                                onClick={handleCheckout}
-                                disabled={isProcessing}
-                            >
-                                {isProcessing ? (
-                                    <>
-                                        <Loader2 className="w-5 h-5 animate-spin" />
-                                        Processing...
-                                    </>
-                                ) : (
-                                    <>
-                                        <CreditCard className="w-5 h-5" />
-                                        Pay {formatPrice(total)}
-                                    </>
+                                {error && (
+                                    <div className="mb-4 p-3 bg-red-900/20 border border-red-800 rounded-lg">
+                                        <p className="text-sm text-red-400">{error}</p>
+                                    </div>
                                 )}
-                            </Button>
 
-                            <p className="text-xs text-gray-500 text-center mt-4">
-                                By completing this purchase, you agree to our Terms of Service
-                            </p>
+                                <Button
+                                    variant="primary"
+                                    size="lg"
+                                    className="w-full gap-2 mt-6"
+                                    onClick={handleCheckout}
+                                    disabled={isProcessing}
+                                >
+                                    {isProcessing ? (
+                                        <>
+                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                            Processing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CreditCard className="w-5 h-5" />
+                                            Pay {formatPrice(total).idr}
+                                        </>
+                                    )}
+                                </Button>
+
+                                <p className="text-xs text-gray-500 text-center mt-4">
+                                    By completing this purchase, you agree to our Terms of Service
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -3,6 +3,8 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useProduct } from '@/lib/hooks/useProducts';
 import { useCart } from '@/lib/hooks/useCart';
+import { useWishlist } from '@/lib/hooks/useWishlist';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { Share2, Heart, Plus, Check, Download, Eye, ShoppingCart } from 'lucide-react';
 import { Suspense, lazy, useState } from 'react';
 import Link from 'next/link';
@@ -21,12 +23,14 @@ export default function ProductDetailPage() {
 
     const { data: product, isLoading, error } = useProduct(productId);
     const { addToCart, isAddingToCart } = useCart();
+    const { isAuthenticated, showLogin } = useAuth();
+    const { isInWishlist, toggle: toggleWishlist, isToggling } = useWishlist();
     const [addedLocally, setAddedLocally] = useState(false);
     const [selectedImage, setSelectedImage] = useState(0);
     const [currency, setCurrency] = useState<'idr' | 'usd'>('idr');
-    const [isFavorited, setIsFavorited] = useState(false);
 
     const handleAddToCart = async () => {
+        if (!isAuthenticated) { showLogin?.(); return; }
         try {
             await addToCart({ modelId: productId });
             setAddedLocally(true);
@@ -34,6 +38,26 @@ export default function ProductDetailPage() {
             console.error('Failed to add to cart:', error);
         }
     };
+
+    const handleBuyNow = async () => {
+        if (!isAuthenticated) { showLogin?.(); return; }
+        try {
+            await addToCart({ modelId: productId });
+            router.push('/cart');
+        } catch (error) {
+            console.error('Failed to buy now:', error);
+        }
+    };
+
+    const handleToggleWishlist = async () => {
+        if (!isAuthenticated) { showLogin?.(); return; }
+        try {
+            await toggleWishlist(productId);
+        } catch (error) {
+            console.error('Failed to toggle wishlist:', error);
+        }
+    };
+
 
     if (isLoading) {
         return (
@@ -102,22 +126,20 @@ export default function ProductDetailPage() {
                                 <div className="bg-black/90 backdrop-blur-xl border border-gray-800 rounded-lg p-1 flex gap-1 shadow-xl">
                                     <button
                                         onClick={() => setSelectedImage(0)}
-                                        className={`px-3 py-1.5 rounded text-xs font-medium transition-all duration-300 ${
-                                            selectedImage !== -1
+                                        className={`px-3 py-1.5 rounded text-xs font-medium transition-all duration-300 ${selectedImage !== -1
                                                 ? 'bg-white text-black shadow-lg shadow-yellow-500/20'
                                                 : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                                        }`}
+                                            }`}
                                     >
                                         <Eye className="w-3.5 h-3.5 inline mr-1.5" />
                                         Image
                                     </button>
                                     <button
                                         onClick={() => setSelectedImage(-1)}
-                                        className={`px-3 py-1.5 rounded text-xs font-medium transition-all duration-300 ${
-                                            selectedImage === -1
+                                        className={`px-3 py-1.5 rounded text-xs font-medium transition-all duration-300 ${selectedImage === -1
                                                 ? 'bg-white text-black shadow-lg shadow-yellow-500/20'
                                                 : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                                        }`}
+                                            }`}
                                     >
                                         <svg className="w-3.5 h-3.5 inline mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
@@ -129,22 +151,22 @@ export default function ProductDetailPage() {
 
                             {/* Action Buttons */}
                             <div className="absolute top-4 right-4 flex gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <button 
-                                    className="p-2.5 bg-black/80 hover:bg-white hover:text-black backdrop-blur-xl border border-gray-800 hover:border-white rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-yellow-500/20" 
+                                <button
+                                    className="p-2.5 bg-black/80 hover:bg-white hover:text-black backdrop-blur-xl border border-gray-800 hover:border-white rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-yellow-500/20"
                                     aria-label="Share"
                                 >
                                     <Share2 className="w-4 h-4" />
                                 </button>
-                                <button 
-                                    onClick={() => setIsFavorited(!isFavorited)}
-                                    className={`p-2.5 backdrop-blur-xl border rounded-lg transition-all duration-300 hover:scale-110 ${
-                                        isFavorited 
-                                            ? 'bg-red-500 text-black border-red-500 shadow-lg shadow-yellow-500/20' 
-                                            : 'bg-black/80 border-gray-800 hover:bg-red-500 hover:border-red-500 hover:text-black hover:shadow-lg hover:shadow-red-500/20'
-                                    }`}
-                                    aria-label="Favorite"
+                                <button
+                                    onClick={handleToggleWishlist}
+                                    disabled={isToggling}
+                                    className={`p-2.5 backdrop-blur-xl border rounded-lg transition-all duration-300 hover:scale-110 ${isInWishlist(productId)
+                                            ? 'bg-red-500 text-white border-red-500 shadow-lg shadow-red-500/20'
+                                            : 'bg-black/80 border-gray-800 hover:bg-red-500 hover:border-red-500 hover:text-white hover:shadow-lg hover:shadow-red-500/20'
+                                        } disabled:opacity-60 disabled:cursor-not-allowed`}
+                                    aria-label="Save to Wishlist"
                                 >
-                                    <Heart className={`w-4 h-4 ${isFavorited ? 'fill-current' : ''}`} />
+                                    <Heart className={`w-4 h-4 ${isInWishlist(productId) ? 'fill-current' : ''}`} />
                                 </button>
                             </div>
 
@@ -174,11 +196,10 @@ export default function ProductDetailPage() {
                                 <button
                                     key={index}
                                     onClick={() => setSelectedImage(index)}
-                                    className={`aspect-square rounded-lg overflow-hidden border-2 transition-all duration-300 hover:scale-105 ${
-                                        selectedImage === index
+                                    className={`aspect-square rounded-lg overflow-hidden border-2 transition-all duration-300 hover:scale-105 ${selectedImage === index
                                             ? 'border-yellow-500 shadow-lg shadow-yellow-500/20'
                                             : 'border-gray-900 hover:border-yellow-500/50'
-                                    }`}
+                                        }`}
                                 >
                                     <img src={thumb} alt="" className="w-full h-full object-cover" />
                                 </button>
@@ -212,21 +233,19 @@ export default function ProductDetailPage() {
                                     <div className="flex gap-1 bg-gray-900 rounded-lg p-0.5">
                                         <button
                                             onClick={() => setCurrency('idr')}
-                                            className={`px-2 py-1 text-xs font-medium rounded transition-all duration-300 ${
-                                                currency === 'idr' 
-                                                    ? 'bg-yellow-500 text-black shadow-lg shadow-yellow-500/20' 
+                                            className={`px-2 py-1 text-xs font-medium rounded transition-all duration-300 ${currency === 'idr'
+                                                    ? 'bg-yellow-500 text-black shadow-lg shadow-yellow-500/20'
                                                     : 'text-gray-400 hover:text-white'
-                                            }`}
+                                                }`}
                                         >
                                             IDR
                                         </button>
                                         <button
                                             onClick={() => setCurrency('usd')}
-                                            className={`px-2 py-1 text-xs font-medium rounded transition-all duration-300 ${
-                                                currency === 'usd' 
-                                                    ? 'bg-yellow-500 text-black shadow-lg shadow-yellow-500/20' 
+                                            className={`px-2 py-1 text-xs font-medium rounded transition-all duration-300 ${currency === 'usd'
+                                                    ? 'bg-yellow-500 text-black shadow-lg shadow-yellow-500/20'
                                                     : 'text-gray-400 hover:text-white'
-                                            }`}
+                                                }`}
                                         >
                                             USD
                                         </button>
@@ -264,7 +283,11 @@ export default function ProductDetailPage() {
                                     </button>
                                 )}
 
-                                <button className="w-full cursor-pointer bg-gray-900 hover:bg-gray-800 border border-gray-800 hover:border-black text-white py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+                                <button
+                                    onClick={handleBuyNow}
+                                    disabled={isAddingToCart}
+                                    className="w-full cursor-pointer bg-gray-900 hover:bg-gray-800 border border-gray-800 hover:border-yellow-500/50 text-white py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                >
                                     Buy Now
                                 </button>
                             </div>

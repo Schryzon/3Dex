@@ -25,12 +25,26 @@ export async function list_models(req: Request, res: Response) {
   const where: any = {};
 
   // 1. Filter by Status (Default: APPROVED)
+  const user = (req as any).user;
+  const is_self = user && artist_id && user.id === artist_id;
+  const is_admin = user && user.role === 'ADMIN';
+
   if (status && status !== 'ALL') {
     where.status = status;
+  } else if (status === 'ALL') {
+    // Only allow seeing ALL if admin or if looking at own models
+    if (is_admin || is_self) {
+      // Do nothing, results in no status filter (shows all)
+    } else {
+      where.status = 'APPROVED';
+    }
   } else if (!status) {
-    where.status = 'APPROVED';
+    if (is_self) {
+      // Show ALL own models by default when looking at own profile
+    } else {
+      where.status = 'APPROVED';
+    }
   }
-  // Note: 'ALL' typically requires admin, but we'll leave open for now or add check later if requested
 
   // 2. Search (Title or Description)
   if (search) {
@@ -58,6 +72,8 @@ export async function list_models(req: Request, res: Response) {
   if (sort === 'price_desc') orderBy = { price: 'desc' };
   if (sort === 'oldest') orderBy = { created_at: 'asc' };
   if (sort === 'newest') orderBy = { created_at: 'desc' };
+  if (sort === 'rating') orderBy = { avg_rating: 'desc' };
+  if (sort === 'popular') orderBy = { review_count: 'desc' };
 
   // 6. Pagination
   const take = Number(limit);
@@ -140,16 +156,23 @@ export async function get_model_detail(req: Request, res: Response) {
 }
 
 export async function upload_model(req: Request, res: Response) {
-  const { title, description, price, file_url, preview_url, artist_id } =
+  const { title, description, price, file_url, preview_url, artist_id, category, tags } =
     req.body;
 
-  if (!title || !price || !file_url || !artist_id) {
+  if (!title || price === undefined || !file_url || !artist_id) {
     return res.status(400).json({
       message: "Missing fields!",
     });
   }
 
   try {
+    // Lookup category if provided as string (slug)
+    let category_id = undefined;
+    if (category) {
+      const cat = await prisma.category.findUnique({ where: { slug: category } });
+      if (cat) category_id = cat.id;
+    }
+
     const model = await create_model({
       title,
       description,
@@ -157,6 +180,8 @@ export async function upload_model(req: Request, res: Response) {
       file_url,
       preview_url,
       artist_id,
+      category_id,
+      tags: Array.isArray(tags) ? tags : undefined
     });
 
     res.status(201).json(model);

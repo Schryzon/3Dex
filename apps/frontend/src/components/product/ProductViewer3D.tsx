@@ -11,29 +11,26 @@ interface ModelProps {
 }
 
 function Model({ url }: ModelProps) {
-  try {
-    const gltf = useLoader(GLTFLoader, url);
+  console.log(`[ProductViewer3D] useLoader starting for: ${url}`);
+  const gltf = useLoader(GLTFLoader, url);
+  console.log(`[ProductViewer3D] useLoader success for: ${url}`);
 
-    // Center and scale the model
-    useEffect(() => {
-      if (gltf.scene) {
-        const box = new THREE.Box3().setFromObject(gltf.scene);
-        const center = box.getCenter(new THREE.Vector3());
-        const size = box.getSize(new THREE.Vector3());
+  // Center and scale the model
+  useEffect(() => {
+    if (gltf.scene) {
+      const box = new THREE.Box3().setFromObject(gltf.scene);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
 
-        const maxDim = Math.max(size.x, size.y, size.z);
-        const scale = 2 / maxDim;
+      const maxDim = Math.max(size.x, size.y, size.z);
+      const scale = 2 / maxDim;
 
-        gltf.scene.scale.setScalar(scale);
-        gltf.scene.position.sub(center.multiplyScalar(scale));
-      }
-    }, [gltf]);
+      gltf.scene.scale.setScalar(scale);
+      gltf.scene.position.sub(center.multiplyScalar(scale));
+    }
+  }, [gltf]);
 
-    return <primitive object={gltf.scene} />;
-  } catch (error) {
-    console.error('Error loading 3D model:', error);
-    return null;
-  }
+  return <primitive object={gltf.scene} />;
 }
 
 interface ProductViewer3DProps {
@@ -43,8 +40,11 @@ interface ProductViewer3DProps {
 export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Check if URL is a valid 3D model format
-  const is3DModel = modelUrl?.match(/\.(glb|gltf)$/i);
+  // Check if URL is a valid 3D model format (strip query params for signed URLs)
+  const getPathFromUrl = (url: string) => {
+    try { return new URL(url).pathname; } catch { return url; }
+  };
+  const is3DModel = modelUrl && /\.(glb|gltf)/i.test(getPathFromUrl(modelUrl));
 
   if (!is3DModel) {
     // Fallback to image if not a 3D model

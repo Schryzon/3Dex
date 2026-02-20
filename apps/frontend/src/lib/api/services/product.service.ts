@@ -1,6 +1,5 @@
 import { apiClient } from '../client';
 import { API_ENDPOINTS } from '@/lib/constants/api';
-import { MOCK_MODELS } from '../mockData';
 import type {
     Model,
     ModelFilters,
@@ -15,22 +14,24 @@ const mapModel = (item: any): Model => ({
     description: item.description || '',
     price: item.price,
     thumbnails: item.preview_url ? [item.preview_url] : [],
+    images: item.preview_url ? [item.preview_url] : [], // Fallback for components using 'images'
     modelFileUrl: item.file_url,
-    fileFormat: ['GLB'],
-    category: item.category?.name || 'Uncategorized',
-    tags: item.tags ? item.tags.map((t: any) => t.name) : [],
+    fileFormat: Array.isArray(item.fileFormat) ? item.fileFormat : (item.fileFormat ? [item.fileFormat] : []),
+    category: item.category?.name || item.category || 'General',
+    tags: Array.isArray(item.tags) ? item.tags.map((t: any) => typeof t === 'string' ? t : t.name) : [],
     isPrintable: false,
     status: item.status,
     artistId: item.artist_id,
     artist: {
         id: item.artist?.id || '',
         username: item.artist?.username || 'Unknown',
-        avatar: item.artist?.avatar_url
+        avatar_url: item.artist?.avatar_url
     },
     createdAt: item.created_at,
     updatedAt: item.updated_at,
-    rating: 0,
-    reviewCount: 0
+    polyCount: item.poly_count || 0,
+    rating: item.avg_rating || item.rating || 0,
+    reviewCount: item.review_count || 0
 });
 
 export const productService = {
@@ -43,7 +44,7 @@ export const productService = {
                 if (filters.category && filters.category !== 'all') params.append('category', filters.category);
                 if (filters.minPrice) params.append('min_price', filters.minPrice.toString());
                 if (filters.maxPrice) params.append('max_price', filters.maxPrice.toString());
-                if (filters.format) filters.format.forEach(f => params.append('format', f));
+                if (filters.format) filters.format.forEach((f: string) => params.append('format', f));
                 if (filters.isPrintable !== undefined) params.append('isPrintable', filters.isPrintable.toString());
                 if (filters.sort) params.append('sort', filters.sort);
                 if (filters.artistId) params.append('artist_id', filters.artistId);
@@ -56,43 +57,34 @@ export const productService = {
 
             const response = await apiClient.get<any>(url);
 
+            // Safety check for backend response structure
+            if (!response || !response.data) {
+                throw new Error('Invalid response format from server');
+            }
+
             return {
                 data: response.data.map(mapModel),
                 pagination: {
-                    page: response.meta.page,
-                    limit: response.meta.limit,
-                    total: response.meta.total,
-                    totalPages: response.meta.pages
+                    page: response.meta?.page || 1,
+                    limit: response.meta?.limit || 20,
+                    total: response.meta?.total || 0,
+                    totalPages: response.meta?.pages || 1
                 }
             };
         } catch (error) {
-            console.warn('API Error in getProducts, falling back to mock data:', error);
-            // Path 2: Return mock data as fallback
-            const filteredModels = filters?.category && filters.category !== 'all'
-                ? MOCK_MODELS.filter(m => m.category.toLowerCase() === filters.category?.toLowerCase())
-                : MOCK_MODELS;
-
-            return {
-                data: filteredModels,
-                pagination: {
-                    page: filters?.page || 1,
-                    limit: filters?.limit || 20,
-                    total: filteredModels.length,
-                    totalPages: 1
-                }
-            };
+            console.error('getProducts failed:', error);
+            throw error;
         }
     },
 
     async getProductById(id: string): Promise<Model> {
         try {
             const data = await apiClient.get<any>(API_ENDPOINTS.MODELS.DETAIL(id));
+            if (!data) throw new Error('Product not found');
             return mapModel(data);
         } catch (error) {
-            console.warn(`API Error in getProductById(${id}), falling back to mock data:`, error);
-            const model = MOCK_MODELS.find(m => m.id === id);
-            if (!model) throw new Error('Product not found');
-            return model;
+            console.error(`getProductById(${id}) failed:`, error);
+            throw error;
         }
     },
 

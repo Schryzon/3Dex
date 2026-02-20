@@ -30,6 +30,7 @@ interface ProductDetailsModalProps {
         title: string;
         author: string;
         images: string[];
+        modelFileUrl?: string;
         price: number;
         originalPrice?: number;
         isFree?: boolean;
@@ -76,8 +77,8 @@ export default function ProductDetailsModal({
     const router = useRouter();
 
     // Cart logic
-    const { addItem, items } = useCart();
-    const isInCart = items.some(item => item.id === product.id);
+    const { addToCart, items } = useCart();
+    const isInCart = items.some(item => item.model_id === product.id);
 
     if (!isOpen) return null;
 
@@ -120,7 +121,7 @@ export default function ProductDetailsModal({
                             {/* Main Preview Area */}
                             <div className="relative aspect-[4/3] bg-[#141414] rounded-xl overflow-hidden">
                                 {isViewMode3D ? (
-                                    <ModelViewer3D modelUrl={product.images[0].endsWith('.glb') ? product.images[0] : undefined} />
+                                    <ModelViewer3D modelUrl={product.modelFileUrl} />
                                 ) : (
                                     <>
                                         <img
@@ -235,13 +236,7 @@ export default function ProductDetailsModal({
                                 <button
                                     onClick={() => {
                                         if (!product.isFree && !isInCart) {
-                                            addItem({
-                                                id: product.id,
-                                                title: product.title,
-                                                price: product.price,
-                                                image: product.images[0],
-                                                author: product.author
-                                            });
+                                            addToCart({ modelId: product.id });
                                         }
                                     }}
                                     className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 sm:py-3 font-bold rounded-xl transition-all cursor-pointer ${isInCart
@@ -275,13 +270,7 @@ export default function ProductDetailsModal({
                                     <button
                                         onClick={() => {
                                             if (!isInCart) {
-                                                addItem({
-                                                    id: product.id,
-                                                    title: product.title,
-                                                    price: product.price,
-                                                    image: product.images[0],
-                                                    author: product.author
-                                                });
+                                                addToCart({ modelId: product.id });
                                             }
                                             router.push('/cart');
                                         }}

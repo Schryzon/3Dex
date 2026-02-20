@@ -18,6 +18,8 @@ import order_routes from "./routes/orders";
 import post_routes from "./routes/posts";
 import review_routes from "./routes/reviews";
 import print_routes from "./routes/print";
+import purchase_routes from "./routes/purchases";
+import cart_routes from "./routes/cart";
 
 // Initialize Backend
 const app = express();
@@ -48,5 +50,24 @@ app.use("/orders", order_routes);
 app.use("/posts", post_routes);
 app.use("/reviews", review_routes);
 app.use("/print", print_routes);
+app.use("/purchases", purchase_routes);
+app.use("/cart", cart_routes);
+
+// 404 Handler - Return JSON instead of HTML
+app.use((req, res) => {
+    res.status(404).json({
+        message: `Route ${req.method} ${req.url} not found`,
+        error: "Not Found"
+    });
+});
+
+// Global Error Handler - Return JSON instead of HTML
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error('[Global Error]:', err);
+    res.status(err.status || 500).json({
+        message: err.message || "Internal Server Error",
+        error: process.env.NODE_ENV === 'development' ? err : "InternalServerError"
+    });
+});
 
 export default app;

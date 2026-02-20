@@ -7,6 +7,8 @@ import CatalogProductCard from '@/components/catalog/CatalogProductCard';
 import CatalogFilters, { FilterState } from '@/components/catalog/CatalogFilters';
 import { Skeleton } from '@/components/common/Loading';
 import { useProducts } from '@/lib/hooks/useProducts';
+import { useWishlist } from '@/lib/hooks/useWishlist';
+import { useAuth } from '@/components/auth/AuthProvider';
 import type { ModelFilters } from '@/lib/types';
 
 // Sort options
@@ -29,8 +31,9 @@ const CATEGORIES = [
 
 export default function CatalogPage() {
     const router = useRouter();
+    const { isAuthenticated, showLogin } = useAuth();
+    const { isInWishlist, toggle: toggleWishlist } = useWishlist();
     const [activeCategory, setActiveCategory] = useState('all');
-    const [saved, setSaved] = useState<Set<string>>(new Set());
     const [sortBy, setSortBy] = useState<ModelFilters['sort']>('newest');
     const [showSortDropdown, setShowSortDropdown] = useState(false);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -60,16 +63,13 @@ export default function CatalogPage() {
 
     const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-    const handleSave = (productId: string) => {
-        setSaved((prev) => {
-            const next = new Set(prev);
-            if (next.has(productId)) {
-                next.delete(productId);
-            } else {
-                next.add(productId);
-            }
-            return next;
-        });
+    const handleSave = async (productId: string) => {
+        if (!isAuthenticated) { showLogin?.(); return; }
+        try {
+            await toggleWishlist(productId);
+        } catch (e) {
+            console.error('Wishlist toggle failed:', e);
+        }
     };
 
     const handleFilterChange = (newFilters: FilterState) => {
@@ -136,8 +136,8 @@ export default function CatalogPage() {
                         key={category.id}
                         onClick={() => setActiveCategory(category.id)}
                         className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all cursor-pointer ${activeCategory === category.id
-                                ? 'bg-white text-black'
-                                : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#252525] hover:text-white border border-gray-800'
+                            ? 'bg-white text-black'
+                            : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#252525] hover:text-white border border-gray-800'
                             }`}
                     >
                         {category.label}
@@ -181,8 +181,8 @@ export default function CatalogPage() {
                                         key={option.id}
                                         onClick={() => handleSortChange(option.id)}
                                         className={`w-full text-left px-3 py-2 text-xs transition-colors cursor-pointer ${sortBy === option.id
-                                                ? 'bg-yellow-400/10 text-yellow-400'
-                                                : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                                            ? 'bg-yellow-400/10 text-yellow-400'
+                                            : 'text-gray-400 hover:bg-gray-800 hover:text-white'
                                             }`}
                                     >
                                         {option.label}
@@ -244,7 +244,7 @@ export default function CatalogPage() {
                             isFree={product.price === 0}
                             discount={undefined}
                             author={product.artist.username}
-                            isSaved={saved.has(product.id)}
+                            isSaved={isInWishlist(product.id)}
                             onSave={() => handleSave(product.id)}
                             onClick={() => handleProductClick(product.id)}
                             price={product.price}

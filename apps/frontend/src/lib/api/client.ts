@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 class ApiClient {
   private client: AxiosInstance;
@@ -17,10 +17,11 @@ class ApiClient {
     // Request interceptor
     this.client.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('auth_token');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
+        console.log(`[apiClient Request] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
         return config;
       },
       (error) => {
@@ -32,11 +33,21 @@ class ApiClient {
     this.client.interceptors.response.use(
       (response) => response,
       async (error: AxiosError) => {
+        console.error(`[apiClient Error] ${error.config?.method?.toUpperCase()} ${error.config?.url}:`, error.response?.status, error.response?.data);
+
         if (error.response?.status === 401) {
-          // Unauthorized - clear token and redirect to login
-          localStorage.removeItem('token');
+          const hasToken = !!localStorage.getItem('auth_token');
+          const isLandingPage = window.location.pathname === '/' || window.location.pathname === '';
+
+          // Unauthorized - clear token
+          localStorage.removeItem('auth_token');
           localStorage.removeItem('user');
-          window.location.href = '/';
+
+          // Only redirect if we were logged in (token existed) and not already on the landing page
+          // This prevents infinite refresh loops on public pages
+          if (hasToken && !isLandingPage) {
+            window.location.href = '/';
+          }
         }
         return Promise.reject(error);
       }

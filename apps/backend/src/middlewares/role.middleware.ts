@@ -6,7 +6,7 @@ export function require_artist(
     res: Response,
     next: NextFunction
 ) {
-    if (req.user.role !== "ARTIST") {
+    if (req.user.role !== "ARTIST" && req.user.role !== "ADMIN") {
         return res.status(403).json({
             message: "Artist only!"
         });

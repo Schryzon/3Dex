@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Box, Palette, ArrowRight } from 'lucide-react';
+import { useInView } from '@/lib/hooks/useInView';
 
 const categories = [
     {
@@ -35,11 +36,22 @@ const categories = [
 ];
 
 export default function FeaturedCategories() {
+    const { ref: headerRef, inView: headerVisible } = useInView({ threshold: 0.2 });
+    const { ref: gridRef, inView: gridVisible } = useInView({ threshold: 0.1 });
+
     return (
         <section className="py-16 md:py-24 bg-black">
             <div className="max-w-[1400px] mx-auto px-4 md:px-6">
                 {/* Header */}
-                <div className="text-center mb-12 md:mb-16">
+                <div
+                    ref={headerRef}
+                    style={{
+                        opacity: headerVisible ? 1 : 0,
+                        transform: headerVisible ? 'translateY(0)' : 'translateY(30px)',
+                        transition: 'opacity 0.7s ease, transform 0.7s ease',
+                    }}
+                    className="text-center mb-12 md:mb-16"
+                >
                     <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
                         Explore Our <span className="text-yellow-400">Collections</span>
                     </h2>
@@ -49,13 +61,19 @@ export default function FeaturedCategories() {
                 </div>
 
                 {/* Category Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                    {categories.map((category) => {
+                <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                    {categories.map((category, i) => {
                         const Icon = category.icon;
                         return (
                             <Link
                                 key={category.title}
                                 href={category.href}
+                                style={{
+                                    opacity: gridVisible ? 1 : 0,
+                                    transform: gridVisible ? 'translateY(0)' : 'translateY(40px)',
+                                    transition: 'opacity 0.6s ease, transform 0.6s ease',
+                                    transitionDelay: `${i * 0.12}s`,
+                                }}
                                 className="group relative overflow-hidden rounded-2xl bg-gray-800/40 backdrop-blur-sm border border-gray-700 hover:border-yellow-400/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-yellow-400/10"
                             >
                                 {/* Gradient Background */}

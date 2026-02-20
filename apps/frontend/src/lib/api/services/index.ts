@@ -4,3 +4,6 @@ export { wishlistService } from './wishlist.service';
 export { cartService } from './cart.service';
 export { orderService } from './order.service';
 export { paymentService } from './payment.service';
+export { purchaseService } from './purchase.service';
+export { printService } from './print.service';
+export { postService } from './post.service';

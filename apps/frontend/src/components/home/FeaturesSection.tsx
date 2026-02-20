@@ -1,6 +1,7 @@
 'use client';
 
 import { Shield, Zap, Award, Globe, Clock, Heart } from 'lucide-react';
+import { useInView } from '@/lib/hooks/useInView';
 
 const features = [
     {
@@ -47,12 +48,31 @@ const features = [
     },
 ];
 
+const stats = [
+    { value: '36K+', label: '3D Assets' },
+    { value: '15K+', label: 'Happy Customers' },
+    { value: '500+', label: 'Artists' },
+    { value: '4.9', label: 'Average Rating' },
+];
+
 export default function FeaturesSection() {
+    const { ref: headerRef, inView: headerVisible } = useInView({ threshold: 0.2 });
+    const { ref: gridRef, inView: gridVisible } = useInView({ threshold: 0.05 });
+    const { ref: statsRef, inView: statsVisible } = useInView({ threshold: 0.2 });
+
     return (
         <section className="py-16 md:py-24 bg-gradient-to-b from-gray-900 to-black">
             <div className="max-w-[1400px] mx-auto px-4 md:px-6">
                 {/* Header */}
-                <div className="text-center mb-16">
+                <div
+                    ref={headerRef}
+                    style={{
+                        opacity: headerVisible ? 1 : 0,
+                        transform: headerVisible ? 'translateY(0)' : 'translateY(30px)',
+                        transition: 'opacity 0.7s ease, transform 0.7s ease',
+                    }}
+                    className="text-center mb-16"
+                >
                     <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
                         Why Choose <span className="text-yellow-400">3Dēx</span>
                     </h2>
@@ -62,12 +82,18 @@ export default function FeaturesSection() {
                 </div>
 
                 {/* Features Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                    {features.map((feature) => {
+                <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                    {features.map((feature, i) => {
                         const Icon = feature.icon;
                         return (
                             <div
                                 key={feature.title}
+                                style={{
+                                    opacity: gridVisible ? 1 : 0,
+                                    transform: gridVisible ? 'translateY(0)' : 'translateY(40px)',
+                                    transition: 'opacity 0.6s ease, transform 0.6s ease',
+                                    transitionDelay: `${i * 0.08}s`,
+                                }}
                                 className="group bg-gray-800/40 backdrop-blur-sm rounded-xl p-6 md:p-8 border border-gray-700 hover:border-yellow-400/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-yellow-400/10"
                             >
                                 {/* Icon */}
@@ -88,23 +114,22 @@ export default function FeaturesSection() {
                 </div>
 
                 {/* Stats */}
-                <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8">
-                    <div className="text-center">
-                        <div className="text-4xl md:text-5xl font-bold text-yellow-400 mb-2">36K+</div>
-                        <div className="text-gray-400">3D Assets</div>
-                    </div>
-                    <div className="text-center">
-                        <div className="text-4xl md:text-5xl font-bold text-yellow-400 mb-2">15K+</div>
-                        <div className="text-gray-400">Happy Customers</div>
-                    </div>
-                    <div className="text-center">
-                        <div className="text-4xl md:text-5xl font-bold text-yellow-400 mb-2">500+</div>
-                        <div className="text-gray-400">Artists</div>
-                    </div>
-                    <div className="text-center">
-                        <div className="text-4xl md:text-5xl font-bold text-yellow-400 mb-2">4.9</div>
-                        <div className="text-gray-400">Average Rating</div>
-                    </div>
+                <div ref={statsRef} className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8">
+                    {stats.map((stat, i) => (
+                        <div
+                            key={stat.label}
+                            style={{
+                                opacity: statsVisible ? 1 : 0,
+                                transform: statsVisible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.9)',
+                                transition: 'opacity 0.6s ease, transform 0.6s ease',
+                                transitionDelay: `${i * 0.1}s`,
+                            }}
+                            className="text-center"
+                        >
+                            <div className="text-4xl md:text-5xl font-bold text-yellow-400 mb-2">{stat.value}</div>
+                            <div className="text-gray-400">{stat.label}</div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </section>

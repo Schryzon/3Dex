@@ -30,3 +30,22 @@ export function require_auth(
     });
   }
 }
+
+export function optional_auth(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const header = req.headers.authorization;
+
+  if (header && header.startsWith("Bearer ")) {
+    const token = header.split(" ")[1];
+    try {
+      const payload = verify_token(token) as Express.Auth_User;
+      (req as any).user = payload;
+    } catch {
+      // Ignore if invalid token, just treat as guest
+    }
+  }
+  next();
+}

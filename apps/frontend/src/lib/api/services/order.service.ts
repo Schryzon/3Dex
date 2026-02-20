@@ -21,6 +21,10 @@ export const orderService = {
         return apiClient.post<Order>(API_ENDPOINTS.ORDERS.CREATE, data);
     },
 
+    async checkout(modelIds: string[]): Promise<{ orderId: string; token: string; redirect_url: string }> {
+        return apiClient.post('/orders/checkout', { model_ids: modelIds });
+    },
+
     async getOrders(): Promise<Order[]> {
         return apiClient.get<Order[]>(API_ENDPOINTS.ORDERS.LIST);
     },

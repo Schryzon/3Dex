@@ -49,7 +49,7 @@ export const API_ENDPOINTS = {
     // Wishlist
     WISHLIST: {
         LIST: '/wishlist',
-        ADD: '/wishlist',
+        ADD: (modelId: string) => `/wishlist/${modelId}`,
         REMOVE: (id: string) => `/wishlist/${id}`,
     },
 

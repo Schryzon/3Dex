@@ -18,6 +18,7 @@ export default function LandingNavbar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [megaMenuOpen, setMegaMenuOpen] = useState<'3d-models' | 'cg-models' | 'textures' | null>(null);
   const [megaMenuCloseTimeout, setMegaMenuCloseTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { items } = useCart();
   const [mounted, setMounted] = useState(false);
@@ -47,6 +48,11 @@ export default function LandingNavbar() {
     router.push('/profile');
     setUserMenuOpen(false);
   }, [router]);
+
+  const handleSearch = useCallback(() => {
+    const q = searchQuery.trim();
+    if (q) router.push(`/catalog?search=${encodeURIComponent(q)}`);
+  }, [searchQuery, router]);
 
   // Role-based menu items
   const getRoleMenuItems = () => {
@@ -146,24 +152,21 @@ export default function LandingNavbar() {
             )}
           </div>
 
-          {/* Search Dropdown - Desktop */}
-          <div className="hidden md:block">
-            <select className="bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-500 outline:none focus:border-gray-400 cursor-pointer text-sm">
-              <option>3D Models</option>
-              <option>Textures</option>
-              <option>3D Printer</option>
-            </select>
-          </div>
-
           {/* Search Bar */}
           <div className="hidden md:flex flex-1 max-w-md">
             <div className="relative w-full">
               <input
                 type="text"
-                placeholder="Search Keywords"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                placeholder="Search 3D models, textures..."
                 className="w-full bg-gray-800 text-white px-4 py-2.5 pr-10 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 border border-gray-700 placeholder-gray-400"
               />
-              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white cursor-pointer">
+              <button
+                onClick={handleSearch}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-yellow-400 cursor-pointer transition-colors"
+              >
                 <Search className="w-5 h-5" />
               </button>
             </div>

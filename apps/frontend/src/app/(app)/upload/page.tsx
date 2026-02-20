@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Box, Info, Tag, DollarSign, Check, ChevronRight, Layout, Loader2 } from 'lucide-react';
 import FileUploader from '@/components/upload/FileUploader';
 import { api } from '@/lib/api';
+import axios from 'axios';
 
 type Step = 'files' | 'details' | 'pricing';
 
@@ -14,6 +15,7 @@ export default function UploadPage() {
     const [modelFile, setModelFile] = useState<File | null>(null);
     const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
 
     // Form Data
     const [formData, setFormData] = useState({
@@ -43,12 +45,16 @@ export default function UploadPage() {
         return data; // { upload_url, key }
     };
 
-    const uploadFileToMinIO = async (file: File, url: string) => {
-        await fetch(url, {
-            method: 'PUT',
-            body: file,
+    const uploadFileToMinIO = async (file: File, url: string, onProgress?: (p: number) => void) => {
+        await axios.put(url, file, {
             headers: {
                 'Content-Type': file.type || (file.name.endsWith('.glb') ? 'model/gltf-binary' : 'image/jpeg')
+            },
+            onUploadProgress: (progressEvent) => {
+                if (onProgress && progressEvent.total) {
+                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    onProgress(progress);
+                }
             }
         });
     };
@@ -61,7 +67,7 @@ export default function UploadPage() {
 
             // 1. Upload Model
             const modelUpload = await getPresignedUrl(modelFile);
-            await uploadFileToMinIO(modelFile, modelUpload.upload_url);
+            await uploadFileToMinIO(modelFile, modelUpload.upload_url, (p) => setUploadProgress(p));
 
             // 2. Upload Thumbnail (if exists)
             let thumbnailKey = '';
@@ -106,6 +112,7 @@ export default function UploadPage() {
             alert(`Upload failed: ${error.response?.data?.message || error.message}`);
         } finally {
             setIsLoading(false);
+            setUploadProgress(0);
         }
     };
 
@@ -341,9 +348,22 @@ export default function UploadPage() {
                                 <button
                                     onClick={handlePublish}
                                     disabled={isLoading}
-                                    className="px-10 py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 text-black font-black rounded-xl shadow-[0_10px_40px_rgba(250,204,21,0.2)] flex items-center gap-3 transition-all hover:scale-[1.02] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="relative px-10 py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 text-black font-black rounded-xl shadow-[0_10px_40px_rgba(250,204,21,0.2)] flex items-center gap-3 transition-all hover:scale-[1.02] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
                                 >
-                                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Publish Asset'}
+                                    {isLoading && (
+                                        <div
+                                            className="absolute bottom-0 left-0 h-1 bg-black/20 transition-all duration-300"
+                                            style={{ width: `${uploadProgress}%` }}
+                                        />
+                                    )}
+                                    {isLoading ? (
+                                        <>
+                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                            <span>Publishing {uploadProgress > 0 ? `${uploadProgress}%` : ''}</span>
+                                        </>
+                                    ) : (
+                                        'Publish Asset'
+                                    )}
                                 </button>
                             </div>
                         </div>

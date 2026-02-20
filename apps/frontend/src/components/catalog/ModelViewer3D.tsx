@@ -12,19 +12,10 @@ declare global {
 }
 
 function Model({ url }: { url: string }) {
-    // Safe loader for GLTF/GLB
-    try {
-        const { scene } = useGLTF(url);
-        return <primitive object={scene} />;
-    } catch (e) {
-        console.error("3D Model Load Error:", e);
-        return (
-            <mesh>
-                <boxGeometry args={[2, 2, 2]} />
-                <meshStandardMaterial color="#fca5a5" metalness={0.5} roughness={0.2} />
-            </mesh>
-        );
-    }
+    console.log(`[Model] useGLTF starting for: ${url}`);
+    const { scene } = useGLTF(url);
+    console.log(`[Model] useGLTF success for: ${url}`);
+    return <primitive object={scene} />;
 }
 
 function FallbackBox() {
@@ -57,7 +48,17 @@ export default function ModelViewer3D({ modelUrl }: { modelUrl?: string }) {
         );
     }
 
-    const isRealModel = modelUrl && (modelUrl.endsWith('.glb') || modelUrl.endsWith('.gltf'));
+    const getPathFromUrl = (url: string) => {
+        try { return new URL(url).pathname; } catch { return url; }
+    };
+    const isRealModel = modelUrl && /\.(glb|gltf)/i.test(getPathFromUrl(modelUrl));
+
+    useEffect(() => {
+        if (modelUrl) {
+            console.log("[3D Viewer] Attempting to load:", modelUrl);
+            console.log("[3D Viewer] Is real model check:", isRealModel);
+        }
+    }, [modelUrl, isRealModel]);
 
     return (
         <div className="relative w-full h-full bg-[#0a0a0a] overflow-hidden rounded-xl group">

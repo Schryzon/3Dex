@@ -7,9 +7,25 @@ export async function create_model(data: {
   file_url: string;
   preview_url?: string;
   artist_id: string;
+  category_id?: string;
+  tags?: string[];
 }) {
+  const { tags, ...rest } = data;
+
   return prisma.model.create({
-    data,
+    data: {
+      ...rest,
+      tags: tags ? {
+        connectOrCreate: tags.map(tag => ({
+          where: { name: tag },
+          create: { name: tag }
+        }))
+      } : undefined
+    },
+    include: {
+      tags: true,
+      category: true
+    }
   });
 }
 

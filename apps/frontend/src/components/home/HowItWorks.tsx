@@ -1,6 +1,7 @@
 'use client';
 
 import { Search, ShoppingCart, Download, ArrowRight } from 'lucide-react';
+import { useInView } from '@/lib/hooks/useInView';
 
 const steps = [
     {
@@ -30,11 +31,23 @@ const steps = [
 ];
 
 export default function HowItWorks() {
+    const { ref: headerRef, inView: headerVisible } = useInView({ threshold: 0.2 });
+    const { ref: stepsRef, inView: stepsVisible } = useInView({ threshold: 0.1 });
+    const { ref: ctaRef, inView: ctaVisible } = useInView({ threshold: 0.3 });
+
     return (
         <section className="py-16 md:py-24 bg-black">
             <div className="max-w-[1400px] mx-auto px-4 md:px-6">
                 {/* Header */}
-                <div className="text-center mb-16">
+                <div
+                    ref={headerRef}
+                    style={{
+                        opacity: headerVisible ? 1 : 0,
+                        transform: headerVisible ? 'translateY(0)' : 'translateY(30px)',
+                        transition: 'opacity 0.7s ease, transform 0.7s ease',
+                    }}
+                    className="text-center mb-16"
+                >
                     <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
                         How It <span className="text-yellow-400">Works</span>
                     </h2>
@@ -44,7 +57,7 @@ export default function HowItWorks() {
                 </div>
 
                 {/* Steps */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 relative">
+                <div ref={stepsRef} className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 relative">
                     {/* Connection Lines - Desktop Only */}
                     <div className="hidden md:block absolute top-24 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gray-700 to-transparent" />
 
@@ -53,6 +66,12 @@ export default function HowItWorks() {
                         return (
                             <div
                                 key={step.number}
+                                style={{
+                                    opacity: stepsVisible ? 1 : 0,
+                                    transform: stepsVisible ? 'translateY(0)' : 'translateY(50px)',
+                                    transition: 'opacity 0.65s ease, transform 0.65s ease',
+                                    transitionDelay: `${index * 0.15}s`,
+                                }}
                                 className="relative group"
                             >
                                 {/* Card */}
@@ -90,7 +109,15 @@ export default function HowItWorks() {
                 </div>
 
                 {/* CTA */}
-                <div className="text-center mt-16">
+                <div
+                    ref={ctaRef}
+                    style={{
+                        opacity: ctaVisible ? 1 : 0,
+                        transform: ctaVisible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.97)',
+                        transition: 'opacity 0.6s ease, transform 0.6s ease',
+                    }}
+                    className="text-center mt-16"
+                >
                     <a
                         href="/catalog"
                         className="inline-flex items-center gap-3 px-8 py-4 bg-yellow-400 hover:bg-yellow-300 text-black font-bold rounded-full text-lg transition-all hover:scale-105 hover:shadow-2xl hover:shadow-yellow-400/20"

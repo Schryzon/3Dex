@@ -37,6 +37,21 @@ export async function create_review(req: Auth_Request, res: Response) {
             }
         });
 
+        // 3. Recalculate and update model avg_rating and review_count
+        const aggregations = await prisma.review.aggregate({
+            where: { model_id: String(model_id) },
+            _avg: { rating: true },
+            _count: { rating: true }
+        });
+
+        await prisma.model.update({
+            where: { id: String(model_id) },
+            data: {
+                avg_rating: aggregations._avg.rating || 0,
+                review_count: aggregations._count.rating || 0
+            }
+        });
+
         res.status(201).json(review);
 
     } catch (error: any) {

@@ -16,7 +16,7 @@ export const authService = {
 
         // Store token and user in localStorage
         if (response.token) {
-            localStorage.setItem('token', response.token);
+            localStorage.setItem('auth_token', response.token);
             localStorage.setItem('user', JSON.stringify(response.user));
         }
 
@@ -31,7 +31,7 @@ export const authService = {
 
         // Store token and user in localStorage
         if (response.token) {
-            localStorage.setItem('token', response.token);
+            localStorage.setItem('auth_token', response.token);
             localStorage.setItem('user', JSON.stringify(response.user));
         }
 
@@ -43,7 +43,7 @@ export const authService = {
             await apiClient.post(API_ENDPOINTS.AUTH.LOGOUT);
         } finally {
             // Clear localStorage regardless of API response
-            localStorage.removeItem('token');
+            localStorage.removeItem('auth_token');
             localStorage.removeItem('user');
         }
     },
@@ -64,7 +64,7 @@ export const authService = {
     },
 
     getToken(): string | null {
-        return localStorage.getItem('token');
+        return localStorage.getItem('auth_token');
     },
 
     isAuthenticated(): boolean {

@@ -76,6 +76,8 @@ model User {
   orders        Order[]        // Orders placed as Customer
   provider_orders Order[]      @relation("provider_orders") // Orders received as Provider
 
+  cart_items    CartItem[]
+
   posts         Post[]
   post_likes    Post_Like[]
   post_comments Post_Comment[]
@@ -106,8 +108,12 @@ model Model {
   purchases  Purchase[]
   reviews    Review[]
   wishlist   Wishlist[]
+  cart_items CartItem[]
   tags       Tag[]
   order_items Order_Item[]
+
+  avg_rating   Float @default(0)
+  review_count Int   @default(0)
 
   created_at DateTime @default(now())
 }
@@ -184,6 +190,23 @@ model Wishlist {
   created_at DateTime @default(now())
 
   @@unique([user_id, model_id])
+}
+
+model CartItem {
+  id String @id @default(uuid())
+
+  user_id  String
+  model_id String
+  quantity Int @default(1)
+
+  user  User  @relation(fields: [user_id], references: [id])
+  model Model @relation(fields: [model_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([user_id, model_id])
+  @@index([user_id])
 }
 
 enum Order_Type {

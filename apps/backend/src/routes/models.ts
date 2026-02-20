@@ -7,7 +7,7 @@ import {
   delete_model,
   get_upload_signed_url
 } from "../controllers/model.controller";
-import { require_auth } from "../middlewares/auth.middleware";
+import { require_auth, optional_auth } from "../middlewares/auth.middleware";
 import { require_artist } from "../middlewares/role.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { upload_model_schema, model_id_param } from "../validators/model.validator";
@@ -65,7 +65,7 @@ const router = Router();
  *       200:
  *         description: List of models
  */
-router.get("/", list_models);
+router.get("/", optional_auth, list_models);
 
 /**
  * @openapi

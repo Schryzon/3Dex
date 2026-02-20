@@ -52,23 +52,24 @@ export interface Model {
     description: string;
     price: number;
     thumbnails: string[];
-    model_file_url: string;
-    file_format: string[];
-    poly_count?: number;
+    images: string[];
+    modelFileUrl: string;
+    fileFormat: string[];
+    polyCount?: number;
     category: string;
     tags: string[];
-    is_printable: boolean;
+    isPrintable: boolean;
     status: 'PENDING' | 'APPROVED' | 'REJECTED';
-    artist_id: string;
+    artistId: string;
     artist: {
         id: string;
         username: string;
         avatar_url?: string;
     };
-    created_at: string;
-    updated_at: string;
+    createdAt: string;
+    updatedAt: string;
     rating?: number;
-    review_count?: number;
+    reviewCount?: number;
 }
 
 export interface Review {
@@ -229,6 +230,18 @@ export interface ProviderFilters {
     country?: string;
     material?: string;
     sort?: string;
+    page?: number;
+    limit?: number;
+}
+export interface ModelFilters {
+    search?: string;
+    category?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    format?: string[];
+    isPrintable?: boolean;
+    sort?: string;
+    artistId?: string;
     page?: number;
     limit?: number;
 }

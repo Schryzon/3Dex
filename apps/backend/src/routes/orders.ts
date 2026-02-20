@@ -1,8 +1,23 @@
 import { Router } from "express";
-import { initiate_checkout, midtrans_notification } from "../controllers/order.controller";
+import { initiate_checkout, midtrans_notification, list_orders } from "../controllers/order.controller";
 import { require_auth } from "../middlewares/auth.middleware";
 
 const router = Router();
+
+/**
+ * @openapi
+ * /orders:
+ *   get:
+ *     summary: List user orders
+ *     tags:
+ *       - Orders
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of orders
+ */
+router.get("/", require_auth, list_orders);
 
 /**
  * @openapi

@@ -58,10 +58,17 @@ export async function google_login(credential: string) {
     console.log('[AUTH] Google login attempt');
 
     // Verify the Google ID token
-    const ticket = await googleClient.verifyIdToken({
-        idToken: credential,
-        audience: process.env.GOOGLE_CLIENT_ID,
-    });
+    let ticket;
+    try {
+        ticket = await googleClient.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+    } catch (error: any) {
+        console.error('[AUTH] Google verifyIdToken error:', error.message);
+        console.error('[AUTH] Target Audience was:', process.env.GOOGLE_CLIENT_ID);
+        throw error;
+    }
 
     const payload = ticket.getPayload();
     if (!payload || !payload.email) {
@@ -70,9 +77,10 @@ export async function google_login(credential: string) {
 
     const { sub: googleId, email, name, picture } = payload;
     console.log('[AUTH] Google token verified for:', email);
+    console.log('[AUTH] Google ID:', googleId);
 
     // Check if user exists by google_id
-    let user = await prisma.user.findUnique({
+    let user = await (prisma.user as any).findUnique({
         where: { google_id: googleId }
     });
 
@@ -95,7 +103,7 @@ export async function google_login(credential: string) {
 
     if (user) {
         console.log('[AUTH] Linking Google to existing account:', email);
-        user = await prisma.user.update({
+        user = await (prisma.user as any).update({
             where: { id: user.id },
             data: {
                 google_id: googleId,
@@ -109,14 +117,13 @@ export async function google_login(credential: string) {
     console.log('[AUTH] Creating new user from Google:', email);
     const username = email.split('@')[0] + '_' + Math.random().toString(36).substring(2, 6);
 
-    user = await prisma.user.create({
+    user = await (prisma.user as any).create({
         data: {
             email,
             username,
-            display_name: name || undefined,
             google_id: googleId,
-            avatar_url: picture || undefined,
-            role: Role.CUSTOMER,
+            avatar_url: picture,
+            account_status: 'APPROVED', // Auto-approve Google users
         }
     });
 
