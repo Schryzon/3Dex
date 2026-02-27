@@ -20,6 +20,7 @@ const mapModel = (item: any): Model => ({
     category: item.category?.name || item.category || 'General',
     tags: Array.isArray(item.tags) ? item.tags.map((t: any) => typeof t === 'string' ? t : t.name) : [],
     isPrintable: false,
+    isPurchased: item.isPurchased,
     status: item.status,
     artistId: item.artist_id,
     artist: {

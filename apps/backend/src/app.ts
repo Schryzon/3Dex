@@ -20,6 +20,9 @@ import review_routes from "./routes/reviews";
 import print_routes from "./routes/print";
 import purchase_routes from "./routes/purchases";
 import cart_routes from "./routes/cart";
+import notification_routes from "./routes/notification";
+import follow_routes from "./routes/follow";
+import collection_routes from "./routes/collections";
 
 // Initialize Backend
 const app = express();
@@ -35,7 +38,7 @@ app.use(cors({
 app.use(express.json());
 
 // Routes
-app.use("/health", health_routes);
+app.get("/health", (req, res) => res.json({ status: "OK" }));
 app.use("/docs", swagger_ui.serve, swagger_ui.setup(swagger_spec));
 app.use("/auth", auth_routes);
 app.use("/models", model_routes);
@@ -52,6 +55,9 @@ app.use("/reviews", review_routes);
 app.use("/print", print_routes);
 app.use("/purchases", purchase_routes);
 app.use("/cart", cart_routes);
+app.use("/notifications", notification_routes);
+app.use("/users", follow_routes);
+app.use("/collections", collection_routes);
 
 // 404 Handler - Return JSON instead of HTML
 app.use((req, res) => {

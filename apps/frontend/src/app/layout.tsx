@@ -3,6 +3,7 @@ import Script from "next/script";
 import "./globals.css";
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import { ReactQueryProvider } from '@/components/providers/ReactQueryProvider';
+import { Toaster } from 'react-hot-toast';
 
 export const metadata: Metadata = {
   title: "3Dēx | 3D Marketplace",
@@ -20,6 +21,7 @@ export default function RootLayout({
         <ReactQueryProvider>
           <AuthProvider>
             {children}
+            <Toaster position="bottom-right" />
           </AuthProvider>
         </ReactQueryProvider>
         <Script

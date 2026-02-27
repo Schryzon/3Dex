@@ -72,7 +72,11 @@ export async function list_reviews(req: Request, res: Response) {
             orderBy: { created_at: 'desc' },
             include: {
                 user: {
-                    select: { username: true, id: true }
+                    select: { 
+                        username: true, 
+                        id: true,
+                        avatar_url: true 
+                    }
                 }
             }
         });
@@ -154,4 +158,39 @@ export async function get_user_reviews(req: Auth_Request, res: Response): Promis
     });
 
     res.json(reviews);
+}
+
+/**
+ * Get distribution and stats for model reviews
+ */
+export async function get_review_stats(req: Request, res: Response) {
+    const model_id = req.params.id;
+
+    try {
+        const stats = await prisma.review.groupBy({
+            by: ['rating'],
+            where: { model_id: String(model_id) },
+            _count: { rating: true }
+        });
+
+        const aggregations = await prisma.review.aggregate({
+            where: { model_id: String(model_id) },
+            _avg: { rating: true },
+            _count: { rating: true }
+        });
+
+        // Initialize distribution
+        const ratingDistribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+        stats.forEach(s => {
+            ratingDistribution[s.rating] = s._count.rating;
+        });
+
+        res.json({
+            averageRating: aggregations._avg.rating || 0,
+            totalReviews: aggregations._count.rating || 0,
+            ratingDistribution
+        });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
 }

@@ -45,6 +45,7 @@ const SIDEBAR_MENU = [
 ];
 
 const SIDEBAR_MY_STUFF = [
+  { id: 'notifications', label: 'Notifications', icon: Bell, href: '/notifications' },
   { id: 'downloads', label: 'Downloads', icon: Download, href: '/downloads' },
   { id: 'orders', label: 'My Orders', icon: Package, href: '/orders' },
   { id: 'saved', label: 'Saved', icon: Heart, href: '/saved' },
@@ -114,7 +115,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full bg-[#141414] border-r border-gray-800 z-50 transition-all duration-300 ease-in-out overflow-x-hidden
+        className={`fixed top-0 left-0 h-full bg-[#141414] border-r border-gray-800 z-50 transition-all duration-300 ease-in-out flex flex-col
                     ${isMobileOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64'} 
                     lg:translate-x-0 ${isSidebarOpen ? 'lg:w-64' : 'lg:w-16'}
                 `}
@@ -148,7 +149,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Navigation */}
-        <nav className={`flex-1 overflow-y-auto py-4 space-y-6 scrollbar-hide ${isSidebarOpen ? 'px-3' : 'px-2'}`}>
+        <nav className={`flex-1 overflow-y-auto py-4 space-y-6 scrollbar-thin ${isSidebarOpen ? 'px-3' : 'px-2'}`}>
           <div>
             {isSidebarOpen && <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-3">Main Menu</div>}
             <div className="space-y-1">
@@ -270,7 +271,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* Bottom Actions */}
-        <div className="p-3 border-t border-gray-800 bg-[#141414]">
+        <div className="p-3 border-t border-gray-800 bg-[#141414] mt-auto">
           <div className="space-y-1">
             {isLoggedIn && SIDEBAR_BOTTOM.map((item) => {
               const Icon = item.icon;

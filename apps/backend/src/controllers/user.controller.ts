@@ -127,7 +127,13 @@ export async function get_public_profile(req: Auth_Request, res: Response): Prom
             rating: true,
             review_count: true,
             created_at: true,
-            portfolio: true // Public portfolio
+            portfolio: true, // Public portfolio
+            _count: {
+                select: {
+                    followers: true,
+                    following: true
+                }
+            }
         }
     });
 

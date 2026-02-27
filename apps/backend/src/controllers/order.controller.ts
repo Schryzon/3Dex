@@ -8,7 +8,7 @@ import { create_order, handle_payment_webhook, get_user_orders } from "../servic
  */
 export async function initiate_checkout(req: Request, res: Response) {
     try {
-        const user_id = (req as any).user.user_id;
+        const user_id = (req as any).user.id;
         const { model_ids } = req.body;
 
         if (!model_ids || !Array.isArray(model_ids) || model_ids.length === 0) {
@@ -45,7 +45,7 @@ export async function midtrans_notification(req: Request, res: Response) {
  */
 export async function list_orders(req: Request, res: Response) {
     try {
-        const user_id = (req as any).user.user_id;
+        const user_id = (req as any).user.id;
         const orders = await get_user_orders(user_id);
         res.json(orders);
     } catch (error: any) {

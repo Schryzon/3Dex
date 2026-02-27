@@ -3,64 +3,18 @@ import {
     create_review,
     list_reviews,
     add_user_review,
-    get_user_reviews
+    get_user_reviews,
+    get_review_stats
 } from "../controllers/review.controller";
 import { require_auth } from "../middlewares/auth.middleware";
 
 const router = Router();
 
 // Model Reviews
-/**
- * @openapi
- * /reviews/model/{id}:
- *   post:
- *     summary: Create a review for a model
- *     tags:
- *       - Reviews
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required: [rating]
- *             properties:
- *               rating:
- *                 type: number
- *               comment:
- *                 type: string
- *     responses:
- *       201:
- *         description: Review created
- */
-router.post("/model/:id", require_auth, create_review);
 
-/**
- * @openapi
- * /reviews/model/{id}:
- *   get:
- *     summary: List reviews for a model
- *     tags:
- *       - Reviews
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: List of reviews
- */
+router.get("/model/:id/stats", get_review_stats);
 router.get("/model/:id", list_reviews);
+router.post("/model/:id", require_auth, create_review);
 
 // User Reviews
 /**

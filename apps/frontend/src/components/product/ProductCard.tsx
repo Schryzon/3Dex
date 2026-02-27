@@ -52,7 +52,7 @@ export default function ProductCard({ product, onAddToCart, onToggleFavorite, is
   };
 
   return (
-    <Link href={`/product/${product.id}`}>
+    <Link href={`/catalog/${product.id}`}>
       <div
         className="group bg-gray-900 rounded-lg overflow-hidden border border-gray-900 hover:border-yellow-500/50 transition-all duration-300 cursor-pointer hover:shadow-lg hover:shadow-yellow-500/10"
         onMouseEnter={() => setIsHovered(true)}
@@ -76,11 +76,10 @@ export default function ProductCard({ product, onAddToCart, onToggleFavorite, is
           {/* Favorite Button */}
           <button
             onClick={handleToggleFavorite}
-            className={`absolute top-3 right-3 p-2 rounded-lg backdrop-blur-xl transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 ${
-              isFavorite 
-                ? 'bg-yellow-500 text-black border border-yellow-500 shadow-lg shadow-yellow-500/20' 
-                : 'bg-black/80 text-white border border-gray-800 hover:bg-yellow-500 hover:text-black hover:border-yellow-500'
-            }`}
+            className={`absolute top-3 right-3 p-2 rounded-lg backdrop-blur-xl transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 ${isFavorite
+              ? 'bg-yellow-500 text-black border border-yellow-500 shadow-lg shadow-yellow-500/20'
+              : 'bg-black/80 text-white border border-gray-800 hover:bg-yellow-500 hover:text-black hover:border-yellow-500'
+              }`}
           >
             <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
           </button>
@@ -96,11 +95,10 @@ export default function ProductCard({ product, onAddToCart, onToggleFavorite, is
                     e.stopPropagation();
                     setImageIndex(index);
                   }}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    imageIndex === index 
-                      ? 'bg-yellow-500 w-6' 
-                      : 'bg-white/50 hover:bg-yellow-500/50 w-1.5'
-                  }`}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${imageIndex === index
+                    ? 'bg-yellow-500 w-6'
+                    : 'bg-white/50 hover:bg-yellow-500/50 w-1.5'
+                    }`}
                 />
               ))}
             </div>
@@ -109,13 +107,28 @@ export default function ProductCard({ product, onAddToCart, onToggleFavorite, is
           {/* Quick Add to Cart (on hover) */}
           {isHovered && (
             <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black via-black/80 to-transparent">
-              <button
-                onClick={handleAddToCart}
-                className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-semibold py-2.5 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-yellow-500/20 hover:scale-[1.02] active:scale-[0.98]"
-              >
-                <ShoppingCart className="w-4 h-4" />
-                Add to Cart
-              </button>
+              {product.price === 0 ? (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // Go to product page to download
+                    window.location.href = `/catalog/${product.id}`;
+                  }}
+                  className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-yellow-500/20 hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <Eye className="w-5 h-5" />
+                  View & Download
+                </button>
+              ) : (
+                <button
+                  onClick={handleAddToCart}
+                  className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-yellow-500/20 hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                  Add to Cart
+                </button>
+              )}
             </div>
           )}
         </div>

@@ -84,7 +84,7 @@ export default function CatalogPage() {
     };
 
     const handleProductClick = (productId: string) => {
-        router.push(`/product/${productId}`);
+        router.push(`/catalog/${productId}`);
     };
 
     const loadMore = () => {

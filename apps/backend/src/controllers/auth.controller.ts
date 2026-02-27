@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { register_user, login_user, google_login } from "../services/auth.service";
+import prisma from "../prisma";
 import { sign_token } from "../utils/jwt";
 
 export async function login(req: Request, res: Response) {
@@ -102,3 +103,33 @@ export async function google_auth(req: Request, res: Response) {
         });
     }
 }
+
+export async function get_me(req: any, res: Response) {
+    const user = req.user;
+    if (!user) {
+        return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+        const db_user = await prisma.user.findUnique({
+            where: { id: user.id },
+            select: {
+                id: true,
+                email: true,
+                username: true,
+                role: true,
+                avatar_url: true,
+                display_name: true,
+            }
+        });
+
+        if (!db_user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.json(db_user);
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
+}
+

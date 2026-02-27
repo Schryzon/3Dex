@@ -3,6 +3,7 @@ import {
   create_model,
   get_all_models,
   get_model_by_id,
+  update_model_by_id,
   delete_model_by_id,
 } from "../services/model.service";
 import { get_download_url_s3 } from "../services/storage.service";
@@ -16,6 +17,8 @@ export async function list_models(req: Request, res: Response) {
     min_price,
     max_price,
     artist_id,
+    category_id,
+    exclude_id,
     sort,
     status, // 'APPROVED' | 'PENDING' | 'REJECTED' | 'ALL'
     page = 1,
@@ -64,6 +67,16 @@ export async function list_models(req: Request, res: Response) {
   // 4. Artist Filter
   if (artist_id) {
     where.artist_id = String(artist_id);
+  }
+
+  // 5. Category Filter
+  if (category_id) {
+    where.category_id = String(category_id);
+  }
+
+  // 6. Exclusion (for Related Products)
+  if (exclude_id) {
+    where.id = { not: String(exclude_id) };
   }
 
   // 5. Sorting
@@ -129,6 +142,8 @@ export async function list_models(req: Request, res: Response) {
 
 export async function get_model_detail(req: Request, res: Response) {
   const id = String(req.params.id);
+  const user = (req as any).user;
+  const user_id = user ? String(user.id) : null;
 
   try {
     const raw_model = await get_model_by_id(id);
@@ -139,7 +154,21 @@ export async function get_model_detail(req: Request, res: Response) {
       });
     }
 
-    const model = { ...raw_model };
+    const model: any = { ...raw_model };
+
+    // Check purchase status
+    let isPurchased = false;
+    if (user_id) {
+      const purchase = await get_purchase(user_id, raw_model.id);
+      isPurchased = !!purchase;
+
+      // Also treat artist as owner
+      if (raw_model.artist.id === user_id) {
+        isPurchased = true;
+      }
+    }
+    model.isPurchased = isPurchased;
+
     if (model.preview_url && !model.preview_url.startsWith("http")) {
       model.preview_url = await get_download_url_s3(model.preview_url);
     }
@@ -154,6 +183,7 @@ export async function get_model_detail(req: Request, res: Response) {
     });
   }
 }
+
 
 export async function upload_model(req: Request, res: Response) {
   const { title, description, price, file_url, preview_url, artist_id, category, tags } =
@@ -209,10 +239,12 @@ export async function download_model(req: Request, res: Response) {
     // Check purchase
     const purchase = await get_purchase(user_id, model_id);
 
-    // Allow artist to download their own model?
-    // The previous logic didn't explicitly allow artist, but usually they should.
-    // However, sticking to purchase check or simple "if artist_id == user_id"
-    if (!purchase && model.artist.id !== user_id && user.role !== "ADMIN") {
+    // Allow download if:
+    // 1. User has purchased it
+    // 2. User is the artist (owner)
+    // 3. User is an ADMIN
+    // 4. Model is FREE (price === 0)
+    if (!purchase && model.artist.id !== user_id && user.role !== "ADMIN" && model.price > 0) {
       return res.status(403).json({
         message: "You have not purchased this model!"
       });
@@ -266,6 +298,38 @@ export async function delete_model(req: Request, res: Response) {
     res.status(500).json({
       message: error.message,
     });
+  }
+}
+
+export async function update_model(req: Request, res: Response) {
+  const model_id = String(req.params.id);
+  const user = (req as Auth_Request).user;
+  const user_id = String(user.id);
+  const user_role = user.role;
+
+  try {
+    const model = await get_model_by_id(model_id);
+
+    if (!model) {
+      return res.status(404).json({ message: "Model not found!" });
+    }
+
+    if (model.artist.id !== user_id && user_role !== "ADMIN") {
+      return res.status(403).json({ message: "You are not authorized to edit this model!" });
+    }
+
+    const { title, description, price, category } = req.body;
+
+    const updated = await update_model_by_id(model_id, {
+      ...(title !== undefined && { title }),
+      ...(description !== undefined && { description }),
+      ...(price !== undefined && { price: Number(price) }),
+      ...(category !== undefined && { category }),
+    });
+
+    res.json(updated);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
   }
 }
 

@@ -134,7 +134,7 @@ export default function PopularModels() {
                     {!isLoading && models.map((model) => (
                         <Link
                             key={model.id}
-                            href={`/product/${model.id}`}
+                            href={`/catalog/${model.id}`}
                             className="group flex-shrink-0 w-[280px] md:w-[300px] bg-gray-900/60 backdrop-blur-sm rounded-xl border border-gray-800 hover:border-yellow-400/50 overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-yellow-400/10"
                         >
                             {/* Thumbnail */}

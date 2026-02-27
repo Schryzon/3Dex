@@ -76,7 +76,7 @@ export default function ProductSearch({ onSearch, placeholder = 'Search 3D model
   const handleSuggestionClick = (suggestion: SearchSuggestion) => {
     setQuery('');
     setShowSuggestions(false);
-    router.push(`/product/${suggestion.id}`);
+    router.push(`/catalog/${suggestion.id}`);
   };
 
   return (

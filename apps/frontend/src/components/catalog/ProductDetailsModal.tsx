@@ -20,7 +20,11 @@ import {
 } from 'lucide-react';
 import ModelViewer3D from './ModelViewer3D';
 import { useCart } from '@/lib/hooks/useCart';
-import router from 'next/router';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { reviewApi, Review } from '@/lib/api/reviews';
+import { purchaseService } from '@/lib/api/services/purchase.service';
+import ProductReviewList from './ProductReviewList';
+import ProductReviewForm from './ProductReviewForm';
 
 interface ProductDetailsModalProps {
     isOpen: boolean;
@@ -76,9 +80,65 @@ export default function ProductDetailsModal({
 
     const router = useRouter();
 
-    // Cart logic
+    // Auth & Cart logic
+    const { user, showLogin } = useAuth();
     const { addToCart, items } = useCart();
     const isInCart = items.some(item => item.model_id === product.id);
+
+    // Reviews state
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [isLoadingReviews, setIsLoadingReviews] = useState(false);
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
+    useEffect(() => {
+        if (isOpen && activeTab === 'reviews') {
+            loadReviews();
+        }
+    }, [isOpen, activeTab, product.id]);
+
+    const loadReviews = async () => {
+        setIsLoadingReviews(true);
+        try {
+            const data = await reviewApi.getReviews(product.id);
+            setReviews(data);
+        } catch (error) {
+            console.error('Failed to load reviews:', error);
+        } finally {
+            setIsLoadingReviews(false);
+        }
+    };
+
+    const handleReviewSubmit = async (rating: number, comment: string) => {
+        setIsSubmittingReview(true);
+        try {
+            await reviewApi.createReview(product.id, { rating, comment });
+            await loadReviews();
+            // Optional: Show success toast
+        } catch (error: any) {
+            console.error('Failed to submit review:', error);
+            alert(error.response?.data?.message || 'Failed to submit review. Make sure you have purchased this model.');
+        } finally {
+            setIsSubmittingReview(false);
+        }
+    };
+
+    const handleDownload = async () => {
+        if (!user) {
+            showLogin?.();
+            return;
+        }
+        try {
+            const { download_url } = await purchaseService.getDownloadUrl(product.id);
+            if (!download_url) {
+                alert('Download URL not available');
+                return;
+            }
+            window.open(download_url, '_blank');
+        } catch (error: any) {
+            console.error('Download failed:', error);
+            alert(error.response?.data?.message || error.message || 'Failed to get download URL');
+        }
+    };
 
     if (!isOpen) return null;
 
@@ -216,7 +276,7 @@ export default function ProductDetailsModal({
 
                             {/* Price */}
                             <div className="flex items-baseline gap-3">
-                                <span className={`text-3xl font-bold ${product.isFree ? 'text-blue-400' : 'text-white'}`}>
+                                <span className={`text-3xl font-bold ${product.isFree ? 'text-yellow-400' : 'text-white'}`}>
                                     {displayPrice}
                                 </span>
                                 {product.originalPrice && (
@@ -235,16 +295,20 @@ export default function ProductDetailsModal({
                             <div className="flex flex-col sm:flex-row gap-3">
                                 <button
                                     onClick={() => {
-                                        if (!product.isFree && !isInCart) {
+                                        if (product.price === 0 || product.isFree) {
+                                            handleDownload();
+                                        } else if (!isInCart) {
                                             addToCart({ modelId: product.id });
                                         }
                                     }}
-                                    className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 sm:py-3 font-bold rounded-xl transition-all cursor-pointer ${isInCart
+                                    className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 sm:py-3.5 font-bold rounded-xl transition-all cursor-pointer ${(isInCart && !product.isFree && product.price > 0)
                                         ? 'bg-green-500/10 border border-green-500/30 text-green-400'
-                                        : 'bg-yellow-400 hover:bg-yellow-300 text-black shadow-[0_4px_20px_rgba(250,204,21,0.2)]'
-                                        }`}
+                                        : (product.isFree || product.price === 0)
+                                            ? 'bg-yellow-500 hover:bg-yellow-400 text-black shadow-[0_4px_20px_rgba(234,179,8,0.2)]'
+                                            : 'bg-yellow-500 hover:bg-yellow-400 text-black shadow-[0_4px_20px_rgba(234,179,8,0.2)]'
+                                        } hover:scale-[1.02] active:scale-[0.98]`}
                                 >
-                                    {product.isFree ? (
+                                    {(product.isFree || product.price === 0) ? (
                                         <>
                                             <Download className="w-5 h-5" />
                                             Download Free
@@ -274,7 +338,7 @@ export default function ProductDetailsModal({
                                             }
                                             router.push('/cart');
                                         }}
-                                        className="flex-1 flex items-center justify-center gap-2 px-6 py-4 sm:py-3 bg-white hover:bg-gray-100 text-black font-bold rounded-xl transition-colors cursor-pointer border border-gray-200"
+                                        className="flex-1 flex items-center justify-center gap-2 px-6 py-4 sm:py-3.5 bg-white hover:bg-gray-100 text-black font-bold rounded-xl transition-all cursor-pointer border border-gray-200 hover:scale-[1.02] active:scale-[0.98]"
                                     >
                                         <ShoppingBag className="w-5 h-5" />
                                         Buy Now
@@ -284,15 +348,15 @@ export default function ProductDetailsModal({
                                 <div className="flex gap-3 sm:gap-2">
                                     <button
                                         onClick={() => setIsSaved(!isSaved)}
-                                        className={`flex-1 sm:flex-none p-4 sm:p-3 rounded-xl border transition-colors cursor-pointer flex items-center justify-center ${isSaved
-                                            ? 'bg-red-500/10 border-red-500/30 text-red-400'
+                                        className={`flex-1 sm:flex-none p-4 sm:p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-center hover:scale-[1.05] active:scale-[0.95] ${isSaved
+                                            ? 'bg-red-500/10 border-red-500/30 text-red-400 shadow-[0_4px_15px_rgba(239,68,68,0.1)]'
                                             : 'border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'
                                             }`}
                                         title="Save to Collection"
                                     >
                                         <Heart className={`w-5 h-5 ${isSaved ? 'fill-current' : ''}`} />
                                     </button>
-                                    <button className="flex-1 sm:flex-none p-4 sm:p-3 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white rounded-xl transition-colors cursor-pointer flex items-center justify-center">
+                                    <button className="flex-1 sm:flex-none p-4 sm:p-3.5 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white rounded-xl transition-all cursor-pointer flex items-center justify-center hover:scale-[1.05] active:scale-[0.95]">
                                         <Share2 className="w-5 h-5" />
                                     </button>
                                 </div>
@@ -385,8 +449,17 @@ export default function ProductDetailsModal({
                                 </div>
                             )}
                             {activeTab === 'reviews' && (
-                                <div className="text-gray-500 text-sm">
-                                    <p>Reviews coming soon...</p>
+                                <div className="space-y-6">
+                                    {user && (
+                                        <ProductReviewForm
+                                            onSubmit={handleReviewSubmit}
+                                            isSubmitting={isSubmittingReview}
+                                        />
+                                    )}
+                                    <ProductReviewList
+                                        reviews={reviews}
+                                        isLoading={isLoadingReviews}
+                                    />
                                 </div>
                             )}
                             {activeTab === 'files' && (
@@ -434,9 +507,9 @@ export default function ProductDetailsModal({
                     <Link
                         href={`/catalog/${product.id}`}
                         onClick={onClose}
-                        className="flex items-center gap-2 text-gray-400 hover:text-white text-sm transition-colors"
+                        className="flex items-center gap-2 text-gray-400 hover:text-white text-sm font-bold py-2 transition-all hover:scale-105 active:scale-95 group"
                     >
-                        <ExternalLink className="w-4 h-4" />
+                        <ExternalLink className="w-5 h-5 text-gray-500 group-hover:text-yellow-500" />
                         View Full Page
                     </Link>
                 </div>

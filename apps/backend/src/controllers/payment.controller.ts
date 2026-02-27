@@ -18,7 +18,7 @@ export async function initiate_checkout(req: Request, res: Response) {
 
 export async function confirm_payment(req: Request, res: Response) {
     const { model_id, transaction_id } = req.body;
-    const user_id = (req as any).user.user_id; // Added via require_auth
+    const user_id = (req as any).user.id; // Added via require_auth
 
     try {
         const model = await get_model_by_id(model_id);

@@ -54,6 +54,11 @@ export async function add_to_cart(req: Auth_Request, res: Response) {
             return res.status(404).json({ message: "Model not found" });
         }
 
+        // Prevent free models in cart
+        if (model.price === 0) {
+            return res.status(400).json({ message: "Free models cannot be added to the cart. Please download them directly." });
+        }
+
         // Upsert: add or update quantity
         const item = await (prisma as any).cartItem.upsert({
             where: {

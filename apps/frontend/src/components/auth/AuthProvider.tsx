@@ -16,7 +16,7 @@ interface AuthContextType {
   login: (credentials: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   googleLogin: (credential: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   setUser: (user: User | null) => void;
   updateUser: (user: User) => void;
 }
@@ -81,8 +81,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     console.log(' Google login successful:', userData.username);
   };
 
-  const logout = () => {
-    authService.logout();
+  const logout = async () => {
+    await authService.logout();
     setUserState(null);
   };
 
@@ -109,6 +109,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setShowLoginModal(false);
     setShowRegisterModal(false);
   };
+
+  
 
   return (
     <AuthContext.Provider value={{

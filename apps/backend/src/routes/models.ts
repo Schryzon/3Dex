@@ -5,14 +5,16 @@ import {
   get_model_detail,
   download_model,
   delete_model,
+  update_model,
   get_upload_signed_url
 } from "../controllers/model.controller";
+import { buy_model } from "../controllers/purchase.controller";
+
 import { require_auth, optional_auth } from "../middlewares/auth.middleware";
 import { require_artist } from "../middlewares/role.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { upload_model_schema, model_id_param } from "../validators/model.validator";
 import { buy_model_schema } from "../validators/purchase.validator";
-import { create_review, list_reviews } from "../controllers/review.controller";
 
 const router = Router();
 
@@ -88,9 +90,8 @@ router.get("/", optional_auth, list_models);
  *       404:
  *         description: Model not found
  */
-router.get("/:id/download", require_auth, validate(model_id_param), download_model);
+router.get("/:id/download", require_auth, validate(model_id_param, "params"), download_model);
 
-/* NOT IMPLEMENTED YET, /:id/buy DOES NOT EXIST
 router.post(
   "/:id/buy",
   require_auth,
@@ -98,7 +99,6 @@ router.post(
   validate(buy_model_schema, "body"),
   buy_model
 );
-*/
 
 /**
  * @openapi
@@ -119,7 +119,7 @@ router.post(
  *       404:
  *         description: Model not found
  */
-router.get("/:id", get_model_detail);
+router.get("/:id", optional_auth, get_model_detail);
 
 router.post("/", require_auth, require_artist, validate(upload_model_schema), upload_model);
 
@@ -146,6 +146,9 @@ router.post("/", require_auth, require_artist, validate(upload_model_schema), up
  *         description: Forbidden
  */
 router.delete("/:id", require_auth, delete_model);
+
+// PATCH /models/:id — Update model details (Artist owner or Admin)
+router.patch("/:id", require_auth, update_model);
 
 /**
  * @openapi
@@ -174,61 +177,5 @@ router.delete("/:id", require_auth, delete_model);
  *         description: Invalid file type or missing fields
  */
 router.post("/upload-url", require_auth, require_artist, get_upload_signed_url);
-
-// REVIEWS
-// REVIEWS
-
-/**
- * @openapi
- * /models/{id}/reviews:
- *   get:
- *     summary: List reviews for a model
- *     tags:
- *       - Reviews
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: List of reviews
- */
-router.get("/:id/reviews", list_reviews);
-
-/**
- * @openapi
- * /models/{id}/reviews:
- *   post:
- *     summary: Add a review (Purchasers only)
- *     tags:
- *       - Reviews
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               rating:
- *                 type: integer
- *               comment:
- *                 type: string
- *     responses:
- *       201:
- *         description: Review added
- *       403:
- *         description: Not purchased
- */
-router.post("/:id/reviews", require_auth, create_review);
 
 export default router;

@@ -85,6 +85,11 @@ model User {
   received_reviews User_Review[] @relation("received_reviews")
   given_reviews    User_Review[] @relation("given_reviews")
 
+  followers     Follow[]       @relation("following")
+  following     Follow[]       @relation("follower")
+  notifications Notification[]
+  collections   Collection[]
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
@@ -111,6 +116,7 @@ model Model {
   cart_items CartItem[]
   tags       Tag[]
   order_items Order_Item[]
+  collection_items CollectionItem[]
 
   avg_rating   Float @default(0)
   review_count Int   @default(0)
@@ -374,5 +380,53 @@ model Stats {
   data Json // { top_models: [], top_artists: [], total_sales: 0 }
 
   created_at DateTime @default(now())
+}
+
+model Follow {
+  id           String   @id @default(uuid())
+  follower_id  String
+  follower     User     @relation("follower", fields: [follower_id], references: [id])
+  following_id String
+  following    User     @relation("following", fields: [following_id], references: [id])
+  created_at   DateTime @default(now())
+
+  @@unique([follower_id, following_id])
+}
+
+model Notification {
+  id         String   @id @default(uuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  type       String   // e.g., 'FOLLOW', 'MODEL_APPROVED', 'SALE', 'LIKE'
+  title      String
+  message    String
+  is_read    Boolean  @default(false)
+  data       Json?    // Optional payload
+  created_at DateTime @default(now())
+
+  @@index([user_id])
+}
+
+model Collection {
+  id          String           @id @default(uuid())
+  user_id     String
+  user        User             @relation(fields: [user_id], references: [id])
+  name        String
+  description String?
+  is_public   Boolean          @default(true)
+  items       CollectionItem[]
+  created_at  DateTime         @default(now())
+  updated_at  DateTime         @updatedAt
+}
+
+model CollectionItem {
+  id            String     @id @default(uuid())
+  collection_id String
+  collection    Collection @relation(fields: [collection_id], references: [id], onDelete: Cascade)
+  model_id      String
+  model         Model      @relation(fields: [model_id], references: [id], onDelete: Cascade)
+  added_at      DateTime   @default(now())
+
+  @@unique([collection_id, model_id])
 }
 

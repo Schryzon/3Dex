@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { register, login, google_auth } from "../controllers/auth.controller";
+import { register, login, google_auth, get_me } from "../controllers/auth.controller";
+import { require_auth } from "../middlewares/auth.middleware";
 
 const router = Router();
 
@@ -83,6 +84,6 @@ router.post("/register", register);
  *         description: Invalid Google token
  */
 router.post("/google", google_auth);
+router.get("/me", require_auth, get_me);
 
 export default router;
-

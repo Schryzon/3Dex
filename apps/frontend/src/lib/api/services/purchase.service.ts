@@ -22,7 +22,11 @@ export const purchaseService = {
         return apiClient.get<Purchase[]>('/purchases/me/purchases');
     },
 
-    async getDownloadUrl(modelId: string): Promise<{ url: string }> {
-        return apiClient.get(API_ENDPOINTS.MODELS.DOWNLOAD(modelId));
-    },
+    async getDownloadUrl(modelId: string): Promise<{ download_url: string; license: string }> {
+    return apiClient.get(API_ENDPOINTS.MODELS.DOWNLOAD(modelId));
+},
+
+    async buyModel(modelId: string, license: 'PERSONAL_USE' | 'COMMERCIAL_USE' = 'PERSONAL_USE'): Promise<any> {
+        return apiClient.post(`/models/${modelId}/buy`, { license });
+    }
 };

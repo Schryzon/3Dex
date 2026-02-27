@@ -49,6 +49,18 @@ export function useDeleteProduct() {
     });
 }
 
+export function useUpdateProduct() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) =>
+            productService.updateProduct(id, data as any),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MODELS });
+        },
+    });
+}
+
 export function useAddReview() {
     const queryClient = useQueryClient();
 

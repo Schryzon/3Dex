@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { User } from '@/lib/types';
 import UserAvatar from '@/components/common/UserAvatar';
@@ -16,9 +16,13 @@ import {
     Github,
     Printer,
     Share2,
-    MessageSquare
+    MessageSquare,
+    UserPlus,
+    UserCheck,
+    Users
 } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 export default function PublicProfilePage() {
     const { username } = useParams();
@@ -32,6 +36,49 @@ export default function PublicProfilePage() {
         },
         enabled: !!username
     });
+
+    const { user: currentUser } = useAuth();
+
+    // Check follow status
+    const { data: followStatus, refetch: refetchFollowStatus } = useQuery({
+        queryKey: ['follow-status', user?.id],
+        queryFn: async () => {
+            if (!user?.id) return { is_following: false };
+            const res = await api.get<{ is_following: boolean }>(`/users/${user.id}/follow-status`);
+            return res.data;
+        },
+        enabled: !!user?.id && !!currentUser
+    });
+
+    // Follow mutation
+    const followMutation = useMutation({
+        mutationFn: async () => {
+            await api.post(`/users/${user?.id}/follow`);
+        },
+        onSuccess: () => {
+            refetchFollowStatus();
+        }
+    });
+
+    // Unfollow mutation
+    const unfollowMutation = useMutation({
+        mutationFn: async () => {
+            await api.delete(`/users/${user?.id}/unfollow`);
+        },
+        onSuccess: () => {
+            refetchFollowStatus();
+        }
+    });
+
+    const handleFollowToggle = () => {
+        if (!currentUser) return; // Note: In a real app, maybe trigger auth modal
+
+        if (followStatus?.is_following) {
+            unfollowMutation.mutate();
+        } else {
+            followMutation.mutate();
+        }
+    };
 
     if (isLoading) {
         return (
@@ -83,6 +130,13 @@ export default function PublicProfilePage() {
                                 </div>
                             )}
                             <div className="flex items-center gap-1.5">
+                                <Users className="w-4 h-4" />
+                                <span><strong className="text-white">{user._count?.followers || 0}</strong> Followers</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <span><strong className="text-white">{user._count?.following || 0}</strong> Following</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
                                 <Calendar className="w-4 h-4" />
                                 <span>Joined {new Date(user.created_at).toLocaleDateString()}</span>
                             </div>
@@ -96,6 +150,30 @@ export default function PublicProfilePage() {
                     </div>
 
                     <div className="flex gap-3 pb-2 w-full md:w-auto">
+                        {currentUser && currentUser.id !== user.id && (
+                            <button
+                                onClick={handleFollowToggle}
+                                disabled={followMutation.isPending || unfollowMutation.isPending}
+                                className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 font-bold rounded-xl transition-all ${followStatus?.is_following
+                                    ? 'bg-gray-800 text-white hover:bg-gray-700 border border-gray-700'
+                                    : 'bg-yellow-400 text-black hover:bg-yellow-300'
+                                    }`}
+                            >
+                                {followMutation.isPending || unfollowMutation.isPending ? (
+                                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></span>
+                                ) : followStatus?.is_following ? (
+                                    <>
+                                        <UserCheck className="w-4 h-4" />
+                                        Following
+                                    </>
+                                ) : (
+                                    <>
+                                        <UserPlus className="w-4 h-4" />
+                                        Follow
+                                    </>
+                                )}
+                            </button>
+                        )}
                         {user.role === 'PROVIDER' && (
                             <Link
                                 href={`/print-services/${user.username}/order`}

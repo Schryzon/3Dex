@@ -22,19 +22,12 @@ import {
     Printer,
     Box,
     Settings2,
-    Shield,
-    Lock,
-    Key,
-    Smartphone,
-    Monitor,
     Globe,
     Trash2,
     Twitter,
     Instagram,
     Github,
     ExternalLink,
-    AlertTriangle,
-    History,
     Download
 } from 'lucide-react';
 import Link from 'next/link';
@@ -65,7 +58,7 @@ function UploadsTab({ userId }: { userId?: string }) {
 }
 
 
-type TabType = 'profile' | 'settings' | 'security' | 'collections' | 'bookmarks' | 'notifications' | 'uploads' | 'analytics' | 'billing' | 'shipping' | 'service' | 'jobs' | 'workshop';
+type TabType = 'profile' | 'settings' | 'collections' | 'bookmarks' | 'notifications' | 'uploads' | 'analytics' | 'billing' | 'shipping' | 'service' | 'jobs' | 'workshop';
 
 export default function ProfilePage() {
     const { user, setUser } = useAuth();
@@ -97,7 +90,6 @@ export default function ProfilePage() {
             artstation: user?.social_artstation || '',
             behance: user?.social_behance || ''
         },
-        twoFactorEnabled: user?.two_factor_enabled || false
     });
     const [newSkill, setNewSkill] = useState('');
     const [isSaving, setIsSaving] = useState(false);
@@ -132,10 +124,6 @@ export default function ProfilePage() {
                 social_instagram: formData.socialLinks.instagram,
                 social_artstation: formData.socialLinks.artstation,
                 social_behance: formData.socialLinks.behance,
-                // Check if backend supports addresses update here or separate
-                // Addresses might be separate endpoint usually, but let's assume separate or ignore for now if complex.
-                // For this MVP, let's focus on basic profile.
-                // two_factor_enabled might be separate too.
             };
 
             const res = await api.patch('/users/profile', payload);
@@ -657,157 +645,6 @@ export default function ProfilePage() {
                             </div>
                         )}
 
-                        {activeTab === 'security' && (
-                            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                {/* Account Strength Score */}
-                                <div className="bg-gradient-to-r from-gray-900/60 to-gray-800/40 rounded-2xl border border-gray-800 p-8 flex flex-col md:flex-row items-center justify-between gap-6">
-                                    <div className="flex items-center gap-6">
-                                        <div className="w-20 h-20 rounded-full border-4 border-yellow-400/20 flex items-center justify-center relative">
-                                            <div className="absolute inset-0 border-4 border-yellow-400 rounded-full border-t-transparent -rotate-45" />
-                                            <span className="text-2xl font-bold text-white">75</span>
-                                        </div>
-                                        <div>
-                                            <h3 className="text-xl font-bold text-white mb-1">Security Strength</h3>
-                                            <p className="text-gray-400 max-w-xs">Your account is moderately secure. Enable 2FA to reach 100%.</p>
-                                        </div>
-                                    </div>
-                                    <button className="px-6 py-2.5 bg-yellow-400 text-black font-bold rounded-xl hover:bg-yellow-300 transition-all text-sm">
-                                        Fix Vulnerabilities
-                                    </button>
-                                </div>
-
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                    {/* Password Card */}
-                                    <div className="bg-gray-900/40 rounded-2xl border border-gray-800 overflow-hidden">
-                                        <div className="px-8 py-6 border-b border-gray-800 bg-gray-800/20 flex items-center gap-4">
-                                            <div className="w-10 h-10 bg-blue-400/10 rounded-xl flex items-center justify-center">
-                                                <Key className="w-5 h-5 text-blue-400" />
-                                            </div>
-                                            <h3 className="text-lg font-bold text-white">Password Settings</h3>
-                                        </div>
-                                        <div className="p-8 space-y-5">
-                                            <div>
-                                                <label className="block text-sm text-gray-400 mb-2">Current Password</label>
-                                                <input type="password" placeholder="••••••••" className="w-full bg-black/50 text-white px-4 py-3 rounded-xl border border-gray-800 focus:border-blue-400 focus:outline-none transition-all" />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm text-gray-400 mb-2">New Password</label>
-                                                <input type="password" placeholder="••••••••" className="w-full bg-black/50 text-white px-4 py-3 rounded-xl border border-gray-800 focus:border-blue-400 focus:outline-none transition-all" />
-                                                <div className="mt-2 flex gap-1">
-                                                    <div className="h-1 flex-1 bg-green-500 rounded-full" />
-                                                    <div className="h-1 flex-1 bg-green-500 rounded-full" />
-                                                    <div className="h-1 flex-1 bg-gray-700 rounded-full" />
-                                                    <div className="h-1 flex-1 bg-gray-700 rounded-full" />
-                                                </div>
-                                                <p className="text-[10px] text-gray-500 mt-1">Strength: Fairly Strong</p>
-                                            </div>
-                                            <button className="w-full py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-all mt-2">
-                                                Update Password
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    {/* 2FA Card */}
-                                    <div className="bg-gray-900/40 rounded-2xl border border-gray-800 overflow-hidden">
-                                        <div className="px-8 py-6 border-b border-gray-800 bg-gray-800/20 flex items-center gap-4">
-                                            <div className="w-10 h-10 bg-yellow-400/10 rounded-xl flex items-center justify-center">
-                                                <Smartphone className="w-5 h-5 text-yellow-400" />
-                                            </div>
-                                            <h3 className="text-lg font-bold text-white">2-Step Verification</h3>
-                                        </div>
-                                        <div className="p-8 space-y-6">
-                                            <p className="text-sm text-gray-400">Add an extra layer of security to your account by requiring a code from your phone.</p>
-                                            <div className="flex items-center justify-between p-4 bg-yellow-400/5 border border-yellow-400/10 rounded-xl">
-                                                <div className="flex items-center gap-3">
-                                                    <Lock className="w-5 h-5 text-yellow-400" />
-                                                    <span className="text-white font-medium">Authenticator App</span>
-                                                </div>
-                                                <button
-                                                    onClick={() => setFormData({ ...formData, twoFactorEnabled: !formData.twoFactorEnabled })}
-                                                    className={`w-12 h-6 rounded-full relative transition-all duration-300 ${formData.twoFactorEnabled ? 'bg-yellow-400' : 'bg-gray-700'}`}
-                                                >
-                                                    <div className={`absolute top-1 w-4 h-4 rounded-full transition-all duration-300 ${formData.twoFactorEnabled ? 'right-1 bg-black' : 'left-1 bg-gray-400'}`} />
-                                                </button>
-                                            </div>
-                                            <div className="space-y-4 pt-2">
-                                                <div className="flex items-center gap-3 text-xs text-gray-400">
-                                                    <CheckCircle2 className="w-4 h-4 text-green-500" />
-                                                    <span>Secure your digital assets</span>
-                                                </div>
-                                                <div className="flex items-center gap-3 text-xs text-gray-400">
-                                                    <CheckCircle2 className="w-4 h-4 text-green-500" />
-                                                    <span>Prevent unauthorized login attempts</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Sessions Card */}
-                                <div className="bg-gray-900/40 rounded-2xl border border-gray-800 overflow-hidden">
-                                    <div className="px-8 py-6 border-b border-gray-800 bg-gray-800/20 flex items-center justify-between">
-                                        <div className="flex items-center gap-4">
-                                            <History className="w-5 h-5 text-gray-400" />
-                                            <h3 className="text-lg font-bold text-white">Active Sessions</h3>
-                                        </div>
-                                        <button className="text-sm text-red-500 font-medium hover:underline">Log out all devices</button>
-                                    </div>
-                                    <div className="p-8 space-y-4">
-                                        <div className="flex items-center justify-between p-4 bg-black/20 rounded-xl border border-gray-800">
-                                            <div className="flex items-center gap-4">
-                                                <div className="p-3 bg-green-400/10 rounded-lg">
-                                                    <Monitor className="w-5 h-5 text-green-400" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-white font-medium">Windows PC • Chrome</p>
-                                                    <p className="text-xs text-gray-500">Jakarta, Indonesia • IP: 182.253.xx.xx</p>
-                                                    <p className="text-[10px] text-green-400 font-medium mt-1 uppercase">Current Session</p>
-                                                </div>
-                                            </div>
-                                            <span className="text-xs text-gray-500">Active</span>
-                                        </div>
-                                        <div className="flex items-center justify-between p-4 bg-black/20 rounded-xl border border-gray-800 opacity-60">
-                                            <div className="flex items-center gap-4">
-                                                <div className="p-3 bg-gray-800 rounded-lg">
-                                                    <Smartphone className="w-5 h-5 text-gray-400" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-white font-medium">iPhone 15 Pro • Safari</p>
-                                                    <p className="text-xs text-gray-500">Bandung, Indonesia • 2 days ago</p>
-                                                </div>
-                                            </div>
-                                            <button className="text-xs text-gray-400 hover:text-white transition-colors">Revoke</button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Danger Zone */}
-                                <div className="bg-red-500/5 rounded-2xl border border-red-500/20 overflow-hidden">
-                                    <div className="px-8 py-6 border-b border-red-500/20 bg-red-500/5 flex items-center gap-4">
-                                        <AlertTriangle className="w-6 h-6 text-red-500" />
-                                        <h3 className="text-lg font-bold text-red-500">Danger Zone</h3>
-                                    </div>
-                                    <div className="p-8 flex flex-col md:flex-row items-center justify-between gap-6">
-                                        <div>
-                                            <h4 className="text-white font-bold mb-1">Delete Account</h4>
-                                            <p className="text-sm text-gray-500 max-w-md">Once you delete your account, there is no going back. Please be certain.</p>
-                                        </div>
-                                        <button className="px-6 py-3 border-2 border-red-500/50 text-red-500 font-bold rounded-xl hover:bg-red-500 hover:text-white transition-all">
-                                            Delete My Account
-                                        </button>
-                                    </div>
-                                    <div className="px-8 py-6 border-t border-red-500/10 flex flex-col md:flex-row items-center justify-between gap-6">
-                                        <div>
-                                            <h4 className="text-white font-bold mb-1">Export Data</h4>
-                                            <p className="text-sm text-gray-500 max-w-md">Download all your personal data, collections, and upload history.</p>
-                                        </div>
-                                        <button className="px-6 py-3 bg-gray-800 text-white font-bold rounded-xl hover:bg-gray-700 transition-all flex items-center gap-2">
-                                            <Download className="w-4 h-4" /> Export (JSON)
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
 
                         {activeTab === 'billing' && (
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">

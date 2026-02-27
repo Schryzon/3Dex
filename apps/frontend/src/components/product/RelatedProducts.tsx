@@ -1,23 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { apiClient } from '@/lib/api/client';
 import ProductCard from './ProductCard';
 import { ChevronRight } from 'lucide-react';
 
-interface Product {
+interface RelatedProduct {
   id: string;
   title: string;
   price: number;
-  discount?: number;
-  thumbnails: string[];
-  seller: {
-    name: string;
-    avatar: string;
+  preview_url: string;
+  artist: {
+    username: string;
+    avatar_url?: string;
   };
-  specifications?: {
-    polygons: number;
-    version: string;
-  };
+  polyCount?: number;
 }
 
 interface Props {
@@ -26,7 +23,7 @@ interface Props {
 }
 
 export default function RelatedProducts({ productId, categories }: Props) {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -35,10 +32,36 @@ export default function RelatedProducts({ productId, categories }: Props) {
 
   const fetchRelatedProducts = async () => {
     try {
-      const categoryQuery = categories.map(cat => `category=${encodeURIComponent(cat)}`).join('&');
-      const response = await fetch(`/api/products/related?productId=${productId}&${categoryQuery}&limit=8`);
-      const data = await response.json();
-      setProducts(data);
+      setLoading(true);
+      const category = categories && categories.length > 0 ? categories[0] : undefined;
+
+      const response = await apiClient.get<any>('/models', {
+        params: {
+          exclude_id: productId,
+          limit: 8,
+          category: category, // Pass category name/slug
+          status: 'APPROVED'
+        }
+      });
+
+      // Map backend model to ProductCard's expected format
+      // Note: Backend returns { data: [], meta: {} }
+      const mappedProducts = (response.data || []).map((m: any) => ({
+        id: m.id,
+        title: m.title,
+        price: m.price,
+        thumbnails: m.preview_url ? [m.preview_url] : ['/placeholder.jpg'],
+        seller: {
+          name: m.artist?.username || 'Anonymous',
+          avatar: m.artist?.avatar_url || '/placeholder-avatar.jpg'
+        },
+        specifications: {
+          polygons: m.poly_count || 0,
+          version: '1.0'
+        }
+      }));
+
+      setProducts(mappedProducts);
     } catch (error) {
       console.error('Error fetching related products:', error);
     } finally {

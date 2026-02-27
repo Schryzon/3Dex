@@ -135,7 +135,7 @@ export default function SavedPage() {
                                     </button>
 
                                     {/* Thumbnail */}
-                                    <Link href={`/product/${modelId}`}>
+                                    <Link href={`/catalog/${modelId}`}>
                                         <div className="aspect-[4/3] overflow-hidden bg-gray-900">
                                             <img
                                                 src={thumb}
@@ -147,7 +147,7 @@ export default function SavedPage() {
 
                                     {/* Info */}
                                     <div className="p-4">
-                                        <Link href={`/product/${modelId}`}>
+                                        <Link href={`/catalog/${modelId}`}>
                                             <h3 className="font-semibold text-white text-sm truncate hover:text-yellow-400 transition-colors mb-1">
                                                 {model.title || 'Untitled'}
                                             </h3>
@@ -160,7 +160,7 @@ export default function SavedPage() {
                                                 {price === 0 ? 'Free' : formatPrice(price).idr}
                                             </span>
                                             <Link
-                                                href={`/product/${modelId}`}
+                                                href={`/catalog/${modelId}`}
                                                 className="text-xs px-3 py-1.5 bg-yellow-400 hover:bg-yellow-300 text-black font-semibold rounded-lg transition-colors"
                                             >
                                                 View

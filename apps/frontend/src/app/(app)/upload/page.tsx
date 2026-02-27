@@ -77,12 +77,6 @@ export default function UploadPage() {
                 thumbnailKey = thumbUpload.key;
             }
 
-            // 3. Create Model Record
-            // Need artist_id. Assuming derived from token or user info in local storage if API needs it explicit.
-            // But usually API extracts it from token. 
-            // However, the controller generic 'upload_model' checks `req.body.artist_id`.
-            // We need to fetch current user ID. 
-            // Ideally useAuth hook, but for now retrieving from localStorage as per api.ts hint
             const userStr = localStorage.getItem('user');
             const user = userStr ? JSON.parse(userStr) : null;
 

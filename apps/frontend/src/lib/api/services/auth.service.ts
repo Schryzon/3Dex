@@ -49,7 +49,14 @@ export const authService = {
     },
 
     async getCurrentUser(): Promise<User> {
-        return apiClient.get<User>(API_ENDPOINTS.AUTH.ME);
+        try {
+            return await apiClient.get<User>(API_ENDPOINTS.AUTH.ME);
+        } catch {
+            // Fall back to stored user if /auth/me is unavailable
+            const stored = this.getStoredUser();
+            if (stored) return stored;
+            throw new Error('Not authenticated');
+        }
     },
 
     getStoredUser(): User | null {
@@ -62,6 +69,10 @@ export const authService = {
             return null;
         }
     },
+
+    getStoredToken(): string | null {
+    return localStorage.getItem('auth_token');
+},
 
     getToken(): string | null {
         return localStorage.getItem('auth_token');

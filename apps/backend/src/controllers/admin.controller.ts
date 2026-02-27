@@ -68,11 +68,11 @@ export async function list_users_by_status(req: Request, res: Response) {
     }
 
     try {
+        const roles = (req.query.roles as string)?.split(',') ?? ['ARTIST', 'PROVIDER'];
         const users = await prisma.user.findMany({
             where: {
-                account_status: status as any
-                // or filter by role too? usually we want to see PENDING ARTIST/PROVIDER.
-                // Customers are APPROVED by default usually.
+                account_status: status as any,
+                role: { in: roles as any }
             },
             orderBy: { created_at: 'asc' },
             select: {

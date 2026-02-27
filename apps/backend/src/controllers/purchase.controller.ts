@@ -7,7 +7,7 @@ export async function buy_model(req: Request, res: Response) {
   const id = String(req.params.id);
 
   const license = String(req.body.license) as "PERSONAL_USE" | "COMMERCIAL_USE";
-  const user_id = String((req as any).user.user_id);
+  const user_id = String((req as any).user.id);
 
   if (!license) {
     return res.status(400).json({
@@ -56,7 +56,7 @@ export async function buy_model(req: Request, res: Response) {
 }
 
 export async function my_purchases(req: Request, res: Response) {
-  const user_id = String((req as any).user.user_id);
+  const user_id = String((req as any).user.id);
 
   try {
     const purchases = await get_user_purchases(user_id);

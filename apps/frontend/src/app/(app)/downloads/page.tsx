@@ -106,7 +106,7 @@ export default function DownloadsPage() {
                                     />
                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                         <Link
-                                            href={`/product/${purchase.model_id}`}
+                                            href={`/catalog/${purchase.model_id}`}
                                             className="p-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg hover:bg-white/20 transition-colors"
                                             title="View Details"
                                         >

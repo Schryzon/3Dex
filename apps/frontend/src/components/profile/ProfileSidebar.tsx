@@ -7,7 +7,6 @@ import {
     Bookmark,
     Upload,
     BarChart3,
-    ShieldCheck,
     CreditCard,
     Bell,
     Package,
@@ -31,7 +30,6 @@ export default function ProfileSidebar({ activeTab, setActiveTab }: ProfileSideb
             items: [
                 { id: 'profile', label: 'Profile', icon: User },
                 { id: 'settings', label: 'Preferences', icon: Settings },
-                { id: 'security', label: 'Security', icon: ShieldCheck },
             ]
         },
         {
@@ -66,7 +64,7 @@ export default function ProfileSidebar({ activeTab, setActiveTab }: ProfileSideb
     ];
 
     return (
-        <aside className="w-full md:w-64 flex-shrink-0 space-y-6 md:space-y-8">
+        <aside className="w-full md:w-64 flex-shrink-0 space-y-6 md:space-y-8 md:sticky md:top-24 h-fit max-h-[calc(100vh-120px)] overflow-y-auto no-scrollbar md:scrollbar-thin">
             {sections.map((section) => (
                 <div key={section.title} className="space-y-3">
                     <h4 className="text-gray-500 text-[10px] md:text-xs font-semibold uppercase tracking-widest px-3">
