@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { reviewApi, Review, ReviewStats } from '@/lib/api/reviews';
+import { reviewService, Review, ReviewStats } from '@/lib/api/services/review.service';
 import { Star, MessageCircle, AlertCircle, CheckCircle } from 'lucide-react';
 import ProductReviewList from '../catalog/ProductReviewList';
 import ProductReviewForm from '../catalog/ProductReviewForm';
@@ -26,45 +26,45 @@ export default function ProductReviews({ productId, isPurchased }: Props) {
 
   // Hapus bagian cek hasReviewed dari loadData
   const loadData = async () => {
-      setLoading(true);
-      try {
-        const [reviewsData, statsData] = await Promise.all([
-          reviewApi.getReviews(productId),
-          reviewApi.getReviewStats(productId)
-        ]);
-        setReviews(reviewsData);
-        setStats(statsData);
-      } catch (error) {
-        console.error('Error fetching review data:', error);
-      } finally {
-        setLoading(false);
-      }
+    setLoading(true);
+    try {
+      const [reviewsData, statsData] = await Promise.all([
+        reviewService.getReviews(productId),
+        reviewService.getReviewStats(productId)
+      ]);
+      setReviews(reviewsData);
+      setStats(statsData);
+    } catch (error) {
+      console.error('Error fetching review data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Tambah useEffect baru khusus cek hasReviewed
   useEffect(() => {
-      if (user && reviews.length > 0) {
-          console.log('Current user ID:', user.id);
-          console.log('Review user_ids:', reviews.map((r: Review) => r.user_id));
-          const alreadyReviewed = reviews.some((r: Review) => r.user_id === user.id);
-          console.log('Has reviewed:', alreadyReviewed);
-          setHasReviewed(alreadyReviewed);
-      } else {
-          setHasReviewed(false);
-      }
+    if (user && reviews.length > 0) {
+      console.log('Current user ID:', user.id);
+      console.log('Review user_ids:', reviews.map((r: Review) => r.user_id));
+      const alreadyReviewed = reviews.some((r: Review) => r.user_id === user.id);
+      console.log('Has reviewed:', alreadyReviewed);
+      setHasReviewed(alreadyReviewed);
+    } else {
+      setHasReviewed(false);
+    }
   }, [user, reviews]);
 
   const handleReviewSubmit = async (rating: number, comment: string) => {
     setIsSubmittingReview(true);
     try {
-      await reviewApi.createReview(productId, { rating, comment });
+      await reviewService.createReview(productId, { rating, comment });
       const [reviewsData, statsData] = await Promise.all([
-        reviewApi.getReviews(productId),
-        reviewApi.getReviewStats(productId)
+        reviewService.getReviews(productId),
+        reviewService.getReviewStats(productId)
       ]);
       setReviews(reviewsData);
       setStats(statsData);
-      setHasReviewed(true); 
+      setHasReviewed(true);
     } catch (error: any) {
       console.error('Failed to submit review:', error);
       if (error.response?.status === 409) {

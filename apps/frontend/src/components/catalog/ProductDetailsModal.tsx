@@ -21,7 +21,7 @@ import {
 import ModelViewer3D from './ModelViewer3D';
 import { useCart } from '@/lib/hooks/useCart';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { reviewApi, Review } from '@/lib/api/reviews';
+import { reviewService, Review } from '@/lib/api/services/review.service';
 import { purchaseService } from '@/lib/api/services/purchase.service';
 import ProductReviewList from './ProductReviewList';
 import ProductReviewForm from './ProductReviewForm';
@@ -99,7 +99,7 @@ export default function ProductDetailsModal({
     const loadReviews = async () => {
         setIsLoadingReviews(true);
         try {
-            const data = await reviewApi.getReviews(product.id);
+            const data = await reviewService.getReviews(product.id);
             setReviews(data);
         } catch (error) {
             console.error('Failed to load reviews:', error);
@@ -111,7 +111,7 @@ export default function ProductDetailsModal({
     const handleReviewSubmit = async (rating: number, comment: string) => {
         setIsSubmittingReview(true);
         try {
-            await reviewApi.createReview(product.id, { rating, comment });
+            await reviewService.createReview(product.id, { rating, comment });
             await loadReviews();
             // Optional: Show success toast
         } catch (error: any) {

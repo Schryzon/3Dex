@@ -102,11 +102,11 @@ export const productService = {
     },
 
     async getProductReviews(id: string): Promise<Review[]> {
-        return apiClient.get<Review[]>(API_ENDPOINTS.MODELS.REVIEWS(id));
+        return apiClient.get<Review[]>(API_ENDPOINTS.REVIEWS.MODEL_LIST(id));
     },
 
     async addReview(id: string, data: { rating: number; comment: string }): Promise<Review> {
-        return apiClient.post<Review>(API_ENDPOINTS.MODELS.REVIEWS(id), data);
+        return apiClient.post<Review>(API_ENDPOINTS.REVIEWS.MODEL_CREATE(id), data);
     },
 
     async downloadProduct(id: string): Promise<{ downloadUrl: string; expiresAt: string; remainingDownloads: number }> {

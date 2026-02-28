@@ -19,7 +19,15 @@ export const API_ENDPOINTS = {
         UPDATE: (id: string) => `/models/${id}`,
         DELETE: (id: string) => `/models/${id}`,
         DOWNLOAD: (id: string) => `/models/${id}/download`,
-        REVIEWS: (id: string) => `/models/${id}/reviews`,
+    },
+
+    // Reviews
+    REVIEWS: {
+        MODEL_STATS: (modelId: string) => `/reviews/model/${modelId}/stats`,
+        MODEL_LIST: (modelId: string) => `/reviews/model/${modelId}`,
+        MODEL_CREATE: (modelId: string) => `/reviews/model/${modelId}`,
+        USER_LIST: (userId: string) => `/reviews/user/${userId}`,
+        USER_CREATE: '/reviews/user',
     },
 
     // Orders
