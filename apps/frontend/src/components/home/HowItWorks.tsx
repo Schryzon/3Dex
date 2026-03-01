@@ -1,131 +1,143 @@
 'use client';
 
-import { Search, ShoppingCart, Download, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
+import { Search, ShoppingCart, Download, CheckCircle } from 'lucide-react';
 import { useInView } from '@/lib/hooks/useInView';
 
-const steps = [
-    {
-        number: '01',
-        title: 'Browse & Discover',
-        description: 'Explore thousands of high-quality 3D models, textures, and CG assets across various categories',
-        icon: Search,
-        color: 'text-blue-400',
-        bgColor: 'bg-blue-500/10',
-    },
-    {
-        number: '02',
-        title: 'Purchase Securely',
-        description: 'Add items to cart and checkout with secure payment. Get instant access to your purchases',
-        icon: ShoppingCart,
-        color: 'text-yellow-400',
-        bgColor: 'bg-yellow-500/10',
-    },
-    {
-        number: '03',
-        title: 'Download & Create',
-        description: 'Download your assets immediately and start creating amazing projects with commercial licenses',
-        icon: Download,
-        color: 'text-green-400',
-        bgColor: 'bg-green-500/10',
-    },
-];
-
 export default function HowItWorks() {
-    const { ref: headerRef, inView: headerVisible } = useInView({ threshold: 0.2 });
-    const { ref: stepsRef, inView: stepsVisible } = useInView({ threshold: 0.1 });
-    const { ref: ctaRef, inView: ctaVisible } = useInView({ threshold: 0.3 });
+    const { ref, inView } = useInView({ threshold: 0.1 });
 
     return (
-        <section className="py-16 md:py-24 bg-black">
-            <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-                {/* Header */}
-                <div
-                    ref={headerRef}
-                    style={{
-                        opacity: headerVisible ? 1 : 0,
-                        transform: headerVisible ? 'translateY(0)' : 'translateY(30px)',
-                        transition: 'opacity 0.7s ease, transform 0.7s ease',
-                    }}
-                    className="text-center mb-16"
-                >
-                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
-                        How It <span className="text-yellow-400">Works</span>
+        <section className="relative py-14 md:py-20 overflow-hidden bg-[#090909]">
+
+            {/* Fine line grid for depth */}
+            <div className="absolute inset-0 bg-line-grid pointer-events-none" />
+            {/* Section background: Unsplash image faded out */}
+            <div className="absolute inset-0">
+                <img
+                    src="https://images.unsplash.com/photo-1617791160505-6f00504e3519?w=1920&q=60"
+                    alt=""
+                    className="w-full h-full object-cover opacity-[0.04]"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-black via-black/80 to-black" />
+            </div>
+            {/* Centered yellow glow */}
+            <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 50% 60% at 50% 50%, rgba(250,204,21,0.06) 0%, transparent 70%)' }} />
+
+            <div className="relative max-w-[1400px] mx-auto px-6 md:px-10">
+
+                {/* Header — centered for this section */}
+                <div className="text-center mb-12">
+                    <p className="text-[11px] font-semibold tracking-[0.25em] uppercase text-yellow-400/70 mb-3">How it works</p>
+                    <h2 className="text-4xl md:text-5xl font-black text-white leading-[1.1]">
+                        Up and running in<br />
+                        <em className="not-italic text-yellow-400">three steps.</em>
                     </h2>
-                    <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto">
-                        Get started with 3Dēx in three simple steps
-                    </p>
                 </div>
 
-                {/* Steps */}
-                <div ref={stepsRef} className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 relative">
-                    {/* Connection Lines - Desktop Only */}
-                    <div className="hidden md:block absolute top-24 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gray-700 to-transparent" />
+                {/* Steps — horizontal, connected by numbers */}
+                <div ref={ref} className="relative">
 
-                    {steps.map((step, index) => {
-                        const Icon = step.icon;
-                        return (
-                            <div
-                                key={step.number}
-                                style={{
-                                    opacity: stepsVisible ? 1 : 0,
-                                    transform: stepsVisible ? 'translateY(0)' : 'translateY(50px)',
-                                    transition: 'opacity 0.65s ease, transform 0.65s ease',
-                                    transitionDelay: `${index * 0.15}s`,
-                                }}
-                                className="relative group"
-                            >
-                                {/* Card */}
-                                <div className="relative bg-gray-800/40 backdrop-blur-sm rounded-2xl p-8 border border-gray-700 hover:border-yellow-400/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-yellow-400/10">
-                                    {/* Step Number */}
-                                    <div className="absolute -top-6 left-8">
-                                        <div className="w-12 h-12 rounded-full bg-gray-900 border-2 border-yellow-400 flex items-center justify-center">
-                                            <span className="text-yellow-400 font-bold text-lg">{step.number}</span>
-                                        </div>
-                                    </div>
+                    {/* Connector line */}
+                    <div className="hidden md:block absolute top-8 left-[16.5%] right-[16.5%] h-px bg-gradient-to-r from-yellow-400/10 via-yellow-400/30 to-yellow-400/10" />
 
-                                    {/* Icon */}
-                                    <div className={`w-16 h-16 rounded-xl ${step.bgColor} flex items-center justify-center mb-6 mt-4 group-hover:scale-110 transition-transform`}>
-                                        <Icon className={`w-8 h-8 ${step.color}`} />
-                                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-6">
 
-                                    {/* Content */}
-                                    <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-yellow-400 transition-colors">
-                                        {step.title}
-                                    </h3>
-                                    <p className="text-gray-400 leading-relaxed">
-                                        {step.description}
-                                    </p>
-
-                                    {/* Arrow Indicator - Not on last item */}
-                                    {index < steps.length - 1 && (
-                                        <div className="hidden md:block absolute -right-4 top-1/2 -translate-y-1/2 text-gray-600">
-                                            <ArrowRight className="w-8 h-8" />
-                                        </div>
-                                    )}
-                                </div>
+                        {/* Step 01 */}
+                        <div
+                            style={{ opacity: inView ? 1 : 0, transform: inView ? 'translateY(0)' : 'translateY(32px)', transition: 'opacity 0.6s ease 0s, transform 0.6s ease 0s' }}
+                            className="group flex flex-col items-center md:items-start text-center md:text-left"
+                        >
+                            {/* Number bubble on the connector */}
+                            <div className="w-16 h-16 rounded-full bg-[#0d0d0d] border border-yellow-400/30 flex items-center justify-center mb-8 shrink-0 group-hover:border-yellow-400/70 transition-colors duration-300">
+                                <span className="text-yellow-400 font-black text-lg">01</span>
                             </div>
-                        );
-                    })}
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                                    <Search className="w-5 h-5 text-blue-400" />
+                                </div>
+                                <h3 className="text-xl font-black text-white">Discover</h3>
+                            </div>
+                            <p className="text-gray-500 text-sm leading-relaxed">
+                                Browse thousands of curated 3D models, textures, and assets. Filter by format, polygon count, license, and more.
+                            </p>
+                            <ul className="mt-4 space-y-1.5">
+                                {['Advanced search & filters', 'Preview before purchase', 'Verified artist profiles'].map(item => (
+                                    <li key={item} className="flex items-center gap-2 text-xs text-gray-600">
+                                        <CheckCircle className="w-3.5 h-3.5 text-yellow-400/60 shrink-0" />
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        {/* Step 02 */}
+                        <div
+                            style={{ opacity: inView ? 1 : 0, transform: inView ? 'translateY(0)' : 'translateY(32px)', transition: 'opacity 0.6s ease 0.15s, transform 0.6s ease 0.15s' }}
+                            className="group flex flex-col items-center md:items-start text-center md:text-left"
+                        >
+                            <div className="w-16 h-16 rounded-full bg-[#0d0d0d] border border-yellow-400/30 flex items-center justify-center mb-8 shrink-0 group-hover:border-yellow-400/70 transition-colors duration-300">
+                                <span className="text-yellow-400 font-black text-lg">02</span>
+                            </div>
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center border border-yellow-500/20">
+                                    <ShoppingCart className="w-5 h-5 text-yellow-400" />
+                                </div>
+                                <h3 className="text-xl font-black text-white">Purchase</h3>
+                            </div>
+                            <p className="text-gray-500 text-sm leading-relaxed">
+                                Secure checkout via Midtrans. Payment confirmed instantly, access granted in seconds — no subscriptions required.
+                            </p>
+                            <ul className="mt-4 space-y-1.5">
+                                {['One-time purchase', 'Secure payment gateway', 'Instant order confirmation'].map(item => (
+                                    <li key={item} className="flex items-center gap-2 text-xs text-gray-600">
+                                        <CheckCircle className="w-3.5 h-3.5 text-yellow-400/60 shrink-0" />
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        {/* Step 03 */}
+                        <div
+                            style={{ opacity: inView ? 1 : 0, transform: inView ? 'translateY(0)' : 'translateY(32px)', transition: 'opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s' }}
+                            className="group flex flex-col items-center md:items-start text-center md:text-left"
+                        >
+                            <div className="w-16 h-16 rounded-full bg-[#0d0d0d] border border-yellow-400/30 flex items-center justify-center mb-8 shrink-0 group-hover:border-yellow-400/70 transition-colors duration-300">
+                                <span className="text-yellow-400 font-black text-lg">03</span>
+                            </div>
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center border border-green-500/20">
+                                    <Download className="w-5 h-5 text-green-400" />
+                                </div>
+                                <h3 className="text-xl font-black text-white">Create</h3>
+                            </div>
+                            <p className="text-gray-500 text-sm leading-relaxed">
+                                Download in your preferred format. Commercial license included. Your library stays online — access any time.
+                            </p>
+                            <ul className="mt-4 space-y-1.5">
+                                {['Multiple file formats', 'Commercial use license', 'Lifetime access to downloads'].map(item => (
+                                    <li key={item} className="flex items-center gap-2 text-xs text-gray-600">
+                                        <CheckCircle className="w-3.5 h-3.5 text-yellow-400/60 shrink-0" />
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                    </div>
                 </div>
 
-                {/* CTA */}
-                <div
-                    ref={ctaRef}
-                    style={{
-                        opacity: ctaVisible ? 1 : 0,
-                        transform: ctaVisible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.97)',
-                        transition: 'opacity 0.6s ease, transform 0.6s ease',
-                    }}
-                    className="text-center mt-16"
-                >
-                    <a
+                {/* Bottom CTA */}
+                <div className="text-center mt-16">
+                    <Link
                         href="/catalog"
-                        className="inline-flex items-center gap-3 px-8 py-4 bg-yellow-400 hover:bg-yellow-300 text-black font-bold rounded-full text-lg transition-all hover:scale-105 hover:shadow-2xl hover:shadow-yellow-400/20"
+                        className="inline-flex items-center gap-2 px-8 py-3.5 bg-yellow-400 hover:bg-yellow-300 text-black font-bold rounded-xl text-sm transition-all duration-300 hover:scale-[1.04] hover:shadow-xl hover:shadow-yellow-400/20"
                     >
-                        Start Browsing
-                        <ArrowRight className="w-5 h-5" />
-                    </a>
+                        Start browsing now
+                    </Link>
                 </div>
+
             </div>
         </section>
     );

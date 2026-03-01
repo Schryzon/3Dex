@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import { ReactQueryProvider } from '@/components/providers/ReactQueryProvider';
 import { Toaster } from 'react-hot-toast';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: "3Dēx | 3D Marketplace",
@@ -16,8 +23,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="antialiased bg-black text-white">
+    <html lang="en" className={inter.variable}>
+      <body className={`${inter.className} antialiased bg-black text-white`}>
         <ReactQueryProvider>
           <AuthProvider>
             {children}

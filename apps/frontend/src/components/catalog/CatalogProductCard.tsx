@@ -6,10 +6,10 @@ import { Heart, Crown, Download, Star, ShoppingCart, Check } from 'lucide-react'
 import { useCart } from '@/lib/hooks/useCart';
 
 const FORMAT_COLORS: Record<string, string> = {
-    blend: 'bg-orange-500/20 text-orange-400',
-    fbx: 'bg-blue-500/20 text-blue-400',
-    obj: 'bg-green-500/20 text-green-400',
-    max: 'bg-purple-500/20 text-purple-400',
+    blend: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+    fbx: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    obj: 'bg-green-500/10 text-green-400 border-green-500/20',
+    max: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
 };
 
 interface CatalogProductCardProps {
@@ -67,51 +67,57 @@ export default function CatalogProductCard({
 
         return (
             <Wrapper {...wrapperProps as any}>
-                <div className="group flex bg-[#1a1a1a] rounded-lg overflow-hidden hover:bg-[#252525] transition-all cursor-pointer border border-transparent hover:border-gray-700">
+                <div className="group flex bg-[#111] rounded-xl overflow-hidden hover:bg-[#161616] transition-all duration-300 cursor-pointer border border-white/[0.05] hover:border-white/[0.12] hover:shadow-xl hover:shadow-black/40">
                     {/* Thumbnail */}
-                    <div className="relative w-24 h-20 md:w-32 md:h-24 shrink-0">
+                    <div className="relative w-28 h-24 md:w-40 md:h-32 shrink-0 overflow-hidden">
                         <img
                             src={image}
                             alt={title}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />
+                        <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
+
                         {/* Badges overlay */}
-                        {discount && (
-                            <span className="absolute top-1 left-1 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-                                -{discount}%
-                            </span>
-                        )}
+                        <div className="absolute top-2 left-2 flex flex-col gap-1">
+                            {discount && (
+                                <span className="bg-green-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-lg shadow-green-500/20">
+                                    -{discount}%
+                                </span>
+                            )}
+                            {isPremium && (
+                                <span className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-[9px] font-black px-1.5 py-0.5 rounded-md shadow-lg shadow-yellow-500/20">
+                                    PRO
+                                </span>
+                            )}
+                        </div>
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 p-2 md:p-3 flex flex-col justify-between min-w-0">
+                    <div className="flex-1 p-3 md:p-4 flex flex-col justify-between min-w-0">
                         <div>
                             <div className="flex items-start justify-between gap-2">
-                                <h3 className="text-white text-sm font-medium line-clamp-1">
+                                <h3 className="text-white text-sm md:text-base font-bold line-clamp-1 group-hover:text-yellow-400 transition-colors">
                                     {title}
                                 </h3>
-                                <div className="flex items-center gap-1 shrink-0">
-                                    {isPremium && (
-                                        <Crown className="w-3.5 h-3.5 text-yellow-500" />
-                                    )}
+                                <div className="flex items-center gap-1.5 shrink-0">
                                     {isFree && (
-                                        <Download className="w-3.5 h-3.5 text-blue-400" />
+                                        <span className="text-[10px] font-bold text-blue-400 tracking-wider">FREE</span>
                                     )}
                                 </div>
                             </div>
                             {author && (
-                                <p className="text-gray-500 text-xs mt-0.5">{author}</p>
+                                <p className="text-gray-500 text-xs font-medium mt-0.5">{author}</p>
                             )}
                         </div>
 
                         {/* Bottom row */}
-                        <div className="flex items-center justify-between gap-2 mt-1">
+                        <div className="flex items-center justify-between gap-4 mt-2">
                             {/* Formats */}
-                            <div className="flex items-center gap-1 overflow-hidden">
-                                {formats.slice(0, 3).map((format) => (
+                            <div className="flex items-center gap-1.5 overflow-hidden">
+                                {formats.slice(0, 4).map((format) => (
                                     <span
                                         key={format}
-                                        className={`text-[9px] font-semibold px-1 py-0.5 rounded ${FORMAT_COLORS[format] || 'bg-gray-700 text-gray-300'
+                                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border ${FORMAT_COLORS[format] || 'bg-white/5 text-gray-400 border-white/10'
                                             }`}
                                     >
                                         {format.toUpperCase()}
@@ -120,15 +126,15 @@ export default function CatalogProductCard({
                             </div>
 
                             {/* Price + Rating */}
-                            <div className="flex items-center gap-2 shrink-0">
+                            <div className="flex items-center gap-3 shrink-0">
                                 {rating !== undefined && (
-                                    <div className="flex items-center gap-0.5 text-xs">
-                                        <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                                        <span className="text-gray-400">{rating.toFixed(1)}</span>
+                                    <div className="flex items-center gap-1 text-xs">
+                                        <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+                                        <span className="text-gray-400 font-medium">{rating.toFixed(1)}</span>
                                     </div>
                                 )}
                                 {displayPrice && (
-                                    <span className={`text-sm font-bold ${isFree ? 'text-blue-400' : 'text-white'}`}>
+                                    <span className={`text-base font-black ${isFree ? 'text-blue-400' : 'text-white'}`}>
                                         {displayPrice}
                                     </span>
                                 )}
@@ -143,12 +149,12 @@ export default function CatalogProductCard({
                             e.stopPropagation();
                             onSave?.();
                         }}
-                        className={`self-center p-2 mr-2 rounded-md transition-all cursor-pointer ${isSaved
+                        className={`self-center p-3 mr-3 rounded-xl transition-all cursor-pointer hover:bg-white/5 ${isSaved
                             ? 'text-red-500'
                             : 'text-gray-600 hover:text-white'
                             }`}
                     >
-                        <Heart className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
+                        <Heart className={`w-5 h-5 ${isSaved ? 'fill-current' : ''}`} />
                     </button>
                 </div>
             </Wrapper>
@@ -162,51 +168,46 @@ export default function CatalogProductCard({
     return (
         <GridWrapper {...gridWrapperProps as any}>
             <div
-                className="group relative rounded-xl overflow-hidden bg-[#1a1a1a] cursor-pointer transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/50"
+                className="group relative rounded-xl overflow-hidden bg-[#0c0c0c] cursor-pointer transition-all duration-500 border border-white/[0.04] hover:border-yellow-400/30 hover:shadow-2xl hover:shadow-yellow-400/5"
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
             >
-                <div className="relative aspect-[4/3]">
+                {/* Image Section */}
+                <div className="relative aspect-[3/4] overflow-hidden">
                     {!imageLoaded && (
-                        <div className="absolute inset-0 bg-gray-800 animate-pulse" />
+                        <div className="absolute inset-0 bg-white/5 animate-pulse" />
                     )}
 
                     <img
                         src={image}
                         alt={title}
-                        className={`absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${imageLoaded ? 'block' : 'hidden'
+                        className={`absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${imageLoaded ? 'block' : 'hidden'
                             }`}
                         onLoad={() => setImageLoaded(true)}
                     />
 
+                    {/* Gradient Overlay - lightened for visibility */}
                     <div
-                        className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-70'
+                        className={`absolute inset-0 bg-gradient-to-t from-[#0c0c0c]/80 via-transparent to-transparent transition-opacity duration-300 ${isHovered ? 'opacity-90' : 'opacity-40'
                             }`}
                     />
 
                     {/* Top Badges */}
-                    <div className="absolute top-2 left-2 flex items-center gap-1">
+                    <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5 z-10">
                         {discount && (
-                            <span className="bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                            <span className="bg-green-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-lg shadow-lg">
                                 -{discount}%
                             </span>
                         )}
                         {isPremium && (
-                            <span className="flex items-center gap-0.5 bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-[10px] font-bold px-1.5 py-0.5 rounded">
-                                <Crown className="w-2.5 h-2.5" />
+                            <span className="flex items-center gap-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-[9px] font-black px-2 py-0.5 rounded-lg">
                                 PRO
-                            </span>
-                        )}
-                        {isFree && (
-                            <span className="flex items-center gap-0.5 bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-                                <Download className="w-2.5 h-2.5" />
-                                FREE
                             </span>
                         )}
                     </div>
 
-                    {/* Quick Actions (Always visible on mobile/touch, hover on desktop) */}
-                    <div className={`absolute top-2 right-2 flex flex-col gap-2 transition-all duration-300 ${isHovered ? 'opacity-100' : 'opacity-0 sm:opacity-0 md:opacity-0 lg:opacity-0 lg:group-hover:opacity-100'} sm:opacity-100`}>
+                    {/* Quick Actions overlay */}
+                    <div className={`absolute top-3 right-3 flex flex-col gap-2 transition-all duration-300 z-10 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'}`}>
                         {/* Save Button */}
                         <button
                             onClick={(e) => {
@@ -214,9 +215,9 @@ export default function CatalogProductCard({
                                 e.stopPropagation();
                                 onSave?.();
                             }}
-                            className={`p-2 cursor-pointer rounded-lg backdrop-blur-md transition-all ${isSaved
-                                ? 'bg-red-500 text-white shadow-lg shadow-red-500/20'
-                                : 'bg-black/50 text-white hover:bg-black/70'
+                            className={`p-2.5 cursor-pointer rounded-xl backdrop-blur-md transition-all duration-300 ${isSaved
+                                ? 'bg-red-500 text-white shadow-lg shadow-red-500/25'
+                                : 'bg-black/40 text-white hover:bg-white/10 border border-white/10'
                                 }`}
                         >
                             <Heart className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
@@ -232,9 +233,9 @@ export default function CatalogProductCard({
                                         addToCart({ modelId: id });
                                     }
                                 }}
-                                className={`p-2 cursor-pointer rounded-lg backdrop-blur-md transition-all ${isInCart
-                                    ? 'bg-green-500 text-white shadow-lg shadow-green-500/20'
-                                    : 'bg-yellow-400 text-black hover:bg-yellow-300 shadow-lg shadow-yellow-400/20'
+                                className={`p-2.5 cursor-pointer rounded-xl backdrop-blur-md transition-all duration-300 ${isInCart
+                                    ? 'bg-green-500 text-white shadow-lg shadow-green-500/25'
+                                    : 'bg-yellow-400 text-black hover:bg-yellow-300 border border-yellow-400/20 shadow-lg shadow-yellow-400/20'
                                     }`}
                             >
                                 {isInCart ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
@@ -242,48 +243,45 @@ export default function CatalogProductCard({
                         )}
                     </div>
 
-                    {/* Bottom Info */}
-                    <div className="absolute bottom-0 left-0 right-0 p-2.5">
-                        <h3 className="text-white font-medium text-xs line-clamp-1 mb-0.5">
-                            {title}
-                        </h3>
-                        {author && (
-                            <p className="text-gray-400 text-[10px] mb-1.5">{author}</p>
-                        )}
-
-                        {formats.length > 0 && (
-                            <div className="flex items-center gap-0.5 mb-1.5 flex-wrap">
-                                {formats.slice(0, 3).map((format) => (
-                                    <span
-                                        key={format}
-                                        className={`text-[8px] font-semibold px-1 py-0.5 rounded ${FORMAT_COLORS[format] || 'bg-gray-700 text-gray-300'
-                                            }`}
-                                    >
-                                        {format.toUpperCase()}
-                                    </span>
-                                ))}
-                            </div>
-                        )}
-
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1.5">
+                    {/* Info Overlay Panel (Bottom) */}
+                    <div className="absolute bottom-0 left-0 right-0 p-4 pt-10 bg-gradient-to-t from-[#0c0c0c] to-transparent">
+                        <div className="flex flex-col gap-1">
+                            <h3 className="text-white font-bold text-sm md:text-base line-clamp-1 group-hover:text-yellow-400 transition-colors">
+                                {title}
+                            </h3>
+                            <div className="flex items-center justify-between">
+                                <p className="text-gray-500 text-xs font-medium">{author}</p>
                                 {displayPrice && (
-                                    <span className={`font-bold text-xs ${isFree ? 'text-blue-400' : 'text-white'}`}>
+                                    <span className={`font-black text-sm tracking-tight ${isFree ? 'text-blue-400' : 'text-white'}`}>
                                         {displayPrice}
                                     </span>
                                 )}
-                                {hasDiscount && (
-                                    <span className="text-gray-500 text-[10px] line-through">
-                                        ${originalPrice.toFixed(0)}
-                                    </span>
-                                )}
                             </div>
-                            {rating !== undefined && (
-                                <div className="flex items-center gap-0.5">
-                                    <Star className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />
-                                    <span className="text-[10px] text-gray-300">{rating.toFixed(1)}</span>
+                        </div>
+
+                        {/* Expandable Meta section on hover */}
+                        <div className={`grid transition-all duration-500 ease-in-out ${isHovered ? 'grid-rows-[1fr] opacity-100 mt-3 pt-3 border-t border-white/[0.05]' : 'grid-rows-[0fr] opacity-0'}`}>
+                            <div className="overflow-hidden">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-1.5 overflow-hidden">
+                                        {formats.slice(0, 3).map((format) => (
+                                            <span
+                                                key={format}
+                                                className={`text-[8px] font-bold px-1.5 py-0.5 rounded-md border ${FORMAT_COLORS[format] || 'bg-white/5 text-gray-500 border-white/5'
+                                                    }`}
+                                            >
+                                                {format.toUpperCase()}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    {rating !== undefined && (
+                                        <div className="flex items-center gap-1">
+                                            <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                                            <span className="text-[10px] font-bold text-gray-300">{rating.toFixed(1)}</span>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
+                            </div>
                         </div>
                     </div>
                 </div>

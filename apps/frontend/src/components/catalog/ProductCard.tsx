@@ -54,31 +54,31 @@ export default function ProductCard({ product, onAddToCart, onToggleFavorite, is
   return (
     <Link href={`/catalog/${product.id}`}>
       <div
-        className="group bg-gray-900 rounded-lg overflow-hidden border border-gray-900 hover:border-yellow-500/50 transition-all duration-300 cursor-pointer hover:shadow-lg hover:shadow-yellow-500/10"
+        className="group relative bg-[#0c0c0c] rounded-xl overflow-hidden border border-white/[0.04] hover:border-yellow-400/30 transition-all duration-500 cursor-pointer hover:shadow-2xl hover:shadow-yellow-400/5"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* Image Container */}
-        <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-gray-800 to-black">
+        <div className="relative aspect-[3/4] overflow-hidden bg-white/5">
           <img
             src={product.thumbnails[imageIndex]}
             alt={product.title}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
+          {/* Subtle gradient by default, lighter opacity */}
+          <div className={`absolute inset-0 bg-gradient-to-t from-[#0c0c0c]/80 via-transparent to-transparent transition-opacity duration-300 ${isHovered ? 'opacity-90' : 'opacity-40'}`} />
 
-          {/* Discount Badge */}
           {product.discount && (
-            <div className="absolute top-3 left-3 bg-yellow-500 text-black text-xs font-bold px-2.5 py-1 rounded-lg shadow-lg shadow-yellow-500/20">
+            <div className="absolute top-3 left-3 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg shadow-lg shadow-green-500/20">
               -{product.discount}%
             </div>
           )}
 
-          {/* Favorite Button */}
           <button
             onClick={handleToggleFavorite}
-            className={`absolute top-3 right-3 p-2 rounded-lg backdrop-blur-xl transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 ${isFavorite
-              ? 'bg-yellow-500 text-black border border-yellow-500 shadow-lg shadow-yellow-500/20'
-              : 'bg-black/80 text-white border border-gray-800 hover:bg-yellow-500 hover:text-black hover:border-yellow-500'
+            className={`absolute top-3 right-3 p-2.5 rounded-xl backdrop-blur-md transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110 z-20 ${isFavorite
+              ? 'bg-red-500 text-white shadow-lg shadow-red-500/25'
+              : 'bg-black/40 text-white border border-white/10 hover:bg-white/20 hover:border-white/20'
               }`}
           >
             <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
@@ -104,104 +104,55 @@ export default function ProductCard({ product, onAddToCart, onToggleFavorite, is
             </div>
           )}
 
-          {/* Quick Add to Cart (on hover) */}
-          {isHovered && (
-            <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black via-black/80 to-transparent">
-              {product.price === 0 ? (
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    // Go to product page to download
-                    window.location.href = `/catalog/${product.id}`;
-                  }}
-                  className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-yellow-500/20 hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  <Eye className="w-5 h-5" />
-                  View & Download
-                </button>
-              ) : (
-                <button
-                  onClick={handleAddToCart}
-                  className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-yellow-500/20 hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  <ShoppingCart className="w-5 h-5" />
-                  Add to Cart
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Content */}
-        <div className="p-4">
-          {/* Title */}
-          <h3 className="font-semibold text-white mb-2 line-clamp-2 group-hover:text-yellow-500 transition-colors duration-300">
-            {product.title}
-          </h3>
-
-          {/* Seller Info */}
-          <div className="flex items-center gap-2 mb-3">
-            <img
-              src={product.seller.avatar}
-              alt={product.seller.name}
-              className="w-6 h-6 rounded-full border border-gray-800"
-            />
-            <span className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
-              {product.seller.name}
-            </span>
-          </div>
-
-          {/* Specifications */}
-          {product.specifications && (
-            <div className="flex items-center gap-3 mb-3 text-xs text-gray-400">
-              <span className="flex items-center gap-1">
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"
+          {/* Info Overlay Panel (Minimalist) */}
+          <div className="absolute bottom-0 left-0 right-0 p-4 pt-10 bg-gradient-to-t from-[#0c0c0c] to-transparent pointer-events-none">
+            <div className="flex flex-col gap-1">
+              <h3 className="text-white font-bold text-sm md:text-base line-clamp-1 group-hover:text-yellow-400 transition-colors">
+                {product.title}
+              </h3>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <img
+                    src={product.seller.avatar}
+                    alt={product.seller.name}
+                    className="w-4 h-4 rounded-full border border-white/10"
                   />
-                </svg>
-                {product.specifications.polygons.toLocaleString()} poly
-              </span>
-              <span className="bg-yellow-500/10 text-yellow-500 px-2 py-0.5 rounded border border-yellow-500/20">
-                {product.specifications.version}
-              </span>
-            </div>
-          )}
-
-          {/* Price */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-baseline gap-2">
-              {product.discount ? (
-                <>
-                  <span className="text-xl font-bold text-yellow-500">
-                    ${finalPrice.toFixed(1)}
-                  </span>
-                  <span className="text-sm text-gray-500 line-through">
-                    ${product.price.toFixed(1)}
-                  </span>
-                </>
-              ) : (
-                <span className="text-xl font-bold text-yellow-500">
-                  ${product.price.toFixed(1)}
+                  <p className="text-gray-500 text-[10px] md:text-xs font-medium truncate">{product.seller.name}</p>
+                </div>
+                <span className="text-white font-black text-sm tracking-tight shrink-0 ml-2">
+                  ${finalPrice.toFixed(finalPrice % 1 === 0 ? 0 : 1)}
                 </span>
-              )}
+              </div>
             </div>
 
-            {/* Quick View Icon */}
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                // Open quick view modal
-              }}
-              className="text-gray-400 hover:text-yellow-500 transition-colors duration-300"
-            >
-              <Eye className="w-5 h-5" />
-            </button>
+            {/* Expandable section on hover */}
+            <div className={`grid transition-all duration-500 ease-in-out ${isHovered ? 'grid-rows-[1fr] opacity-100 mt-3 pt-3 border-t border-white/[0.05]' : 'grid-rows-[0fr] opacity-0'}`}>
+              <div className="overflow-hidden">
+                <div className="flex items-center justify-between pointer-events-auto">
+                  {product.price === 0 ? (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.location.href = `/catalog/${product.id}`;
+                      }}
+                      className="w-full bg-blue-500 hover:bg-blue-400 text-white text-[10px] font-bold py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      View
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleAddToCart}
+                      className="w-full bg-yellow-400 hover:bg-yellow-300 text-black text-[10px] font-black py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5"
+                    >
+                      <ShoppingCart className="w-3.5 h-3.5" />
+                      Cart
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

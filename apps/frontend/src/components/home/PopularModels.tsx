@@ -1,39 +1,23 @@
 'use client';
 
+import React, { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Star, ArrowRight, ShoppingCart } from 'lucide-react';
-import { useRef, useEffect, useState } from 'react';
+import { ArrowRight, ShoppingCart } from 'lucide-react';
 import { useProducts } from '@/lib/hooks/useProducts';
 import { formatPrice } from '@/lib/utils';
 import { useInView } from '@/lib/hooks/useInView';
+import CatalogProductCard from '@/components/catalog/CatalogProductCard';
 
-function StarRating({ rating }: { rating: number }) {
-    const stars = [1, 2, 3, 4, 5];
-    return (
-        <div className="flex items-center gap-0.5">
-            {stars.map((star) => (
-                <Star
-                    key={star}
-                    className={`w-3.5 h-3.5 ${star <= Math.round(rating)
-                        ? 'fill-yellow-400 text-yellow-400'
-                        : 'text-gray-600'
-                        }`}
-                />
-            ))}
-        </div>
-    );
-}
+
 
 function ModelCardSkeleton() {
     return (
-        <div className="flex-shrink-0 w-[280px] md:w-[300px] bg-gray-900 rounded-xl border border-gray-800 overflow-hidden animate-pulse">
-            <div className="aspect-[4/3] bg-gray-800" />
-            <div className="p-4 space-y-3">
-                <div className="h-4 bg-gray-800 rounded w-3/4" />
-                <div className="h-3 bg-gray-800 rounded w-1/2" />
-                <div className="flex justify-between items-center">
-                    <div className="h-5 bg-gray-800 rounded w-1/3" />
-                    <div className="h-8 bg-gray-800 rounded w-1/4" />
+        <div className="flex-shrink-0 w-[240px] md:w-[280px] bg-[#111] rounded-xl border border-white/[0.05] overflow-hidden animate-pulse">
+            <div className="aspect-[3/4] bg-white/5" />
+            <div className="p-5 space-y-4">
+                <div className="space-y-2">
+                    <div className="h-5 bg-white/5 rounded-lg w-3/4" />
+                    <div className="h-3 bg-white/5 rounded-lg w-1/2" />
                 </div>
             </div>
         </div>
@@ -79,8 +63,10 @@ export default function PopularModels() {
     }, [isPaused, models.length]);
 
     return (
-        <section className="py-16 md:py-24 bg-black">
-            <div className="max-w-[1400px] mx-auto px-4 md:px-6">
+        <section className="relative py-14 md:py-20 bg-[#070707] overflow-hidden">
+            {/* Fine line grid for depth */}
+            <div className="absolute inset-0 bg-line-grid pointer-events-none" />
+            <div className="max-w-[1400px] mx-auto px-6 md:px-10">
                 {/* Header */}
                 <div
                     ref={headerRef}
@@ -89,23 +75,21 @@ export default function PopularModels() {
                         transform: headerVisible ? 'translateY(0)' : 'translateY(30px)',
                         transition: 'opacity 0.7s ease, transform 0.7s ease',
                     }}
-                    className="flex items-center justify-between mb-12"
+                    className="mb-12"
                 >
-                    <div>
-                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
-                            Popular <span className="text-yellow-400">Models</span>
+                    <p className="text-xs font-bold tracking-[0.2em] uppercase text-yellow-400 mb-3">Community picks</p>
+                    <div className="flex items-end justify-between gap-4">
+                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
+                            Trending <span className="text-yellow-400">right now.</span>
                         </h2>
-                        <p className="text-gray-400 text-lg">
-                            Trending assets loved by our community
-                        </p>
+                        <Link
+                            href="/catalog?sort=rating"
+                            className="hidden md:flex items-center gap-2 text-sm text-gray-400 hover:text-yellow-400 transition-colors group shrink-0"
+                        >
+                            View all
+                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </Link>
                     </div>
-                    <Link
-                        href="/catalog?sort=rating"
-                        className="hidden md:flex items-center gap-2 text-yellow-400 hover:text-yellow-300 font-semibold transition-colors group"
-                    >
-                        View All
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </Link>
                 </div>
 
                 {/* Scrollable Cards */}
@@ -131,82 +115,21 @@ export default function PopularModels() {
                     )}
 
                     {/* Model cards */}
-                    {!isLoading && models.map((model) => (
-                        <Link
-                            key={model.id}
-                            href={`/catalog/${model.id}`}
-                            className="group flex-shrink-0 w-[280px] md:w-[300px] bg-gray-900/60 backdrop-blur-sm rounded-xl border border-gray-800 hover:border-yellow-400/50 overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-yellow-400/10"
-                        >
-                            {/* Thumbnail */}
-                            <div className="relative aspect-[4/3] bg-gray-800 overflow-hidden">
-                                {model.thumbnails?.[0] ? (
-                                    <img
-                                        src={model.thumbnails[0]}
-                                        alt={model.title}
-                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                    />
-                                ) : (
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <ShoppingCart className="w-10 h-10 text-gray-600" />
-                                    </div>
-                                )}
-
-                                {/* Category badge */}
-                                <div className="absolute top-3 left-3">
-                                    <span className="px-2.5 py-1 bg-black/70 backdrop-blur-sm text-white text-xs font-medium rounded-full border border-white/10">
-                                        {model.category}
-                                    </span>
-                                </div>
-
-                                {/* Rating badge */}
-                                {(model.rating ?? 0) > 0 && (
-                                    <div className="absolute top-3 right-3">
-                                        <span className="px-2.5 py-1 bg-yellow-400/90 backdrop-blur-sm text-black text-xs font-bold rounded-full flex items-center gap-1">
-                                            <Star className="w-3 h-3 fill-black" />
-                                            {(model.rating ?? 0).toFixed(1)}
-                                        </span>
-                                    </div>
-                                )}
-
-                                {/* Hover overlay */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            </div>
-
-                            {/* Content */}
-                            <div className="p-4">
-                                <h3 className="text-white font-semibold text-base mb-2 group-hover:text-yellow-400 transition-colors line-clamp-1">
-                                    {model.title}
-                                </h3>
-
-                                {/* Stars + Review count */}
-                                <div className="flex items-center gap-2 mb-3">
-                                    <StarRating rating={model.rating ?? 0} />
-                                    <span className="text-gray-500 text-xs">
-                                        {(model.reviewCount ?? 0) > 0
-                                            ? `(${model.reviewCount})`
-                                            : 'No reviews yet'}
-                                    </span>
-                                </div>
-
-                                {/* Artist */}
-                                <p className="text-gray-500 text-xs mb-3">
-                                    by{' '}
-                                    <span className="text-gray-400 hover:text-yellow-400 transition-colors">
-                                        {model.artist?.username || 'Unknown'}
-                                    </span>
-                                </p>
-
-                                {/* Price */}
-                                <div className="flex items-center justify-between">
-                                    <span className="text-yellow-400 font-bold text-lg">
-                                        {formatPrice(model.price).idr}
-                                    </span>
-                                    <span className="text-xs text-gray-600 border border-gray-700 px-2 py-1 rounded-lg">
-                                        View
-                                    </span>
-                                </div>
-                            </div>
-                        </Link>
+                    {!isLoading && models.map((model: any) => (
+                        <div key={model.id} className="flex-shrink-0 w-[240px] md:w-[280px]">
+                            <CatalogProductCard
+                                id={model.id}
+                                title={model.title}
+                                image={model.thumbnails?.[0] || '/placeholder-model.jpg'}
+                                author={model.artist?.username || 'Unknown'}
+                                price={model.price}
+                                isFree={model.price === 0}
+                                rating={model.rating}
+                                reviewCount={model.reviewCount}
+                                formats={model.specifications?.formats || []}
+                                polyCount={model.specifications?.polygons?.toLocaleString()}
+                            />
+                        </div>
                     ))}
                 </div>
 

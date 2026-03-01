@@ -9,13 +9,17 @@ interface ProtectedLinkProps {
     children: ReactNode;
     className?: string;
     requireAuth?: boolean;
+    onClick?: () => void;
+    onMouseEnter?: () => void;
 }
 
 export default function ProtectedLink({
     href,
     children,
     className = '',
-    requireAuth = true
+    requireAuth = true,
+    onClick,
+    onMouseEnter
 }: ProtectedLinkProps) {
     const { isAuthenticated, showLogin } = useAuth();
 
@@ -29,10 +33,10 @@ export default function ProtectedLink({
 
         if (requireAuth && !isAuthenticated) {
             e.preventDefault();
-            console.log('🚫 Access blocked - showing login modal');
+            console.log('Access blocked - showing login modal');
             showLogin();
         } else {
-            console.log('✅ Access granted - navigating to:', href);
+            console.log('Access granted - navigating to:', href);
         }
     };
 

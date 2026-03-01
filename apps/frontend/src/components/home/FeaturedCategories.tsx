@@ -1,128 +1,108 @@
 'use client';
 
 import Link from 'next/link';
-import { Box, Palette, ArrowRight } from 'lucide-react';
+import { Box, Palette, Printer, ArrowRight } from 'lucide-react';
 import { useInView } from '@/lib/hooks/useInView';
 
-const categories = [
-    {
-        title: '3D Models',
-        description: 'High-quality 3D assets for games, animation, and visualization',
-        icon: Box,
-        count: '12,500+',
-        href: '/catalog',
-        gradient: 'from-blue-500/20 to-purple-500/20',
-        iconColor: 'text-blue-400',
-    },
-    {
-        title: 'CG Models',
-        description: 'Professional CG assets, rigs, and game-ready models',
-        icon: Box,
-        count: '8,200+',
-        href: '/cg-models',
-        gradient: 'from-green-500/20 to-emerald-500/20',
-        iconColor: 'text-green-400',
-        badge: 'NEW',
-    },
-    {
-        title: 'Textures',
-        description: 'PBR materials, seamless textures, and surface details',
-        icon: Palette,
-        count: '15,800+',
-        href: '/textures',
-        gradient: 'from-orange-500/20 to-red-500/20',
-        iconColor: 'text-orange-400',
-    },
-];
-
 export default function FeaturedCategories() {
-    const { ref: headerRef, inView: headerVisible } = useInView({ threshold: 0.2 });
-    const { ref: gridRef, inView: gridVisible } = useInView({ threshold: 0.1 });
+    const { ref, inView } = useInView({ threshold: 0.1 });
 
     return (
-        <section className="py-16 md:py-24 bg-black">
-            <div className="max-w-[1400px] mx-auto px-4 md:px-6">
+        <section className="relative py-14 md:py-20 bg-[#060606] overflow-hidden">
+
+            {/* Dot grid texture */}
+            <div className="absolute inset-0 bg-dot-grid opacity-[0.03] pointer-events-none" />
+            {/* Top accent line */}
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400/30 to-transparent" />
+
+            <div className="relative max-w-[1400px] mx-auto px-6 md:px-10">
+
                 {/* Header */}
-                <div
-                    ref={headerRef}
-                    style={{
-                        opacity: headerVisible ? 1 : 0,
-                        transform: headerVisible ? 'translateY(0)' : 'translateY(30px)',
-                        transition: 'opacity 0.7s ease, transform 0.7s ease',
-                    }}
-                    className="text-center mb-12 md:mb-16"
-                >
-                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
-                        Explore Our <span className="text-yellow-400">Collections</span>
-                    </h2>
-                    <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto">
-                        Discover thousands of premium 3D assets, models, and textures for your next project
-                    </p>
+                <div className="flex items-end justify-between mb-8">
+                    <div>
+                        <p className="text-[11px] font-semibold tracking-[0.25em] uppercase text-yellow-400/70 mb-3">Browse by category</p>
+                        <h2 className="text-4xl md:text-5xl font-black text-white leading-[1.1]">
+                            Everything you need<br />
+                            <em className="not-italic text-yellow-400">in one place.</em>
+                        </h2>
+                    </div>
+                    <Link href="/catalog" className="hidden md:flex items-center gap-2 text-sm text-gray-500 hover:text-white transition-colors group">
+                        Browse all <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </Link>
                 </div>
 
-                {/* Category Cards */}
-                <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                    {categories.map((category, i) => {
-                        const Icon = category.icon;
-                        return (
-                            <Link
-                                key={category.title}
-                                href={category.href}
-                                style={{
-                                    opacity: gridVisible ? 1 : 0,
-                                    transform: gridVisible ? 'translateY(0)' : 'translateY(40px)',
-                                    transition: 'opacity 0.6s ease, transform 0.6s ease',
-                                    transitionDelay: `${i * 0.12}s`,
-                                }}
-                                className="group relative overflow-hidden rounded-2xl bg-gray-800/40 backdrop-blur-sm border border-gray-700 hover:border-yellow-400/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-yellow-400/10"
-                            >
-                                {/* Gradient Background */}
-                                <div className={`absolute inset-0 bg-gradient-to-br ${category.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                {/* Asymmetric mosaic grid */}
+                <div ref={ref} className="grid grid-cols-1 md:grid-cols-5 gap-4 auto-rows-[280px]">
 
-                                {/* Content */}
-                                <div className="relative p-8">
-                                    {/* Icon */}
-                                    <div className="mb-6">
-                                        <div className="w-16 h-16 rounded-xl bg-gray-700/50 backdrop-blur-sm flex items-center justify-center group-hover:bg-gray-700/70 transition-colors">
-                                            <Icon className={`w-8 h-8 ${category.iconColor}`} />
-                                        </div>
-                                    </div>
-
-                                    {/* Title & Badge */}
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <h3 className="text-2xl font-bold text-white group-hover:text-yellow-400 transition-colors">
-                                            {category.title}
-                                        </h3>
-                                        {category.badge && (
-                                            <span className="px-2 py-1 bg-green-500 text-black text-xs font-bold rounded">
-                                                {category.badge}
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    {/* Description */}
-                                    <p className="text-gray-400 mb-6 leading-relaxed">
-                                        {category.description}
-                                    </p>
-
-                                    {/* Count & Arrow */}
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-yellow-400 font-bold text-lg">
-                                            {category.count} items
-                                        </span>
-                                        <div className="flex items-center gap-2 text-gray-400 group-hover:text-yellow-400 transition-colors">
-                                            <span className="text-sm font-medium">Explore</span>
-                                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                                        </div>
-                                    </div>
+                    {/* 3D Models — spans 3 cols, tall */}
+                    <Link
+                        href="/catalog"
+                        style={{ opacity: inView ? 1 : 0, transform: inView ? 'translateY(0)' : 'translateY(24px)', transition: 'opacity 0.6s ease 0s, transform 0.6s ease 0s' }}
+                        className="group md:col-span-3 md:row-span-1 relative rounded-2xl overflow-hidden border border-white/[0.06] hover:border-yellow-400/25 transition-all duration-500"
+                    >
+                        <img src="/category-3d-models.jpg" alt="" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
+                        <div className="absolute bottom-0 left-0 p-8">
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="w-8 h-8 rounded-lg bg-blue-500/20 backdrop-blur-sm flex items-center justify-center border border-blue-400/20">
+                                    <Box className="w-4 h-4 text-blue-400" />
                                 </div>
+                                <h3 className="text-2xl font-black text-white">3D Models</h3>
+                            </div>
+                            <p className="text-gray-400 text-sm mb-3 max-w-xs">Game-ready, animation rigs, props & architectural models</p>
+                            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-yellow-400 group-hover:gap-3 transition-all duration-300">12,500+ assets <ArrowRight className="w-3.5 h-3.5" /></span>
+                        </div>
+                    </Link>
 
-                                {/* Hover Effect Border */}
-                                <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/5 group-hover:ring-yellow-400/20 transition-all" />
-                            </Link>
-                        );
-                    })}
+                    {/* Textures — spans 2 cols */}
+                    <Link
+                        href="/textures"
+                        style={{ opacity: inView ? 1 : 0, transform: inView ? 'translateY(0)' : 'translateY(24px)', transition: 'opacity 0.6s ease 0.1s, transform 0.6s ease 0.1s' }}
+                        className="group md:col-span-2 relative rounded-2xl overflow-hidden border border-white/[0.06] hover:border-yellow-400/25 transition-all duration-500"
+                    >
+                        <img src="/category-textures.jpg" alt="" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
+                        <div className="absolute bottom-0 left-0 right-0 p-6">
+                            <div className="flex items-center gap-2 mb-1">
+                                <div className="w-7 h-7 rounded-lg bg-orange-500/20 backdrop-blur-sm flex items-center justify-center border border-orange-400/20">
+                                    <Palette className="w-3.5 h-3.5 text-orange-400" />
+                                </div>
+                                <h3 className="text-xl font-black text-white">Textures</h3>
+                            </div>
+                            <p className="text-gray-400 text-xs mb-2">PBR materials & surface details</p>
+                            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-yellow-400">15,800+ <ArrowRight className="w-3 h-3" /></span>
+                        </div>
+                    </Link>
+
+                    {/* 3D Printing — full width bottom strip */}
+                    <Link
+                        href="/print-services"
+                        style={{ height: '160px', opacity: inView ? 1 : 0, transform: inView ? 'translateY(0)' : 'translateY(24px)', transition: 'opacity 0.6s ease 0.2s, transform 0.6s ease 0.2s' }}
+                        className="group md:col-span-5 relative rounded-2xl overflow-hidden border border-white/[0.06] hover:border-violet-400/25 transition-all duration-500"
+                    >
+                        <img src="/category-3d-print.jpg" alt="" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" style={{ objectPosition: 'center 40%' }} />
+                        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent" />
+                        <div className="absolute inset-0 flex items-center px-8 gap-6">
+                            <div className="w-10 h-10 rounded-xl bg-violet-500/20 backdrop-blur-sm flex items-center justify-center border border-violet-400/20 shrink-0">
+                                <Printer className="w-5 h-5 text-violet-400" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-black text-white mb-0.5">3D Printing Services</h3>
+                                <p className="text-gray-400 text-sm">Print-on-demand via 500+ verified local providers</p>
+                            </div>
+                            <span className="ml-auto hidden md:inline-flex items-center gap-2 px-5 py-2.5 border border-violet-400/30 text-violet-300 text-sm font-semibold rounded-xl group-hover:bg-violet-400/10 transition-colors">
+                                Find a provider <ArrowRight className="w-4 h-4" />
+                            </span>
+                        </div>
+                    </Link>
+
                 </div>
+
+                {/* Mobile view all */}
+                <div className="mt-8 md:hidden text-center">
+                    <Link href="/catalog" className="inline-flex items-center gap-2 text-sm text-yellow-400 font-semibold">All categories <ArrowRight className="w-4 h-4" /></Link>
+                </div>
+
             </div>
         </section>
     );

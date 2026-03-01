@@ -66,12 +66,17 @@ export default function ProductGrid({ products, loading, onLoadMore, hasMore }: 
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {[...Array(8)].map((_, i) => (
-          <div key={i} className="bg-[#141414] rounded-lg overflow-hidden animate-pulse">
-            <div className="aspect-[4/3] bg-gray-800"></div>
-            <div className="p-4 space-y-3">
-              <div className="h-4 bg-gray-800 rounded w-3/4"></div>
-              <div className="h-3 bg-gray-800 rounded w-1/2"></div>
-              <div className="h-5 bg-gray-800 rounded w-1/4"></div>
+          <div key={i} className="bg-[#111] rounded-xl border border-white/[0.05] overflow-hidden animate-pulse">
+            <div className="aspect-[3/4] bg-white/5"></div>
+            <div className="p-5 space-y-4">
+              <div className="space-y-2">
+                <div className="h-5 bg-white/5 rounded-lg w-3/4"></div>
+                <div className="h-3 bg-white/5 rounded-lg w-1/2"></div>
+              </div>
+              <div className="flex justify-between items-center pt-2">
+                <div className="h-7 bg-white/5 rounded-lg w-1/3"></div>
+                <div className="h-6 bg-white/5 rounded-lg w-1/4"></div>
+              </div>
             </div>
           </div>
         ))}
@@ -81,9 +86,9 @@ export default function ProductGrid({ products, loading, onLoadMore, hasMore }: 
 
   if (products.length === 0) {
     return (
-      <div className="text-center py-16">
+      <div className="text-center py-20 bg-[#111] rounded-3xl border border-white/[0.05]">
         <svg
-          className="w-20 h-20 text-gray-600 mx-auto mb-4"
+          className="w-20 h-20 text-gray-700 mx-auto mb-4 opacity-50"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -91,12 +96,12 @@ export default function ProductGrid({ products, loading, onLoadMore, hasMore }: 
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth={2}
+            strokeWidth={1.5}
             d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <h3 className="text-xl font-semibold mb-2">No Products Found</h3>
-        <p className="text-gray-400">Try adjusting your search or filter criteria</p>
+        <h3 className="text-xl font-bold text-white mb-2">No Products Found</h3>
+        <p className="text-gray-500 font-medium">Try adjusting your search or filter criteria</p>
       </div>
     );
   }
@@ -121,7 +126,7 @@ export default function ProductGrid({ products, loading, onLoadMore, hasMore }: 
           <button
             onClick={onLoadMore}
             disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed px-8 py-3 rounded-lg font-semibold transition-all flex items-center gap-2"
+            className="bg-white/5 hover:bg-white/10 text-white border border-white/10 disabled:opacity-50 disabled:cursor-not-allowed px-10 py-3.5 rounded-xl font-bold transition-all flex items-center gap-3 backdrop-blur-md"
           >
             {loading ? (
               <>
