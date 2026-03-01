@@ -9,7 +9,9 @@ export function useAuth() {
     const { data: user, isLoading, error } = useQuery({
         queryKey: QUERY_KEYS.AUTH,
         queryFn: () => authService.getCurrentUser(),
-        enabled: authService.isAuthenticated(),
+        // Always run this query — with HTTP-only cookies there is no client-side
+        // way to know if a session exists. /auth/me returns null on 401.
+        enabled: true,
         retry: false,
         staleTime: 5 * 60 * 1000, // 5 minutes
     });
@@ -23,8 +25,10 @@ export function useAuth() {
 
     const registerMutation = useMutation({
         mutationFn: (data: RegisterRequest) => authService.register(data),
-        onSuccess: (data) => {
-            queryClient.setQueryData(QUERY_KEYS.AUTH, data.user);
+        // register returns { id, email } only — session is established via the
+        // auto-login that AuthProvider performs after registration
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.AUTH });
         },
     });
 

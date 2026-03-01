@@ -1,5 +1,5 @@
-import { api } from '../api';
-import { Post, PostComment, UserReview, ApiResponse } from '../types';
+import { api } from '@/lib/api';
+import { Post, PostComment, UserReview } from '@/lib/types';
 
 export const socialService = {
     // Posts

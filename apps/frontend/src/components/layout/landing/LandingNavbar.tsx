@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Search, ShoppingCart, Menu, X, LogOut, Settings, FolderOpen, Heart, Upload, BarChart3, Users, FileText, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import ProtectedLink from '@/components/common/ProtectedLink';
-import CategoryMegaMenu from '@/components/common/CategoryMegaMenu';
+import CategoryMegaMenu from '@/components/layout/CategoryMegaMenu';
 import { useState, useCallback, useEffect } from 'react';
 import { useCart } from '@/lib/hooks/useCart';
 import UserAvatar from '@/components/common/UserAvatar';

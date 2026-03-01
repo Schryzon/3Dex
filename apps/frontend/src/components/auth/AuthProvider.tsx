@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import LoginModal from './LoginModal';
 import RegisterModal from './RegisterModal';
-import { authService } from '@/lib/services/auth.service';
+import { authService } from '@/lib/api/services/auth.service';
 import { User, LoginRequest, RegisterRequest } from '@/lib/types';
 
 interface AuthContextType {

@@ -1,13 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { printService } from '@/lib/services/print.service';
-import { Order } from '@/lib/types';
+import { printService, PrintJob } from '@/lib/api/services/print.service';
 import { Loader2, Package, Check, X, Truck, Box } from 'lucide-react';
 import Link from 'next/link';
 
 export default function JobsTab() {
-    const [jobs, setJobs] = useState<Order[]>([]);
+    const [jobs, setJobs] = useState<PrintJob[]>([]);
     const [loading, setLoading] = useState(true);
 
     const fetchJobs = async () => {
@@ -64,10 +63,10 @@ export default function JobsTab() {
                                     <div className="flex items-center gap-3 mb-1">
                                         <h4 className="font-semibold text-white">Order #{job.id.slice(0, 8)}</h4>
                                         <span className={`px-2 py-0.5 rounded textxs font-bold uppercase ${job.status === 'PENDING' ? 'bg-yellow-400/10 text-yellow-400' :
-                                                job.status === 'PROCESSING' ? 'bg-blue-400/10 text-blue-400' :
-                                                    job.status === 'SHIPPED' ? 'bg-purple-400/10 text-purple-400' :
-                                                        job.status === 'DELIVERED' ? 'bg-green-400/10 text-green-400' :
-                                                            'bg-red-400/10 text-red-400'
+                                            job.status === 'PROCESSING' ? 'bg-blue-400/10 text-blue-400' :
+                                                job.status === 'SHIPPED' ? 'bg-purple-400/10 text-purple-400' :
+                                                    job.status === 'DELIVERED' ? 'bg-green-400/10 text-green-400' :
+                                                        'bg-red-400/10 text-red-400'
                                             }`}>
                                             {job.status}
                                         </span>

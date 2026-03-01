@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { printService } from '@/lib/services/print.service';
+import { printService } from '@/lib/api/services/print.service';
 import { api } from '@/lib/api';
 import { User, Model, PrintConfig } from '@/lib/types';
 import UserAvatar from '@/components/common/UserAvatar';

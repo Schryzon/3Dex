@@ -6,7 +6,7 @@ import {
     UserCheck, Settings2, Package, Sparkles, Shield, Clock,
     Zap, ChevronLeft, ChevronRight, TrendingUp, Award
 } from 'lucide-react';
-import { printService } from '@/lib/services/print.service';
+import { printService } from '@/lib/api/services/print.service';
 import { User, ProviderFilters } from '@/lib/types';
 import ProviderCard from '@/components/print/ProviderCard';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -205,8 +205,8 @@ export default function PrintServicesPage() {
                                     key={cat.id}
                                     onClick={() => setActiveCategory(cat.id)}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all cursor-pointer ${activeCategory === cat.id
-                                            ? 'bg-yellow-400 text-black shadow-lg shadow-yellow-400/20'
-                                            : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#252525] hover:text-white border border-gray-800'
+                                        ? 'bg-yellow-400 text-black shadow-lg shadow-yellow-400/20'
+                                        : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#252525] hover:text-white border border-gray-800'
                                         }`}
                                 >
                                     <Icon className="w-4 h-4" />

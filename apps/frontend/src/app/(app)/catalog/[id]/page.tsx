@@ -8,16 +8,16 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { Share2, Heart, Plus, Check, Download, Eye, ShoppingCart, FolderPlus } from 'lucide-react';
 import { Suspense, lazy, useState } from 'react';
 import Link from 'next/link';
-import ProductDetails from '@/components/product/ProductDetails';
-import RelatedProducts from '@/components/product/RelatedProducts';
-import ProductReviews from '@/components/product/ProductReviews';
+import ProductDetails from '@/components/catalog/ProductDetails';
+import RelatedProducts from '@/components/catalog/RelatedProducts';
+import ProductReviews from '@/components/catalog/ProductReviews';
 import AddToCollectionModal from '@/components/collection/AddToCollectionModal';
 import { formatPrice } from '@/lib/utils';
 import { purchaseService } from '@/lib/api/services/purchase.service';
 import { toast } from 'react-hot-toast';
 
 // Lazy load 3D viewer for better performance
-const ProductViewer3D = lazy(() => import('@/components/product/ProductViewer3D'));
+const ProductViewer3D = lazy(() => import('@/components/catalog/ProductViewer3D'));
 
 export default function CatalogDetailPage() {
     const params = useParams();
