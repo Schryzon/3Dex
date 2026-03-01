@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { register, login, google_auth, get_me } from "../controllers/auth.controller";
+import { register, login, logout, google_auth, get_me } from "../controllers/auth.controller";
 import { require_auth } from "../middlewares/auth.middleware";
 
 const router = Router();
@@ -85,5 +85,8 @@ router.post("/register", register);
  */
 router.post("/google", google_auth);
 router.get("/me", require_auth, get_me);
+
+// Clears the HTTP-only cookie — no auth required to call this
+router.post("/logout", logout);
 
 export default router;

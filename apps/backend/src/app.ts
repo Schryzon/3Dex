@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import swagger_ui from "swagger-ui-express";
 import { swagger_spec } from "./utils/swagger";
 
@@ -36,6 +37,8 @@ app.use(cors({
 }));
 
 app.use(express.json());
+// Parse cookies — required for HTTP-only cookie auth
+app.use(cookieParser());
 
 // Routes
 app.get("/health", (req, res) => res.json({ status: "OK" }));

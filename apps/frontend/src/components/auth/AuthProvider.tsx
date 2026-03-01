@@ -37,61 +37,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
 
-  // Load user from localStorage on mount
+  // On mount, validate the session by calling /auth/me.
+  // The HTTP-only cookie is sent automatically by the browser.
+  // We also show a cached user immediately from localStorage for instant UI,
+  // then replace it with the fresh value from the server.
   useEffect(() => {
-    const storedUser = authService.getStoredUser();
-    const storedToken = authService.getStoredToken();
-
-    // Debug logging
-    console.log(' AuthProvider - Checking stored auth:', {
-      hasUser: !!storedUser,
-      hasToken: !!storedToken,
-      user: storedUser,
-      tokenPreview: storedToken ? storedToken.substring(0, 20) + '...' : null
-    });
-
-    if (storedUser && storedToken) {
-      setUserState(storedUser);
-      console.log(' User restored from localStorage:', storedUser.username);
-    } else {
-      console.log(' No stored auth found');
+    const cachedUser = authService.getStoredUser();
+    if (cachedUser) {
+      // Optimistically restore the cached user so the UI is not blank
+      setUserState(cachedUser);
     }
-    setIsLoading(false);
+
+    authService.getCurrentUser()
+      .then((freshUser) => {
+        setUserState(freshUser);
+        // Keep the cache in sync with the server value
+        authService.storeUser(freshUser);
+      })
+      .catch(() => {
+        // Cookie missing or expired — treat as logged out
+        setUserState(null);
+        authService.clearStoredUser();
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
   const login = async (credentials: LoginRequest) => {
-    console.log('Login attempt:', credentials.email);
-    const { token, user: userData } = await authService.login(credentials);
-    authService.storeAuth(token, userData);
+    // Server sets the HTTP-only cookie in the response
+    const { user: userData } = await authService.login(credentials);
+    // Cache user data in localStorage for instant UI on next load
+    authService.storeUser(userData);
     setUserState(userData);
-    console.log(' Login successful:', userData.username, 'Token stored:', !!token);
   };
 
   const register = async (data: RegisterRequest) => {
     await authService.register(data);
-    // After registration, auto-login
+    // Auto-login after successful registration
     await login({ email: data.email, password: data.password });
   };
 
   const googleLoginHandler = async (credential: string) => {
-    console.log('Google login attempt');
-    const { token, user: userData } = await authService.googleLogin(credential);
-    authService.storeAuth(token, userData);
+    // Server sets the HTTP-only cookie in the response
+    const { user: userData } = await authService.googleLogin(credential);
+    authService.storeUser(userData);
     setUserState(userData);
-    console.log(' Google login successful:', userData.username);
   };
 
   const logout = async () => {
+    // Server clears the HTTP-only cookie
     await authService.logout();
+    authService.clearStoredUser();
     setUserState(null);
   };
 
+  // Allow direct user mutation (e.g. after profile update)
   const setUser = (newUser: User | null) => {
     setUserState(newUser);
     if (newUser) {
-      localStorage.setItem('user', JSON.stringify(newUser));
+      authService.storeUser(newUser);
     } else {
-      localStorage.removeItem('user');
+      authService.clearStoredUser();
     }
   };
 
@@ -110,8 +115,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setShowRegisterModal(false);
   };
 
-  
-
   return (
     <AuthContext.Provider value={{
       user,
@@ -125,11 +128,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       googleLogin: googleLoginHandler,
       logout,
       setUser,
-      updateUser: setUser
+      updateUser: setUser,
     }}>
       {children}
 
-      {/* Global Modals */}
+      {/* Global auth modals */}
       <LoginModal
         isOpen={showLoginModal}
         onClose={hideModals}

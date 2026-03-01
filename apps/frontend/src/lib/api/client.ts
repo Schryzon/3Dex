@@ -11,44 +11,43 @@ class ApiClient {
       headers: {
         'Content-Type': 'application/json',
       },
+      // Required: instructs the browser to send the HTTP-only auth cookie
+      // with every cross-origin request to the backend
       withCredentials: true,
     });
 
-    // Request interceptor
+    // Request interceptor — logging only; no token injection needed
+    // because the browser attaches the cookie automatically
     this.client.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
         console.log(`[apiClient Request] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
         return config;
       },
-      (error) => {
-        return Promise.reject(error);
-      }
+      (error) => Promise.reject(error)
     );
 
-    // Response interceptor
+    // Response interceptor — handle auth errors
     this.client.interceptors.response.use(
       (response) => response,
       async (error: AxiosError) => {
-        console.error(`[apiClient Error] ${error.config?.method?.toUpperCase()} ${error.config?.url}:`, error.response?.status, error.response?.data);
+        console.error(
+          `[apiClient Error] ${error.config?.method?.toUpperCase()} ${error.config?.url}:`,
+          error.response?.status,
+          error.response?.data
+        );
 
         if (error.response?.status === 401) {
-          const hasToken = !!localStorage.getItem('auth_token');
-          const isLandingPage = window.location.pathname === '/' || window.location.pathname === '';
+          const isLandingPage =
+            window.location.pathname === '/' ||
+            window.location.pathname === '';
 
-          // Unauthorized - clear token
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('user');
-
-          // Only redirect if we were logged in (token existed) and not already on the landing page
-          // This prevents infinite refresh loops on public pages
-          if (hasToken && !isLandingPage) {
+          // Redirect to root only when the user was on a protected page.
+          // Skip the redirect on the landing page to prevent infinite loops.
+          if (!isLandingPage) {
             window.location.href = '/';
           }
         }
+
         return Promise.reject(error);
       }
     );
@@ -79,15 +78,19 @@ class ApiClient {
     return response.data;
   }
 
-  // For file uploads
-  async upload<T>(url: string, formData: FormData, onProgress?: (progress: number) => void): Promise<T> {
+  // For file uploads — multipart/form-data with progress tracking
+  async upload<T>(
+    url: string,
+    formData: FormData,
+    onProgress?: (progress: number) => void
+  ): Promise<T> {
     const response: AxiosResponse<T> = await this.client.post(url, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+      headers: { 'Content-Type': 'multipart/form-data' },
       onUploadProgress: (progressEvent) => {
         if (onProgress && progressEvent.total) {
-          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          const progress = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
           onProgress(progress);
         }
       },
@@ -98,4 +101,3 @@ class ApiClient {
 
 export const apiClient = new ApiClient();
 export default apiClient;
-

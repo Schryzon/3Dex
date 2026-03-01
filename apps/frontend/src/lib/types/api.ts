@@ -28,8 +28,10 @@ export interface RegisterRequest {
     role?: 'CUSTOMER' | 'ARTIST' | 'PROVIDER';
 }
 
+// token is no longer sent in the response body — it is set as an HTTP-only cookie.
+// Kept as optional here for backward compatibility with any code that may still reference it.
 export interface AuthResponse {
-    token: string;
+    token?: string;
     user: User;
 }
 

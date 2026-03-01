@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
         REGISTER: '/auth/register',
         LOGOUT: '/auth/logout',
         ME: '/auth/me',
+        GOOGLE: '/auth/google',
     },
 
     // Models/Products

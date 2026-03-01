@@ -2,47 +2,49 @@ import axios, { AxiosError, InternalAxiosRequestConfig, AxiosResponse } from 'ax
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
-// Create axios instance
+// Legacy axios instance — used by older service files that import from '@/lib/api'
+// Prefer apiClient from '@/lib/api/client' for new code
 export const api = axios.create({
     baseURL: API_URL,
     headers: {
         'Content-Type': 'application/json',
     },
+    // Required: instructs the browser to include the HTTP-only auth cookie
+    withCredentials: true,
 });
 
-// Request interceptor - attach token to requests
+// Request interceptor — logging only; no token injection needed
+// because the browser attaches the auth cookie automatically
 api.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
         console.log(`[API Request] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
         return config;
     },
-    (error: AxiosError) => {
-        return Promise.reject(error);
-    }
+    (error: AxiosError) => Promise.reject(error)
 );
 
-// Response interceptor - handle errors
+// Response interceptor — redirect on 401 for protected pages
 api.interceptors.response.use(
     (response: AxiosResponse) => response,
     (error: AxiosError) => {
-        console.error(`[API Error] ${error.config?.method?.toUpperCase()} ${error.config?.url}:`, error.response?.status, error.response?.data);
+        console.error(
+            `[API Error] ${error.config?.method?.toUpperCase()} ${error.config?.url}:`,
+            error.response?.status,
+            error.response?.data
+        );
 
         if (error.response?.status === 401) {
-            const hasToken = !!localStorage.getItem('auth_token');
-            const isLandingPage = window.location.pathname === '/' || window.location.pathname === '';
+            const isLandingPage =
+                window.location.pathname === '/' ||
+                window.location.pathname === '';
 
-            // Token expired or invalid
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('user');
-
-            if (hasToken && !isLandingPage) {
+            // Redirect to root only on protected pages; skip the landing page
+            // to avoid infinite redirect loops
+            if (!isLandingPage) {
                 window.location.href = '/';
             }
         }
+
         return Promise.reject(error);
     }
 );

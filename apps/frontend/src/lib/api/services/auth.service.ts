@@ -1,68 +1,49 @@
 import { apiClient } from '../client';
 import { API_ENDPOINTS } from '@/lib/constants/api';
-import type {
-    LoginRequest,
-    RegisterRequest,
-    AuthResponse,
-    User
-} from '@/lib/types';
+import type { LoginRequest, RegisterRequest, User } from '@/lib/types';
+
+// Shape returned by login and googleLogin.
+// Token is no longer in the body — it lives in an HTTP-only cookie.
+interface AuthResponse {
+    user: User;
+}
 
 export const authService = {
+    // POST /auth/login
+    // Cookie is set by the server in the response; no token handling needed here
     async login(credentials: LoginRequest): Promise<AuthResponse> {
-        const response = await apiClient.post<AuthResponse>(
-            API_ENDPOINTS.AUTH.LOGIN,
-            credentials
-        );
-
-        // Store token and user in localStorage
-        if (response.token) {
-            localStorage.setItem('auth_token', response.token);
-            localStorage.setItem('user', JSON.stringify(response.user));
-        }
-
-        return response;
+        return apiClient.post<AuthResponse>(API_ENDPOINTS.AUTH.LOGIN, credentials);
     },
 
-    async register(data: RegisterRequest): Promise<AuthResponse> {
-        const response = await apiClient.post<AuthResponse>(
-            API_ENDPOINTS.AUTH.REGISTER,
-            data
-        );
-
-        // Store token and user in localStorage
-        if (response.token) {
-            localStorage.setItem('auth_token', response.token);
-            localStorage.setItem('user', JSON.stringify(response.user));
-        }
-
-        return response;
+    // POST /auth/register
+    // Returns the new user's id and email only; no auto-login token is issued
+    async register(data: RegisterRequest): Promise<{ id: string; email: string }> {
+        return apiClient.post(API_ENDPOINTS.AUTH.REGISTER, data);
     },
 
+    // POST /auth/google
+    // Cookie is set by the server after verifying the Google ID token
+    async googleLogin(credential: string): Promise<AuthResponse> {
+        return apiClient.post<AuthResponse>(API_ENDPOINTS.AUTH.GOOGLE, { credential });
+    },
+
+    // POST /auth/logout
+    // Instructs the server to clear the HTTP-only cookie
     async logout(): Promise<void> {
-        try {
-            await apiClient.post(API_ENDPOINTS.AUTH.LOGOUT);
-        } finally {
-            // Clear localStorage regardless of API response
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('user');
-        }
+        await apiClient.post(API_ENDPOINTS.AUTH.LOGOUT);
     },
 
+    // GET /auth/me
+    // Verifies the current cookie session and returns the user's profile
     async getCurrentUser(): Promise<User> {
-        try {
-            return await apiClient.get<User>(API_ENDPOINTS.AUTH.ME);
-        } catch {
-            // Fall back to stored user if /auth/me is unavailable
-            const stored = this.getStoredUser();
-            if (stored) return stored;
-            throw new Error('Not authenticated');
-        }
+        return apiClient.get<User>(API_ENDPOINTS.AUTH.ME);
     },
 
+    // Read user data cached in localStorage (UI only — not the auth token)
     getStoredUser(): User | null {
+        if (typeof window === 'undefined') return null;
         const userStr = localStorage.getItem('user');
         if (!userStr) return null;
-
         try {
             return JSON.parse(userStr);
         } catch {
@@ -70,15 +51,13 @@ export const authService = {
         }
     },
 
-    getStoredToken(): string | null {
-    return localStorage.getItem('auth_token');
-},
-
-    getToken(): string | null {
-        return localStorage.getItem('auth_token');
+    // Persist user data in localStorage for instant UI hydration on next load.
+    // This does NOT store a token — the real auth credential is the HTTP-only cookie.
+    storeUser(user: User): void {
+        localStorage.setItem('user', JSON.stringify(user));
     },
 
-    isAuthenticated(): boolean {
-        return !!this.getToken();
+    clearStoredUser(): void {
+        localStorage.removeItem('user');
     },
 };
