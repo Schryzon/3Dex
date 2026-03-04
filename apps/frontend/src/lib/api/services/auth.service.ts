@@ -2,10 +2,10 @@ import { apiClient } from '../client';
 import { API_ENDPOINTS } from '@/lib/constants/api';
 import type { LoginRequest, RegisterRequest, User } from '@/lib/types';
 
-// Shape returned by login and googleLogin.
-// Token is no longer in the body — it lives in an HTTP-only cookie.
+// Shape returned by login, googleLogin.
 interface AuthResponse {
     user: User;
+    needs_username?: boolean;
 }
 
 export const authService = {
@@ -37,6 +37,12 @@ export const authService = {
     // Verifies the current cookie session and returns the user's profile
     async getCurrentUser(): Promise<User> {
         return apiClient.get<User>(API_ENDPOINTS.AUTH.ME);
+    },
+
+    // POST /auth/complete-profile
+    // Saves the user-chosen username after a Google sign-up
+    async completeProfile(username: string): Promise<User> {
+        return apiClient.post<User>(API_ENDPOINTS.AUTH.COMPLETE_PROFILE, { username });
     },
 
     // Read user data cached in localStorage (UI only — not the auth token)

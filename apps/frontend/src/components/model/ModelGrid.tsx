@@ -6,6 +6,7 @@ import { Box, Upload, EllipsisVertical, Trash2, Pencil } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import EditModelModal from './EditModelModal';
+import ConfirmModal from '@/components/common/ConfirmModal';
 import type { Model } from '@/lib/types';
 
 interface ModelGridProps {
@@ -20,26 +21,29 @@ export default function ModelGrid({ artistId, showUpload = false }: ModelGridPro
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
     const [editingModel, setEditingModel] = useState<Model | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
 
     const isAdmin = currentUser?.role === 'ADMIN';
     const isOwner = currentUser?.id === artistId;
     const canManage = isAdmin || (showUpload && isOwner);
 
-    const handleDelete = async (e: React.MouseEvent, id: string, title: string) => {
+    const handleDelete = (e: React.MouseEvent, id: string, title: string) => {
         e.preventDefault();
         e.stopPropagation();
+        setMenuOpenId(null);
+        setDeleteTarget({ id, title });
+    };
 
-        if (confirm(`Are you sure you want to delete "${title}"?`)) {
-            try {
-                setDeletingId(id);
-                await deleteMutation.mutateAsync(id);
-            } catch (error) {
-                console.error('Failed to delete model:', error);
-                alert('Failed to delete model');
-            } finally {
-                setDeletingId(null);
-                setMenuOpenId(null);
-            }
+    const handleConfirmDelete = async () => {
+        if (!deleteTarget) return;
+        try {
+            setDeletingId(deleteTarget.id);
+            await deleteMutation.mutateAsync(deleteTarget.id);
+            setDeleteTarget(null);
+        } catch (error) {
+            console.error('Failed to delete model:', error);
+        } finally {
+            setDeletingId(null);
         }
     };
 
@@ -114,10 +118,10 @@ export default function ModelGrid({ artistId, showUpload = false }: ModelGridPro
                         <div className="absolute top-3 left-3 right-3 flex items-start justify-between pointer-events-none z-10">
                             {/* Status badge — left */}
                             <span className={`pointer-events-auto inline-flex px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${model.status === 'APPROVED'
-                                    ? 'bg-green-500/20 text-green-400 border-green-500/30'
-                                    : model.status === 'PENDING'
-                                        ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
-                                        : 'bg-red-500/20 text-red-400 border-red-500/30'
+                                ? 'bg-green-500/20 text-green-400 border-green-500/30'
+                                : model.status === 'PENDING'
+                                    ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+                                    : 'bg-red-500/20 text-red-400 border-red-500/30'
                                 }`}>
                                 {model.status}
                             </span>
@@ -214,6 +218,25 @@ export default function ModelGrid({ artistId, showUpload = false }: ModelGridPro
                     onClose={() => setEditingModel(null)}
                 />
             )}
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmModal
+                isOpen={!!deleteTarget}
+                onClose={() => setDeleteTarget(null)}
+                onConfirm={handleConfirmDelete}
+                title="Delete Asset?"
+                message={
+                    <>
+                        Are you sure you want to delete{' '}
+                        <strong className="text-white">&ldquo;{deleteTarget?.title}&rdquo;</strong>?{' '}
+                        This action is <strong className="text-red-400">permanent</strong> and cannot be undone.
+                    </>
+                }
+                confirmLabel={deletingId ? 'Deleting...' : 'Delete Asset'}
+                cancelLabel="Keep Asset"
+                variant="danger"
+                isLoading={!!deletingId}
+            />
         </>
     );
 }

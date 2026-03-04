@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import LoginModal from './LoginModal';
 import RegisterModal from './RegisterModal';
+import UsernameSetupModal from './UsernameSetupModal';
 import { authService } from '@/lib/api/services/auth.service';
 import { User, LoginRequest, RegisterRequest } from '@/lib/types';
 
@@ -36,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [showUsernameSetupModal, setShowUsernameSetupModal] = useState(false);
 
   // On mount, validate the session by calling /auth/me.
   // The HTTP-only cookie is sent automatically by the browser.
@@ -78,9 +80,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const googleLoginHandler = async (credential: string) => {
     // Server sets the HTTP-only cookie in the response
-    const { user: userData } = await authService.googleLogin(credential);
-    authService.storeUser(userData);
-    setUserState(userData);
+    const response = await authService.googleLogin(credential);
+    authService.storeUser(response.user);
+    setUserState(response.user);
+
+    // If this is a brand-new Google account, prompt for username before continuing
+    if (response.needs_username) {
+      setShowUsernameSetupModal(true);
+    }
   };
 
   const logout = async () => {
@@ -143,6 +150,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isOpen={showRegisterModal}
         onClose={hideModals}
         onSwitchToLogin={showLogin}
+      />
+
+      {/* Username setup modal — shown once after first Google sign-in */}
+      <UsernameSetupModal
+        isOpen={showUsernameSetupModal}
+        onComplete={(updatedUser) => {
+          authService.storeUser(updatedUser);
+          setUserState(updatedUser);
+          setShowUsernameSetupModal(false);
+        }}
       />
     </AuthContext.Provider>
   );

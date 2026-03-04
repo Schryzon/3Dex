@@ -115,6 +115,7 @@ export function useProductDetails(
     return {
         // Auth
         user,
+        showLogin,
         // Cart
         isInCart,
         addToCart,

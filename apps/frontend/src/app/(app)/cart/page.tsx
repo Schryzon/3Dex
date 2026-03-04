@@ -17,8 +17,8 @@ export default function Page() {
 
   if (isLoading || !isAuthenticated) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#080808] flex items-center justify-center">
+        <div className="w-5 h-5 rounded-full border-2 border-white/10 border-t-yellow-400 animate-spin" />
       </div>
     );
   }

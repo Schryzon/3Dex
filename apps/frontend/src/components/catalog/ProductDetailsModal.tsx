@@ -70,6 +70,7 @@ export default function ProductDetailsModal({
         handleReviewSubmit,
         handleDownload,
         displayPrice,
+        showLogin,
     } = useProductDetails(product, isOpen);
 
     // Early return after all hooks — hooks must not be conditional
@@ -159,6 +160,7 @@ export default function ProductDetailsModal({
                                 isInCart={isInCart}
                                 isSaved={isSaved}
                                 onPrimaryClick={() => {
+                                    if (!user) { showLogin?.(); return; }
                                     if (product.price === 0 || product.isFree) {
                                         handleDownload();
                                     } else if (!isInCart) {
@@ -166,10 +168,14 @@ export default function ProductDetailsModal({
                                     }
                                 }}
                                 onBuyNow={() => {
+                                    if (!user) { showLogin?.(); return; }
                                     if (!isInCart) addToCart({ modelId: product.id });
                                     router.push('/cart');
                                 }}
-                                onToggleSave={() => setIsSaved(!isSaved)}
+                                onToggleSave={() => {
+                                    if (!user) { showLogin?.(); return; }
+                                    setIsSaved(!isSaved);
+                                }}
                             />
 
                             {/* Spec grid: formats, polygon count, features, license, tags */}

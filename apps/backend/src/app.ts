@@ -45,7 +45,7 @@ app.get("/health", (req, res) => res.json({ status: "OK" }));
 app.use("/docs", swagger_ui.serve, swagger_ui.setup(swagger_spec));
 app.use("/auth", auth_routes);
 app.use("/models", model_routes);
-app.use("/users", user_routes);
+app.use("/users", user_routes, follow_routes);
 app.use("/admin", admin_routes);
 app.use("/payments", payment_routes);
 app.use("/catalog", catalog_routes);
@@ -59,7 +59,6 @@ app.use("/print", print_routes);
 app.use("/purchases", purchase_routes);
 app.use("/cart", cart_routes);
 app.use("/notifications", notification_routes);
-app.use("/users", follow_routes);
 app.use("/collections", collection_routes);
 
 // 404 Handler - Return JSON instead of HTML

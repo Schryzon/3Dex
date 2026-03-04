@@ -30,20 +30,31 @@ class ApiClient {
     this.client.interceptors.response.use(
       (response) => response,
       async (error: AxiosError) => {
-        console.error(
-          `[apiClient Error] ${error.config?.method?.toUpperCase()} ${error.config?.url}:`,
-          error.response?.status,
-          error.response?.data
-        );
+        const isAuthMe = error.config?.url?.includes('/auth/me');
+
+        // Don't log 401 errors for the initial session check as they are normal for guests
+        if (!(isAuthMe && error.response?.status === 401)) {
+          console.error(
+            `[apiClient Error] ${error.config?.method?.toUpperCase()} ${error.config?.url}:`,
+            error.response?.status,
+            error.response?.data
+          );
+        }
 
         if (error.response?.status === 401) {
-          const isLandingPage =
-            window.location.pathname === '/' ||
-            window.location.pathname === '';
+          const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+
+          const isPublicRoute =
+            pathname === '/' ||
+            pathname === '' ||
+            pathname.startsWith('/catalog') ||
+            pathname.startsWith('/print-services') ||
+            pathname.startsWith('/community') ||
+            pathname.startsWith('/u/');
 
           // Redirect to root only when the user was on a protected page.
-          // Skip the redirect on the landing page to prevent infinite loops.
-          if (!isLandingPage) {
+          // Skip the redirect on public routes to allow guest browsing.
+          if (!isPublicRoute) {
             window.location.href = '/';
           }
         }

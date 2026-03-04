@@ -62,8 +62,9 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
           setError('');
           try {
             await googleLogin(response.credential);
+            // Close the login modal; AuthProvider will show UsernameSetupModal
+            // for new users or leave them authenticated for existing users.
             onClose();
-            router.push('/dashboard');
           } catch (err: any) {
             setError(err.response?.data?.message || 'Google login failed. Please try again.');
           } finally {
@@ -227,16 +228,19 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
             {/* Divider */}
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-700"></div>
+                <div className="w-full border-t border-gray-700/60"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gray-900 text-gray-400">or continue with</span>
+                <span className="px-3 bg-transparent text-gray-500">or continue with</span>
               </div>
             </div>
 
-            {/* Google Sign In - rendered by Google's SDK */}
+            {/* Google Sign In */}
             <div className="flex justify-center">
-              <div ref={googleBtnRef} />
+              <div
+                ref={googleBtnRef}
+                className="overflow-hidden rounded-md w-full max-w-[400px]"
+              />
             </div>
           </form>
         </div>

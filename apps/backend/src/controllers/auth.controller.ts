@@ -74,7 +74,7 @@ export async function google_auth(req: Request, res: Response) {
     }
 
     try {
-        const user = await google_login(credential);
+        const { user, isNew } = await google_login(credential);
 
         const token = sign_token({
             id: user.id,
@@ -86,7 +86,7 @@ export async function google_auth(req: Request, res: Response) {
         // Set the JWT as an HTTP-only cookie
         res.cookie("token", token, COOKIE_OPTIONS);
 
-        // Return only the user object
+        // Return the user object and whether this is a new account
         res.json({
             user: {
                 id: user.id,
@@ -96,12 +96,62 @@ export async function google_auth(req: Request, res: Response) {
                 avatar_url: user.avatar_url,
                 display_name: user.display_name,
             },
+            needs_username: isNew,
         });
     } catch (error: any) {
         console.error("[AUTH] Google auth error:", error.message);
         res.status(401).json({ message: "Google authentication failed" });
     }
 }
+
+// Complete profile — user picks their final username after a Google sign-up
+export async function complete_profile(req: any, res: Response) {
+    const { username } = req.body;
+    const userId = req.user?.id;
+
+    if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    if (!username || typeof username !== 'string') {
+        return res.status(400).json({ message: "Username is required" });
+    }
+
+    const trimmed = username.trim().toLowerCase();
+
+    if (trimmed.length < 3 || trimmed.length > 30) {
+        return res.status(400).json({ message: "Username must be between 3 and 30 characters" });
+    }
+
+    if (!/^[a-z0-9_]+$/.test(trimmed)) {
+        return res.status(400).json({ message: "Username can only contain letters, numbers, and underscores" });
+    }
+
+    try {
+        const existing = await prisma.user.findUnique({ where: { username: trimmed } });
+        if (existing && existing.id !== userId) {
+            return res.status(409).json({ message: "Username is already taken" });
+        }
+
+        const updated = await prisma.user.update({
+            where: { id: userId },
+            data: { username: trimmed },
+            select: {
+                id: true,
+                email: true,
+                username: true,
+                role: true,
+                avatar_url: true,
+                display_name: true,
+            },
+        });
+
+        res.json(updated);
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
 
 // Clear the auth cookie — effectively logs the user out
 export async function logout(req: Request, res: Response) {

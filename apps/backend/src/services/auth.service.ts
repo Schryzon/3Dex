@@ -93,7 +93,7 @@ export async function google_login(credential: string) {
                 data: { avatar_url: picture }
             });
         }
-        return user;
+        return { user, isNew: false };
     }
 
     // Check if user exists by email (link Google to existing account)
@@ -110,17 +110,18 @@ export async function google_login(credential: string) {
                 avatar_url: user.avatar_url || picture,
             }
         });
-        return user;
+        return { user, isNew: false };
     }
 
-    // Create new user from Google data
+    // Create new user from Google data — username is temporary, user will pick one
     console.log('[AUTH] Creating new user from Google:', email);
-    const username = email.split('@')[0] + '_' + Math.random().toString(36).substring(2, 6);
+    const tempUsername = email.split('@')[0] + '_' + Math.random().toString(36).substring(2, 6);
 
     user = await (prisma.user as any).create({
         data: {
             email,
-            username,
+            username: tempUsername,
+            display_name: name || null,
             google_id: googleId,
             avatar_url: picture,
             account_status: 'APPROVED', // Auto-approve Google users
@@ -128,5 +129,5 @@ export async function google_login(credential: string) {
     });
 
     console.log('[AUTH] Google user created:', user.email);
-    return user;
+    return { user, isNew: true };
 }

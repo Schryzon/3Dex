@@ -10,6 +10,7 @@ export const API_ENDPOINTS = {
         LOGOUT: '/auth/logout',
         ME: '/auth/me',
         GOOGLE: '/auth/google',
+        COMPLETE_PROFILE: '/auth/complete-profile',
     },
 
     // Models/Products
@@ -72,6 +73,8 @@ export const API_ENDPOINTS = {
     USERS: {
         PROFILE: '/users/profile',
         UPDATE: '/users/profile',
+        DELETE_ME: '/users/me',
+        PUBLIC_PROFILE: (username: string) => `/users/${username}`,
     },
 
     // Admin

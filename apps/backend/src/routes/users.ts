@@ -5,7 +5,8 @@ import {
     change_password,
     toggle_2fa,
     apply_for_role,
-    get_public_profile
+    get_public_profile,
+    delete_account
 } from "../controllers/user.controller";
 import { require_auth } from "../middlewares/auth.middleware";
 import { require_admin } from "../middlewares/role.middleware";
@@ -86,6 +87,21 @@ router.post("/security/2fa", require_auth, toggle_2fa);
  *         description: Application submitted
  */
 router.post("/apply-role", require_auth, apply_for_role);
+
+/**
+ * @openapi
+ * /users/me:
+ *   delete:
+ *     summary: Permanently delete own account
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Account deleted
+ */
+router.delete("/me", require_auth, delete_account);
 
 /**
  * @openapi

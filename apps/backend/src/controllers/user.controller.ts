@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import { Response } from "express";
 import { Auth_Request } from "../middlewares/auth.middleware";
 import prisma from "../prisma";
+import { Prisma } from "@prisma/client";
 
 /**
  * List all users (Admin only)
@@ -194,4 +195,25 @@ export async function toggle_2fa(req: Auth_Request, res: Response): Promise<void
         message: enabled ? "2FA enabled!" : "2FA disabled!",
         two_factor_enabled: user.two_factor_enabled
     });
+}
+
+/**
+ * Delete own account (permanent)
+ */
+export async function delete_account(req: Auth_Request, res: Response): Promise<void> {
+    const { id } = req.user;
+
+    try {
+        await prisma.user.delete({ where: { id } });
+    } catch (err) {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
+            res.status(404).json({ message: "User not found." });
+            return;
+        }
+        throw err;
+    }
+
+    // Clear auth cookie
+    res.clearCookie('token', { httpOnly: true, sameSite: 'lax' });
+    res.json({ message: "Account deleted successfully." });
 }

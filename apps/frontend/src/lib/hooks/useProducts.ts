@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { productService } from '@/lib/api/services';
 import { QUERY_KEYS } from '@/lib/constants/api';
 import type { ModelFilters } from '@/lib/types';
@@ -7,6 +7,21 @@ export function useProducts(filters?: ModelFilters) {
     return useQuery({
         queryKey: [...QUERY_KEYS.MODELS, filters],
         queryFn: () => productService.getProducts(filters),
+    });
+}
+
+export function useInfiniteProducts(filters?: ModelFilters) {
+    return useInfiniteQuery({
+        queryKey: [...QUERY_KEYS.MODELS, 'infinite', filters],
+        queryFn: ({ pageParam = 1 }) =>
+            productService.getProducts({ ...filters, page: pageParam as number }),
+        getNextPageParam: (lastPage) => {
+            if (lastPage?.pagination && lastPage.pagination.page < lastPage.pagination.totalPages) {
+                return lastPage.pagination.page + 1;
+            }
+            return undefined;
+        },
+        initialPageParam: 1,
     });
 }
 

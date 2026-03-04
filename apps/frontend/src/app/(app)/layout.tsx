@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useCart } from '@/lib/hooks/useCart';
 import AppSidebar from '@/components/layout/app/AppSidebar';
@@ -26,12 +26,23 @@ export default function AppLayout({ children }: AppLayoutProps) {
     setMounted(true);
   }, []);
 
-  // Auth guard: redirect unauthenticated users to landing page
+  const pathname = usePathname();
+
+  // Routes accessible without login
+  const isPublicRoute =
+    pathname === '/' ||
+    pathname.startsWith('/catalog') ||
+    pathname.startsWith('/print-services') ||
+    pathname.startsWith('/community') ||
+    pathname.startsWith('/u/');
+
+  // Auth guard: redirect unauthenticated users only for private pages
   useEffect(() => {
-    if (!isAuthLoading && !isLoggedIn) {
+    // Only redirect if: loading is done, NOT logged in, AND path is NOT public
+    if (!isAuthLoading && !isLoggedIn && !isPublicRoute) {
       router.replace('/');
     }
-  }, [isAuthLoading, isLoggedIn, router]);
+  }, [isAuthLoading, isLoggedIn, isPublicRoute, router]);
 
   const handleLogout = () => {
     logout();

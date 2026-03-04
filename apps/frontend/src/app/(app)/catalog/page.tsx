@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import CatalogProductCard from '@/components/catalog/CatalogProductCard';
 import CatalogFilters, { FilterState } from '@/components/catalog/CatalogFilters';
 import { Skeleton } from '@/components/common/Loading';
-import { useProducts } from '@/lib/hooks/useProducts';
+import { useInfiniteProducts } from '@/lib/hooks/useProducts';
 import { useWishlist } from '@/lib/hooks/useWishlist';
 import { useAuth } from '@/components/auth/AuthProvider';
 import type { ModelFilters } from '@/lib/types';
@@ -43,23 +43,27 @@ export default function CatalogPage() {
         price: 'all',
         types: [],
     });
-    const [page, setPage] = useState(1);
-
-    // Build API filters
+    // Build API filters (without page, as it's managed by useInfiniteQuery)
     const apiFilters: ModelFilters = {
         category: activeCategory !== 'all' ? activeCategory : undefined,
         format: filters.formats.length > 0 ? filters.formats : undefined,
         sort: sortBy,
-        page,
         limit: 20,
     };
 
-    // Fetch products from API
-    const { data, isLoading, error } = useProducts(apiFilters);
+    // Fetch products from API using Infinite Query
+    const {
+        data,
+        isLoading,
+        isFetchingNextPage,
+        hasNextPage,
+        fetchNextPage,
+        error
+    } = useInfiniteProducts(apiFilters);
 
-    const products = data?.data || [];
-    const totalResults = data?.pagination?.total || 0;
-    const hasMore = page < (data?.pagination?.totalPages || 1);
+    const products = data?.pages.flatMap((page) => page.data) || [];
+    const totalResults = data?.pages[0]?.pagination?.total || 0;
+    const hasMore = hasNextPage;
 
     const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
@@ -74,13 +78,11 @@ export default function CatalogPage() {
 
     const handleFilterChange = (newFilters: FilterState) => {
         setFilters(newFilters);
-        setPage(1); // Reset to first page when filters change
     };
 
     const handleSortChange = (sortId: string) => {
         setSortBy(sortId as ModelFilters['sort']);
         setShowSortDropdown(false);
-        setPage(1); // Reset to first page when sort changes
     };
 
     const handleProductClick = (productId: string) => {
@@ -88,8 +90,8 @@ export default function CatalogPage() {
     };
 
     const loadMore = () => {
-        if (!isLoading && hasMore) {
-            setPage(prev => prev + 1);
+        if (!isFetchingNextPage && hasNextPage) {
+            fetchNextPage();
         }
     };
 
@@ -109,7 +111,7 @@ export default function CatalogPage() {
         }
 
         return () => observer.disconnect();
-    }, [isLoading, hasMore, page]);
+    }, [isFetchingNextPage, hasNextPage]);
 
     // Click outside handler
     useEffect(() => {
@@ -122,10 +124,6 @@ export default function CatalogPage() {
         return () => document.removeEventListener('click', handleClickOutside);
     }, [isFilterExpanded]);
 
-    // Reset page when category changes
-    useEffect(() => {
-        setPage(1);
-    }, [activeCategory]);
 
     return (
         <div className="max-w-[1800px] mx-auto px-4 md:px-6 py-4">
@@ -278,14 +276,14 @@ export default function CatalogPage() {
 
             {/* Infinite Scroll Trigger */}
             <div ref={loadMoreRef} className="h-16 flex items-center justify-center mt-6">
-                {isLoading && (
+                {(isLoading || isFetchingNextPage) && (
                     <div className="flex items-center gap-2 text-gray-500">
                         <div className="w-4 h-4 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" />
                         <span className="text-xs">Loading...</span>
                     </div>
                 )}
-                {!hasMore && products.length > 0 && (
-                    <p className="text-gray-600 text-xs">You've reached the end ✨</p>
+                {!hasNextPage && products.length > 0 && (
+                    <p className="text-gray-600 text-xs text-center w-full">You've reached the end</p>
                 )}
             </div>
 

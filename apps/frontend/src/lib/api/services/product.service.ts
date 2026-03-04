@@ -1,11 +1,15 @@
 import { apiClient } from '../client';
 import { API_ENDPOINTS } from '@/lib/constants/api';
+import { MOCK_PRODUCTS } from '@/lib/mocks/products';
 import type {
     Model,
     ModelFilters,
     PaginatedResponse,
     Review
 } from '@/lib/types';
+
+// Set this to true to use mock data, or false to use the real database
+export const USE_MOCK_DATA = true;
 
 
 const mapModel = (item: any): Model => ({
@@ -37,6 +41,40 @@ const mapModel = (item: any): Model => ({
 
 export const productService = {
     async getProducts(filters?: ModelFilters): Promise<PaginatedResponse<Model>> {
+        if (USE_MOCK_DATA) {
+            let data = [...MOCK_PRODUCTS];
+
+            // Basic filtering for mock data
+            if (filters) {
+                if (filters.search) {
+                    const search = filters.search.toLowerCase();
+                    data = data.filter(item =>
+                        item.title.toLowerCase().includes(search) ||
+                        item.description.toLowerCase().includes(search)
+                    );
+                }
+                if (filters.category && filters.category !== 'all') {
+                    data = data.filter(item => item.category.toLowerCase() === filters.category?.toLowerCase());
+                }
+            }
+
+            // Mock pagination
+            const page = filters?.page || 1;
+            const limit = filters?.limit || 20;
+            const start = (page - 1) * limit;
+            const paginatedData = data.slice(start, start + limit);
+
+            return {
+                data: paginatedData,
+                pagination: {
+                    page,
+                    limit,
+                    total: data.length,
+                    totalPages: Math.ceil(data.length / limit)
+                }
+            };
+        }
+
         try {
             const params = new URLSearchParams();
 
@@ -79,6 +117,12 @@ export const productService = {
     },
 
     async getProductById(id: string): Promise<Model> {
+        if (USE_MOCK_DATA && id.startsWith('mock-')) {
+            const product = MOCK_PRODUCTS.find(p => p.id === id);
+            if (!product) throw new Error('Product not found');
+            return product;
+        }
+
         try {
             const data = await apiClient.get<any>(API_ENDPOINTS.MODELS.DETAIL(id));
             if (!data) throw new Error('Product not found');

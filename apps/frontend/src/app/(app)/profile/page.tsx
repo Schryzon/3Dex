@@ -4,7 +4,6 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import {
     FolderOpen,
     Bookmark,
-    ShoppingCart,
     Sparkles,
     CheckCircle,
     XCircle,
@@ -15,10 +14,8 @@ import {
     X,
     ChevronRight,
     Bell,
-    ShieldCheck,
     CreditCard,
     CheckCircle2,
-    AlertCircle,
     Printer,
     Box,
     Settings2,
@@ -26,12 +23,12 @@ import {
     Trash2,
     Twitter,
     Instagram,
-    Github,
     ExternalLink,
-    Download
+    ArrowUpRight,
+    Loader2
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import UserAvatar from '@/components/common/UserAvatar';
 import ProfileSidebar from '@/components/profile/ProfileSidebar';
@@ -39,8 +36,11 @@ import ServiceTab from '@/components/profile/ServiceTab';
 import JobsTab from '@/components/profile/JobsTab';
 import { useProducts } from '@/lib/hooks/useProducts';
 import { api } from '@/lib/api';
+import { API_ENDPOINTS } from '@/lib/constants/api';
+import ConfirmModal from '@/components/common/ConfirmModal';
 
 import ModelGrid from '@/components/model/ModelGrid';
+
 
 function UploadsTab({ userId }: { userId?: string }) {
     return (
@@ -61,11 +61,25 @@ function UploadsTab({ userId }: { userId?: string }) {
 type TabType = 'profile' | 'settings' | 'collections' | 'bookmarks' | 'notifications' | 'uploads' | 'analytics' | 'billing' | 'shipping' | 'service' | 'jobs' | 'workshop';
 
 export default function ProfilePage() {
-    const { user, setUser } = useAuth();
+    const { user, setUser, logout } = useAuth();
+    const router = useRouter();
     const searchParams = useSearchParams();
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     const [upgrading, setUpgrading] = useState(false);
     const [upgradeStatus, setUpgradeStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [activeTab, setActiveTab] = useState<TabType>('profile');
+    const [saveBanner, setSaveBanner] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
+    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+    // Delete account modal
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deleteConfirmInput, setDeleteConfirmInput] = useState('');
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    // Provider apply modal
+    const [showProviderModal, setShowProviderModal] = useState(false);
+    const [isApplyingProvider, setIsApplyingProvider] = useState(false);
 
     const [formData, setFormData] = useState({
         username: user?.username || '',
@@ -73,9 +87,6 @@ export default function ProfilePage() {
         displayName: user?.display_name || '',
         bio: user?.bio || '',
         location: user?.location || '',
-        address1: '',
-        address2: '',
-        address3: '',
         receiverName: '',
         phoneNumber: '',
         postcode: '',
@@ -91,49 +102,74 @@ export default function ProfilePage() {
             behance: user?.social_behance || ''
         },
     });
-    const [newSkill, setNewSkill] = useState('');
     const [isSaving, setIsSaving] = useState(false);
 
-    const addSkill = () => {
-        if (newSkill.trim() && !formData.skills.includes(newSkill.trim())) {
-            setFormData({
-                ...formData,
-                skills: [...formData.skills, newSkill.trim()]
-            });
-            setNewSkill('');
-        }
-    };
-
-    const removeSkill = (skillToRemove: string) => {
-        setFormData({
-            ...formData,
-            skills: formData.skills.filter(skill => skill !== skillToRemove)
-        });
+    const showBanner = (type: 'success' | 'error', msg: string) => {
+        setSaveBanner({ type, msg });
+        setTimeout(() => setSaveBanner(null), 4000);
     };
 
     const handleSaveSettings = async () => {
         setIsSaving(true);
+        setSaveBanner(null);
         try {
             const payload = {
-                username: formData.username,
                 display_name: formData.displayName,
                 bio: formData.bio,
                 location: formData.location,
-                // Simplify social links flattened
+                website: formData.website,
                 social_twitter: formData.socialLinks.twitter,
                 social_instagram: formData.socialLinks.instagram,
                 social_artstation: formData.socialLinks.artstation,
                 social_behance: formData.socialLinks.behance,
             };
-
-            const res = await api.patch('/users/profile', payload);
+            const res = await api.patch(API_ENDPOINTS.USERS.UPDATE, payload);
             setUser(res.data);
-            alert('Settings saved successfully');
-        } catch (error) {
+            showBanner('success', 'Profile saved successfully!');
+        } catch (error: any) {
             console.error('Failed to save settings:', error);
-            alert('Failed to save settings');
+            showBanner('error', error.response?.data?.message || 'Failed to save settings.');
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setIsUploadingAvatar(true);
+        try {
+            const { data: { url, key } } = await api.post('/storage/upload-url', {
+                filename: file.name,
+                content_type: file.type,
+            });
+            await fetch(url, {
+                method: 'PUT',
+                body: file,
+                headers: { 'Content-Type': file.type },
+            });
+            const res = await api.patch(API_ENDPOINTS.USERS.UPDATE, { avatar_url: key });
+            setUser(res.data);
+            showBanner('success', 'Avatar updated!');
+        } catch (error: any) {
+            showBanner('error', 'Failed to upload avatar.');
+        } finally {
+            setIsUploadingAvatar(false);
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        if (deleteConfirmInput !== user?.username) return;
+        setIsDeleting(true);
+        try {
+            await api.delete(API_ENDPOINTS.USERS.DELETE_ME);
+            await logout();
+            router.push('/');
+        } catch (error: any) {
+            showBanner('error', error.response?.data?.message || 'Failed to delete account.');
+            setShowDeleteModal(false);
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -147,35 +183,115 @@ export default function ProfilePage() {
     const handleUpgradeToArtist = async () => {
         setUpgrading(true);
         setUpgradeStatus('idle');
-
         try {
             await api.post('/users/apply-role', { role: 'ARTIST' });
-            // Refresh user or show success
             setUpgradeStatus('success');
-            alert('Application submitted!');
+            showBanner('success', 'Artist application submitted!');
         } catch (error) {
             setUpgradeStatus('error');
-            alert('Application failed');
+            showBanner('error', 'Application failed. Please try again.');
         } finally {
             setUpgrading(false);
         }
     };
 
-    const handleUpgradeToProvider = async () => {
-        if (!confirm('Apply to become a printing provider?')) return;
+    const handleUpgradeToProvider = () => {
+        setShowProviderModal(true);
+    };
+
+    const handleConfirmProvider = async () => {
+        setIsApplyingProvider(true);
         setUpgrading(true);
         try {
             await api.post('/users/apply-role', { role: 'PROVIDER' });
-            alert('Application submitted!');
+            showBanner('success', 'Provider application submitted!');
+            setShowProviderModal(false);
         } catch (error) {
-            alert('Application failed');
+            showBanner('error', 'Application failed. Please try again.');
         } finally {
+            setIsApplyingProvider(false);
             setUpgrading(false);
         }
     };
 
+
+
+
     return (
         <div className="min-h-screen bg-[#0a0a0a]">
+            {/* Hidden file input for avatar upload */}
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarUpload}
+            />
+
+            {/* Provider Apply Confirmation Modal */}
+            <ConfirmModal
+                isOpen={showProviderModal}
+                onClose={() => setShowProviderModal(false)}
+                onConfirm={handleConfirmProvider}
+                title="Become a Provider?"
+                message={
+                    <>
+                        You are about to apply to become a <strong className="text-white">Printing Provider</strong>. Your application will be reviewed by our team.
+                        <br /><br />
+                        Once approved, you&apos;ll be able to accept 3D printing jobs from customers on the platform.
+                    </>
+                }
+                confirmLabel="Apply Now"
+                cancelLabel="Not Yet"
+                variant="default"
+                isLoading={isApplyingProvider}
+            />
+
+            {/* Delete Account Confirmation Modal */}
+            {showDeleteModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => { if (!isDeleting) { setShowDeleteModal(false); setDeleteConfirmInput(''); } }} />
+                    <div className="relative bg-[#141414] rounded-2xl shadow-2xl w-full max-w-md border border-red-500/30 overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="h-1 w-full bg-red-500" />
+                        <div className="p-8">
+                            <div className="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center mb-4">
+                                <Trash2 className="w-6 h-6 text-red-500" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-white mb-2">Delete account?</h2>
+                            <p className="text-gray-400 text-sm mb-6">
+                                This action is <strong className="text-red-400">permanent and irreversible</strong>. All your models, purchases, and data will be deleted.
+                            </p>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Type <span className="text-white font-bold">{user?.username}</span> to confirm
+                            </label>
+                            <input
+                                type="text"
+                                value={deleteConfirmInput}
+                                onChange={(e) => setDeleteConfirmInput(e.target.value)}
+                                className="w-full bg-gray-800/80 text-white px-4 py-3 rounded-xl border border-gray-700 focus:border-red-500 focus:outline-none mb-4 transition-colors placeholder:text-gray-600"
+                                placeholder={user?.username}
+                            />
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => { setShowDeleteModal(false); setDeleteConfirmInput(''); }}
+                                    disabled={isDeleting}
+                                    className="flex-1 px-4 py-3 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-white font-bold rounded-xl transition-all"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleDeleteAccount}
+                                    disabled={deleteConfirmInput !== user?.username || isDeleting}
+                                    className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-500 disabled:bg-gray-700 disabled:text-gray-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+                                >
+                                    {isDeleting ? <><Loader2 className="w-4 h-4 animate-spin" />Deleting...</> : 'Delete Account'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="max-w-7xl mx-auto px-6 py-10">
                 {/* Breadcrumbs */}
                 <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8">
@@ -185,6 +301,19 @@ export default function ProfilePage() {
                     <ChevronRight className="w-4 h-4" />
                     <span className="text-white capitalize">{activeTab}</span>
                 </nav>
+
+                {/* Global inline banner */}
+                {saveBanner && (
+                    <div className={`mb-6 flex items-center gap-3 px-5 py-3 rounded-xl text-sm font-medium animate-in fade-in duration-300 ${saveBanner.type === 'success'
+                        ? 'bg-green-500/10 border border-green-500/30 text-green-400'
+                        : 'bg-red-500/10 border border-red-500/30 text-red-400'
+                        }`}>
+                        {saveBanner.type === 'success'
+                            ? <CheckCircle2 className="w-4 h-4 shrink-0" />
+                            : <XCircle className="w-4 h-4 shrink-0" />}
+                        {saveBanner.msg}
+                    </div>
+                )}
 
                 <div className="flex flex-col md:flex-row gap-10">
                     {/* Sidebar Left */}
@@ -224,15 +353,29 @@ export default function ProfilePage() {
                                 <div className="bg-gray-900/40 rounded-2xl p-8 border border-gray-800 flex flex-col md:flex-row items-center gap-8">
                                     <div className="relative group">
                                         <UserAvatar user={user} size="xl" className="border-4 cursor-pointer border-gray-800 shadow-2xl transition-transform group-hover:scale-105" />
-                                        <button className="absolute bottom-2 cursor-pointer right-2 w-10 h-10 bg-yellow-400 hover:bg-yellow-300 text-black rounded-full flex items-center justify-center shadow-lg transition-all transform scale-0 group-hover:scale-100">
-                                            <Camera className="w-5 h-5" />
+                                        <button
+                                            onClick={() => fileInputRef.current?.click()}
+                                            disabled={isUploadingAvatar}
+                                            className="absolute bottom-2 cursor-pointer right-2 w-10 h-10 bg-yellow-400 hover:bg-yellow-300 disabled:bg-gray-600 text-black rounded-full flex items-center justify-center shadow-lg transition-all transform scale-0 group-hover:scale-100"
+                                        >
+                                            {isUploadingAvatar
+                                                ? <Loader2 className="w-5 h-5 animate-spin" />
+                                                : <Camera className="w-5 h-5" />}
                                         </button>
                                     </div>
                                     <div className="flex-1 text-center md:text-left">
-                                        <h3 className="text-2xl font-bold text-white mb-2">{user?.username}</h3>
-                                        <p className="text-gray-400 mb-4">{user?.email}</p>
+                                        <h3 className="text-2xl font-bold text-white mb-1">{user?.display_name || user?.username}</h3>
+                                        <p className="text-gray-400 mb-4">@{user?.username} · {user?.email}</p>
+                                        <Link
+                                            href={`/u/${user?.username}`}
+                                            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-sm font-medium rounded-lg border border-gray-700 transition-all"
+                                        >
+                                            <ArrowUpRight className="w-4 h-4" />
+                                            View public profile
+                                        </Link>
                                     </div>
                                 </div>
+
 
                                 {/* General Settings Card */}
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -326,11 +469,11 @@ export default function ProfilePage() {
                                                     />
                                                 </div>
                                                 <div className="relative">
-                                                    <Github className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white" />
+                                                    <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                                     <input
                                                         type="text"
                                                         placeholder="GitHub URL"
-                                                        className="w-full bg-black/30 text-white pl-10 pr-4 py-2 text-sm rounded-lg border border-gray-800 focus:border-white focus:outline-none transition-all"
+                                                        className="w-full bg-black/30 text-white pl-10 pr-4 py-2 text-sm rounded-lg border border-gray-800 focus:border-gray-400 focus:outline-none transition-all"
                                                     />
                                                 </div>
                                                 <div className="relative">
@@ -346,21 +489,6 @@ export default function ProfilePage() {
                                             </div>
                                         </div>
 
-                                        <div className="bg-yellow-400/5 rounded-2xl border border-yellow-400/10 p-6">
-                                            <div className="flex items-center gap-3 mb-4">
-                                                <div className="w-10 h-10 bg-yellow-400/10 rounded-xl flex items-center justify-center">
-                                                    <ShieldCheck className="w-5 h-5 text-yellow-400" />
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-bold text-white">Trust Level</h4>
-                                                    <p className="text-xs text-gray-500">Verified Member</p>
-                                                </div>
-                                            </div>
-                                            <div className="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
-                                                <div className="bg-yellow-400 h-full w-[85%]" />
-                                            </div>
-                                            <p className="text-[10px] text-gray-500 mt-2 text-center">Your profile is 85% complete</p>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -642,8 +770,32 @@ export default function ProfilePage() {
                                         </button>
                                     </div>
                                 </div>
+
+                                {/* Danger Zone */}
+                                <div className="bg-red-500/5 rounded-2xl border border-red-500/20 overflow-hidden">
+                                    <div className="px-8 py-6 border-b border-red-500/20 bg-red-500/5">
+                                        <h3 className="text-lg font-bold text-red-400">Danger Zone</h3>
+                                        <p className="text-sm text-gray-400">Actions here are permanent and cannot be undone.</p>
+                                    </div>
+                                    <div className="p-8">
+                                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                                            <div>
+                                                <p className="text-white font-semibold mb-1">Delete Account</p>
+                                                <p className="text-sm text-gray-500">Permanently delete your account and all associated data. This cannot be reversed.</p>
+                                            </div>
+                                            <button
+                                                onClick={() => setShowDeleteModal(true)}
+                                                className="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/40 hover:border-red-600 font-bold rounded-xl transition-all"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                                Delete Account
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         )}
+
 
 
                         {activeTab === 'billing' && (
