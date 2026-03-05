@@ -9,13 +9,10 @@
     "start": "node dist/src/server.js",
     "test": "jest",
     "seed": "prisma db seed",
-    "sync-minio": "ts-node scripts/sync_minio.ts",
-    "sync-db": "powershell scripts/sync_db.ps1",
-    "sync-all": "npm run sync-db && npm run sync-minio pull",
-    "push-db": "powershell scripts/push_db.ps1",
-    "push-minio": "ts-node scripts/sync_minio.ts push",
-    "push-all": "npm run push-db && npm run push-minio",
-    "register-models": "ts-node scripts/register_minio_models.ts"
+    "setup": "powershell scripts/setup.ps1",
+    "pull": "powershell scripts/pull.ps1",
+    "push": "powershell scripts/push.ps1",
+    "register-models": "npx ts-node scripts/worker.ts register-models"
   },
   "keywords": [],
   "author": "",
