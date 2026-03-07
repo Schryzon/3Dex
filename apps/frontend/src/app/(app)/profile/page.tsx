@@ -326,22 +326,20 @@ export default function ProfilePage() {
                             <h2 className="text-3xl font-bold text-white capitalize">{activeTab}</h2>
                             {activeTab === 'profile' && user?.role === 'CUSTOMER' && (
                                 <div className="flex gap-2">
-                                    <button
-                                        onClick={handleUpgradeToArtist}
-                                        disabled={upgrading}
-                                        className="flex items-center gap-2 px-4 py-2 bg-yellow-400 hover:bg-yellow-300 text-black font-semibold rounded-lg transition-all disabled:opacity-50"
+                                    <Link
+                                        href="/become-artist"
+                                        className="flex items-center gap-2 px-4 py-2 bg-yellow-400 hover:bg-yellow-300 text-black font-semibold rounded-lg transition-all"
                                     >
                                         <Sparkles className="w-4 h-4" />
                                         Artist
-                                    </button>
-                                    <button
-                                        onClick={handleUpgradeToProvider}
-                                        disabled={upgrading}
-                                        className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-black font-semibold rounded-lg transition-all disabled:opacity-50"
+                                    </Link>
+                                    <Link
+                                        href="/become-provider"
+                                        className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 text-black font-semibold rounded-lg transition-all"
                                     >
                                         <Printer className="w-4 h-4" />
                                         Provider
-                                    </button>
+                                    </Link>
                                 </div>
                             )}
                         </div>

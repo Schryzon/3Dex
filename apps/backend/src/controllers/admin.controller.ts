@@ -4,7 +4,9 @@ import { Auth_Request } from "../middlewares/auth.middleware";
 import { aggregate_stats } from "../services/cron.service";
 
 export async function list_pending_models(req: Request, res: Response) {
-    const models = await prisma.model.findMany({
+    const { get_download_url_s3 } = await import("../services/storage.service");
+
+    const raw = await prisma.model.findMany({
         where: {
             status: "PENDING"
         },
@@ -13,10 +15,24 @@ export async function list_pending_models(req: Request, res: Response) {
         },
         include: {
             artist: {
-                select: { username: true, id: true }
-            }
+                select: { username: true, id: true, avatar_url: true, display_name: true }
+            },
+            category: true,
+            tags: true
         }
     });
+
+    // Sign URLs
+    const models = await Promise.all(raw.map(async (m: any) => {
+        const model = { ...m };
+        if (model.preview_url && !model.preview_url.startsWith("http")) {
+            model.preview_url = await get_download_url_s3(model.preview_url);
+        }
+        if (model.file_url && !model.file_url.startsWith("http")) {
+            model.file_url = await get_download_url_s3(model.file_url);
+        }
+        return model;
+    }));
 
     res.json(models);
 }

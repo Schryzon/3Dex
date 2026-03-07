@@ -51,7 +51,7 @@ export default function BecomeArtist() {
 
                     <div className="flex flex-wrap gap-3">
                         <Link
-                            href="/register"
+                            href="/become-artist"
                             className="inline-flex items-center gap-2 px-6 py-3 bg-yellow-400 hover:bg-yellow-300 text-black font-bold rounded-xl text-sm transition-all duration-300 hover:scale-[1.04] hover:shadow-lg hover:shadow-yellow-400/20"
                         >
                             Become an Artist

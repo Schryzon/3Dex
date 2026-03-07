@@ -71,7 +71,19 @@ export async function update_profile(req: Auth_Request, res: Response): Promise<
  */
 export async function apply_for_role(req: Auth_Request, res: Response): Promise<void> {
     const { id } = req.user;
-    const { role, portfolio } = req.body; // role: 'ARTIST' | 'PROVIDER'
+    const {
+        role,
+        portfolio,
+        provider_config,
+        display_name,
+        bio,
+        website,
+        location,
+        social_twitter,
+        social_instagram,
+        social_artstation,
+        social_behance,
+    } = req.body; // role: 'ARTIST' | 'PROVIDER'
 
     if (!['ARTIST', 'PROVIDER'].includes(role)) {
         res.status(400).json({ message: "Invalid role! Must be ARTIST or PROVIDER." });
@@ -83,21 +95,43 @@ export async function apply_for_role(req: Auth_Request, res: Response): Promise<
         return;
     }
 
-    // Update user to the requested role but set status to PENDING
-    const user = await prisma.user.update({
-        where: { id },
-        data: {
-            role: role,
-            account_status: 'PENDING',
-            portfolio: portfolio,
-            status_history: {
-                push: {
-                    status: 'PENDING',
-                    timestamp: new Date().toISOString(),
-                    reason: 'User applied for role'
-                }
+    if (role === 'PROVIDER' && (!provider_config || !provider_config.printerTypes?.length || !provider_config.materials?.length)) {
+        res.status(400).json({ message: "Printer types and materials are required for Provider application!" });
+        return;
+    }
+
+    // Build the update data
+    const updateData: any = {
+        role: role,
+        account_status: 'PENDING',
+        display_name: display_name || undefined,
+        bio: bio || undefined,
+        website: website || undefined,
+        location: location || undefined,
+        social_twitter: social_twitter || undefined,
+        social_instagram: social_instagram || undefined,
+        social_artstation: social_artstation || undefined,
+        social_behance: social_behance || undefined,
+        status_history: {
+            push: {
+                status: 'PENDING',
+                timestamp: new Date().toISOString(),
+                reason: `User applied for ${role} role`
             }
         }
+    };
+
+    // Role-specific data
+    if (role === 'ARTIST') {
+        updateData.portfolio = portfolio;
+    }
+    if (role === 'PROVIDER') {
+        updateData.provider_config = provider_config;
+    }
+
+    const user = await prisma.user.update({
+        where: { id },
+        data: updateData,
     });
 
     res.json({ message: "Application submitted successfully!", user });

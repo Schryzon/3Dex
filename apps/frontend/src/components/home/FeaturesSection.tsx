@@ -109,7 +109,7 @@ export default function FeaturesSection() {
                             </p>
                         </div>
                         <Link
-                            href="/upload"
+                            href="/become-artist"
                             className="shrink-0 inline-flex items-center gap-2 px-7 py-3.5 bg-yellow-400 hover:bg-yellow-300 text-black font-bold rounded-xl text-sm transition-all duration-300 hover:scale-[1.04] hover:shadow-xl hover:shadow-yellow-400/20"
                         >
                             Start Selling

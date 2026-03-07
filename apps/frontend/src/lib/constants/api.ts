@@ -74,6 +74,7 @@ export const API_ENDPOINTS = {
         PROFILE: '/users/profile',
         UPDATE: '/users/profile',
         DELETE_ME: '/users/me',
+        APPLY_ROLE: '/users/apply-role',
         PUBLIC_PROFILE: (username: string) => `/users/${username}`,
     },
 

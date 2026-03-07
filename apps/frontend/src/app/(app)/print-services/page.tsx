@@ -328,7 +328,7 @@ export default function PrintServicesPage() {
                         </div>
                         <div className="flex flex-col sm:flex-row gap-3 shrink-0">
                             <Link
-                                href="/provider"
+                                href="/become-provider"
                                 className="flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-yellow-400/20 hover:scale-[1.02] active:scale-[0.98]"
                             >
                                 Become a Provider <ArrowRight className="w-4 h-4" />

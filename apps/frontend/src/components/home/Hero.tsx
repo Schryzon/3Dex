@@ -43,8 +43,8 @@ export default function Hero() {
         <h1
           className="text-5xl sm:text-6xl xl:text-7xl font-extrabold text-white leading-[1.06] tracking-tight mb-6 max-w-2xl"
           style={fadeIn(visible, 0.1)}>
-          Buy, sell &<br/>
-          own premium<br/>
+          Buy, sell &<br />
+          own premium<br />
           <span className="text-yellow-400">3D assets.</span>
         </h1>
 
@@ -64,7 +64,7 @@ export default function Hero() {
           </Link>
 
           <Link
-            href="/upload"
+            href="/become-artist"
             className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold text-sm text-white border border-white/20 hover:border-white/40 hover:bg-white/10 backdrop-blur-sm transition-all duration-300 hover:scale-[1.04]">
             Start Selling
             <ArrowRight className="w-4 h-4" />

@@ -9,7 +9,7 @@ import type {
 } from '@/lib/types';
 
 // Set this to true to use mock data, or false to use the real database
-export const USE_MOCK_DATA = true;
+export const USE_MOCK_DATA = false;
 
 
 const mapModel = (item: any): Model => ({
