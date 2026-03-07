@@ -101,6 +101,7 @@ model Model {
   price       Int // in IDR
   file_url    String
   preview_url String?
+  gallery_urls String[]
   
   status      ModelStatus @default(PENDING)
 

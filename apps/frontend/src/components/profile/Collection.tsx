@@ -23,9 +23,9 @@ export default function Collection() {
 
   const handleDownload = async (modelId: string, title: string) => {
     try {
-      const { url } = await purchaseService.getDownloadUrl(modelId);
+      const { download_url } = await purchaseService.getDownloadUrl(modelId);
       const a = document.createElement('a');
-      a.href = url;
+      a.href = download_url;
       a.setAttribute('download', `${title}.glb`);
       document.body.appendChild(a);
       a.click();

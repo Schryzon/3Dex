@@ -6,6 +6,7 @@ export async function create_model(data: {
   price: number;
   file_url: string;
   preview_url?: string;
+  gallery_urls?: string[];
   artist_id: string;
   category_id?: string;
   tags?: string[];
@@ -36,6 +37,7 @@ export function get_all_models() {
       title: true,
       price: true,
       preview_url: true,
+      gallery_urls: true,
       artist: {
         select: { username: true },
       },
@@ -53,6 +55,7 @@ export function get_model_by_id(model_id: string) {
       price: true,
       file_url: true,
       preview_url: true,
+      gallery_urls: true,
       created_at: true,
       artist: {
         select: {

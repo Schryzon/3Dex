@@ -22,7 +22,7 @@ services:
       - db
     ports:
       - "4000:4000"
-    command: sh -c "npx prisma migrate deploy && node dist/src/server.js"
+    command: sh -c "npx prisma migrate deploy && node dist/server.js"
 
 volumes:
   pgdata:

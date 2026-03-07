@@ -28,7 +28,7 @@ import {
     Loader2
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import UserAvatar from '@/components/common/UserAvatar';
 import ProfileSidebar from '@/components/profile/ProfileSidebar';
@@ -60,7 +60,7 @@ function UploadsTab({ userId }: { userId?: string }) {
 
 type TabType = 'profile' | 'settings' | 'collections' | 'bookmarks' | 'notifications' | 'uploads' | 'analytics' | 'billing' | 'shipping' | 'service' | 'jobs' | 'workshop';
 
-export default function ProfilePage() {
+function ProfileContent() {
     const { user, setUser, logout } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -812,5 +812,17 @@ export default function ProfilePage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function ProfilePage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-yellow-400 animate-spin" />
+            </div>
+        }>
+            <ProfileContent />
+        </Suspense>
     );
 }

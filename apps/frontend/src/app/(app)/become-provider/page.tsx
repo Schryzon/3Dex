@@ -5,10 +5,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
     ArrowLeft, User, Printer, Settings2, Check, ChevronRight,
-    Loader2, Plus, X, Sparkles, MapPin, Globe, FileText, Wrench, Palette, DollarSign
+    Loader2, Plus, X, Sparkles, MapPin, Globe, FileText, Wrench, Palette, DollarSign, FileUp
 } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { userService } from '@/lib/api/services/user.service';
+import MultiFileUploader from '@/components/upload/MultiFileUploader';
+import { api } from '@/lib/api';
+import axios from 'axios';
 
 type Step = 'profile' | 'equipment' | 'review';
 
@@ -39,13 +42,14 @@ export default function BecomeProviderPage() {
     const [maxY, setMaxY] = useState('');
     const [maxZ, setMaxZ] = useState('');
 
-    // Step 3: Terms
+    // Step 3: Terms & Documents
+    const [documents, setDocuments] = useState<File[]>([]);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
 
     // Validation
     const isStep1Valid = displayName.trim().length >= 2 && bio.trim().length >= 10 && location.trim().length >= 2;
     const isStep2Valid = selectedMaterials.length > 0 && selectedPrinterTypes.length > 0;
-    const isStep3Valid = agreedToTerms;
+    const isStep3Valid = agreedToTerms && documents.length > 0;
 
     const steps = [
         { id: 'profile' as Step, label: 'Profile Info', icon: User },
@@ -63,10 +67,22 @@ export default function BecomeProviderPage() {
         setIsSubmitting(true);
 
         try {
+            // Upload Documents to MinIO
+            const documentKeys: string[] = [];
+            for (const file of documents) {
+                const { data } = await api.post('/models/upload-url', {
+                    filename: `provider_doc_${Date.now()}_${file.name}`,
+                    content_type: file.type || 'application/pdf'
+                });
+                await axios.put(data.upload_url, file, { headers: { 'Content-Type': file.type || 'application/pdf' } });
+                documentKeys.push(data.key);
+            }
+
             const providerConfig: any = {
                 materials: selectedMaterials,
                 colors: selectedColors,
                 printerTypes: selectedPrinterTypes,
+                documents: documentKeys,
             };
             if (basePrice) providerConfig.basePrice = Number(basePrice);
             if (maxX && maxY && maxZ) {
@@ -235,10 +251,10 @@ export default function BecomeProviderPage() {
                         return (
                             <div key={step.id} className="relative z-10 flex flex-col items-center">
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${isActive
-                                        ? 'bg-yellow-400 text-black scale-110 shadow-[0_0_20px_rgba(250,204,21,0.3)]'
-                                        : isPast
-                                            ? 'bg-green-500 text-white'
-                                            : 'bg-gray-900 text-gray-500 border border-gray-800'
+                                    ? 'bg-yellow-400 text-black scale-110 shadow-[0_0_20px_rgba(250,204,21,0.3)]'
+                                    : isPast
+                                        ? 'bg-green-500 text-white'
+                                        : 'bg-gray-900 text-gray-500 border border-gray-800'
                                     }`}>
                                     {isPast ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
                                 </div>
@@ -359,8 +375,8 @@ export default function BecomeProviderPage() {
                                             key={type}
                                             onClick={() => toggleItem(selectedPrinterTypes, setSelectedPrinterTypes, type)}
                                             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all cursor-pointer ${selectedPrinterTypes.includes(type)
-                                                    ? 'bg-yellow-400 text-black shadow-lg shadow-yellow-400/20'
-                                                    : 'bg-gray-900/50 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'
+                                                ? 'bg-yellow-400 text-black shadow-lg shadow-yellow-400/20'
+                                                : 'bg-gray-900/50 border border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'
                                                 }`}
                                         >
                                             {selectedPrinterTypes.includes(type) && <Check className="w-3 h-3 inline mr-1" />}
@@ -382,8 +398,8 @@ export default function BecomeProviderPage() {
                                             key={mat}
                                             onClick={() => toggleItem(selectedMaterials, setSelectedMaterials, mat)}
                                             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${selectedMaterials.includes(mat)
-                                                    ? 'bg-yellow-400 text-black'
-                                                    : 'bg-gray-900/50 border border-gray-800 text-gray-400 hover:border-gray-600'
+                                                ? 'bg-yellow-400 text-black'
+                                                : 'bg-gray-900/50 border border-gray-800 text-gray-400 hover:border-gray-600'
                                                 }`}
                                         >
                                             {mat}
@@ -403,8 +419,8 @@ export default function BecomeProviderPage() {
                                             key={color}
                                             onClick={() => toggleItem(selectedColors, setSelectedColors, color)}
                                             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${selectedColors.includes(color)
-                                                    ? 'bg-yellow-400 text-black'
-                                                    : 'bg-gray-900/50 border border-gray-800 text-gray-400 hover:border-gray-600'
+                                                ? 'bg-yellow-400 text-black'
+                                                : 'bg-gray-900/50 border border-gray-800 text-gray-400 hover:border-gray-600'
                                                 }`}
                                         >
                                             {color}
@@ -466,8 +482,25 @@ export default function BecomeProviderPage() {
                             <div>
                                 <h2 className="text-2xl font-bold mb-2">Review Your Application</h2>
                                 <p className="text-gray-400 text-sm">
-                                    Make sure everything looks good before submitting.
+                                    Upload verification documents and submit your application.
                                 </p>
+                            </div>
+
+                            {/* Verification Documents */}
+                            <div className="bg-gray-900/40 border border-gray-800 rounded-2xl p-5 space-y-4">
+                                <h3 className="text-sm font-bold text-gray-300 flex items-center gap-2">
+                                    <FileUp className="w-4 h-4 text-yellow-400" /> Verification Documents (Required)
+                                </h3>
+                                <p className="text-xs text-gray-500">
+                                    Please upload high-quality photos of your printing workspace, equipment, and a government ID to securely verify your identity.
+                                </p>
+                                <MultiFileUploader
+                                    onFilesSelect={setDocuments}
+                                    accept=".jpg,.jpeg,.png,.pdf"
+                                    label="Upload Documents"
+                                    description="JPG, PNG, PDF (Max 5MB each)"
+                                    maxFiles={5}
+                                />
                             </div>
 
                             {/* Summary Cards */}

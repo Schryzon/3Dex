@@ -34,7 +34,7 @@ export default function DevTools() {
         setIsOpen(false);
     };
 
-    if (process.env.NODE_ENV === 'production' && !window.location.hostname.includes('localhost')) {
+    if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined' && !window.location.hostname.includes('localhost')) {
         return null;
     }
 

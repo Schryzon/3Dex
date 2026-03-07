@@ -28,10 +28,10 @@ export default function DownloadsPage() {
 
     const handleDownload = async (modelId: string, title: string) => {
         try {
-            const { url } = await purchaseService.getDownloadUrl(modelId);
+            const { download_url } = await purchaseService.getDownloadUrl(modelId);
             // Create a temporary link and trigger download
             const link = document.createElement('a');
-            link.href = url;
+            link.href = download_url;
             link.setAttribute('download', `${title}.glb`); // Default to glb for now
             document.body.appendChild(link);
             link.click();

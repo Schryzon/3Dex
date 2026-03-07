@@ -172,6 +172,13 @@ export async function get_model_detail(req: Request, res: Response) {
     if (model.preview_url && !model.preview_url.startsWith("http")) {
       model.preview_url = await get_download_url_s3(model.preview_url);
     }
+    if (model.gallery_urls && model.gallery_urls.length > 0) {
+      model.gallery_urls = await Promise.all(
+        model.gallery_urls.map(async (url: string) => {
+          return url.startsWith("http") ? url : await get_download_url_s3(url);
+        })
+      );
+    }
     if (model.file_url && !model.file_url.startsWith("http")) {
       model.file_url = await get_download_url_s3(model.file_url);
     }
@@ -186,7 +193,7 @@ export async function get_model_detail(req: Request, res: Response) {
 
 
 export async function upload_model(req: Request, res: Response) {
-  const { title, description, price, file_url, preview_url, artist_id, category, tags } =
+  const { title, description, price, file_url, preview_url, gallery_urls, artist_id, category, tags } =
     req.body;
 
   if (!title || price === undefined || !file_url || !artist_id) {
@@ -209,6 +216,7 @@ export async function upload_model(req: Request, res: Response) {
       price: Number(price),
       file_url,
       preview_url,
+      gallery_urls: Array.isArray(gallery_urls) ? gallery_urls : undefined,
       artist_id,
       category_id,
       tags: Array.isArray(tags) ? tags : undefined

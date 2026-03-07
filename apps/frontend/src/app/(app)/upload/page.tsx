@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Box, Info, Tag, DollarSign, Check, ChevronRight, Layout, Loader2 } from 'lucide-react';
 import FileUploader from '@/components/upload/FileUploader';
+import MultiFileUploader from '@/components/upload/MultiFileUploader';
 import { api } from '@/lib/api';
 import axios from 'axios';
 
@@ -13,7 +14,7 @@ export default function UploadPage() {
     const router = useRouter();
     const [currentStep, setCurrentStep] = useState<Step>('files');
     const [modelFile, setModelFile] = useState<File | null>(null);
-    const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+    const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
 
@@ -28,7 +29,7 @@ export default function UploadPage() {
         license: 'royalty-free'
     });
 
-    const isStep1Valid = modelFile !== null;
+    const isStep1Valid = modelFile !== null && galleryFiles.length > 0;
     const isStep2Valid = formData.title.length >= 5 && formData.description.length >= 10;
 
     const steps = [
@@ -69,12 +70,20 @@ export default function UploadPage() {
             const modelUpload = await getPresignedUrl(modelFile);
             await uploadFileToMinIO(modelFile, modelUpload.upload_url, (p) => setUploadProgress(p));
 
-            // 2. Upload Thumbnail (if exists)
-            let thumbnailKey = '';
-            if (thumbnailFile) {
-                const thumbUpload = await getPresignedUrl(thumbnailFile);
-                await uploadFileToMinIO(thumbnailFile, thumbUpload.upload_url);
-                thumbnailKey = thumbUpload.key;
+            // 2. Upload Thumbnail & Gallery Images
+            let previewKey = '';
+            const galleryKeys: string[] = [];
+
+            for (let i = 0; i < galleryFiles.length; i++) {
+                const file = galleryFiles[i];
+                const upload = await getPresignedUrl(file);
+                await uploadFileToMinIO(file, upload.upload_url);
+
+                if (i === 0) {
+                    previewKey = upload.key;
+                } else {
+                    galleryKeys.push(upload.key);
+                }
             }
 
             const userStr = localStorage.getItem('user');
@@ -91,7 +100,8 @@ export default function UploadPage() {
                 description: formData.description,
                 price: formData.isFree ? 0 : Number(formData.price),
                 file_url: modelUpload.key, // Store KEY, not signed URL
-                preview_url: thumbnailKey,
+                preview_url: previewKey,
+                gallery_urls: galleryKeys,
                 artist_id: user.id, // Explicitly sending artist_id as required by backend
                 category: formData.category,
                 tags: formData.tags.split(',').map(t => t.trim()),
@@ -168,12 +178,13 @@ export default function UploadPage() {
                                     <FileUploader onFileSelect={setModelFile} accept=".glb,.gltf" maxSizeMB={100} />
                                 </div>
                                 <div className="space-y-4">
-                                    <label className="text-sm font-bold text-gray-300 block">Thumbnail Image</label>
-                                    <FileUploader
-                                        onFileSelect={setThumbnailFile}
+                                    <label className="text-sm font-bold text-gray-300 block">Preview Images (Required)</label>
+                                    <MultiFileUploader
+                                        onFilesSelect={setGalleryFiles}
                                         accept=".jpg,.jpeg,.png,.webp"
-                                        label="Upload Preview"
-                                        description="JPG, PNG or WEBP (Max 5MB)"
+                                        label="Upload Previews"
+                                        description="JPG, PNG or WEBP (Max 5MB each)"
+                                        maxFiles={5}
                                     />
                                 </div>
                             </div>
