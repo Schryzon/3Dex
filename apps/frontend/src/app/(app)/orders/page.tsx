@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { orderService } from '@/lib/api/services';
 import { formatPrice, formatDate } from '@/lib/utils';
-import { ShoppingBag, ChevronRight, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { ShoppingBag, ChevronRight, Clock, CheckCircle, XCircle, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useRouter } from 'next/navigation';
@@ -36,9 +36,18 @@ export default function OrdersPage() {
     return (
         <div className="min-h-screen bg-black text-white py-12">
             <div className="container mx-auto px-4 max-w-4xl">
-                <div className="flex items-center gap-3 mb-8">
-                    <ShoppingBag className="w-8 h-8 text-yellow-500" />
-                    <h1 className="text-3xl font-bold">My Orders</h1>
+                <div className="mb-6">
+                    <button
+                        onClick={() => router.back()}
+                        className="flex items-center gap-2 text-gray-500 hover:text-yellow-500 transition-colors group mb-6"
+                    >
+                        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                        <span className="text-sm font-medium">Back</span>
+                    </button>
+                    <div className="flex items-center gap-3">
+                        <ShoppingBag className="w-8 h-8 text-yellow-500" />
+                        <h1 className="text-3xl font-bold">My Orders</h1>
+                    </div>
                 </div>
 
                 {isLoading ? (

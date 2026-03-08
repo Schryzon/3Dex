@@ -10,6 +10,7 @@ interface SidebarNavItemProps {
     isActive: boolean;
     isSidebarOpen: boolean;
     title?: string;
+    count?: number;
 }
 
 export default function SidebarNavItem({
@@ -19,6 +20,7 @@ export default function SidebarNavItem({
     isActive,
     isSidebarOpen,
     title,
+    count,
 }: SidebarNavItemProps) {
     return (
         <Link
@@ -43,6 +45,16 @@ export default function SidebarNavItem({
             >
                 {label}
             </span>
+
+            {/* Notification Badge */}
+            {count !== undefined && count > 0 && isSidebarOpen && (
+                <span className="ml-auto px-1.5 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full">
+                    {count}
+                </span>
+            )}
+            {count !== undefined && count > 0 && !isSidebarOpen && (
+                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-[#111]" />
+            )}
         </Link>
     );
 }

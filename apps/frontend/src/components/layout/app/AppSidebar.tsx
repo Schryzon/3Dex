@@ -29,6 +29,12 @@ interface AppSidebarProps {
   user: any;
   isLoggedIn: boolean;
   handleLogout: () => void;
+  menuItems: NavItem[];
+  myStuffItems: NavItem[];
+  artistItems: NavItem[];
+  providerItems: NavItem[];
+  adminItems: NavItem[];
+  bottomItems: NavItem[];
 }
 
 export default function AppSidebar({
@@ -39,6 +45,12 @@ export default function AppSidebar({
   user,
   isLoggedIn,
   handleLogout,
+  menuItems,
+  myStuffItems,
+  artistItems,
+  providerItems,
+  adminItems,
+  bottomItems,
 }: AppSidebarProps) {
   const pathname = usePathname();
 
@@ -60,6 +72,7 @@ export default function AppSidebar({
           isActive={isActive}
           isSidebarOpen={isSidebarOpen}
           title={!isSidebarOpen ? item.label : undefined}
+          count={item.count}
         />
       );
     })
@@ -107,34 +120,34 @@ export default function AppSidebar({
 
         {/* Main Menu */}
         <SidebarSection label="Main Menu" isVisible={isSidebarOpen}>
-          {renderNavItems(SIDEBAR_MENU)}
+          {renderNavItems(menuItems)}
         </SidebarSection>
 
         {/* My Stuff (General Auth) */}
         {isLoggedIn && (
           <SidebarSection label="My Stuff" isVisible={isSidebarOpen}>
-            {renderNavItems(SIDEBAR_MY_STUFF)}
+            {renderNavItems(myStuffItems)}
           </SidebarSection>
         )}
 
         {/* Artist Tools */}
         {isLoggedIn && user?.role === 'ARTIST' && (
           <SidebarSection label="Artist Tools" isVisible={isSidebarOpen}>
-            {renderNavItems(SIDEBAR_ARTIST)}
+            {renderNavItems(artistItems)}
           </SidebarSection>
         )}
 
         {/* Provider Tools */}
         {isLoggedIn && user?.role === 'PROVIDER' && (
           <SidebarSection label="Provider Tools" isVisible={isSidebarOpen}>
-            {renderNavItems(SIDEBAR_PROVIDER)}
+            {renderNavItems(providerItems)}
           </SidebarSection>
         )}
 
         {/* Administration */}
         {isLoggedIn && user?.role === 'ADMIN' && (
           <SidebarSection label="Administration" isVisible={isSidebarOpen}>
-            {renderNavItems(SIDEBAR_ADMIN)}
+            {renderNavItems(adminItems)}
           </SidebarSection>
         )}
 
@@ -145,7 +158,7 @@ export default function AppSidebar({
         <div className="space-y-1">
           {isLoggedIn && (
             <>
-              {renderNavItems(SIDEBAR_BOTTOM)}
+              {renderNavItems(bottomItems)}
               <button
                 onClick={handleLogout}
                 title={!isSidebarOpen ? "Log Out" : undefined}

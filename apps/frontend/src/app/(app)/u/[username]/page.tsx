@@ -13,19 +13,23 @@ import {
     Link as LinkIcon,
     Twitter,
     Instagram,
-    Github,
     Printer,
     Share2,
-    MessageSquare,
     UserPlus,
     UserCheck,
-    Users
+    Users,
+    ChevronLeft,
+    Camera,
 } from 'lucide-react';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 
+
 export default function PublicProfilePage() {
     const { username } = useParams();
+    const router = useRouter();
     const [activeTab, setActiveTab] = useState<'models' | 'posts' | 'about'>('models');
 
     const { data: user, isLoading, error } = useQuery({
@@ -71,7 +75,7 @@ export default function PublicProfilePage() {
     });
 
     const handleFollowToggle = () => {
-        if (!currentUser) return; // Note: In a real app, maybe trigger auth modal
+        if (!currentUser) return;
 
         if (followStatus?.is_following) {
             unfollowMutation.mutate();
@@ -97,11 +101,59 @@ export default function PublicProfilePage() {
         );
     }
 
+    const isOwner = currentUser?.id === user.id;
+    const bannerSrc = user.banner_url
+        ? user.banner_url.startsWith('http')
+            ? user.banner_url
+            : `${process.env.NEXT_PUBLIC_STORAGE_URL}/${user.banner_url}`
+        : null;
+
     return (
         <div className="min-h-screen bg-[#0a0a0a]">
-            {/* Cover Image (Placeholder for now) */}
-            <div className="h-48 md:h-64 bg-gradient-to-r from-gray-900 to-gray-800 relative">
-                <div className="absolute inset-0 bg-black/20" />
+            {/* Header / Navigation */}
+            <div className="bg-[#0a0a0a]/80 backdrop-blur-md border-b border-white/5 sticky top-0 z-30">
+                <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+                    <button
+                        onClick={() => router.back()}
+                        className="flex items-center gap-2 text-gray-400 hover:text-yellow-400 transition-colors group text-sm font-medium"
+                    >
+                        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                        Back
+                    </button>
+                    <Breadcrumbs
+                        items={[
+                            { label: 'Users', href: '/catalog' },
+                            { label: `@${username}`, active: true }
+                        ]}
+                    />
+                </div>
+            </div>
+
+            {/* Banner / Cover Image */}
+            <div className="h-48 md:h-64 bg-gradient-to-r from-gray-900 to-gray-800 relative group">
+                {/* Image layer with overflow-hidden */}
+                <div className="absolute inset-0 overflow-hidden">
+                    {bannerSrc ? (
+                        <img
+                            src={bannerSrc}
+                            alt="Profile banner"
+                            className="w-full h-full object-cover"
+                        />
+                    ) : (
+                        <div className="absolute inset-0 bg-black/20" />
+                    )}
+                </div>
+
+                {/* Button layer outside overflow-hidden */}
+                {isOwner && (
+                    <Link
+                        href="/profile"
+                        className="absolute bottom-4 right-4 z-10 px-4 py-2 bg-black/60 backdrop-blur-md border border-white/10 text-white text-sm font-bold rounded-xl flex items-center gap-2 hover:bg-black/80 transition-opacity duration-200 opacity-0 group-hover:opacity-100"
+                    >
+                        <Camera className="w-4 h-4" />
+                        Change Banner
+                    </Link>
+                )}
             </div>
 
             <div className="max-w-7xl mx-auto px-6">
@@ -131,10 +183,10 @@ export default function PublicProfilePage() {
                             )}
                             <div className="flex items-center gap-1.5">
                                 <Users className="w-4 h-4" />
-                                <span><strong className="text-white">{user._count?.followers || 0}</strong> Followers</span>
+                                <span><strong className="text-white">{user._count?.followers ?? 0}</strong> Followers</span>
                             </div>
                             <div className="flex items-center gap-1.5">
-                                <span><strong className="text-white">{user._count?.following || 0}</strong> Following</span>
+                                <span><strong className="text-white">{user._count?.following ?? 0}</strong> Following</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <Calendar className="w-4 h-4" />
@@ -150,7 +202,7 @@ export default function PublicProfilePage() {
                     </div>
 
                     <div className="flex gap-3 pb-2 w-full md:w-auto">
-                        {currentUser && currentUser.id !== user.id && (
+                        {currentUser && !isOwner && (
                             <button
                                 onClick={handleFollowToggle}
                                 disabled={followMutation.isPending || unfollowMutation.isPending}
@@ -160,7 +212,7 @@ export default function PublicProfilePage() {
                                     }`}
                             >
                                 {followMutation.isPending || unfollowMutation.isPending ? (
-                                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></span>
+                                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
                                 ) : followStatus?.is_following ? (
                                     <>
                                         <UserCheck className="w-4 h-4" />
@@ -228,7 +280,7 @@ export default function PublicProfilePage() {
                                             <div>
                                                 <span className="text-gray-500 text-sm block mb-1">Materials</span>
                                                 <div className="flex flex-wrap gap-2">
-                                                    {user.provider_config.materials.map(m => (
+                                                    {user.provider_config.materials.map((m: string) => (
                                                         <span key={m} className="px-2 py-1 bg-gray-800 text-gray-300 text-xs rounded">{m}</span>
                                                     ))}
                                                 </div>
@@ -236,7 +288,7 @@ export default function PublicProfilePage() {
                                             <div>
                                                 <span className="text-gray-500 text-sm block mb-1">Printer Types</span>
                                                 <div className="flex flex-wrap gap-2">
-                                                    {user.provider_config.printerTypes.map(p => (
+                                                    {user.provider_config.printerTypes.map((p: string) => (
                                                         <span key={p} className="px-2 py-1 bg-gray-800 text-gray-300 text-xs rounded">{p}</span>
                                                     ))}
                                                 </div>
@@ -267,7 +319,7 @@ export default function PublicProfilePage() {
                         )}
                     </div>
 
-                    {/* Sidebar Rght (Stats/Similar) - Optional */}
+                    {/* Sidebar Right */}
                     <div className="hidden lg:block space-y-6">
                         <div className="bg-gray-900/40 border border-gray-800 rounded-2xl p-6">
                             <h3 className="font-bold text-white mb-4">Stats</h3>
@@ -275,7 +327,7 @@ export default function PublicProfilePage() {
                                 <div className="flex justify-between items-center text-sm">
                                     <span className="text-gray-400">Rating</span>
                                     <span className="text-white font-bold flex items-center gap-1">
-                                        ⭐ {user.rating.toFixed(1)} <span className="text-gray-500 font-normal">({user.review_count})</span>
+                                        ⭐ {(user.rating ?? 0).toFixed(1)} <span className="text-gray-500 font-normal">({user.review_count ?? 0})</span>
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">

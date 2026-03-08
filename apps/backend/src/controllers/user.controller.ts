@@ -42,6 +42,7 @@ export async function update_profile(req: Auth_Request, res: Response): Promise<
         addresses, // Json[]
         provider_config, // Json
         avatar_url,
+        banner_url,
         show_nsfw
     } = req.body;
 
@@ -61,6 +62,7 @@ export async function update_profile(req: Auth_Request, res: Response): Promise<
             addresses: addresses ? addresses : undefined,
             provider_config: provider_config ? provider_config : undefined,
             avatar_url,
+            banner_url,
             show_nsfw: show_nsfw !== undefined ? !!show_nsfw : undefined
         }
     });
@@ -152,6 +154,7 @@ export async function get_public_profile(req: Auth_Request, res: Response): Prom
             username: true,
             display_name: true,
             avatar_url: true,
+            banner_url: true,
             bio: true,
             role: true,
             account_status: true,

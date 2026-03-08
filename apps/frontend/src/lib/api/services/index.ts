@@ -9,3 +9,4 @@ export { printService } from './print.service';
 export { postService } from './post.service';
 export { reviewService } from './review.service';
 export { userService } from './user.service';
+export { notificationService } from './notification.service';

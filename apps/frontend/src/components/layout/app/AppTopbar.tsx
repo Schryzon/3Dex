@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Search,
@@ -26,6 +26,7 @@ interface AppTopbarProps {
   setAvatarDropdownOpen: (open: boolean) => void;
   setMobileOpen: (open: boolean) => void;
   handleLogout: () => void;
+  notificationsCount?: number;
   showLogin?: () => void;
   showRegister?: () => void;
 }
@@ -39,9 +40,24 @@ export default function AppTopbar({
   setAvatarDropdownOpen,
   setMobileOpen,
   handleLogout,
+  notificationsCount = 0,
   showLogin,
   showRegister,
 }: AppTopbarProps) {
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isAvatarDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setAvatarDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isAvatarDropdownOpen, setAvatarDropdownOpen]);
   return (
     <header className="sticky top-0 z-30 h-14 bg-[#111]/95 backdrop-blur-sm border-b border-white/[0.06]">
       <div className="h-full flex items-center justify-between px-4 md:px-6">
@@ -89,60 +105,63 @@ export default function AppTopbar({
           </Link>
 
           {isLoggedIn ? (
-            <div className="relative">
+            <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setAvatarDropdownOpen(!isAvatarDropdownOpen)}
                 className="flex items-center gap-1.5 hover:opacity-80 transition-opacity cursor-pointer"
               >
-                <UserAvatar user={user} size="sm" className="border-2 border-white/[0.08]" />
+                <div className="relative">
+                  <UserAvatar user={user} size="sm" className="border-2 border-white/[0.08]" />
+                  {mounted && notificationsCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#111]" />
+                  )}
+                </div>
                 <ChevronDown className={`w-3 h-3 text-gray-500 hidden md:block transition-transform ${isAvatarDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {isAvatarDropdownOpen && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setAvatarDropdownOpen(false)} />
-                  <div className="absolute right-0 top-full mt-2 w-56 bg-[#111] border border-white/[0.06] rounded-xl shadow-2xl z-50 overflow-hidden">
-                    <div className="px-4 py-3 border-b border-white/[0.06]">
-                      <p className="text-white text-sm font-medium">{user?.username}</p>
-                      <p className="text-gray-500 text-xs">{user?.email}</p>
-                    </div>
-                    <div className="py-1">
-                      <Link href="/notifications" className="flex items-center justify-between px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors">
-                        <div className="flex items-center gap-3">
-                          <Bell className="w-4 h-4" />
-                          <span className="text-sm">Notifications</span>
-                        </div>
-                        <span className="px-1.5 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full">3</span>
-                      </Link>
-                      <Link href="/profile" className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors">
-                        <User className="w-4 h-4" />
-                        <span className="text-sm">My Profile</span>
-                      </Link>
-                      <Link href="/downloads" className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors">
-                        <Download className="w-4 h-4" />
-                        <span className="text-sm">My Downloads</span>
-                      </Link>
-                      <Link href="/orders" className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors">
-                        <Package className="w-4 h-4" />
-                        <span className="text-sm">My Orders</span>
-                      </Link>
-                      <Link href="/saved" className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors">
-                        <Heart className="w-4 h-4" />
-                        <span className="text-sm">Saved</span>
-                      </Link>
-
-                    </div>
-                    <div className="border-t border-white/[0.06] py-1">
-                      <button
-                        onClick={handleLogout}
-                        className="flex items-center gap-3 px-4 py-2.5 text-red-400 hover:bg-white/[0.04] hover:text-red-300 transition-colors w-full text-left cursor-pointer font-medium"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        <span className="text-sm">Log Out</span>
-                      </button>
-                    </div>
+                <div className="absolute right-0 top-full mt-2 w-56 bg-[#111] border border-white/[0.06] rounded-xl shadow-2xl z-50 overflow-hidden">
+                  <div className="px-4 py-3 border-b border-white/[0.06]">
+                    <p className="text-white text-sm font-medium">{user?.username}</p>
+                    <p className="text-gray-500 text-xs">{user?.email}</p>
                   </div>
-                </>
+                  <div className="py-1">
+                    <Link href="/notifications" className="flex items-center justify-between px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
+                      <div className="flex items-center gap-3">
+                        <Bell className="w-4 h-4" />
+                        <span className="text-sm">Notifications</span>
+                      </div>
+                      {notificationsCount > 0 && (
+                        <span className="px-1.5 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full">{notificationsCount}</span>
+                      )}
+                    </Link>
+                    <Link href="/profile" className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
+                      <User className="w-4 h-4" />
+                      <span className="text-sm">My Profile</span>
+                    </Link>
+                    <Link href="/downloads" className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
+                      <Download className="w-4 h-4" />
+                      <span className="text-sm">My Downloads</span>
+                    </Link>
+                    <Link href="/orders" className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
+                      <Package className="w-4 h-4" />
+                      <span className="text-sm">My Orders</span>
+                    </Link>
+                    <Link href="/saved" className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
+                      <Heart className="w-4 h-4" />
+                      <span className="text-sm">Saved Items</span>
+                    </Link>
+                  </div>
+                  <div className="border-t border-white/[0.06] py-1">
+                    <button
+                      onClick={() => { handleLogout(); setAvatarDropdownOpen(false); }}
+                      className="flex items-center gap-3 px-4 py-2.5 text-red-400 hover:bg-white/[0.04] hover:text-red-300 transition-colors w-full text-left cursor-pointer font-medium"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span className="text-sm">Log Out</span>
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
           ) : (

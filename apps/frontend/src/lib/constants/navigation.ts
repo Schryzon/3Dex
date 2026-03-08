@@ -24,6 +24,7 @@ export interface NavItem {
     label: string;
     icon: LucideIcon;
     href: string;
+    count?: number;
 }
 
 export const SIDEBAR_MENU: NavItem[] = [

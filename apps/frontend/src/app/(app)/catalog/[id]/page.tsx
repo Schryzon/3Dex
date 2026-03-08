@@ -5,7 +5,8 @@ import { useProduct } from '@/lib/hooks/useProducts';
 import { useCart } from '@/lib/hooks/useCart';
 import { useWishlist } from '@/lib/hooks/useWishlist';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { Share2, Heart, Plus, Check, Download, Eye, ShoppingCart, FolderPlus, AlertTriangle } from 'lucide-react';
+import { Share2, Heart, Plus, Check, Download, Eye, ShoppingCart, FolderPlus, AlertTriangle, ChevronLeft } from 'lucide-react';
+import Breadcrumbs from '@/components/common/Breadcrumbs';
 import { Suspense, lazy, useState } from 'react';
 import Link from 'next/link';
 import ProductDetails from '@/components/catalog/ProductDetails';
@@ -140,26 +141,23 @@ export default function CatalogDetailPage() {
 
     return (
         <div className="min-h-screen bg-black text-white">
-            {/* Breadcrumb */}
             <div className="border-b border-gray-900">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3">
-                    <div className="flex items-center justify-between text-sm">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-2">
+                    <div className="flex items-center justify-between">
                         <button
                             onClick={() => router.back()}
-                            className="flex items-center gap-2 text-gray-400 hover:text-yellow-500 transition-colors duration-300 group"
+                            className="flex items-center gap-2 text-gray-400 hover:text-yellow-500 transition-colors duration-300 group text-sm"
                         >
-                            <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                            </svg>
+                            <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-300" />
                             <span>Back</span>
                         </button>
-                        <div className="flex items-center gap-2 text-gray-500">
-                            <span className="hover:text-yellow-500 transition-colors duration-300 cursor-pointer">Home</span>
-                            <span>/</span>
-                            <span className="hover:text-yellow-500 transition-colors duration-300 cursor-pointer">{product.category}</span>
-                            <span>/</span>
-                            <span className="text-white truncate max-w-[200px]">{product.title}</span>
-                        </div>
+                        <Breadcrumbs
+                            items={[
+                                { label: 'Catalog', href: '/catalog' },
+                                { label: product.category, href: `/catalog?category=${product.category}` },
+                                { label: product.title, active: true }
+                            ]}
+                        />
                     </div>
                 </div>
             </div>

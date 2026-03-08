@@ -7,6 +7,9 @@ import { useCart } from '@/lib/hooks/useCart';
 import AppSidebar from '@/components/layout/app/AppSidebar';
 import AppTopbar from '@/components/layout/app/AppTopbar';
 import DevTools from '@/components/common/DevTools';
+import { useQuery } from '@tanstack/react-query';
+import { notificationService } from '@/lib/api/services';
+import { SIDEBAR_MENU, SIDEBAR_MY_STUFF, SIDEBAR_ARTIST, SIDEBAR_PROVIDER, SIDEBAR_ADMIN, SIDEBAR_BOTTOM } from '@/lib/constants/navigation';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -21,6 +24,19 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const [isMobileOpen, setMobileOpen] = useState(false);
   const [isAvatarDropdownOpen, setAvatarDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+
+  // Fetch unread notification count
+  const { data: notificationData } = useQuery({
+    queryKey: ['notifications-unread-count'],
+    queryFn: async () => {
+      const res = await notificationService.getNotifications();
+      return res.unread_count;
+    },
+    enabled: isLoggedIn,
+    refetchInterval: 60000, // Refetch every minute
+  });
+
+  const unreadCount = notificationData || 0;
 
   useEffect(() => {
     setMounted(true);
@@ -49,6 +65,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
     router.replace('/');
   };
 
+  // Map sidebar items to include count for notifications
+  const mappedMyStuff = SIDEBAR_MY_STUFF.map(item =>
+    item.id === 'notifications' ? { ...item, count: unreadCount } : item
+  );
+
   return (
     <div className="flex min-h-screen bg-[#0a0a0a]">
       {/* Mobile Sidebar Overlay */}
@@ -68,6 +89,13 @@ export default function AppLayout({ children }: AppLayoutProps) {
         user={user}
         isLoggedIn={isLoggedIn}
         handleLogout={handleLogout}
+        // Custom menus with dynamic data
+        menuItems={SIDEBAR_MENU}
+        myStuffItems={mappedMyStuff}
+        artistItems={SIDEBAR_ARTIST}
+        providerItems={SIDEBAR_PROVIDER}
+        adminItems={SIDEBAR_ADMIN}
+        bottomItems={SIDEBAR_BOTTOM}
       />
 
       {/* Main Content Area */}
@@ -79,6 +107,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
           isLoggedIn={isLoggedIn}
           mounted={mounted}
           cartItemsCount={cartItems.length}
+          notificationsCount={unreadCount}
           isAvatarDropdownOpen={isAvatarDropdownOpen}
           setAvatarDropdownOpen={setAvatarDropdownOpen}
           setMobileOpen={setMobileOpen}

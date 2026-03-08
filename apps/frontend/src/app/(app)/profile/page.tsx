@@ -39,7 +39,8 @@ import { useProducts } from '@/lib/hooks/useProducts';
 import { api } from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/constants/api';
 import ConfirmModal from '@/components/common/ConfirmModal';
-
+import Breadcrumbs from '@/components/common/Breadcrumbs';
+import ImageCropModal from '@/components/common/ImageCropModal';
 import ModelGrid from '@/components/model/ModelGrid';
 
 
@@ -72,6 +73,14 @@ function ProfileContent() {
     const [activeTab, setActiveTab] = useState<TabType>('profile');
     const [saveBanner, setSaveBanner] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+    // Image Cropping
+    const [cropModal, setCropModal] = useState<{
+        isOpen: boolean;
+        image: string;
+        aspect: number;
+        type: 'avatar' | 'banner';
+    }>({ isOpen: false, image: '', aspect: 1, type: 'avatar' });
 
     // Delete account modal
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -106,7 +115,7 @@ function ProfileContent() {
     });
     const [isSaving, setIsSaving] = useState(false);
 
-    const showBanner = (type: 'success' | 'error', msg: string) => {
+    const showBannerNotif = (type: 'success' | 'error', msg: string) => {
         setSaveBanner({ type, msg });
         setTimeout(() => setSaveBanner(null), 4000);
     };
@@ -128,34 +137,60 @@ function ProfileContent() {
             };
             const res = await api.patch(API_ENDPOINTS.USERS.UPDATE, payload);
             setUser(res.data);
-            showBanner('success', 'Profile saved successfully!');
+            showBannerNotif('success', 'Profile saved successfully!');
         } catch (error: any) {
             console.error('Failed to save settings:', error);
-            showBanner('error', error.response?.data?.message || 'Failed to save settings.');
+            showBannerNotif('error', error.response?.data?.message || 'Failed to save settings.');
         } finally {
             setIsSaving(false);
         }
     };
 
-    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'banner') => {
         const file = e.target.files?.[0];
         if (!file) return;
-        setIsUploadingAvatar(true);
-        try {
-            const { data: { url, key } } = await api.post('/storage/upload-url', {
-                filename: file.name,
-                content_type: file.type,
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            setCropModal({
+                isOpen: true,
+                image: reader.result as string,
+                aspect: type === 'avatar' ? 1 : 16 / 5,
+                type
             });
+        };
+        reader.readAsDataURL(file);
+
+        // Reset input value to allow selecting same file again
+        e.target.value = '';
+    };
+
+    const handleCropComplete = async (croppedBlob: Blob) => {
+        const type = cropModal.type;
+        setCropModal(prev => ({ ...prev, isOpen: false }));
+
+        // Set the correct uploading state based on type
+        if (type === 'avatar') setIsUploadingAvatar(true);
+
+        try {
+            const fileName = `${type}_${user?.id}_${Date.now()}.jpg`;
+            const { data: { url, key } } = await api.post('/storage/upload-url', {
+                filename: fileName,
+                content_type: 'image/jpeg',
+            });
+
             await fetch(url, {
                 method: 'PUT',
-                body: file,
-                headers: { 'Content-Type': file.type },
+                body: croppedBlob,
+                headers: { 'Content-Type': 'image/jpeg' },
             });
-            const res = await api.patch(API_ENDPOINTS.USERS.UPDATE, { avatar_url: key });
+
+            const payload = type === 'avatar' ? { avatar_url: key } : { banner_url: key };
+            const res = await api.patch(API_ENDPOINTS.USERS.UPDATE, payload);
             setUser(res.data);
-            showBanner('success', 'Avatar updated!');
+            showBannerNotif('success', `${type.charAt(0).toUpperCase() + type.slice(1)} updated!`);
         } catch (error: any) {
-            showBanner('error', 'Failed to upload avatar.');
+            showBannerNotif('error', `Failed to upload ${type}.`);
         } finally {
             setIsUploadingAvatar(false);
         }
@@ -169,7 +204,7 @@ function ProfileContent() {
             await logout();
             router.push('/');
         } catch (error: any) {
-            showBanner('error', error.response?.data?.message || 'Failed to delete account.');
+            showBannerNotif('error', error.response?.data?.message || 'Failed to delete account.');
             setShowDeleteModal(false);
         } finally {
             setIsDeleting(false);
@@ -189,10 +224,10 @@ function ProfileContent() {
         try {
             await api.post('/users/apply-role', { role: 'ARTIST' });
             setUpgradeStatus('success');
-            showBanner('success', 'Artist application submitted!');
+            showBannerNotif('success', 'Artist application submitted!');
         } catch (error) {
             setUpgradeStatus('error');
-            showBanner('error', 'Application failed. Please try again.');
+            showBannerNotif('error', 'Application failed. Please try again.');
         } finally {
             setUpgrading(false);
         }
@@ -207,29 +242,37 @@ function ProfileContent() {
         setUpgrading(true);
         try {
             await api.post('/users/apply-role', { role: 'PROVIDER' });
-            showBanner('success', 'Provider application submitted!');
+            showBannerNotif('success', 'Provider application submitted!');
             setShowProviderModal(false);
         } catch (error) {
-            showBanner('error', 'Application failed. Please try again.');
+            showBannerNotif('error', 'Application failed. Please try again.');
         } finally {
             setIsApplyingProvider(false);
             setUpgrading(false);
         }
     };
 
-
-
-
     return (
         <div className="min-h-screen bg-[#0a0a0a]">
-            {/* Hidden file input for avatar upload */}
+            {/* Hidden file inputs */}
             <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={handleAvatarUpload}
+                onChange={(e) => handleImageSelect(e, 'avatar')}
             />
+
+
+            {cropModal.isOpen && (
+                <ImageCropModal
+                    image={cropModal.image}
+                    aspect={cropModal.aspect}
+                    title={`Crop ${cropModal.type === 'avatar' ? 'Avatar' : 'Banner'}`}
+                    onClose={() => setCropModal(prev => ({ ...prev, isOpen: false }))}
+                    onCropComplete={handleCropComplete}
+                />
+            )}
 
             {/* Provider Apply Confirmation Modal */}
             <ConfirmModal
@@ -253,7 +296,15 @@ function ProfileContent() {
             {/* Delete Account Confirmation Modal */}
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => { if (!isDeleting) { setShowDeleteModal(false); setDeleteConfirmInput(''); } }} />
+                    <div
+                        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+                        onClick={() => {
+                            if (!isDeleting) {
+                                setShowDeleteModal(false);
+                                setDeleteConfirmInput('');
+                            }
+                        }}
+                    />
                     <div className="relative bg-[#141414] rounded-2xl shadow-2xl w-full max-w-md border border-red-500/30 overflow-hidden animate-in zoom-in-95 duration-200">
                         <div className="h-1 w-full bg-red-500" />
                         <div className="p-8">
@@ -287,7 +338,10 @@ function ProfileContent() {
                                     disabled={deleteConfirmInput !== user?.username || isDeleting}
                                     className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-500 disabled:bg-gray-700 disabled:text-gray-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2"
                                 >
-                                    {isDeleting ? <><Loader2 className="w-4 h-4 animate-spin" />Deleting...</> : 'Delete Account'}
+                                    {isDeleting
+                                        ? <><Loader2 className="w-4 h-4 animate-spin" />Deleting...</>
+                                        : 'Delete Account'
+                                    }
                                 </button>
                             </div>
                         </div>
@@ -296,14 +350,13 @@ function ProfileContent() {
             )}
 
             <div className="max-w-7xl mx-auto px-6 py-10">
-                {/* Breadcrumbs */}
-                <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8">
-                    <Link href="/dashboard" className="hover:text-white transition-colors">Home</Link>
-                    <ChevronRight className="w-4 h-4" />
-                    <span>Profile</span>
-                    <ChevronRight className="w-4 h-4" />
-                    <span className="text-white capitalize">{activeTab}</span>
-                </nav>
+                <Breadcrumbs
+                    items={[
+                        { label: 'Profile', href: '/profile' },
+                        { label: activeTab, active: true }
+                    ]}
+                    className="mb-8"
+                />
 
                 {/* Global inline banner */}
                 {saveBanner && (
@@ -324,7 +377,7 @@ function ProfileContent() {
 
                     {/* Content Right */}
                     <div className="flex-1 min-w-0">
-                        {/* Tab Headers per Page */}
+                        {/* Tab Header */}
                         <div className="mb-8 flex items-center justify-between">
                             <h2 className="text-3xl font-bold text-white capitalize">{activeTab}</h2>
                             {activeTab === 'profile' && user?.role === 'CUSTOMER' && (
@@ -347,17 +400,17 @@ function ProfileContent() {
                             )}
                         </div>
 
-                        {/* Rendering Content */}
+                        {/* ── TAB: PROFILE ── */}
                         {activeTab === 'profile' && (
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
                                 {/* Avatar Card */}
-                                <div className="bg-gray-900/40 rounded-2xl p-8 border border-gray-800 flex flex-col md:flex-row items-center gap-8">
-                                    <div className="relative group">
-                                        <UserAvatar user={user} size="xl" className="border-4 cursor-pointer border-gray-800 shadow-2xl transition-transform group-hover:scale-105" />
+                                <div className="bg-gray-900/40 rounded-2xl p-8 border border-gray-800 flex flex-col md:flex-row items-center gap-8 relative">
+                                    <div className="relative group/avatar">
+                                        <UserAvatar user={user} size="xl" className="border-4 cursor-pointer border-gray-800 shadow-2xl transition-transform group-hover/avatar:scale-105" />
                                         <button
                                             onClick={() => fileInputRef.current?.click()}
                                             disabled={isUploadingAvatar}
-                                            className="absolute bottom-2 cursor-pointer right-2 w-10 h-10 bg-yellow-400 hover:bg-yellow-300 disabled:bg-gray-600 text-black rounded-full flex items-center justify-center shadow-lg transition-all transform scale-0 group-hover:scale-100"
+                                            className="absolute bottom-2 cursor-pointer right-2 w-10 h-10 bg-yellow-400 hover:bg-yellow-300 disabled:bg-gray-600 text-black rounded-full flex items-center justify-center shadow-lg transition-all transform scale-0 group-hover/avatar:scale-100"
                                         >
                                             {isUploadingAvatar
                                                 ? <Loader2 className="w-5 h-5 animate-spin" />
@@ -376,7 +429,6 @@ function ProfileContent() {
                                         </Link>
                                     </div>
                                 </div>
-
 
                                 {/* General Settings Card */}
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -489,16 +541,17 @@ function ProfileContent() {
                                                 </div>
                                             </div>
                                         </div>
-
                                     </div>
                                 </div>
                             </div>
                         )}
 
+                        {/* ── TAB: UPLOADS ── */}
                         {activeTab === 'uploads' && (
                             <UploadsTab userId={user?.id} />
                         )}
 
+                        {/* ── TAB: ANALYTICS ── */}
                         {activeTab === 'analytics' && (
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -528,13 +581,13 @@ function ProfileContent() {
                             </div>
                         )}
 
+                        {/* ── TAB: SHIPPING ── */}
                         {activeTab === 'shipping' && (
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                {/* Shipping Address Card */}
                                 <div className="bg-gray-900/40 rounded-2xl border border-gray-800 overflow-hidden">
                                     <div className="px-8 py-6 border-b border-gray-800 bg-gray-800/20">
                                         <h3 className="text-lg font-bold text-white">Default Shipping Address</h3>
-                                        <p className="text-sm text-gray-400">Where should we spend your physical 3D prints or packages?</p>
+                                        <p className="text-sm text-gray-400">Where should we send your physical 3D prints or packages?</p>
                                     </div>
                                     <div className="p-8 space-y-6">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -559,7 +612,6 @@ function ProfileContent() {
                                                 />
                                             </div>
                                         </div>
-
                                         <div>
                                             <label className="block text-sm text-gray-400 mb-2 font-medium">Detailed Address</label>
                                             <textarea
@@ -569,7 +621,6 @@ function ProfileContent() {
                                                 className="w-full bg-black/50 text-white px-4 py-3 rounded-xl border border-gray-800 focus:border-yellow-400 focus:outline-none transition-all h-32 resize-none"
                                             />
                                         </div>
-
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div>
                                                 <label className="block text-sm text-gray-400 mb-2 font-medium">Postcode / ZIP</label>
@@ -596,7 +647,6 @@ function ProfileContent() {
                                                 </select>
                                             </div>
                                         </div>
-
                                         <div className="pt-4 border-t border-gray-800">
                                             <div className="flex items-center justify-between p-4 bg-gray-800/20 rounded-xl border border-gray-800">
                                                 <div className="flex items-center gap-4">
@@ -630,18 +680,21 @@ function ProfileContent() {
                             </div>
                         )}
 
+                        {/* ── TAB: SERVICE ── */}
                         {activeTab === 'service' && (
                             <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
                                 <ServiceTab />
                             </div>
                         )}
 
+                        {/* ── TAB: JOBS ── */}
                         {activeTab === 'jobs' && (
                             <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
                                 <JobsTab />
                             </div>
                         )}
 
+                        {/* ── TAB: WORKSHOP ── */}
                         {activeTab === 'workshop' && (
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
                                 <div className="bg-gray-900/40 rounded-2xl border border-gray-800 overflow-hidden">
@@ -669,6 +722,7 @@ function ProfileContent() {
                             </div>
                         )}
 
+                        {/* ── TAB: COLLECTIONS ── */}
                         {activeTab === 'collections' && (
                             <div className="text-center py-20 bg-gray-900/20 rounded-2xl border border-gray-800 border-dashed animate-in fade-in slide-in-from-bottom-2 duration-500">
                                 <FolderOpen className="w-16 h-16 text-gray-700 mx-auto mb-4" />
@@ -680,6 +734,7 @@ function ProfileContent() {
                             </div>
                         )}
 
+                        {/* ── TAB: BOOKMARKS ── */}
                         {activeTab === 'bookmarks' && (
                             <div className="text-center py-20 bg-gray-900/20 rounded-2xl border border-gray-800 border-dashed animate-in fade-in slide-in-from-bottom-2 duration-500">
                                 <Bookmark className="w-16 h-16 text-gray-700 mx-auto mb-4" />
@@ -691,6 +746,7 @@ function ProfileContent() {
                             </div>
                         )}
 
+                        {/* ── TAB: NOTIFICATIONS ── */}
                         {activeTab === 'notifications' && (
                             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
                                 <div className="p-6 bg-gray-900/40 rounded-2xl border border-gray-800 flex items-start gap-4 hover:border-yellow-400/30 transition-all cursor-pointer">
@@ -716,6 +772,7 @@ function ProfileContent() {
                             </div>
                         )}
 
+                        {/* ── TAB: SETTINGS ── */}
                         {activeTab === 'settings' && (
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
                                 {/* Preferences Card */}
@@ -743,11 +800,12 @@ function ProfileContent() {
                                                 </select>
                                             </div>
                                         </div>
-
                                         <div className="pt-4 space-y-4">
                                             <div className="flex items-center justify-between p-4 bg-gray-800/20 rounded-xl border border-gray-800">
                                                 <div>
-                                                    <p className="text-white font-medium flex items-center gap-2">Show NSFW Content {formData.showNsfw && <AlertTriangle className="w-4 h-4 text-red-500" />}</p>
+                                                    <p className="text-white font-medium flex items-center gap-2">
+                                                        Show NSFW Content {formData.showNsfw && <AlertTriangle className="w-4 h-4 text-red-500" />}
+                                                    </p>
                                                     <p className="text-sm text-gray-500">Enable viewing mature and explicit content.</p>
                                                 </div>
                                                 <button
@@ -778,7 +836,11 @@ function ProfileContent() {
                                         </div>
                                     </div>
                                     <div className="px-8 py-4 bg-gray-800/10 border-t border-gray-800 flex justify-end">
-                                        <button onClick={handleSaveSettings} disabled={isSaving} className="px-8 py-2.5 bg-yellow-400 hover:bg-yellow-300 disabled:opacity-50 text-black font-bold rounded-xl transition-all">
+                                        <button
+                                            onClick={handleSaveSettings}
+                                            disabled={isSaving}
+                                            className="px-8 py-2.5 bg-yellow-400 hover:bg-yellow-300 disabled:opacity-50 text-black font-bold rounded-xl transition-all"
+                                        >
                                             {isSaving ? 'Saving...' : 'Update Preferences'}
                                         </button>
                                     </div>
@@ -809,15 +871,14 @@ function ProfileContent() {
                             </div>
                         )}
 
-
-
+                        {/* ── TAB: BILLING ── */}
                         {activeTab === 'billing' && (
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                <div className="bg-gray-900/40 rounded-2xl border border-gray-800 p-8 flex flex-col items-center text-center">
+                                <div className="bg-gray-900/40 rounded-2xl border border-gray-800 p-8 flex flex-col items-center text-center shadow-xl">
                                     <CreditCard className="w-16 h-16 text-gray-700 mb-4" />
                                     <h3 className="text-xl font-bold text-white mb-2">Billing & Payments</h3>
                                     <p className="text-gray-400 mb-8 max-w-sm">Manage your payment methods and view your transaction history.</p>
-                                    <button className="px-8 py-3 bg-yellow-400 text-black font-bold rounded-xl hover:bg-yellow-300 transition-all">
+                                    <button className="px-8 py-3 bg-yellow-400 text-black font-bold rounded-xl hover:bg-yellow-300 transition-all shadow-lg">
                                         Add Payment Method
                                     </button>
                                 </div>

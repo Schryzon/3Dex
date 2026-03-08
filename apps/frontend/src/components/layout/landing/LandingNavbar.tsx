@@ -73,8 +73,8 @@ export default function LandingNavbar() {
       const target = e.target as HTMLElement;
       if (userMenuOpen && !target.closest('.user-menu-container')) setUserMenuOpen(false);
     };
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [userMenuOpen]);
 
   const handleLogout = useCallback(() => {

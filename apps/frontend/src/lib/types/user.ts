@@ -31,6 +31,7 @@ export interface User {
     location?: string;
     role: 'CUSTOMER' | 'ARTIST' | 'PROVIDER' | 'ADMIN';
     avatar_url?: string;
+    banner_url?: string;
     avatar?: string;
     created_at: string;
     account_status: 'PENDING' | 'APPROVED' | 'REJECTED';

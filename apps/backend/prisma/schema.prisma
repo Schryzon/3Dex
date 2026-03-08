@@ -47,6 +47,7 @@ model User {
   display_name String?
   bio          String?
   avatar_url   String?
+  banner_url   String?
   location     String? // General location string
   website      String?
   

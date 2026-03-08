@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { purchaseService } from '@/lib/api/services';
-import { Download, Search, Package, FileArchive, Clock, ExternalLink } from 'lucide-react';
+import { Download, Search, Package, FileArchive, Clock, ExternalLink, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useRouter } from 'next/navigation';
@@ -51,13 +51,22 @@ export default function DownloadsPage() {
     return (
         <div className="min-h-screen bg-[#0a0a0a] p-4 md:p-6 lg:p-8">
             <div className="max-w-[1400px] mx-auto">
-                <div className="mb-8">
-                    <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                        My <span className="text-yellow-400">Downloads</span>
-                    </h1>
-                    <p className="text-gray-400">
-                        Access your purchased and downloaded 3D assets
-                    </p>
+                <div className="mb-6">
+                    <button
+                        onClick={() => router.back()}
+                        className="flex items-center gap-2 text-gray-400 hover:text-yellow-400 transition-colors group mb-4"
+                    >
+                        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                        <span className="text-sm font-medium">Back</span>
+                    </button>
+                    <div className="mb-2">
+                        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                            My <span className="text-yellow-400">Downloads</span>
+                        </h1>
+                        <p className="text-gray-400">
+                            Access your purchased and downloaded 3D assets
+                        </p>
+                    </div>
                 </div>
 
                 {/* Stats */}
