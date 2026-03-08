@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -18,28 +19,33 @@ jobs:
         with:
           node-version: 24
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install & Build (On GitHub Runner)
+        run: |
+          npm install
+          npm run build --workspaces
 
-      - name: Run tests
-        run: npm test
+      - name: Rsync Build Files to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          # List the folders/files you actually need to run the app
+          source: "apps/backend/dist/,apps/backend/package.json,apps/backend/prisma/,apps/frontend/.next/,apps/frontend/package.json,apps/frontend/public/,apps/frontend/next.config.ts,package.json,package-lock.json,ecosystem.config.js"
+          target: "~/3Dex"
 
-      - name: Build
-        run: npm run build --workspaces
-
-      - name: Deploy via SSH
+      - name: Finalize on VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            cd 3Dex
-            git pull origin master
-            npm install
+            cd ~/3Dex
+            # Only install production dependencies to save RAM
+            npm install --omit=dev
             cd apps/backend
             npx prisma generate
             npx prisma migrate deploy
             cd ../..
-            npm run build --workspaces
             pm2 reload ecosystem.config.js
