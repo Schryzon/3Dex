@@ -14,7 +14,7 @@ export default function AdminDashboardPage() {
 
     useEffect(() => {
         if (!isLoading && user?.role !== 'ADMIN') {
-            router.replace('/dashboard');
+            router.replace('/forbidden');
         }
     }, [user, isLoading, router]);
 

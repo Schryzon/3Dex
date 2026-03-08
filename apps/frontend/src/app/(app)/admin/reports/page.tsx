@@ -129,7 +129,7 @@ export default function AdminReportsPage() {
 
     useEffect(() => {
         if (!isLoading && user?.role !== 'ADMIN') {
-            router.replace('/dashboard');
+            router.replace('/forbidden');
         }
     }, [user, isLoading, router]);
 

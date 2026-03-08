@@ -31,7 +31,7 @@ export default function ProviderDashboardPage() {
 
     if (authLoading) return null;
     if (!user || user.role !== 'PROVIDER') {
-        router.push('/');
+        router.replace('/forbidden');
         return null;
     }
 
