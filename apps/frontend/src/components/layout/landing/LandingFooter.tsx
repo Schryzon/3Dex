@@ -23,7 +23,7 @@ export default function LandingFooter() {
             <h3 className="text-white font-bold text-lg mb-4">Contents</h3>
             <ul className="space-y-3">
               <li>
-                <Link href="/models" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/catalog" className="text-gray-400 hover:text-white transition-colors">
                   3D Models
                 </Link>
               </li>
@@ -33,12 +33,12 @@ export default function LandingFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/hdri" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/catalog?category=hdri" className="text-gray-400 hover:text-white transition-colors">
                   HDRI
                 </Link>
               </li>
               <li>
-                <Link href="/free" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/catalog?price=free" className="text-gray-400 hover:text-white transition-colors">
                   Free 3D models
                 </Link>
               </li>
@@ -50,22 +50,22 @@ export default function LandingFooter() {
             <h3 className="text-white font-bold text-lg mb-4">Agreements</h3>
             <ul className="space-y-3">
               <li>
-                <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
                   Terms of Use
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/cookies" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
                   Cookie Policy
                 </Link>
               </li>
               <li>
-                <Link href="/license" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
                   License
                 </Link>
               </li>
@@ -77,17 +77,17 @@ export default function LandingFooter() {
             <h3 className="text-white font-bold text-lg mb-4">Support</h3>
             <ul className="space-y-3">
               <li>
-                <Link href="/faq" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
                   FAQ
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
                   Contact us
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
                   About us
                 </Link>
               </li>
@@ -129,7 +129,7 @@ export default function LandingFooter() {
       <div className="border-t border-gray-800 bg-black">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <p className="text-gray-400 text-sm text-center">
-            © 2026 3Dēx. All rights reserved.
+            © {new Date().getFullYear()} 3Dēx. All rights reserved.
           </p>
         </div>
       </div>
