@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import swagger_ui from "swagger-ui-express";
 import { swagger_spec } from "./utils/swagger";
@@ -29,9 +30,21 @@ import report_routes from "./routes/reports";
 // Initialize Backend
 const app = express();
 
-// CORS Configuration
+// Middleware
+app.use(helmet({
+    contentSecurityPolicy: false, // Disable CSP for now to avoid breaking 3D viewers/images
+}));
+
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000').split(',');
+
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
