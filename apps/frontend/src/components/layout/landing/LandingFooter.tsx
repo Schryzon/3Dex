@@ -23,22 +23,22 @@ export default function LandingFooter() {
             <h3 className="text-white font-bold text-lg mb-4">Contents</h3>
             <ul className="space-y-3">
               <li>
-                <Link href="/catalog" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
                   3D Models
                 </Link>
               </li>
               <li>
-                <Link href="/textures" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
                   Textures
                 </Link>
               </li>
               <li>
-                <Link href="/catalog?category=hdri" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
                   HDRI
                 </Link>
               </li>
               <li>
-                <Link href="/catalog?price=free" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
                   Free 3D models
                 </Link>
               </li>
