@@ -9,7 +9,6 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import ProtectedLink from '@/components/common/ProtectedLink';
-import CategoryMegaMenu from '@/components/layout/CategoryMegaMenu';
 import { useState, useCallback, useEffect } from 'react';
 import { useCart } from '@/lib/hooks/useCart';
 import UserAvatar from '@/components/common/UserAvatar';
@@ -61,7 +60,6 @@ export default function LandingNavbar() {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [megaMenuOpen, setMegaMenuOpen] = useState<MegaMenuType | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [mounted, setMounted] = useState(false);
 
@@ -73,12 +71,11 @@ export default function LandingNavbar() {
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (megaMenuOpen && !target.closest('.mega-menu-container')) setMegaMenuOpen(null);
       if (userMenuOpen && !target.closest('.user-menu-container')) setUserMenuOpen(false);
     };
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
-  }, [megaMenuOpen, userMenuOpen]);
+  }, [userMenuOpen]);
 
   const handleLogout = useCallback(() => {
     logout();
@@ -87,10 +84,6 @@ export default function LandingNavbar() {
 
   const toggleMobileMenu = useCallback(() => {
     setMobileMenuOpen(prev => !prev);
-  }, []);
-
-  const handleMegaMenuClick = useCallback((type: MegaMenuType) => {
-    setMegaMenuOpen(prev => prev === type ? null : type);
   }, []);
 
   const handleSearch = useCallback(() => {
@@ -113,25 +106,17 @@ export default function LandingNavbar() {
             <span className="text-white font-bold text-xl md:text-2xl">3Dēx</span>
           </Link>
 
-          {/* Desktop Nav + Mega Menu */}
-          <div className="hidden lg:flex items-center gap-6 mega-menu-container">
-            {(['3d-models', 'cg-models', 'textures'] as MegaMenuType[]).map((type) => (
-              <button
-                key={type}
-                onClick={() => handleMegaMenuClick(type)}
-                className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors cursor-pointer"
+          {/* Desktop Nav */}
+          <div className="hidden lg:flex items-center gap-6">
+            {MOBILE_NAV.map(({ label, href }) => (
+              <Link
+                key={href}
+                href={href}
+                className="text-gray-300 hover:text-white transition-colors cursor-pointer font-medium"
               >
-                <span className="text-gray-500">○</span>
-                <span>{NAV_LABELS[type]}</span>
-              </button>
+                {label}
+              </Link>
             ))}
-            {megaMenuOpen && (
-              <CategoryMegaMenu
-                isOpen={true}
-                onClose={() => setMegaMenuOpen(null)}
-                type={megaMenuOpen}
-              />
-            )}
           </div>
 
           {/* Search Bar */}

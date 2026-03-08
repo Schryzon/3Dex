@@ -3,11 +3,28 @@
 import Link from 'next/link';
 import { Shield, Zap, Award, Globe, Clock, Heart } from 'lucide-react';
 import { useInView } from '@/lib/hooks/useInView';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api/client';
 
 export default function FeaturesSection() {
     const { ref: leftRef, inView: leftVisible } = useInView({ threshold: 0.1 });
     const { ref: rightRef, inView: rightVisible } = useInView({ threshold: 0.1 });
     const { ref: bannerRef, inView: bannerVisible } = useInView({ threshold: 0.2 });
+
+    const { data: stats } = useQuery({
+        queryKey: ['public-stats'],
+        queryFn: async () => {
+            const res = await apiClient.get('/analytics/public');
+            return res as any;
+        }
+    });
+
+    const displayStats = [
+        { value: stats ? `${stats.models}+` : '...', label: '3D Assets' },
+        { value: stats ? `${stats.customers}+` : '...', label: 'Customers' },
+        { value: stats ? `${stats.artists}+` : '...', label: 'Artists' },
+        { value: '4.9★', label: 'Avg Rating' },
+    ];
 
     return (
         <section className="relative py-14 md:py-20 bg-[#040404] overflow-hidden">
@@ -39,12 +56,7 @@ export default function FeaturesSection() {
                         </p>
                         {/* Mini stats */}
                         <div className="grid grid-cols-2 gap-5">
-                            {[
-                                { value: '36K+', label: '3D Assets' },
-                                { value: '15K+', label: 'Customers' },
-                                { value: '500+', label: 'Artists' },
-                                { value: '4.9★', label: 'Avg Rating' },
-                            ].map(stat => (
+                            {displayStats.map(stat => (
                                 <div key={stat.label} className="border border-white/[0.07] rounded-xl px-4 py-3 bg-white/[0.02]">
                                     <div className="text-2xl font-black text-yellow-400">{stat.value}</div>
                                     <div className="text-xs text-gray-600 mt-0.5">{stat.label}</div>
@@ -105,7 +117,7 @@ export default function FeaturesSection() {
                                 Ready to sell your work?
                             </h3>
                             <p className="text-gray-400 text-sm max-w-md">
-                                Upload your first asset today. Join 500+ artists already earning on 3Dēx and reach thousands of buyers worldwide.
+                                Upload your first asset today. Join {stats ? stats.artists : ''}+ artists already earning on 3Dēx and reach thousands of buyers worldwide.
                             </p>
                         </div>
                         <Link
