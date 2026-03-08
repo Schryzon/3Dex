@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { ChevronDown, LayoutGrid, List, ShoppingCart } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import CatalogProductCard from '@/components/catalog/CatalogProductCard';
@@ -29,7 +29,7 @@ const CATEGORIES = [
     { id: 'weapons', label: 'Weapons' },
 ];
 
-export default function CatalogPage() {
+function CatalogContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const searchQuery = searchParams.get('search') || '';
@@ -327,5 +327,17 @@ export default function CatalogPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function CatalogPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-[60vh] flex items-center justify-center">
+                <div className="w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+        }>
+            <CatalogContent />
+        </Suspense>
     );
 }
