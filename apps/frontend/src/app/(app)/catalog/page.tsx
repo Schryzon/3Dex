@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { ChevronDown, LayoutGrid, List } from 'lucide-react';
+import { ChevronDown, LayoutGrid, List, ShoppingBag } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import CatalogProductCard from '@/components/catalog/CatalogProductCard';
 import CatalogFilters, { FilterState } from '@/components/catalog/CatalogFilters';
@@ -296,8 +296,26 @@ export default function CatalogPage() {
 
             {/* Empty State */}
             {!isLoading && !error && products.length === 0 && (
-                <div className="text-center py-12 bg-gray-800/20 rounded-xl border border-gray-800">
-                    <p className="text-gray-400">No products found. Try adjusting your filters.</p>
+                <div className="flex flex-col items-center justify-center py-20 px-4 animate-in fade-in zoom-in-95 duration-500">
+                    <div className="w-24 h-24 bg-gradient-to-br from-yellow-400/20 to-yellow-600/5 rounded-full flex items-center justify-center mb-6 shadow-[0_0_50px_rgba(250,204,21,0.1)] border border-yellow-400/10">
+                        <ShoppingBag className="w-10 h-10 text-yellow-400/80" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-2">No assets found</h3>
+                    <p className="text-gray-500 max-w-xs text-center mb-8 leading-relaxed">
+                        We couldn't find any 3D models matching your current filters. Try adjusting your search or filters.
+                    </p>
+                    {(filters.formats.length > 0 || filters.types.length > 0 || filters.price !== 'all' || activeCategory !== 'all' || searchQuery) && (
+                        <button
+                            onClick={() => {
+                                setFilters({ formats: [], price: 'all', types: [] });
+                                setActiveCategory('all');
+                                if (searchQuery) router.push('/catalog');
+                            }}
+                            className="px-6 py-2.5 bg-white text-black font-bold rounded-xl hover:bg-yellow-400 transition-all cursor-pointer shadow-lg active:scale-95"
+                        >
+                            Clear all filters
+                        </button>
+                    )}
                 </div>
             )}
         </div>
