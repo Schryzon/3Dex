@@ -25,7 +25,8 @@ import {
     Instagram,
     ExternalLink,
     ArrowUpRight,
-    Loader2
+    Loader2,
+    AlertTriangle
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect, useRef, Suspense } from 'react';
@@ -95,6 +96,7 @@ function ProfileContent() {
         ecoPackaging: true,
         website: user?.website || '',
         skills: [] as string[],
+        showNsfw: user?.show_nsfw || false,
         socialLinks: {
             twitter: user?.social_twitter || '',
             instagram: user?.social_instagram || '',
@@ -118,6 +120,7 @@ function ProfileContent() {
                 bio: formData.bio,
                 location: formData.location,
                 website: formData.website,
+                show_nsfw: formData.showNsfw,
                 social_twitter: formData.socialLinks.twitter,
                 social_instagram: formData.socialLinks.instagram,
                 social_artstation: formData.socialLinks.artstation,
@@ -744,6 +747,18 @@ function ProfileContent() {
                                         <div className="pt-4 space-y-4">
                                             <div className="flex items-center justify-between p-4 bg-gray-800/20 rounded-xl border border-gray-800">
                                                 <div>
+                                                    <p className="text-white font-medium flex items-center gap-2">Show NSFW Content {formData.showNsfw && <AlertTriangle className="w-4 h-4 text-red-500" />}</p>
+                                                    <p className="text-sm text-gray-500">Enable viewing mature and explicit content.</p>
+                                                </div>
+                                                <button
+                                                    onClick={() => setFormData({ ...formData, showNsfw: !formData.showNsfw })}
+                                                    className={`w-12 h-6 rounded-full relative cursor-pointer transition-colors ${formData.showNsfw ? 'bg-red-500' : 'bg-gray-700'}`}
+                                                >
+                                                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${formData.showNsfw ? 'translate-x-7' : 'translate-x-1'}`} />
+                                                </button>
+                                            </div>
+                                            <div className="flex items-center justify-between p-4 bg-gray-800/20 rounded-xl border border-gray-800">
+                                                <div>
                                                     <p className="text-white font-medium">Email Notifications</p>
                                                     <p className="text-sm text-gray-500">Receive weekly digests and important updates.</p>
                                                 </div>
@@ -763,8 +778,8 @@ function ProfileContent() {
                                         </div>
                                     </div>
                                     <div className="px-8 py-4 bg-gray-800/10 border-t border-gray-800 flex justify-end">
-                                        <button className="px-8 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-black font-bold rounded-xl transition-all">
-                                            Update Preferences
+                                        <button onClick={handleSaveSettings} disabled={isSaving} className="px-8 py-2.5 bg-yellow-400 hover:bg-yellow-300 disabled:opacity-50 text-black font-bold rounded-xl transition-all">
+                                            {isSaving ? 'Saving...' : 'Update Preferences'}
                                         </button>
                                     </div>
                                 </div>

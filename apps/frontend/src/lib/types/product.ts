@@ -18,6 +18,7 @@ export interface Model {
         username: string;
         avatar_url?: string;
     };
+    is_nsfw?: boolean;
     createdAt: string;
     updatedAt: string;
     rating?: number;

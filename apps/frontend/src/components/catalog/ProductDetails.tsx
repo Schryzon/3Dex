@@ -22,11 +22,10 @@ export default function ProductDetails({ product }: Props) {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`px-6 py-4 text-sm font-semibold transition-all duration-300 relative whitespace-nowrap flex-shrink-0 ${
-              activeTab === tab.id
+            className={`px-6 py-4 text-sm font-semibold transition-all duration-300 relative whitespace-nowrap flex-shrink-0 ${activeTab === tab.id
                 ? 'text-white'
                 : 'text-gray-400 hover:text-gray-300'
-            }`}
+              }`}
           >
             {tab.label}
             {/* Active Indicator - Yellow underline */}
@@ -166,7 +165,7 @@ export default function ProductDetails({ product }: Props) {
               </div>
               <div className="bg-gray-800 px-4 py-2 rounded-lg border border-gray-800">
                 <p className="text-xs font-medium text-gray-400">
-                  Document Ref: <span className="text-white">3DX-LI-2024-STD</span>
+                  Document Ref: <span className="text-white">3DX-LI-2026-STD</span>
                 </p>
               </div>
             </div>

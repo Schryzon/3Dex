@@ -3,14 +3,14 @@
 This is the *backend API* for 3Dēx.
 
 It handles:
-- Authentication & authorization (JWT, Roles)
-- Business logic (Orders, models, etc.)
-- Database access (Prisma)
-- Advanced Search & Filtering (Catalog)
-- Social Features (Reviews, Wishlists)
-- Analytics (Artist Dashboard)
-- File Storage (MinIO/S3 Presigned URLs)
-- API endpoints for frontend
+- ✅ Authentication & authorization (JWT, Secure Role Validations)
+- ✅ Core Business Logic (Orders, Model Uploads, Print Services)
+- ✅ Database Queries (Complex Prisma aggregations & indexing)
+- ✅ Advanced Search & Filtering (Catalog sorting strategies)
+- ✅ Social & Community Features (Posts, Likes, Comments, NSFW flags)
+- ✅ Analytics Engine (Stats aggregation for Artists/Providers)
+- ✅ File Storage Integrations (MinIO/S3 Presigned Uploads & Downloads)
+- ✅ Admin & Moderation Operations (Approve/Reject Content, Reports)
 
 ---
 

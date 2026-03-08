@@ -6,16 +6,17 @@ This repository contains *both frontend and backend* for the platform.
 
 ---
 
-## ✨ Features (MVP)
-- User authentication (Client / Seller)
-- 3D services marketplace
-- Asset marketplace with **Advanced Search & Filtering**
-- **Reviews & Ratings**
-- **Wishlists**
-- **Artist Analytics Dashboard**
-- **Secure File Storage (MinIO/S3)**
-- Client‑side 3D previews
-- Order & workflow management
+## ✨ Features (MVP - Completed!)
+- ✅ **Authentication & Authorization** (Secure JWT + Role-based Access)
+- ✅ **Interactive 3D Services Marketplace** (Providers & Print Services)
+- ✅ **Digital Asset Marketplace** (Models, Textures, HDRIs) with Advanced Search 
+- ✅ **Community Feed & Interactions** (Posts, Likes, Comments, NSFW Filters)
+- ✅ **User Profiles & Collections** (Wishlists, Libraries, Order History)
+- ✅ **Artist & Provider Analytics Dashboards**
+- ✅ **Secure File Storage** (MinIO/S3 Presigned URLs)
+- ✅ **Client-Side 3D Previews** (Interactive canvas)
+- ✅ **Order Management & Payment Integration** (Midtrans Simulation)
+- ✅ **Admin Moderation Interface** (User approvals, Model approvals, Content Flags)
 
 ---
 

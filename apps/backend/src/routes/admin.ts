@@ -8,6 +8,11 @@ import {
     reject_user,
     trigger_stats_aggregation
 } from "../controllers/admin.controller";
+import {
+    get_reports,
+    dismiss_report,
+    delete_reported_content
+} from "../controllers/report.controller";
 import { require_auth } from "../middlewares/auth.middleware";
 import { require_admin } from "../middlewares/role.middleware";
 
@@ -169,5 +174,69 @@ router.post("/users/:id/reject", require_auth, require_admin, reject_user);
  *         description: Stats aggregated
  */
 router.post("/stats/trigger", require_auth, require_admin, trigger_stats_aggregation);
+
+// Report Management
+/**
+ * @openapi
+ * /admin/reports:
+ *   get:
+ *     summary: Get aggregated reports
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of aggregated reports
+ */
+router.get("/reports", require_auth, require_admin, get_reports);
+
+/**
+ * @openapi
+ * /admin/reports/{id}/dismiss:
+ *   post:
+ *     summary: Dismiss all reports for a specific target id
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Reports dismissed
+ */
+router.post("/reports/:id/dismiss", require_auth, require_admin, dismiss_report);
+
+/**
+ * @openapi
+ * /admin/reports/{type}/{id}/delete:
+ *   delete:
+ *     summary: Delete reported content and mark reports as reviewed
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: type
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [MODEL, POST, COMMENT]
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Content deleted
+ */
+router.delete("/reports/:type/:id/delete", require_auth, require_admin, delete_reported_content);
 
 export default router;

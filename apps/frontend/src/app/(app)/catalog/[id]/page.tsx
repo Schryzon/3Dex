@@ -5,7 +5,7 @@ import { useProduct } from '@/lib/hooks/useProducts';
 import { useCart } from '@/lib/hooks/useCart';
 import { useWishlist } from '@/lib/hooks/useWishlist';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { Share2, Heart, Plus, Check, Download, Eye, ShoppingCart, FolderPlus } from 'lucide-react';
+import { Share2, Heart, Plus, Check, Download, Eye, ShoppingCart, FolderPlus, AlertTriangle } from 'lucide-react';
 import { Suspense, lazy, useState } from 'react';
 import Link from 'next/link';
 import ProductDetails from '@/components/catalog/ProductDetails';
@@ -26,7 +26,7 @@ export default function CatalogDetailPage() {
 
     const { data: product, isLoading, error } = useProduct(productId);
     const { addToCart, isAddingToCart } = useCart();
-    const { isAuthenticated, showLogin } = useAuth();
+    const { isAuthenticated, showLogin, user } = useAuth();
     const { isInWishlist, toggle: toggleWishlist, isToggling } = useWishlist();
     const [addedLocally, setAddedLocally] = useState(false);
     const [selectedImage, setSelectedImage] = useState(0);
@@ -232,21 +232,30 @@ export default function CatalogDetailPage() {
                             </div>
 
                             {/* Content */}
-                            <div className="w-full h-full">
+                            <div className="w-full h-full relative overflow-hidden">
                                 {selectedImage === -1 ? (
                                     <Suspense fallback={
                                         <div className="w-full h-full flex items-center justify-center">
                                             <div className="w-8 h-8 border-2 border-yellow-500/20 border-t-yellow-500 rounded-full animate-spin" />
                                         </div>
                                     }>
-                                        <ProductViewer3D modelUrl={product.modelFileUrl} />
+                                        <div className={`w-full h-full ${product.is_nsfw && !user?.show_nsfw ? 'blur-2xl pointer-events-none' : ''}`}>
+                                            <ProductViewer3D modelUrl={product.modelFileUrl} />
+                                        </div>
                                     </Suspense>
                                 ) : (
                                     <img
                                         src={product.thumbnails?.[selectedImage] || product.thumbnails?.[0]}
                                         alt={product.title}
-                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                        className={`w-full h-full object-cover transition-transform duration-700 ${product.is_nsfw && !user?.show_nsfw ? 'blur-2xl scale-110' : 'group-hover:scale-105'}`}
                                     />
+                                )}
+                                {product.is_nsfw && !user?.show_nsfw && (
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 text-white z-10 pointer-events-none backdrop-blur-sm">
+                                        <AlertTriangle className="w-12 h-12 text-red-500 mb-2 opacity-80 shadow-black drop-shadow-lg" />
+                                        <p className="font-bold tracking-wide shadow-black drop-shadow-md pb-1 text-lg">Mature Content</p>
+                                        <p className="text-sm font-semibold text-gray-300 shadow-black drop-shadow-md">Show NSFW content in settings to view</p>
+                                    </div>
                                 )}
                             </div>
                         </div>

@@ -130,10 +130,7 @@ export default function AppTopbar({
                         <Heart className="w-4 h-4" />
                         <span className="text-sm">Saved</span>
                       </Link>
-                      <Link href="/settings" className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors">
-                        <Settings className="w-4 h-4" />
-                        <span className="text-sm">Settings</span>
-                      </Link>
+
                     </div>
                     <div className="border-t border-white/[0.06] py-1">
                       <button

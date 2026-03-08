@@ -7,8 +7,12 @@ const is_production = process.env.NODE_ENV === "production";
 // Initialize Snap Client
 const snap = new midtransClient.Snap({
     isProduction: is_production,
-    serverKey: is_production ? process.env.PROD_MIDTRANS_SERVER_KEY : process.env.SB_MIDTRANS_SERVER_KEY,
-    clientKey: is_production ? process.env.PROD_MIDTRANS_CLIENT_KEY : process.env.SB_MIDTRANS_CLIENT_KEY,
+    serverKey: is_production
+        ? (process.env.PROD_MIDTRANS_SERVER_KEY || process.env.MIDTRANS_SERVER_KEY || '')
+        : (process.env.SB_MIDTRANS_SERVER_KEY || process.env.MIDTRANS_SERVER_KEY || ''),
+    clientKey: is_production
+        ? (process.env.PROD_MIDTRANS_CLIENT_KEY || process.env.MIDTRANS_CLIENT_KEY || '')
+        : (process.env.SB_MIDTRANS_CLIENT_KEY || process.env.MIDTRANS_CLIENT_KEY || ''),
 });
 
 console.log("Snap Client Initialized:", {
@@ -65,7 +69,9 @@ export function verify_signature(
     gross_amount: string,
     signature_key: string
 ): boolean {
-    const server_key = process.env.MIDTRANS_SERVER_KEY || "";
+    const server_key = is_production
+        ? (process.env.PROD_MIDTRANS_SERVER_KEY || process.env.MIDTRANS_SERVER_KEY || "")
+        : (process.env.SB_MIDTRANS_SERVER_KEY || process.env.MIDTRANS_SERVER_KEY || "");
     const input = order_id + status_code + gross_amount + server_key;
     const signature = crypto.createHash("sha512").update(input).digest("hex");
 

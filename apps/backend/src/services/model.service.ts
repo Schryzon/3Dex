@@ -10,6 +10,7 @@ export async function create_model(data: {
   artist_id: string;
   category_id?: string;
   tags?: string[];
+  is_nsfw?: boolean;
 }) {
   const { tags, ...rest } = data;
 
@@ -38,6 +39,7 @@ export function get_all_models() {
       price: true,
       preview_url: true,
       gallery_urls: true,
+      is_nsfw: true,
       artist: {
         select: { username: true },
       },
@@ -57,6 +59,7 @@ export function get_model_by_id(model_id: string) {
       preview_url: true,
       gallery_urls: true,
       created_at: true,
+      is_nsfw: true,
       artist: {
         select: {
           id: true,

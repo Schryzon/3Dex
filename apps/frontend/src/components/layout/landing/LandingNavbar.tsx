@@ -17,22 +17,27 @@ import Image from 'next/image';
 
 const ROLE_MENU_ITEMS = {
   ADMIN: [
-    { icon: LayoutDashboard, label: 'Dashboard',  href: '/admin/dashboard' },
-    { icon: Users,           label: 'Users',       href: '/admin/users' },
-    { icon: FileText,        label: 'Models',      href: '/admin/models' },
-    { icon: BarChart3,       label: 'Reports',     href: '/admin/reports' },
+    { icon: LayoutDashboard, label: 'Dashboard', href: '/admin/dashboard' },
+    { icon: Users, label: 'Users', href: '/admin/users' },
+    { icon: FileText, label: 'Models', href: '/admin/models' },
+    { icon: BarChart3, label: 'Reports', href: '/admin/reports' },
   ],
   ARTIST: [
-    { icon: Upload,          label: 'Upload Asset', href: '/upload' },
-    { icon: FolderOpen,      label: 'Collections',  href: '/profile?tab=collections' },
-    { icon: Heart,           label: 'Saved Assets', href: '/saved' },
-    { icon: LayoutDashboard, label: 'My Uploads',   href: '/profile?tab=uploads' },
-    { icon: BarChart3,       label: 'Analytics',    href: '/artist/analytics' },
+    { icon: Upload, label: 'Upload Asset', href: '/upload' },
+    { icon: FolderOpen, label: 'Collections', href: '/profile?tab=collections' },
+    { icon: Heart, label: 'Saved Assets', href: '/saved' },
+    { icon: LayoutDashboard, label: 'My Uploads', href: '/profile?tab=uploads' },
+    { icon: BarChart3, label: 'Analytics', href: '/artist/analytics' },
+  ],
+  PROVIDER: [
+    { icon: LayoutDashboard, label: 'Dashboard', href: '/provider/dashboard' },
+    { icon: FolderOpen, label: 'Print Jobs', href: '/provider/jobs' },
+    { icon: Heart, label: 'Saved Assets', href: '/saved' },
   ],
   CUSTOMER: [
-    { icon: FolderOpen,   label: 'Collections', href: '/profile?tab=collections' },
-    { icon: Heart,        label: 'Saved Assets', href: '/saved' },
-    { icon: ShoppingCart, label: 'My Orders',   href: '/orders' },
+    { icon: FolderOpen, label: 'Collections', href: '/profile?tab=collections' },
+    { icon: Heart, label: 'Saved Assets', href: '/saved' },
+    { icon: ShoppingCart, label: 'My Orders', href: '/orders' },
   ],
 };
 
@@ -41,13 +46,13 @@ type MegaMenuType = '3d-models' | 'cg-models' | 'textures';
 const NAV_LABELS: Record<MegaMenuType, string> = {
   '3d-models': '3D Models',
   'cg-models': '3D Printer',
-  'textures':  'Textures',
+  'textures': 'Textures',
 };
 
 const MOBILE_NAV = [
-  { label: '3D Models',  href: '/catalog' },
+  { label: '3D Models', href: '/catalog' },
   { label: '3D Printer', href: '/cg-models' },
-  { label: 'Textures',   href: '/textures' },
+  { label: 'Textures', href: '/textures' },
 ];
 
 export default function LandingNavbar() {
@@ -55,10 +60,10 @@ export default function LandingNavbar() {
   const { showLogin, showRegister, isAuthenticated, user, logout } = useAuth();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen]     = useState(false);
-  const [megaMenuOpen, setMegaMenuOpen]     = useState<MegaMenuType | null>(null);
-  const [searchQuery, setSearchQuery]       = useState('');
-  const [mounted, setMounted]               = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [megaMenuOpen, setMegaMenuOpen] = useState<MegaMenuType | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [mounted, setMounted] = useState(false);
 
   const { items } = useCart();
   const cartItemCount = mounted ? items.length : 0;
@@ -69,7 +74,7 @@ export default function LandingNavbar() {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (megaMenuOpen && !target.closest('.mega-menu-container')) setMegaMenuOpen(null);
-      if (userMenuOpen && !target.closest('.user-menu-container'))  setUserMenuOpen(false);
+      if (userMenuOpen && !target.closest('.user-menu-container')) setUserMenuOpen(false);
     };
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
@@ -93,7 +98,7 @@ export default function LandingNavbar() {
     if (q) router.push(`/catalog?search=${encodeURIComponent(q)}`);
   }, [searchQuery, router]);
 
-  const roleMenuItems = ROLE_MENU_ITEMS[(user?.role as keyof typeof ROLE_MENU_ITEMS) || 'CUSTOMER'];
+  const roleMenuItems = ROLE_MENU_ITEMS[(user?.role as keyof typeof ROLE_MENU_ITEMS) || 'CUSTOMER'] || [];
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-md border-b border-gray-800">
@@ -220,14 +225,7 @@ export default function LandingNavbar() {
                       ))}
 
                       <div className="border-t border-gray-800 mt-1 pt-1">
-                        <ProtectedLink
-                          href="/profile/settings"
-                          className="flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:bg-gray-800/60 hover:text-white transition-colors cursor-pointer"
-                          onClick={() => setUserMenuOpen(false)}
-                        >
-                          <Settings className="w-4 h-4" />
-                          <span className="text-sm">Settings</span>
-                        </ProtectedLink>
+
                         <button
                           onClick={handleLogout}
                           className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:bg-gray-800/60 hover:text-white transition-colors cursor-pointer"

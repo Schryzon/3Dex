@@ -41,7 +41,8 @@ export async function update_profile(req: Auth_Request, res: Response): Promise<
         social_behance,
         addresses, // Json[]
         provider_config, // Json
-        avatar_url
+        avatar_url,
+        show_nsfw
     } = req.body;
 
     // Validate addresses if provided? (Basic structure check logic could be here)
@@ -59,7 +60,8 @@ export async function update_profile(req: Auth_Request, res: Response): Promise<
             social_behance,
             addresses: addresses ? addresses : undefined,
             provider_config: provider_config ? provider_config : undefined,
-            avatar_url
+            avatar_url,
+            show_nsfw: show_nsfw !== undefined ? !!show_nsfw : undefined
         }
     });
 

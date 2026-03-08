@@ -1,8 +1,7 @@
 'use client';
-
 import { useProducts, useDeleteProduct } from '@/lib/hooks/useProducts';
 import Link from 'next/link';
-import { Box, Upload, EllipsisVertical, Trash2, Pencil } from 'lucide-react';
+import { Box, Upload, EllipsisVertical, Trash2, Pencil, AlertTriangle } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import EditModelModal from './EditModelModal';
@@ -99,11 +98,22 @@ export default function ModelGrid({ artistId, showUpload = false }: ModelGridPro
                         {/* ── Thumbnail ── */}
                         <Link href={`/catalog/${model.id}`} className="block relative overflow-hidden aspect-[4/3] bg-gray-900 flex-shrink-0">
                             {model.thumbnails[0] ? (
-                                <img
-                                    src={model.thumbnails[0]}
-                                    alt={model.title}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                />
+                                <>
+                                    <img
+                                        src={model.thumbnails[0]}
+                                        alt={model.title}
+                                        className={`w-full h-full object-cover transition-transform duration-500 ${model.is_nsfw && !currentUser?.show_nsfw
+                                            ? 'blur-2xl scale-125'
+                                            : 'group-hover:scale-105'
+                                            }`}
+                                    />
+                                    {model.is_nsfw && !currentUser?.show_nsfw && (
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 text-white z-10 pointer-events-none">
+                                            <AlertTriangle className="w-10 h-10 text-red-500 mb-2 opacity-80 drop-shadow-lg" />
+                                            <p className="font-bold text-sm tracking-wide drop-shadow-md">NSFW</p>
+                                        </div>
+                                    )}
+                                </>
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-gray-700">
                                     <Box className="w-12 h-12" />

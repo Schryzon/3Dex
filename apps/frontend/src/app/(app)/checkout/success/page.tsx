@@ -3,9 +3,9 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle, Download, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui';
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 
-export default function CheckoutSuccessPage() {
+function SuccessContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const orderId = searchParams.get('order');
@@ -61,5 +61,13 @@ export default function CheckoutSuccessPage() {
                 </p>
             </div>
         </div>
+    );
+}
+
+export default function CheckoutSuccessPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-black" />}>
+            <SuccessContent />
+        </Suspense>
     );
 }

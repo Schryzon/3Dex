@@ -13,6 +13,7 @@ export interface Post {
     };
     like_count: number;
     comment_count: number;
+    is_nsfw?: boolean;
     is_liked?: boolean;
     created_at: string;
     _count?: {
@@ -26,7 +27,7 @@ export const postService = {
         return apiClient.get<Post[]>(`/posts/feed?page=${page}&limit=${limit}`);
     },
 
-    async createPost(data: { caption: string; media_urls: string[] }): Promise<Post> {
+    async createPost(data: { caption: string; media_urls: string[]; is_nsfw?: boolean }): Promise<Post> {
         return apiClient.post<Post>('/posts', data);
     },
 

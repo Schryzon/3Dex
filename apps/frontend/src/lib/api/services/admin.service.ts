@@ -38,5 +38,21 @@ export const adminService = {
     triggerStatsAggregation: async () => {
         const response = await api.post('/admin/stats/trigger');
         return response.data;
+    },
+
+    // Reports
+    getAggregatedReports: async () => {
+        const response = await api.get<{ data: any[] }>('/admin/reports');
+        return response.data.data;
+    },
+
+    dismissReports: async (targetId: string) => {
+        const response = await api.post(`/admin/reports/${targetId}/dismiss`);
+        return response.data;
+    },
+
+    deleteReportedContent: async (targetType: string, targetId: string) => {
+        const response = await api.delete(`/admin/reports/${targetType}/${targetId}/delete`);
+        return response.data;
     }
 };

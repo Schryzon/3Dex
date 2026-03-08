@@ -5,7 +5,7 @@ import { api } from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { FileText, Users, ArrowRight, ShieldCheck, Clock } from 'lucide-react';
+import { FileText, Users, ArrowRight, ShieldCheck, Clock, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminDashboardPage() {
@@ -32,6 +32,15 @@ export default function AdminDashboardPage() {
         queryFn: async () => {
             const res = await api.get('/admin/users/status?status=PENDING');
             return res.data;
+        },
+        enabled: user?.role === 'ADMIN',
+    });
+
+    const { data: aggregatedReports } = useQuery({
+        queryKey: ['admin-reports'],
+        queryFn: async () => {
+            const res = await api.get('/admin/reports');
+            return res.data.data;
         },
         enabled: user?.role === 'ADMIN',
     });
@@ -63,6 +72,15 @@ export default function AdminDashboardPage() {
             href: '/admin/users',
             description: 'User applications to review'
         },
+        {
+            label: 'Content Reports',
+            value: aggregatedReports?.length ?? '—',
+            icon: AlertCircle,
+            color: 'text-red-400',
+            bg: 'bg-red-400/10',
+            href: '/admin/reports',
+            description: 'User-flagged content awaiting moderation'
+        },
     ];
 
     return (
@@ -81,7 +99,7 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 {stats.map((stat) => (
                     <Link
                         key={stat.label}
@@ -107,7 +125,7 @@ export default function AdminDashboardPage() {
                     <Clock className="w-5 h-5 text-yellow-400" />
                     <h3 className="font-bold text-white">Quick Actions</h3>
                 </div>
-                <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <Link
                         href="/admin/models"
                         className="flex items-center gap-4 p-4 bg-black/20 rounded-xl border border-gray-800 hover:border-yellow-400/30 hover:bg-yellow-400/5 transition-all group"
@@ -133,6 +151,19 @@ export default function AdminDashboardPage() {
                             <p className="text-gray-500 text-xs">Approve or reject user applications</p>
                         </div>
                         <ArrowRight className="w-4 h-4 text-gray-600 group-hover:text-blue-400 ml-auto transition-colors" />
+                    </Link>
+                    <Link
+                        href="/admin/reports"
+                        className="flex items-center gap-4 p-4 bg-black/20 rounded-xl border border-gray-800 hover:border-red-400/30 hover:bg-red-400/5 transition-all group"
+                    >
+                        <div className="p-2 bg-red-400/10 rounded-lg">
+                            <AlertCircle className="w-5 h-5 text-red-400" />
+                        </div>
+                        <div>
+                            <p className="text-white font-semibold text-sm">Moderate Content</p>
+                            <p className="text-gray-500 text-xs">Review user reports and remove violations</p>
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-gray-600 group-hover:text-red-400 ml-auto transition-colors" />
                     </Link>
                 </div>
             </div>

@@ -68,6 +68,7 @@ model User {
   // Security
   two_factor_enabled Boolean @default(false)
   last_login_at      DateTime?
+  show_nsfw          Boolean @default(false)
   
   models        Model[]        @relation("artist_models")
   purchases     Purchase[]
@@ -84,6 +85,7 @@ model User {
   
   received_reviews User_Review[] @relation("received_reviews")
   given_reviews    User_Review[] @relation("given_reviews")
+  reports_given    Report[]
 
   followers     Follow[]       @relation("following")
   following     Follow[]       @relation("follower")
@@ -104,6 +106,7 @@ model Model {
   gallery_urls String[]
   
   status      ModelStatus @default(PENDING)
+  is_nsfw     Boolean     @default(false)
 
   artist_id String
   artist    User   @relation("artist_models", fields: [artist_id], references: [id])
@@ -333,6 +336,8 @@ model Post {
   caption    String?
   media_urls String[] // Array of URLs
 
+  is_nsfw    Boolean @default(false)
+
   like_count    Int @default(0)
   comment_count Int @default(0)
 
@@ -429,5 +434,36 @@ model CollectionItem {
   added_at      DateTime   @default(now())
 
   @@unique([collection_id, model_id])
+}
+
+enum Report_Target {
+  MODEL
+  POST
+  COMMENT
+}
+
+enum Report_Status {
+  PENDING
+  REVIEWED
+  DISMISSED
+}
+
+model Report {
+  id String @id @default(uuid())
+
+  reporter_id String
+  reporter    User   @relation(fields: [reporter_id], references: [id])
+
+  target_type Report_Target
+  
+  model_id   String?
+  post_id    String?
+  comment_id String?
+
+  reason String
+
+  status Report_Status @default(PENDING)
+
+  created_at DateTime @default(now())
 }
 

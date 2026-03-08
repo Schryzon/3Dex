@@ -193,7 +193,7 @@ export async function get_model_detail(req: Request, res: Response) {
 
 
 export async function upload_model(req: Request, res: Response) {
-  const { title, description, price, file_url, preview_url, gallery_urls, artist_id, category, tags } =
+  const { title, description, price, file_url, preview_url, gallery_urls, artist_id, category, tags, is_nsfw } =
     req.body;
 
   if (!title || price === undefined || !file_url || !artist_id) {
@@ -219,7 +219,8 @@ export async function upload_model(req: Request, res: Response) {
       gallery_urls: Array.isArray(gallery_urls) ? gallery_urls : undefined,
       artist_id,
       category_id,
-      tags: Array.isArray(tags) ? tags : undefined
+      tags: Array.isArray(tags) ? tags : undefined,
+      is_nsfw: !!is_nsfw
     });
 
     res.status(201).json(model);

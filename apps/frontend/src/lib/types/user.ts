@@ -44,6 +44,7 @@ export interface User {
     social_artstation?: string;
     social_behance?: string;
     two_factor_enabled?: boolean;
+    show_nsfw?: boolean;
     _count?: {
         followers: number;
         following: number;

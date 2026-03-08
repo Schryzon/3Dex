@@ -7,10 +7,10 @@ import prisma from "../prisma";
  */
 export async function create_post(req: Auth_Request, res: Response): Promise<void> {
     const { id, role } = req.user;
-    const { caption, media_urls } = req.body;
+    const { caption, media_urls, is_nsfw } = req.body;
 
-    // 1. Restrict posting to non-customers
-    if (!['ARTIST', 'PROVIDER', 'ADMIN'].includes(role)) {
+    // 1. Restrict posting to non-customers and non-admins
+    if (!['ARTIST', 'PROVIDER'].includes(role)) {
         res.status(403).json({ message: "Only Artists and Providers can post!" });
         return;
     }
@@ -24,7 +24,8 @@ export async function create_post(req: Auth_Request, res: Response): Promise<voi
         data: {
             user_id: id,
             caption,
-            media_urls
+            media_urls,
+            is_nsfw: !!is_nsfw
         },
         include: {
             user: { select: { id: true, username: true, display_name: true, avatar_url: true, role: true } }
@@ -183,10 +184,10 @@ export async function get_comments(req: Auth_Request, res: Response): Promise<vo
 }
 
 /**
- * Delete a post (Owner only)
+ * Delete a post (Owner and Admin)
  */
 export async function delete_post(req: Auth_Request, res: Response): Promise<void> {
-    const { id: user_id } = req.user;
+    const { id: user_id, role } = req.user;
     const post_id = req.params.post_id as string;
 
     const post = await prisma.post.findUnique({ where: { id: post_id } });
@@ -196,7 +197,7 @@ export async function delete_post(req: Auth_Request, res: Response): Promise<voi
         return;
     }
 
-    if (post.user_id !== user_id) {
+    if (post.user_id !== user_id && role !== 'ADMIN') {
         res.status(403).json({ message: "Not authorized!" });
         return;
     }

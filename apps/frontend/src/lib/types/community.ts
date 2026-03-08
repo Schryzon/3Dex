@@ -13,6 +13,7 @@ export interface Post {
     like_count: number;
     comment_count: number;
     created_at: string;
+    is_nsfw?: boolean;
     liked_by_me?: boolean;
 }
 

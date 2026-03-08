@@ -129,7 +129,7 @@ export default function LandingFooter() {
       <div className="border-t border-gray-800 bg-black">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <p className="text-gray-400 text-sm text-center">
-            © 2024 3Dēx. All rights reserved.
+            © 2026 3Dēx. All rights reserved.
           </p>
         </div>
       </div>

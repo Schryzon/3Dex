@@ -5,17 +5,20 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { postService } from '@/lib/api/services';
 import { useAuth } from '@/lib/hooks/useAuth';
 import UserAvatar from '@/components/common/UserAvatar';
-import { Loader2, Heart, MessageSquare, Send, Image as ImageIcon } from 'lucide-react';
+import { Loader2, Heart, MessageSquare, Send, Image as ImageIcon, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
+import PostComments from '@/components/community/PostComments';
 
 export default function CommunityPage() {
     const { user } = useAuth();
     const queryClient = useQueryClient();
+    const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
 
     // New Post State
     const [caption, setCaption] = useState('');
     const [mediaUrl, setMediaUrl] = useState('');
+    const [isNsfw, setIsNsfw] = useState(false);
 
     const { data: posts, isLoading } = useQuery({
         queryKey: ['community-feed'],
@@ -25,12 +28,14 @@ export default function CommunityPage() {
     const createPostMutation = useMutation({
         mutationFn: () => postService.createPost({
             caption,
-            media_urls: [mediaUrl]
+            media_urls: [mediaUrl],
+            is_nsfw: isNsfw
         }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['community-feed'] });
             setCaption('');
             setMediaUrl('');
+            setIsNsfw(false);
         },
         onError: (err: any) => {
             alert(err.response?.data?.message || 'Failed to post');
@@ -44,7 +49,7 @@ export default function CommunityPage() {
         }
     });
 
-    const canPost = user?.role === 'ARTIST' || user?.role === 'PROVIDER' || user?.role === 'ADMIN';
+    const canPost = user?.role === 'ARTIST' || user?.role === 'PROVIDER';
 
     return (
         <div className="min-h-screen bg-[#0a0a0a] pt-24 pb-12 px-4">
@@ -84,7 +89,7 @@ export default function CommunityPage() {
                                     </div>
                                 )}
                                 <div className="flex justify-between items-center pt-2 border-t border-gray-800">
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-4 items-center">
                                         <button
                                             onClick={() => {
                                                 const url = prompt('Enter image URL:');
@@ -94,6 +99,10 @@ export default function CommunityPage() {
                                         >
                                             <ImageIcon className="w-5 h-5" />
                                         </button>
+                                        <label className="flex items-center gap-2 cursor-pointer text-gray-400 hover:text-white transition-colors">
+                                            <input type="checkbox" checked={isNsfw} onChange={(e) => setIsNsfw(e.target.checked)} className="rounded border-gray-700 bg-gray-900 text-red-500 focus:ring-red-500 focus:ring-offset-gray-900" />
+                                            <span className="text-sm font-medium">NSFW Content</span>
+                                        </label>
                                     </div>
                                     <button
                                         onClick={() => createPostMutation.mutate()}
@@ -143,8 +152,18 @@ export default function CommunityPage() {
 
                                 {/* Media */}
                                 {post.media_urls.length > 0 && (
-                                    <div className="w-full aspect-video bg-gray-900 overflow-hidden">
-                                        <img src={post.media_urls[0]} alt="Post content" className="w-full h-full object-cover" />
+                                    <div className="relative w-full aspect-video bg-gray-900 overflow-hidden">
+                                        <img
+                                            src={post.media_urls[0]}
+                                            alt="Post content"
+                                            className={`w-full h-full object-cover ${post.is_nsfw && !user?.show_nsfw ? 'blur-2xl scale-110' : ''}`}
+                                        />
+                                        {post.is_nsfw && !user?.show_nsfw && (
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 text-white z-10 pointer-events-none">
+                                                <AlertTriangle className="w-12 h-12 text-red-500 mb-2 opacity-80 drop-shadow-lg" />
+                                                <p className="font-bold tracking-wide drop-shadow-md">NSFW Content</p>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
@@ -162,11 +181,18 @@ export default function CommunityPage() {
                                             <Heart className={`w-5 h-5 ${post.is_liked ? 'fill-current' : ''}`} />
                                             <span>{post.like_count ?? post._count?.likes ?? 0}</span>
                                         </button>
-                                        <button className="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white transition-colors">
+                                        <button
+                                            onClick={() => setOpenComments(prev => ({ ...prev, [post.id]: !prev[post.id] }))}
+                                            className={`flex items-center gap-2 text-sm font-medium transition-colors ${openComments[post.id] ? 'text-yellow-400' : 'text-gray-400 hover:text-white'}`}
+                                        >
                                             <MessageSquare className="w-5 h-5" />
                                             <span>{post.comment_count ?? post._count?.comments ?? 0}</span>
                                         </button>
                                     </div>
+
+                                    {openComments[post.id] && (
+                                        <PostComments postId={post.id} />
+                                    )}
                                 </div>
                             </div>
                         ))}

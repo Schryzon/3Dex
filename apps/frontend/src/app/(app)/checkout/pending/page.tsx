@@ -3,8 +3,9 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Clock, RefreshCw, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui';
+import { Suspense } from 'react';
 
-export default function CheckoutPendingPage() {
+function PendingContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const orderId = searchParams.get('order');
@@ -57,5 +58,13 @@ export default function CheckoutPendingPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function CheckoutPendingPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-black" />}>
+            <PendingContent />
+        </Suspense>
     );
 }

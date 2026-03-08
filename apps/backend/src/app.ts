@@ -24,6 +24,7 @@ import cart_routes from "./routes/cart";
 import notification_routes from "./routes/notification";
 import follow_routes from "./routes/follow";
 import collection_routes from "./routes/collections";
+import report_routes from "./routes/reports";
 
 // Initialize Backend
 const app = express();
@@ -60,6 +61,7 @@ app.use("/purchases", purchase_routes);
 app.use("/cart", cart_routes);
 app.use("/notifications", notification_routes);
 app.use("/collections", collection_routes);
+app.use("/reports", report_routes);
 
 // 404 Handler - Return JSON instead of HTML
 app.use((req, res) => {

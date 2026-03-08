@@ -26,7 +26,8 @@ export default function UploadPage() {
         tags: '',
         price: '0',
         isFree: true,
-        license: 'royalty-free'
+        license: 'royalty-free',
+        isNsfw: false
     });
 
     const isStep1Valid = modelFile !== null && galleryFiles.length > 0;
@@ -105,7 +106,8 @@ export default function UploadPage() {
                 artist_id: user.id, // Explicitly sending artist_id as required by backend
                 category: formData.category,
                 tags: formData.tags.split(',').map(t => t.trim()),
-                license: formData.license
+                license: formData.license,
+                is_nsfw: formData.isNsfw
             });
 
             // Success
@@ -256,6 +258,20 @@ export default function UploadPage() {
                                             onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
                                         />
                                     </div>
+                                </div>
+
+                                <div className="flex items-center gap-3 p-4 bg-gray-900/50 border border-gray-800 rounded-xl">
+                                    <input
+                                        type="checkbox"
+                                        id="nsfw-checkbox"
+                                        checked={formData.isNsfw}
+                                        onChange={(e) => setFormData({ ...formData, isNsfw: e.target.checked })}
+                                        className="w-5 h-5 rounded border-gray-700 bg-black text-red-500 focus:ring-red-500 focus:ring-offset-gray-900 cursor-pointer"
+                                    />
+                                    <label htmlFor="nsfw-checkbox" className="text-sm font-medium text-gray-300 flex items-center cursor-pointer">
+                                        Mature Content (NSFW)
+                                        <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded ml-2">Applies blur filter</span>
+                                    </label>
                                 </div>
                             </div>
 

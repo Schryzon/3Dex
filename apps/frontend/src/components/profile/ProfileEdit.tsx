@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { User, Wallet, FolderOpen, Download, TrendingUp, Upload, FileText, Settings, Camera, X } from 'lucide-react';
+import Link from 'next/link';
 
 type ProfileSection = 'wallet' | 'collections' | 'download' | 'consumption' | 'upload' | 'upload-records' | 'account' | 'edit';
 
@@ -82,7 +83,7 @@ export default function ProfileEditPage({ onNavigate }: ProfileEditPageProps) {
           <div className="flex items-center gap-8">
             <div className="text-2xl font-bold text-yellow-400">ReleBook</div>
             <nav className="hidden md:flex items-center gap-6">
-              <a href="#" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+              <Link href="/models" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
                 <div className="w-5 h-5">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M12 2L2 7l10 5 10-5-10-5z" />
@@ -91,8 +92,8 @@ export default function ProfileEditPage({ onNavigate }: ProfileEditPageProps) {
                   </svg>
                 </div>
                 3D Models
-              </a>
-              <a href="#" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+              </Link>
+              <Link href="/models?category=cg" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
                 <div className="w-5 h-5">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <rect x="2" y="3" width="20" height="14" rx="2" />
@@ -101,8 +102,8 @@ export default function ProfileEditPage({ onNavigate }: ProfileEditPageProps) {
                   </svg>
                 </div>
                 CG Models
-              </a>
-              <a href="#" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+              </Link>
+              <Link href="/textures" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
                 <div className="w-5 h-5">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -111,7 +112,7 @@ export default function ProfileEditPage({ onNavigate }: ProfileEditPageProps) {
                   </svg>
                 </div>
                 Textures
-              </a>
+              </Link>
             </nav>
           </div>
           <div className="flex items-center gap-4">
@@ -164,8 +165,8 @@ export default function ProfileEditPage({ onNavigate }: ProfileEditPageProps) {
                     key={item.id}
                     onClick={() => onNavigate?.(item.id as ProfileSection)}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${item.active
-                        ? 'bg-gray-800 text-white'
-                        : 'text-gray-400 hover:bg-gray-800/50 hover:text-white'
+                      ? 'bg-gray-800 text-white'
+                      : 'text-gray-400 hover:bg-gray-800/50 hover:text-white'
                       }`}
                   >
                     <Icon className="w-5 h-5" />
