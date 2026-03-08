@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { ChevronDown, LayoutGrid, List } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import CatalogProductCard from '@/components/catalog/CatalogProductCard';
 import CatalogFilters, { FilterState } from '@/components/catalog/CatalogFilters';
 import { Skeleton } from '@/components/common/Loading';
@@ -31,6 +31,8 @@ const CATEGORIES = [
 
 export default function CatalogPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const searchQuery = searchParams.get('search') || '';
     const { isAuthenticated, showLogin } = useAuth();
     const { isInWishlist, toggle: toggleWishlist } = useWishlist();
     const [activeCategory, setActiveCategory] = useState('all');
@@ -49,6 +51,7 @@ export default function CatalogPage() {
         format: filters.formats.length > 0 ? filters.formats : undefined,
         sort: sortBy,
         limit: 20,
+        search: searchQuery || undefined,
     };
 
     // Fetch products from API using Infinite Query

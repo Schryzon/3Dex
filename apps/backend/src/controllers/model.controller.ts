@@ -49,11 +49,24 @@ export async function list_models(req: Request, res: Response) {
     }
   }
 
-  // 2. Search (Title or Description)
+  // 2. Search (Title, Description, Tags, or Category)
   if (search) {
+    const searchStr = String(search);
     where.OR = [
-      { title: { contains: String(search), mode: 'insensitive' } },
-      { description: { contains: String(search), mode: 'insensitive' } }
+      { title: { contains: searchStr, mode: 'insensitive' } },
+      { description: { contains: searchStr, mode: 'insensitive' } },
+      {
+        tags: {
+          some: {
+            name: { contains: searchStr, mode: 'insensitive' }
+          }
+        }
+      },
+      {
+        category: {
+          name: { contains: searchStr, mode: 'insensitive' }
+        }
+      }
     ];
   }
 
@@ -93,19 +106,40 @@ export async function list_models(req: Request, res: Response) {
   const skip = (Number(page) - 1) * take;
 
   try {
-    const raw_models = await prisma.model.findMany({
-      where,
-      orderBy,
-      take,
-      skip,
-      include: {
-        artist: {
-          select: { username: true, id: true, avatar_url: true }
-        },
-        category: true,
-        tags: true
-      }
-    });
+    let raw_models;
+    if (search) {
+      const searchStr = `%${String(search)}%`;
+      // Use raw SQL for better performance/flexibility with ILIKE across multiple fields
+      // or stick to Prisma if we want to keep it simple.
+      // Given pg_trgm is enabled, we could use % but Prisma's contains already does this.
+      raw_models = await prisma.model.findMany({
+        where,
+        orderBy,
+        take,
+        skip,
+        include: {
+          artist: {
+            select: { username: true, id: true, avatar_url: true }
+          },
+          category: true,
+          tags: true
+        }
+      });
+    } else {
+      raw_models = await prisma.model.findMany({
+        where,
+        orderBy,
+        take,
+        skip,
+        include: {
+          artist: {
+            select: { username: true, id: true, avatar_url: true }
+          },
+          category: true,
+          tags: true
+        }
+      });
+    }
 
     // Helper to sign URLs
     const sign_model = async (m: any) => {
