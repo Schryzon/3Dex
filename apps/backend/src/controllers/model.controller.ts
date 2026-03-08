@@ -18,6 +18,8 @@ export async function list_models(req: Request, res: Response) {
     max_price,
     artist_id,
     category_id,
+    format,
+    types,
     exclude_id,
     sort,
     status, // 'APPROVED' | 'PENDING' | 'REJECTED' | 'ALL'
@@ -87,7 +89,33 @@ export async function list_models(req: Request, res: Response) {
     where.category_id = String(category_id);
   }
 
-  // 6. Exclusion (for Related Products)
+  // 6. Format Filter (Tags)
+  if (format) {
+    const formats = Array.isArray(format) ? format : [String(format)];
+    if (!where.AND) where.AND = [];
+    where.AND.push({
+      tags: {
+        some: {
+          name: { in: formats, mode: 'insensitive' }
+        }
+      }
+    });
+  }
+
+  // 7. Types Filter (Tags)
+  if (types) {
+    const typeList = Array.isArray(types) ? types : [String(types)];
+    if (!where.AND) where.AND = [];
+    where.AND.push({
+      tags: {
+        some: {
+          name: { in: typeList, mode: 'insensitive' }
+        }
+      }
+    });
+  }
+
+  // 8. Exclusion (for Related Products)
   if (exclude_id) {
     where.id = { not: String(exclude_id) };
   }

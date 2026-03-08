@@ -52,6 +52,10 @@ export default function CatalogPage() {
         sort: sortBy,
         limit: 20,
         search: searchQuery || undefined,
+        minPrice: filters.price === 'paid' ? 1 : undefined,
+        maxPrice: filters.price === 'free' ? 0 : undefined,
+        // Using 'tags' or 'types' - the backend list_models needs to support this
+        types: filters.types.length > 0 ? filters.types : undefined,
     };
 
     // Fetch products from API using Infinite Query

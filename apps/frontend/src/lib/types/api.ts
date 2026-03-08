@@ -49,6 +49,7 @@ export interface ModelFilters {
     minPrice?: number;
     maxPrice?: number;
     format?: string[];
+    types?: string[];
     isPrintable?: boolean;
     sort?: string;
     artistId?: string;
