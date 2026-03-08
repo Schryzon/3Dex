@@ -108,15 +108,27 @@ export default function LandingNavbar() {
 
           {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-6">
-            {MOBILE_NAV.map(({ label, href }) => (
-              <Link
-                key={href}
-                href={href}
-                className="text-gray-300 hover:text-white transition-colors cursor-pointer font-medium"
-              >
-                {label}
-              </Link>
-            ))}
+            <Link
+              href="/catalog"
+              className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors cursor-pointer"
+            >
+              <span className="text-gray-500">○</span>
+              <span>3D Models</span>
+            </Link>
+            <Link
+              href="/cg-models"
+              className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors cursor-pointer"
+            >
+              <span className="text-gray-500">○</span>
+              <span>3D Printer</span>
+            </Link>
+            <Link
+              href="/textures"
+              className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors cursor-pointer"
+            >
+              <span className="text-gray-500">○</span>
+              <span>Textures</span>
+            </Link>
           </div>
 
           {/* Search Bar */}

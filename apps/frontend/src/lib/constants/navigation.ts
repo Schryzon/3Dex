@@ -51,13 +51,14 @@ export const SIDEBAR_ADMIN: NavItem[] = [
     { id: 'admin-dash', label: 'Dashboard', icon: LayoutDashboard, href: '/admin/dashboard' },
     { id: 'users', label: 'Users', icon: Users, href: '/admin/users' },
     { id: 'models', label: 'Models', icon: FileText, href: '/admin/models' },
-    { id: 'reports', label: 'Reports', icon: BarChart3, href: '/admin/reports' },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3, href: '/admin/analytics' },
 ];
 
 export const SIDEBAR_PROVIDER: NavItem[] = [
     { id: 'service-mgmt', label: 'My Printing Service', icon: Printer, href: '/profile?tab=service' },
     { id: 'print-jobs', label: 'Active Jobs', icon: Box, href: '/profile?tab=jobs' },
     { id: 'workshop', label: 'Workshop Setup', icon: Settings2, href: '/profile?tab=workshop' },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3, href: '/provider/analytics' },
 ];
 
 export const SIDEBAR_BOTTOM: NavItem[] = [
