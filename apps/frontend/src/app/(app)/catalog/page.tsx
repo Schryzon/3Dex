@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { ChevronDown, LayoutGrid, List, ShoppingBag } from 'lucide-react';
+import { ChevronDown, LayoutGrid, List, ShoppingCart } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import CatalogProductCard from '@/components/catalog/CatalogProductCard';
 import CatalogFilters, { FilterState } from '@/components/catalog/CatalogFilters';
@@ -296,14 +296,21 @@ export default function CatalogPage() {
 
             {/* Empty State */}
             {!isLoading && !error && products.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-20 px-4 animate-in fade-in zoom-in-95 duration-500">
-                    <div className="w-24 h-24 bg-gradient-to-br from-yellow-400/20 to-yellow-600/5 rounded-full flex items-center justify-center mb-6 shadow-[0_0_50px_rgba(250,204,21,0.1)] border border-yellow-400/10">
-                        <ShoppingBag className="w-10 h-10 text-yellow-400/80" />
+                <div className="flex flex-col items-center justify-center py-15 px-4 animate-in fade-in zoom-in-95 duration-700">
+                    <div className="relative mb-8">
+                        <div className="absolute inset-0 bg-blue-500/20 rounded-full" />
+                        <div className="relative w-28 h-28 bg-[#0a0a0a] border border-white/10 rounded-2xl flex items-center justify-center shadow-2xl overflow-hidden group">
+                            <ShoppingCart className="w-12 h-12 text-gray-500 group-hover:scale-110 transition-transform duration-500" />
+                        </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-white mb-2">No assets found</h3>
-                    <p className="text-gray-500 max-w-xs text-center mb-8 leading-relaxed">
-                        We couldn't find any 3D models matching your current filters. Try adjusting your search or filters.
+
+                    <h3 className="text-3xl font-black text-white mb-3 tracking-tight">
+                        No assets found
+                    </h3>
+                    <p className="text-gray-500 max-w-sm text-center mb-10 leading-relaxed text-sm md:text-base">
+                        We couldn't find any 3D models matching your request. Try broadening your filters or different keywords.
                     </p>
+
                     {(filters.formats.length > 0 || filters.types.length > 0 || filters.price !== 'all' || activeCategory !== 'all' || searchQuery) && (
                         <button
                             onClick={() => {
@@ -311,9 +318,10 @@ export default function CatalogPage() {
                                 setActiveCategory('all');
                                 if (searchQuery) router.push('/catalog');
                             }}
-                            className="px-6 py-2.5 bg-white text-black font-bold rounded-xl hover:bg-yellow-400 transition-all cursor-pointer shadow-lg active:scale-95"
+                            className="group relative px-8 py-3.5 bg-white text-black font-black rounded-xl hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer overflow-hidden shadow-[0_0_30px_rgba(255,255,255,0.1)]"
                         >
-                            Clear all filters
+                            <span className="relative z-10">Reset Filters</span>
+                            <div className="absolute inset-0 bg-gradient-to-r from-blue-100 to-white opacity-0 group-hover:opacity-100 transition-opacity" />
                         </button>
                     )}
                 </div>

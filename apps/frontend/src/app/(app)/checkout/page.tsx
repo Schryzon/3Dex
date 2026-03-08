@@ -126,7 +126,7 @@ export default function CheckoutPage() {
 
     const handleCheckout = async () => {
         if (!billing.fullName || !billing.email || !billing.phone) {
-            setError('Lengkapi semua informasi kontak terlebih dahulu.');
+            setError('Please complete all contact information first.');
             return;
         }
         setIsProcessing(true);
@@ -165,7 +165,7 @@ export default function CheckoutPage() {
                 });
             } else throw new Error('Payment gateway not loaded');
         } catch (err: any) {
-            setError(err.response?.data?.message || err.message || 'Checkout gagal. Silakan coba lagi.');
+            setError(err.response?.data?.message || err.message || 'Checkout failed. Please try again.');
             setIsProcessing(false);
         }
     };
@@ -332,9 +332,9 @@ export default function CheckoutPage() {
                                     <div className="flex items-center gap-3 mt-1 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
                                         <ShieldCheck size={14} strokeWidth={1.5} className="text-white/25 flex-shrink-0" />
                                         <p className="text-[11px] text-white/25 leading-relaxed">
-                                            Pembayaran diproses secara aman oleh{' '}
+                                            Payments are securely processed by{' '}
                                             <strong className="text-white/40">Midtrans</strong>.
-                                            Data kartu tidak disimpan di server kami.
+                                            Card data is not stored on our servers.
                                         </p>
                                     </div>
                                 </div>

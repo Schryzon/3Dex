@@ -24,7 +24,7 @@ export default function ProductReviews({ productId, isPurchased }: Props) {
     loadData();
   }, [productId]);
 
-  // Hapus bagian cek hasReviewed dari loadData
+  // Remove hasReviewed check from loadData
   const loadData = async () => {
     setLoading(true);
     try {
@@ -41,7 +41,7 @@ export default function ProductReviews({ productId, isPurchased }: Props) {
     }
   };
 
-  // Tambah useEffect baru khusus cek hasReviewed
+  // Add new useEffect specifically for hasReviewed check
   useEffect(() => {
     if (user && reviews.length > 0) {
       console.log('Current user ID:', user.id);
@@ -107,13 +107,13 @@ export default function ProductReviews({ productId, isPurchased }: Props) {
       {isPurchased && (
         <div className="bg-gray-900/30 rounded-xl p-6 border border-gray-800/50">
           {hasReviewed ? (
-            // Sudah review → tampilkan pesan
+            // Already reviewed → show message
             <div className="flex items-center gap-3 p-4 bg-green-500/10 border border-green-500/20 rounded-lg text-green-300">
               <CheckCircle className="w-5 h-5 flex-shrink-0" />
               <p className="text-sm">You have already reviewed this product. Thank you for your feedback!</p>
             </div>
           ) : (
-            // Belum review → tampilkan form
+            // Not reviewed yet → show form
             <>
               <h4 className="text-lg font-semibold text-white mb-4">Write a Review</h4>
               <ProductReviewForm

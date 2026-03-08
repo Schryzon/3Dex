@@ -13,9 +13,9 @@ export default function ArtistAnalyticsPage() {
                 <div className="w-20 h-20 bg-yellow-400/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-yellow-400/20">
                     <Construction className="w-10 h-10 text-yellow-400" />
                 </div>
-                <h2 className="text-2xl font-bold text-white mb-3">Fitur Sedang Dikembangkan</h2>
+                <h2 className="text-2xl font-bold text-white mb-3">Feature Under Development</h2>
                 <p className="text-gray-400 max-w-md mx-auto">
-                    Dashboard analitik progresif untuk seniman 3Dēx sedang kami siapkan untuk melacak penjualan, view, dan pertumbuhan audiens Anda.
+                    A progressive analytics dashboard for 3Dex artists is currently being prepared to track your sales, views, and audience growth.
                 </p>
             </div>
         </div>
