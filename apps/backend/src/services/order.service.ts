@@ -154,3 +154,31 @@ export async function handle_payment_webhook(notification: any) {
 
     return { status: "OK", order_status: new_status };
 }
+
+export async function get_user_orders(user_id: string) {
+    return prisma.order.findMany({
+        where: { user_id },
+        include: {
+            items: {
+                include: {
+                    model: {
+                        select: {
+                            id: true,
+                            title: true,
+                            preview_url: true,
+                            price: true,
+                            artist: {
+                                select: {
+                                    username: true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        orderBy: {
+            created_at: 'desc'
+        }
+    });
+}

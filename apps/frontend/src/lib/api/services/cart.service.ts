@@ -1,94 +1,121 @@
 import { apiClient } from '../client';
 import { API_ENDPOINTS } from '@/lib/constants/api';
-import { MOCK_MODELS } from '../mockData';
+import { USE_MOCK_DATA } from './product.service';
+import { MOCK_PRODUCTS } from '@/lib/mocks/products';
 import type { CartItem } from '@/lib/types';
 
-const CART_STORAGE_KEY = 'threedex_cart';
+const MOCK_CART_KEY = '3dex_mock_cart';
 
-const getLocalCart = (): CartItem[] => {
-    if (typeof window === 'undefined') return [];
-    const stored = localStorage.getItem(CART_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-};
-
-const saveLocalCart = (items: CartItem[]) => {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-};
+// Maps raw backend cart item to frontend CartItem shape
+function mapCartItem(raw: any): CartItem {
+    const model = raw.model || {};
+    return {
+        id: raw.id,
+        model_id: raw.model_id,
+        quantity: raw.quantity,
+        model: {
+            id: model.id,
+            title: model.title || '',
+            description: model.description || '',
+            price: model.price || 0,
+            thumbnails: model.preview_url ? [model.preview_url] : [],
+            images: model.preview_url ? [model.preview_url] : [],
+            modelFileUrl: model.file_url || '',
+            fileFormat: model.file_url
+                ? [model.file_url.split('.').pop()?.toUpperCase() || 'GLB']
+                : ['GLB'],
+            category: model.category?.name || 'General',
+            tags: [],
+            isPrintable: false,
+            status: model.status || 'APPROVED',
+            artistId: model.artist_id || '',
+            artist: {
+                id: model.artist?.id || '',
+                username: model.artist?.username || 'Unknown',
+                avatar_url: model.artist?.avatar_url,
+            },
+            createdAt: model.created_at || '',
+            updatedAt: model.updated_at || '',
+            rating: model.avg_rating || 0,
+            reviewCount: model.review_count || 0,
+        },
+    };
+}
 
 export const cartService = {
     async getCart(): Promise<CartItem[]> {
+        if (USE_MOCK_DATA) {
+            const stored = localStorage.getItem(MOCK_CART_KEY);
+            return stored ? JSON.parse(stored) : [];
+        }
         try {
-            return await apiClient.get<CartItem[]>(API_ENDPOINTS.CART.LIST);
+            const raw = await apiClient.get<any[]>(API_ENDPOINTS.CART.LIST);
+            return Array.isArray(raw) ? raw.map(mapCartItem) : [];
         } catch (error) {
-            console.warn('API Error in getCart, falling back to local storage:', error);
-            return getLocalCart();
+            console.warn('Cart API error (user may not be logged in):', error);
+            return [];
         }
     },
 
     async addToCart(modelId: string, quantity: number = 1): Promise<CartItem> {
-        try {
-            return await apiClient.post<CartItem>(API_ENDPOINTS.CART.ADD, { modelId, quantity });
-        } catch (error) {
-            console.warn('API Error in addToCart, falling back to local storage:', error);
-            const items = getLocalCart();
-            const existingItem = items.find(item => item.modelId === modelId);
+        if (USE_MOCK_DATA) {
+            const items = await this.getCart();
+            const existing = items.find(i => i.model_id === modelId);
 
-            if (existingItem) {
-                existingItem.quantity += quantity;
-                saveLocalCart(items);
-                return existingItem;
+            if (existing) {
+                existing.quantity += quantity;
+                localStorage.setItem(MOCK_CART_KEY, JSON.stringify(items));
+                return existing;
             }
 
-            const model = MOCK_MODELS.find(m => m.id === modelId);
-            if (!model) throw new Error('Model not found for cart');
+            const product = MOCK_PRODUCTS.find(p => p.id === modelId);
+            if (!product) throw new Error('Product not found');
 
             const newItem: CartItem = {
-                id: Math.random().toString(36).substr(2, 9),
-                modelId,
-                model,
-                quantity
+                id: `mock-cart-${Date.now()}`,
+                model_id: modelId,
+                quantity,
+                model: product
             };
 
             items.push(newItem);
-            saveLocalCart(items);
+            localStorage.setItem(MOCK_CART_KEY, JSON.stringify(items));
             return newItem;
         }
+
+        const raw = await apiClient.post<any>(API_ENDPOINTS.CART.ADD, { modelId, quantity });
+        return mapCartItem(raw);
     },
 
     async updateQuantity(itemId: string, quantity: number): Promise<CartItem> {
-        try {
-            return await apiClient.patch<CartItem>(API_ENDPOINTS.CART.UPDATE(itemId), { quantity });
-        } catch (error) {
-            console.warn('API Error in updateQuantity, falling back to local storage:', error);
-            const items = getLocalCart();
+        if (USE_MOCK_DATA) {
+            const items = await this.getCart();
             const item = items.find(i => i.id === itemId);
-            if (!item) throw new Error('Cart item not found');
-
+            if (!item) throw new Error('Item not found');
             item.quantity = quantity;
-            saveLocalCart(items);
+            localStorage.setItem(MOCK_CART_KEY, JSON.stringify(items));
             return item;
         }
+        const raw = await apiClient.patch<any>(API_ENDPOINTS.CART.UPDATE(itemId), { quantity });
+        return mapCartItem(raw);
     },
 
     async removeItem(itemId: string): Promise<void> {
-        try {
-            await apiClient.delete(API_ENDPOINTS.CART.REMOVE(itemId));
-        } catch (error) {
-            console.warn('API Error in removeItem, falling back to local storage:', error);
-            const items = getLocalCart();
+        if (USE_MOCK_DATA) {
+            const items = await this.getCart();
             const filtered = items.filter(i => i.id !== itemId);
-            saveLocalCart(filtered);
+            localStorage.setItem(MOCK_CART_KEY, JSON.stringify(filtered));
+            return;
         }
+        await apiClient.delete(API_ENDPOINTS.CART.REMOVE(itemId));
     },
 
     async clearCart(): Promise<void> {
-        try {
-            await apiClient.delete(API_ENDPOINTS.CART.CLEAR);
-        } catch (error) {
-            console.warn('API Error in clearCart, falling back to local storage:', error);
-            saveLocalCart([]);
+        if (USE_MOCK_DATA) {
+            localStorage.removeItem(MOCK_CART_KEY);
+            return;
         }
+        await apiClient.delete(API_ENDPOINTS.CART.CLEAR);
     },
 
     async getCartCount(): Promise<number> {

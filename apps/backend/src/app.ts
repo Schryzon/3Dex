@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
+import cookieParser from "cookie-parser";
 import swagger_ui from "swagger-ui-express";
 import { swagger_spec } from "./utils/swagger";
 
@@ -15,26 +17,49 @@ import wishlist_routes from "./routes/wishlist";
 import analytics_routes from "./routes/analytics";
 import storage_routes from "./routes/storage";
 import order_routes from "./routes/orders";
+import post_routes from "./routes/posts";
+import review_routes from "./routes/reviews";
+import print_routes from "./routes/print";
+import purchase_routes from "./routes/purchases";
+import cart_routes from "./routes/cart";
+import notification_routes from "./routes/notification";
+import follow_routes from "./routes/follow";
+import collection_routes from "./routes/collections";
+import report_routes from "./routes/reports";
 
 // Initialize Backend
 const app = express();
 
-// CORS Configuration
+// Middleware
+app.use(helmet({
+    contentSecurityPolicy: false, // Disable CSP for now to avoid breaking 3D viewers/images
+}));
+
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000').split(',');
+
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
+// Parse cookies — required for HTTP-only cookie auth
+app.use(cookieParser());
 
 // Routes
-app.use("/health", health_routes);
+app.get("/health", (req, res) => res.json({ status: "OK" }));
 app.use("/docs", swagger_ui.serve, swagger_ui.setup(swagger_spec));
 app.use("/auth", auth_routes);
 app.use("/models", model_routes);
-app.use("/users", user_routes);
+app.use("/users", user_routes, follow_routes);
 app.use("/admin", admin_routes);
 app.use("/payments", payment_routes);
 app.use("/catalog", catalog_routes);
@@ -42,5 +67,30 @@ app.use("/wishlist", wishlist_routes);
 app.use("/analytics", analytics_routes);
 app.use("/storage", storage_routes);
 app.use("/orders", order_routes);
+app.use("/posts", post_routes);
+app.use("/reviews", review_routes);
+app.use("/print", print_routes);
+app.use("/purchases", purchase_routes);
+app.use("/cart", cart_routes);
+app.use("/notifications", notification_routes);
+app.use("/collections", collection_routes);
+app.use("/reports", report_routes);
+
+// 404 Handler - Return JSON instead of HTML
+app.use((req, res) => {
+    res.status(404).json({
+        message: `Route ${req.method} ${req.url} not found`,
+        error: "Not Found"
+    });
+});
+
+// Global Error Handler - Return JSON instead of HTML
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error('[Global Error]:', err);
+    res.status(err.status || 500).json({
+        message: err.message || "Internal Server Error",
+        error: process.env.NODE_ENV === 'development' ? err : "InternalServerError"
+    });
+});
 
 export default app;

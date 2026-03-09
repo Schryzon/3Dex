@@ -1,5 +1,7 @@
 import { Router } from "express";
-import { register, login } from "../controllers/auth.controller";
+import { register, login, logout, google_auth, get_me, complete_profile } from "../controllers/auth.controller";
+
+import { require_auth } from "../middlewares/auth.middleware";
 
 const router = Router();
 
@@ -58,5 +60,36 @@ router.post("/login", login);
  *         description: Email or username exists
  */
 router.post("/register", register);
+
+/**
+ * @openapi
+ * /auth/google:
+ *   post:
+ *     summary: Login or register with Google
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               credential:
+ *                 type: string
+ *                 description: Google ID token
+ *     responses:
+ *       200:
+ *         description: Auth success
+ *       401:
+ *         description: Invalid Google token
+ */
+router.post("/google", google_auth);
+router.get("/me", require_auth, get_me);
+router.post("/complete-profile", require_auth, complete_profile);
+
+
+// Clears the HTTP-only cookie — no auth required to call this
+router.post("/logout", logout);
 
 export default router;

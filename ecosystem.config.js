@@ -3,7 +3,7 @@ module.exports = {
     {
       name: "3dex-api",
       cwd: "apps/backend",
-      script: "dist/app.js",
+      script: "dist/server.js",
       interpreter: "node",
       env: {
         NODE_ENV: "production",

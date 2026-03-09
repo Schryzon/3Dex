@@ -6,10 +6,28 @@ export async function create_model(data: {
   price: number;
   file_url: string;
   preview_url?: string;
+  gallery_urls?: string[];
   artist_id: string;
+  category_id?: string;
+  tags?: string[];
+  is_nsfw?: boolean;
 }) {
+  const { tags, ...rest } = data;
+
   return prisma.model.create({
-    data,
+    data: {
+      ...rest,
+      tags: tags ? {
+        connectOrCreate: tags.map(tag => ({
+          where: { name: tag },
+          create: { name: tag }
+        }))
+      } : undefined
+    },
+    include: {
+      tags: true,
+      category: true
+    }
   });
 }
 
@@ -20,6 +38,8 @@ export function get_all_models() {
       title: true,
       price: true,
       preview_url: true,
+      gallery_urls: true,
+      is_nsfw: true,
       artist: {
         select: { username: true },
       },
@@ -37,7 +57,9 @@ export function get_model_by_id(model_id: string) {
       price: true,
       file_url: true,
       preview_url: true,
+      gallery_urls: true,
       created_at: true,
+      is_nsfw: true,
       artist: {
         select: {
           id: true,
@@ -45,6 +67,46 @@ export function get_model_by_id(model_id: string) {
         },
       },
     },
+  });
+}
+
+export async function update_model_by_id(
+  model_id: string,
+  data: {
+    title?: string;
+    description?: string;
+    price?: number;
+    category?: string;
+  }
+) {
+  let category_id: string | undefined = undefined;
+
+  if (data.category) {
+    const cat = await prisma.category.findUnique({ where: { slug: data.category } });
+    if (!cat) {
+      // Try by name (case-insensitive fallback)
+      const catByName = await prisma.category.findFirst({
+        where: { name: { equals: data.category, mode: 'insensitive' } }
+      });
+      if (catByName) category_id = catByName.id;
+    } else {
+      category_id = cat.id;
+    }
+  }
+
+  return prisma.model.update({
+    where: { id: model_id },
+    data: {
+      ...(data.title !== undefined && { title: data.title }),
+      ...(data.description !== undefined && { description: data.description }),
+      ...(data.price !== undefined && { price: data.price }),
+      ...(category_id !== undefined && { category_id }),
+    },
+    include: {
+      tags: true,
+      category: true,
+      artist: { select: { id: true, username: true, avatar_url: true } }
+    }
   });
 }
 

@@ -3,7 +3,9 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import LoginModal from './LoginModal';
 import RegisterModal from './RegisterModal';
-import { authService, User, LoginCredentials, RegisterData } from '@/lib/services/auth.service';
+import UsernameSetupModal from './UsernameSetupModal';
+import { authService } from '@/lib/api/services/auth.service';
+import { User, LoginRequest, RegisterRequest } from '@/lib/types';
 
 interface AuthContextType {
   user: User | null;
@@ -12,9 +14,12 @@ interface AuthContextType {
   showLogin: () => void;
   showRegister: () => void;
   hideModals: () => void;
-  login: (credentials: LoginCredentials) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
-  logout: () => void;
+  login: (credentials: LoginRequest) => Promise<void>;
+  register: (data: RegisterRequest) => Promise<void>;
+  googleLogin: (credential: string) => Promise<void>;
+  logout: () => Promise<void>;
+  setUser: (user: User | null) => void;
+  updateUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,50 +33,78 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUserState] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [showUsernameSetupModal, setShowUsernameSetupModal] = useState(false);
 
-  // Load user from localStorage on mount
+  // On mount, validate the session by calling /auth/me.
+  // The HTTP-only cookie is sent automatically by the browser.
+  // We also show a cached user immediately from localStorage for instant UI,
+  // then replace it with the fresh value from the server.
   useEffect(() => {
-    const storedUser = authService.getStoredUser();
-    const storedToken = authService.getStoredToken();
-
-    // Debug logging
-    console.log(' AuthProvider - Checking stored auth:', {
-      hasUser: !!storedUser,
-      hasToken: !!storedToken,
-      user: storedUser,
-      tokenPreview: storedToken ? storedToken.substring(0, 20) + '...' : null
-    });
-
-    if (storedUser && storedToken) {
-      setUser(storedUser);
-      console.log(' User restored from localStorage:', storedUser.username);
-    } else {
-      console.log(' No stored auth found');
+    const cachedUser = authService.getStoredUser();
+    if (cachedUser) {
+      // Optimistically restore the cached user so the UI is not blank
+      setUserState(cachedUser);
     }
-    setIsLoading(false);
+
+    authService.getCurrentUser()
+      .then((freshUser) => {
+        setUserState(freshUser);
+        // Keep the cache in sync with the server value
+        authService.storeUser(freshUser);
+      })
+      .catch(() => {
+        // Cookie missing or expired — treat as logged out
+        setUserState(null);
+        authService.clearStoredUser();
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
-  const login = async (credentials: LoginCredentials) => {
-    console.log('🔐 Login attempt:', credentials.email);
-    const { token, user: userData } = await authService.login(credentials);
-    authService.storeAuth(token, userData);
-    setUser(userData);
-    console.log(' Login successful:', userData.username, 'Token stored:', !!token);
+  const login = async (credentials: LoginRequest) => {
+    // Server sets the HTTP-only cookie in the response
+    const { user: userData } = await authService.login(credentials);
+    // Cache user data in localStorage for instant UI on next load
+    authService.storeUser(userData);
+    setUserState(userData);
   };
 
-  const register = async (data: RegisterData) => {
+  const register = async (data: RegisterRequest) => {
     await authService.register(data);
-    // After registration, auto-login
+    // Auto-login after successful registration
     await login({ email: data.email, password: data.password });
   };
 
-  const logout = () => {
-    authService.logout();
-    setUser(null);
+  const googleLoginHandler = async (credential: string) => {
+    // Server sets the HTTP-only cookie in the response
+    const response = await authService.googleLogin(credential);
+    authService.storeUser(response.user);
+    setUserState(response.user);
+
+    // If this is a brand-new Google account, prompt for username before continuing
+    if (response.needs_username) {
+      setShowUsernameSetupModal(true);
+    }
+  };
+
+  const logout = async () => {
+    // Server clears the HTTP-only cookie
+    await authService.logout();
+    authService.clearStoredUser();
+    setUserState(null);
+  };
+
+  // Allow direct user mutation (e.g. after profile update)
+  const setUser = (newUser: User | null) => {
+    setUserState(newUser);
+    if (newUser) {
+      authService.storeUser(newUser);
+    } else {
+      authService.clearStoredUser();
+    }
   };
 
   const showLogin = () => {
@@ -99,11 +132,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       hideModals,
       login,
       register,
-      logout
+      googleLogin: googleLoginHandler,
+      logout,
+      setUser,
+      updateUser: setUser,
     }}>
       {children}
 
-      {/* Global Modals */}
+      {/* Global auth modals */}
       <LoginModal
         isOpen={showLoginModal}
         onClose={hideModals}
@@ -114,6 +150,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isOpen={showRegisterModal}
         onClose={hideModals}
         onSwitchToLogin={showLogin}
+      />
+
+      {/* Username setup modal — shown once after first Google sign-in */}
+      <UsernameSetupModal
+        isOpen={showUsernameSetupModal}
+        onComplete={(updatedUser) => {
+          authService.storeUser(updatedUser);
+          setUserState(updatedUser);
+          setShowUsernameSetupModal(false);
+        }}
       />
     </AuthContext.Provider>
   );

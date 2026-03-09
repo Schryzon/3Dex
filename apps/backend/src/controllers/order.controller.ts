@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { create_order, handle_payment_webhook } from "../services/order.service";
+import { create_order, handle_payment_webhook, get_user_orders } from "../services/order.service";
 
 /**
  * initiate_checkout
@@ -31,16 +31,24 @@ export async function initiate_checkout(req: Request, res: Response) {
 export async function midtrans_notification(req: Request, res: Response) {
     try {
         const notification = req.body;
-
-        // Midtrans sends notification
         const result = await handle_payment_webhook(notification);
-
         res.status(200).json(result);
     } catch (error: any) {
         console.error("Webhook Error:", error);
-        // Return 200 to acknowledge receipt even on logic error to prevent retries? 
-        // Or 500 to retry? 
-        // Typically if signature invalid, we want to know.
+        res.status(500).json({ message: error.message });
+    }
+}
+
+/**
+ * list_orders
+ * GET /orders
+ */
+export async function list_orders(req: Request, res: Response) {
+    try {
+        const user_id = (req as any).user.id;
+        const orders = await get_user_orders(user_id);
+        res.json(orders);
+    } catch (error: any) {
         res.status(500).json({ message: error.message });
     }
 }

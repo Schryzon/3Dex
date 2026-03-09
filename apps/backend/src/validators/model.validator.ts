@@ -3,10 +3,13 @@ import { z } from "zod";
 export const upload_model_schema = z.object({
   title: z.string().min(3),
   description: z.string().optional(),
-  price: z.number().int().positive(),
-  file_url: z.string().url(),
-  preview_url: z.string().url().optional(),
+  price: z.number().int().nonnegative(),
+  file_url: z.string(),
+  preview_url: z.string().optional(),
+  gallery_urls: z.array(z.string()).optional(),
   artist_id: z.string().uuid(),
+  category: z.string().optional(),
+  tags: z.array(z.string()).optional(),
 });
 
 export const model_id_param = z.object({

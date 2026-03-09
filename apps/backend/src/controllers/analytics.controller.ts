@@ -2,6 +2,24 @@ import { Request, Response } from "express";
 import prisma from "../prisma";
 import { Auth_Request } from "../middlewares/auth.middleware";
 
+export async function get_public_stats(req: Request, res: Response) {
+    try {
+        const models = await prisma.model.count({ where: { status: 'APPROVED' } });
+        const customers = await prisma.user.count({ where: { role: 'CUSTOMER' } });
+        const artists = await prisma.user.count({ where: { role: 'ARTIST' } });
+        const providers = await prisma.user.count({ where: { role: 'PROVIDER' } });
+
+        res.json({
+            models,
+            customers,
+            artists,
+            providers,
+        });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
 export async function get_artist_stats(req: Auth_Request, res: Response) {
     const user_id = req.user.id;
 

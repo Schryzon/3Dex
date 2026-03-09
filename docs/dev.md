@@ -31,7 +31,7 @@
 
 ## What Is This Project?
 
-3Dēx is a 3D services & asset marketplace with:
+3Dēx is a completed MVP for a 3D services & asset marketplace with:
 ```
 Frontend: Next.js + Tailwind
 

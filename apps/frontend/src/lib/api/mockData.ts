@@ -16,6 +16,7 @@ export const MOCK_MODELS: Model[] = [
         description: 'A highly detailed cyberpunk drone model perfect for futuristic environments. Includes 4K textures and multiple file formats.',
         price: 450000,
         thumbnails: ['https://picsum.photos/800/600?random=1'],
+        images: ['https://picsum.photos/800/600?random=1'],
         modelFileUrl: '/models/drone.glb',
         fileFormat: ['GLB', 'FBX', 'OBJ'],
         polyCount: 45000,
@@ -27,7 +28,7 @@ export const MOCK_MODELS: Model[] = [
         artist: {
             id: 'artist1',
             username: 'CyberSmith',
-            avatar: 'https://i.pravatar.cc/150?u=artist1'
+            avatar_url: 'https://i.pravatar.cc/150?u=artist1'
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -40,6 +41,7 @@ export const MOCK_MODELS: Model[] = [
         description: 'Full body warrior armor set from the medieval era. Rigged and ready for animation.',
         price: 750000,
         thumbnails: ['https://picsum.photos/800/600?random=2'],
+        images: ['https://picsum.photos/800/600?random=2'],
         modelFileUrl: '/models/armor.glb',
         fileFormat: ['GLB', 'MAX'],
         polyCount: 120000,
@@ -51,7 +53,7 @@ export const MOCK_MODELS: Model[] = [
         artist: {
             id: 'artist2',
             username: 'Ironclad_3D',
-            avatar: 'https://i.pravatar.cc/150?u=artist2'
+            avatar_url: 'https://i.pravatar.cc/150?u=artist2'
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -64,6 +66,7 @@ export const MOCK_MODELS: Model[] = [
         description: 'Complete interior set for a modern coffee shop. Includes all furniture and lighting assets.',
         price: 1200000,
         thumbnails: ['https://picsum.photos/800/600?random=3'],
+        images: ['https://picsum.photos/800/600?random=3'],
         modelFileUrl: '/models/cafe.glb',
         fileFormat: ['GLB', 'OBJ', 'C4D'],
         polyCount: 250000,
@@ -75,7 +78,7 @@ export const MOCK_MODELS: Model[] = [
         artist: {
             id: 'artist3',
             username: 'ArchViz_Pro',
-            avatar: 'https://i.pravatar.cc/150?u=artist3'
+            avatar_url: 'https://i.pravatar.cc/150?u=artist3'
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

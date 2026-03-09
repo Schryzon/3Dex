@@ -1,21 +1,45 @@
 'use client';
 
+import React, { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Star, ShoppingCart, ArrowRight } from 'lucide-react';
-import { useRef, useEffect, useState } from 'react';
+import { ArrowRight, ShoppingCart } from 'lucide-react';
+import { useProducts } from '@/lib/hooks/useProducts';
+import { formatPrice } from '@/lib/utils';
+import { useInView } from '@/lib/hooks/useInView';
+import CatalogProductCard from '@/components/catalog/CatalogProductCard';
 
-// Mock data - replace with actual popular models from API
-const popularModels: any[] = [];
 
+
+function ModelCardSkeleton() {
+    return (
+        <div className="flex-shrink-0 w-[240px] md:w-[280px] bg-[#111] rounded-xl border border-white/[0.05] overflow-hidden animate-pulse">
+            <div className="aspect-[3/4] bg-white/5" />
+            <div className="p-5 space-y-4">
+                <div className="space-y-2">
+                    <div className="h-5 bg-white/5 rounded-lg w-3/4" />
+                    <div className="h-3 bg-white/5 rounded-lg w-1/2" />
+                </div>
+            </div>
+        </div>
+    );
+}
 
 export default function PopularModels() {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [isPaused, setIsPaused] = useState(false);
+    const { ref: headerRef, inView: headerVisible } = useInView({ threshold: 0.2 });
+
+    const { data, isLoading } = useProducts({
+        sort: 'rating',
+        limit: 12,
+    });
+
+    const models = data?.data || [];
 
     // Auto-scroll functionality
     useEffect(() => {
         const container = scrollContainerRef.current;
-        if (!container || popularModels.length === 0) return;
+        if (!container || models.length === 0) return;
 
         let scrollInterval: NodeJS.Timeout;
 
@@ -26,115 +50,93 @@ export default function PopularModels() {
                     const currentScroll = container.scrollLeft;
 
                     if (currentScroll >= maxScroll - 10) {
-                        // Reset to start for infinite loop
                         container.scrollTo({ left: 0, behavior: 'smooth' });
                     } else {
-                        // Scroll by one card width + gap (320px + 24px = 344px)
-                        container.scrollBy({ left: 344, behavior: 'smooth' });
+                        container.scrollBy({ left: 320, behavior: 'smooth' });
                     }
                 }
-            }, 3000); // Every 3 seconds
+            }, 3000);
         };
 
         startAutoScroll();
-
-        return () => {
-            clearInterval(scrollInterval);
-        };
-    }, [isPaused]);
+        return () => clearInterval(scrollInterval);
+    }, [isPaused, models.length]);
 
     return (
-        <section className="py-16 md:py-24 bg-black">
-            <div className="max-w-[1400px] mx-auto px-4 md:px-6">
+        <section className="relative py-14 md:py-20 bg-[#070707] overflow-hidden">
+            {/* Fine line grid for depth */}
+            <div className="absolute inset-0 bg-line-grid pointer-events-none" />
+            <div className="max-w-[1400px] mx-auto px-6 md:px-10">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-12">
-                    <div>
-                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
-                            Popular <span className="text-yellow-400">Models</span>
+                <div
+                    ref={headerRef}
+                    style={{
+                        opacity: headerVisible ? 1 : 0,
+                        transform: headerVisible ? 'translateY(0)' : 'translateY(30px)',
+                        transition: 'opacity 0.7s ease, transform 0.7s ease',
+                    }}
+                    className="mb-12"
+                >
+                    <p className="text-xs font-bold tracking-[0.2em] uppercase text-yellow-400 mb-3">Community picks</p>
+                    <div className="flex items-end justify-between gap-4">
+                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white leading-tight">
+                            Trending <span className="text-yellow-400">right now.</span>
                         </h2>
-                        <p className="text-gray-400 text-lg">
-                            Trending assets loved by our community
-                        </p>
+                        <Link
+                            href="/catalog?sort=rating"
+                            className="hidden md:flex items-center gap-2 text-sm text-gray-400 hover:text-yellow-400 transition-colors group shrink-0"
+                        >
+                            View all
+                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </Link>
                     </div>
-                    <Link
-                        href="/catalog"
-                        className="hidden md:flex items-center gap-2 text-yellow-400 hover:text-yellow-300 font-semibold transition-colors group"
-                    >
-                        View All
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </Link>
                 </div>
 
-                {/* Scrollable Cards with Auto-Scroll */}
+                {/* Scrollable Cards */}
                 <div
                     ref={scrollContainerRef}
                     onMouseEnter={() => setIsPaused(true)}
                     onMouseLeave={() => setIsPaused(false)}
-                    className="flex gap-6 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800 scroll-smooth"
+                    className="flex gap-5 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900 scroll-smooth"
                     style={{ scrollbarWidth: 'thin' }}
                 >
-                    {popularModels.map((model) => (
-                        <div
-                            key={model.id}
-                            className="group flex-shrink-0 w-[280px] md:w-[320px] bg-gray-800/40 backdrop-blur-sm rounded-xl border border-gray-700 hover:border-yellow-400/50 overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-yellow-400/10"
-                        >
-                            {/* Image */}
-                            <div className="relative aspect-[4/3] bg-gray-700 overflow-hidden">
-                                <div className="absolute inset-0 flex items-center justify-center text-gray-500">
-                                    <ShoppingCart className="w-16 h-16" />
-                                </div>
-                                {/* Category Badge */}
-                                <div className="absolute top-3 left-3">
-                                    <span className="px-3 py-1 bg-black/60 backdrop-blur-sm text-white text-xs font-medium rounded-full">
-                                        {model.category}
-                                    </span>
-                                </div>
-                                {/* Hover Overlay */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            </div>
+                    {/* Loading skeletons */}
+                    {isLoading && Array.from({ length: 6 }).map((_, i) => (
+                        <ModelCardSkeleton key={i} />
+                    ))}
 
-                            {/* Content */}
-                            <div className="p-5">
-                                <h3 className="text-white font-semibold text-lg mb-2 group-hover:text-yellow-400 transition-colors line-clamp-1">
-                                    {model.title}
-                                </h3>
+                    {/* Empty state */}
+                    {!isLoading && models.length === 0 && (
+                        <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
+                            <ShoppingCart className="w-12 h-12 text-gray-700 mb-4" />
+                            <p className="text-gray-500 text-lg font-medium">No models yet</p>
+                            <p className="text-gray-600 text-sm mt-1">Be the first to upload and get rated!</p>
+                        </div>
+                    )}
 
-                                {/* Rating */}
-                                <div className="flex items-center gap-2 mb-3">
-                                    <div className="flex items-center gap-1">
-                                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                        <span className="text-white font-medium text-sm">{model.rating}</span>
-                                    </div>
-                                    <span className="text-gray-400 text-sm">({model.reviews} reviews)</span>
-                                </div>
-
-                                {/* Price & Button */}
-                                <div className="flex items-center justify-between">
-                                    <span className="text-yellow-400 font-bold text-xl">
-                                        ${model.price}
-                                    </span>
-                                    <button className="px-4 py-2 bg-yellow-400 hover:bg-yellow-300 text-black font-semibold rounded-lg transition-colors text-sm">
-                                        Add to Cart
-                                    </button>
-                                </div>
-                            </div>
+                    {/* Model cards */}
+                    {!isLoading && models.map((model: any) => (
+                        <div key={model.id} className="flex-shrink-0 w-[240px] md:w-[280px]">
+                            <CatalogProductCard
+                                id={model.id}
+                                title={model.title}
+                                image={model.thumbnails?.[0] || '/placeholder-model.jpg'}
+                                author={model.artist?.username || 'Unknown'}
+                                price={model.price}
+                                isFree={model.price === 0}
+                                rating={model.rating}
+                                reviewCount={model.reviewCount}
+                                formats={model.specifications?.formats || []}
+                                polyCount={model.specifications?.polygons?.toLocaleString()}
+                            />
                         </div>
                     ))}
                 </div>
 
-                {/* Auto-Scroll Indicator */}
-                {popularModels.length > 0 && (
-                    <div className="mt-4 text-center">
-                        <p className="text-gray-500 text-xs">
-                            {isPaused ? '⏸ Paused' : '▶ Auto-scrolling'} • Hover to pause
-                        </p>
-                    </div>
-                )}
-
-                {/* View All Button - Mobile */}
+                {/* View All - Mobile */}
                 <div className="md:hidden mt-8 text-center">
                     <Link
-                        href="/catalog"
+                        href="/catalog?sort=rating"
                         className="inline-flex items-center gap-2 text-yellow-400 hover:text-yellow-300 font-semibold transition-colors"
                     >
                         View All Models

@@ -9,6 +9,8 @@ export const API_ENDPOINTS = {
         REGISTER: '/auth/register',
         LOGOUT: '/auth/logout',
         ME: '/auth/me',
+        GOOGLE: '/auth/google',
+        COMPLETE_PROFILE: '/auth/complete-profile',
     },
 
     // Models/Products
@@ -19,7 +21,15 @@ export const API_ENDPOINTS = {
         UPDATE: (id: string) => `/models/${id}`,
         DELETE: (id: string) => `/models/${id}`,
         DOWNLOAD: (id: string) => `/models/${id}/download`,
-        REVIEWS: (id: string) => `/models/${id}/reviews`,
+    },
+
+    // Reviews
+    REVIEWS: {
+        MODEL_STATS: (modelId: string) => `/reviews/model/${modelId}/stats`,
+        MODEL_LIST: (modelId: string) => `/reviews/model/${modelId}`,
+        MODEL_CREATE: (modelId: string) => `/reviews/model/${modelId}`,
+        USER_LIST: (userId: string) => `/reviews/user/${userId}`,
+        USER_CREATE: '/reviews/user',
     },
 
     // Orders
@@ -49,7 +59,7 @@ export const API_ENDPOINTS = {
     // Wishlist
     WISHLIST: {
         LIST: '/wishlist',
-        ADD: '/wishlist',
+        ADD: (modelId: string) => `/wishlist/${modelId}`,
         REMOVE: (id: string) => `/wishlist/${id}`,
     },
 
@@ -63,6 +73,9 @@ export const API_ENDPOINTS = {
     USERS: {
         PROFILE: '/users/profile',
         UPDATE: '/users/profile',
+        DELETE_ME: '/users/me',
+        APPLY_ROLE: '/users/apply-role',
+        PUBLIC_PROFILE: (username: string) => `/users/${username}`,
     },
 
     // Admin

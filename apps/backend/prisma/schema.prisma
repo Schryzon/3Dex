@@ -16,6 +16,7 @@ datasource db {
 enum Role {
   CUSTOMER
   ARTIST
+  PROVIDER
   ADMIN
 }
 
@@ -27,17 +28,70 @@ enum ModelStatus {
 
 
 model User {
-  id       String @id @default(uuid())
-  email    String @unique
-  username String @unique
-  password String
+  id        String  @id @default(uuid())
+  email     String  @unique
+  username  String  @unique
+  password  String?
+  google_id String? @unique
   role     Role   @default(CUSTOMER)
 
-  models    Model[]    @relation("artist_models")
-  purchases Purchase[]
-  reviews   Review[]
-  wishlist  Wishlist[]
-  orders    Order[]
+  // Account Status
+  account_status AccountStatus @default(PENDING) // Default pending for checks? Or APPROVED for Customer?
+  // Logic: Service will handle defaults. Schema default can be PENDING.
+  
+  status_history Json[] // [{ status, timestamp, reason, admin_id }]
+  approved_at    DateTime?
+  rejected_at    DateTime?
+
+  // Profile fields
+  display_name String?
+  bio          String?
+  avatar_url   String?
+  banner_url   String?
+  location     String? // General location string
+  website      String?
+  
+  // Structured Data
+  addresses    Json[] // [{ label, street, city, region, country, zip, is_default }]
+  portfolio    Json[] // [{ title, media_url, description }] (MinIO)
+  provider_config Json? // { materials: [], colors: [], printer_types: [], max_size: [] }
+
+  // Social links (stored as JSON for flexibility or separate fields)
+  social_twitter    String?
+  social_instagram  String?
+  social_artstation String?
+  social_behance    String?
+
+  // Social Stats
+  rating       Float @default(0) // Avg Rating
+  review_count Int   @default(0)
+
+  // Security
+  two_factor_enabled Boolean @default(false)
+  last_login_at      DateTime?
+  show_nsfw          Boolean @default(false)
+  
+  models        Model[]        @relation("artist_models")
+  purchases     Purchase[]
+  reviews       Review[]       // Product Reviews given
+  wishlist      Wishlist[]
+  orders        Order[]        // Orders placed as Customer
+  provider_orders Order[]      @relation("provider_orders") // Orders received as Provider
+
+  cart_items    CartItem[]
+
+  posts         Post[]
+  post_likes    Post_Like[]
+  post_comments Post_Comment[]
+  
+  received_reviews User_Review[] @relation("received_reviews")
+  given_reviews    User_Review[] @relation("given_reviews")
+  reports_given    Report[]
+
+  followers     Follow[]       @relation("following")
+  following     Follow[]       @relation("follower")
+  notifications Notification[]
+  collections   Collection[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -50,8 +104,10 @@ model Model {
   price       Int // in IDR
   file_url    String
   preview_url String?
+  gallery_urls String[]
   
   status      ModelStatus @default(PENDING)
+  is_nsfw     Boolean     @default(false)
 
   artist_id String
   artist    User   @relation("artist_models", fields: [artist_id], references: [id])
@@ -62,8 +118,13 @@ model Model {
   purchases  Purchase[]
   reviews    Review[]
   wishlist   Wishlist[]
+  cart_items CartItem[]
   tags       Tag[]
   order_items Order_Item[]
+  collection_items CollectionItem[]
+
+  avg_rating   Float @default(0)
+  review_count Int   @default(0)
 
   created_at DateTime @default(now())
 }
@@ -142,6 +203,23 @@ model Wishlist {
   @@unique([user_id, model_id])
 }
 
+model CartItem {
+  id String @id @default(uuid())
+
+  user_id  String
+  model_id String
+  quantity Int @default(1)
+
+  user  User  @relation(fields: [user_id], references: [id])
+  model Model @relation(fields: [model_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([user_id, model_id])
+  @@index([user_id])
+}
+
 enum Order_Type {
   ASSET
   PRINT_JOB
@@ -154,15 +232,39 @@ enum Order_Status {
   CANCELLED
 }
 
+enum AccountStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PrintStatus {
+  PENDING
+  ACCEPTED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
 model Order {
   id String @id @default(uuid())
 
   user_id String
   user    User   @relation(fields: [user_id], references: [id])
 
+  // Provider Link (For Print Orders)
+  provider_id String?
+  provider    User?   @relation("provider_orders", fields: [provider_id], references: [id])
+
   total_amount Int          @default(0) // IDR
-  status       Order_Status @default(PENDING)
+  status       Order_Status @default(PENDING) // Payment Status
   type         Order_Type   @default(ASSET)
+  
+  // Shipping & Tracking
+  courier_name    String?
+  tracking_number String?
+  shipping_address Json? // Snapshot of address
 
   snap_token   String?
   snap_redirect_url String?
@@ -184,6 +286,10 @@ model Order_Item {
   model    Model? @relation(fields: [model_id], references: [id])
 
   price Int // IDR at time of purchase
+  
+  // Print Config
+  print_config Json? // { material, color, scale, ... }
+  print_status PrintStatus @default(PENDING)
 
   created_at DateTime @default(now())
 }
@@ -201,6 +307,163 @@ model Payment {
   fraud_status        String?
   
   raw_response        Json?
+
+  created_at DateTime @default(now())
+}
+
+model User_Review {
+  id String @id @default(uuid())
+
+  reviewer_id String
+  reviewer    User   @relation("given_reviews", fields: [reviewer_id], references: [id])
+
+  target_user_id String
+  target_user    User   @relation("received_reviews", fields: [target_user_id], references: [id])
+
+  rating  Int // 1-5
+  comment String?
+
+  created_at DateTime @default(now())
+
+  @@unique([reviewer_id, target_user_id])
+}
+
+model Post {
+  id String @id @default(uuid())
+
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id])
+
+  caption    String?
+  media_urls String[] // Array of URLs
+
+  is_nsfw    Boolean @default(false)
+
+  like_count    Int @default(0)
+  comment_count Int @default(0)
+
+  likes    Post_Like[]
+  comments Post_Comment[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Post_Like {
+  id String @id @default(uuid())
+
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id])
+
+  post_id String
+  post    Post   @relation(fields: [post_id], references: [id])
+
+  created_at DateTime @default(now())
+
+  @@unique([user_id, post_id])
+}
+
+model Post_Comment {
+  id String @id @default(uuid())
+
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id])
+
+  post_id String
+  post    Post   @relation(fields: [post_id], references: [id])
+
+  content String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Stats {
+  id String @id @default(uuid())
+
+  period_start DateTime
+  period_end   DateTime
+  
+  data Json // { top_models: [], top_artists: [], total_sales: 0 }
+
+  created_at DateTime @default(now())
+}
+
+model Follow {
+  id           String   @id @default(uuid())
+  follower_id  String
+  follower     User     @relation("follower", fields: [follower_id], references: [id])
+  following_id String
+  following    User     @relation("following", fields: [following_id], references: [id])
+  created_at   DateTime @default(now())
+
+  @@unique([follower_id, following_id])
+}
+
+model Notification {
+  id         String   @id @default(uuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  type       String   // e.g., 'FOLLOW', 'MODEL_APPROVED', 'SALE', 'LIKE'
+  title      String
+  message    String
+  is_read    Boolean  @default(false)
+  data       Json?    // Optional payload
+  created_at DateTime @default(now())
+
+  @@index([user_id])
+}
+
+model Collection {
+  id          String           @id @default(uuid())
+  user_id     String
+  user        User             @relation(fields: [user_id], references: [id])
+  name        String
+  description String?
+  is_public   Boolean          @default(true)
+  items       CollectionItem[]
+  created_at  DateTime         @default(now())
+  updated_at  DateTime         @updatedAt
+}
+
+model CollectionItem {
+  id            String     @id @default(uuid())
+  collection_id String
+  collection    Collection @relation(fields: [collection_id], references: [id], onDelete: Cascade)
+  model_id      String
+  model         Model      @relation(fields: [model_id], references: [id], onDelete: Cascade)
+  added_at      DateTime   @default(now())
+
+  @@unique([collection_id, model_id])
+}
+
+enum Report_Target {
+  MODEL
+  POST
+  COMMENT
+}
+
+enum Report_Status {
+  PENDING
+  REVIEWED
+  DISMISSED
+}
+
+model Report {
+  id String @id @default(uuid())
+
+  reporter_id String
+  reporter    User   @relation(fields: [reporter_id], references: [id])
+
+  target_type Report_Target
+  
+  model_id   String?
+  post_id    String?
+  comment_id String?
+
+  reason String
+
+  status Report_Status @default(PENDING)
 
   created_at DateTime @default(now())
 }

@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { ChevronDown, LayoutGrid, List } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useRef, Suspense } from 'react';
+import { ChevronDown, LayoutGrid, List, ShoppingCart } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import CatalogProductCard from '@/components/catalog/CatalogProductCard';
 import CatalogFilters, { FilterState } from '@/components/catalog/CatalogFilters';
 import { Skeleton } from '@/components/common/Loading';
-import { useProducts } from '@/lib/hooks/useProducts';
+import { useInfiniteProducts } from '@/lib/hooks/useProducts';
+import { useWishlist } from '@/lib/hooks/useWishlist';
+import { useAuth } from '@/components/auth/AuthProvider';
 import type { ModelFilters } from '@/lib/types';
 
 // Sort options
@@ -27,10 +29,13 @@ const CATEGORIES = [
     { id: 'weapons', label: 'Weapons' },
 ];
 
-export default function CatalogPage() {
+function CatalogContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const searchQuery = searchParams.get('search') || '';
+    const { isAuthenticated, showLogin } = useAuth();
+    const { isInWishlist, toggle: toggleWishlist } = useWishlist();
     const [activeCategory, setActiveCategory] = useState('all');
-    const [saved, setSaved] = useState<Set<string>>(new Set());
     const [sortBy, setSortBy] = useState<ModelFilters['sort']>('newest');
     const [showSortDropdown, setShowSortDropdown] = useState(false);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -40,56 +45,60 @@ export default function CatalogPage() {
         price: 'all',
         types: [],
     });
-    const [page, setPage] = useState(1);
-
-    // Build API filters
+    // Build API filters (without page, as it's managed by useInfiniteQuery)
     const apiFilters: ModelFilters = {
         category: activeCategory !== 'all' ? activeCategory : undefined,
         format: filters.formats.length > 0 ? filters.formats : undefined,
         sort: sortBy,
-        page,
         limit: 20,
+        search: searchQuery || undefined,
+        minPrice: filters.price === 'paid' ? 1 : undefined,
+        maxPrice: filters.price === 'free' ? 0 : undefined,
+        // Using 'tags' or 'types' - the backend list_models needs to support this
+        types: filters.types.length > 0 ? filters.types : undefined,
     };
 
-    // Fetch products from API
-    const { data, isLoading, error } = useProducts(apiFilters);
+    // Fetch products from API using Infinite Query
+    const {
+        data,
+        isLoading,
+        isFetchingNextPage,
+        hasNextPage,
+        fetchNextPage,
+        error
+    } = useInfiniteProducts(apiFilters);
 
-    const products = data?.data || [];
-    const totalResults = data?.pagination?.total || 0;
-    const hasMore = page < (data?.pagination?.totalPages || 1);
+    const products = data?.pages.flatMap((page) => page.data) || [];
+    const totalResults = data?.pages[0]?.pagination?.total || 0;
+    const hasMore = hasNextPage;
 
     const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-    const handleSave = (productId: string) => {
-        setSaved((prev) => {
-            const next = new Set(prev);
-            if (next.has(productId)) {
-                next.delete(productId);
-            } else {
-                next.add(productId);
-            }
-            return next;
-        });
+    const handleSave = async (productId: string) => {
+        if (!isAuthenticated) { showLogin?.(); return; }
+        try {
+            await toggleWishlist(productId);
+        } catch (e) {
+            console.error('Wishlist toggle failed:', e);
+        }
     };
 
     const handleFilterChange = (newFilters: FilterState) => {
         setFilters(newFilters);
-        setPage(1); // Reset to first page when filters change
     };
 
     const handleSortChange = (sortId: string) => {
         setSortBy(sortId as ModelFilters['sort']);
         setShowSortDropdown(false);
-        setPage(1); // Reset to first page when sort changes
     };
 
     const handleProductClick = (productId: string) => {
-        router.push(`/product/${productId}`);
+        router.push(`/catalog/${productId}`);
     };
 
     const loadMore = () => {
-        if (!isLoading && hasMore) {
-            setPage(prev => prev + 1);
+        if (!isFetchingNextPage && hasNextPage) {
+            fetchNextPage();
         }
     };
 
@@ -109,7 +118,7 @@ export default function CatalogPage() {
         }
 
         return () => observer.disconnect();
-    }, [isLoading, hasMore, page]);
+    }, [isFetchingNextPage, hasNextPage]);
 
     // Click outside handler
     useEffect(() => {
@@ -122,10 +131,6 @@ export default function CatalogPage() {
         return () => document.removeEventListener('click', handleClickOutside);
     }, [isFilterExpanded]);
 
-    // Reset page when category changes
-    useEffect(() => {
-        setPage(1);
-    }, [activeCategory]);
 
     return (
         <div className="max-w-[1800px] mx-auto px-4 md:px-6 py-4">
@@ -136,8 +141,8 @@ export default function CatalogPage() {
                         key={category.id}
                         onClick={() => setActiveCategory(category.id)}
                         className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all cursor-pointer ${activeCategory === category.id
-                                ? 'bg-white text-black'
-                                : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#252525] hover:text-white border border-gray-800'
+                            ? 'bg-white text-black'
+                            : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#252525] hover:text-white border border-gray-800'
                             }`}
                     >
                         {category.label}
@@ -181,8 +186,8 @@ export default function CatalogPage() {
                                         key={option.id}
                                         onClick={() => handleSortChange(option.id)}
                                         className={`w-full text-left px-3 py-2 text-xs transition-colors cursor-pointer ${sortBy === option.id
-                                                ? 'bg-yellow-400/10 text-yellow-400'
-                                                : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                                            ? 'bg-yellow-400/10 text-yellow-400'
+                                            : 'text-gray-400 hover:bg-gray-800 hover:text-white'
                                             }`}
                                     >
                                         {option.label}
@@ -244,7 +249,7 @@ export default function CatalogPage() {
                             isFree={product.price === 0}
                             discount={undefined}
                             author={product.artist.username}
-                            isSaved={saved.has(product.id)}
+                            isSaved={isInWishlist(product.id)}
                             onSave={() => handleSave(product.id)}
                             onClick={() => handleProductClick(product.id)}
                             price={product.price}
@@ -278,23 +283,61 @@ export default function CatalogPage() {
 
             {/* Infinite Scroll Trigger */}
             <div ref={loadMoreRef} className="h-16 flex items-center justify-center mt-6">
-                {isLoading && (
+                {(isLoading || isFetchingNextPage) && (
                     <div className="flex items-center gap-2 text-gray-500">
                         <div className="w-4 h-4 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" />
                         <span className="text-xs">Loading...</span>
                     </div>
                 )}
-                {!hasMore && products.length > 0 && (
-                    <p className="text-gray-600 text-xs">You've reached the end ✨</p>
+                {!hasNextPage && products.length > 0 && (
+                    <p className="text-gray-600 text-xs text-center w-full">You've reached the end</p>
                 )}
             </div>
 
             {/* Empty State */}
             {!isLoading && !error && products.length === 0 && (
-                <div className="text-center py-12 bg-gray-800/20 rounded-xl border border-gray-800">
-                    <p className="text-gray-400">No products found. Try adjusting your filters.</p>
+                <div className="flex flex-col items-center justify-center py-15 px-4 animate-in fade-in zoom-in-95 duration-700">
+                    <div className="relative mb-8">
+                        <div className="absolute inset-0 bg-blue-500/20 rounded-full" />
+                        <div className="relative w-28 h-28 bg-[#0a0a0a] border border-white/10 rounded-2xl flex items-center justify-center shadow-2xl overflow-hidden group">
+                            <ShoppingCart className="w-12 h-12 text-gray-500 group-hover:scale-110 transition-transform duration-500" />
+                        </div>
+                    </div>
+
+                    <h3 className="text-3xl font-black text-white mb-3 tracking-tight">
+                        No assets found
+                    </h3>
+                    <p className="text-gray-500 max-w-sm text-center mb-10 leading-relaxed text-sm md:text-base">
+                        We couldn't find any 3D models matching your request. Try broadening your filters or different keywords.
+                    </p>
+
+                    {(filters.formats.length > 0 || filters.types.length > 0 || filters.price !== 'all' || activeCategory !== 'all' || searchQuery) && (
+                        <button
+                            onClick={() => {
+                                setFilters({ formats: [], price: 'all', types: [] });
+                                setActiveCategory('all');
+                                if (searchQuery) router.push('/catalog');
+                            }}
+                            className="group relative px-8 py-3.5 bg-white text-black font-black rounded-xl hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer overflow-hidden shadow-[0_0_30px_rgba(255,255,255,0.1)]"
+                        >
+                            <span className="relative z-10">Reset Filters</span>
+                            <div className="absolute inset-0 bg-gradient-to-r from-blue-100 to-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                    )}
                 </div>
             )}
         </div>
+    );
+}
+
+export default function CatalogPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-[60vh] flex items-center justify-center">
+                <div className="w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+        }>
+            <CatalogContent />
+        </Suspense>
     );
 }

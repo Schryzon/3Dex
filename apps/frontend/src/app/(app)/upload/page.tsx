@@ -1,16 +1,22 @@
-'use client';
-
+'use client'
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Box, Info, Tag, DollarSign, Check, ChevronRight, Layout } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Box, Info, Tag, DollarSign, Check, ChevronRight, Layout, Loader2 } from 'lucide-react';
 import FileUploader from '@/components/upload/FileUploader';
+import MultiFileUploader from '@/components/upload/MultiFileUploader';
+import { api } from '@/lib/api';
+import axios from 'axios';
 
 type Step = 'files' | 'details' | 'pricing';
 
 export default function UploadPage() {
+    const router = useRouter();
     const [currentStep, setCurrentStep] = useState<Step>('files');
     const [modelFile, setModelFile] = useState<File | null>(null);
-    const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+    const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
 
     // Form Data
     const [formData, setFormData] = useState({
@@ -20,10 +26,11 @@ export default function UploadPage() {
         tags: '',
         price: '0',
         isFree: true,
-        license: 'royalty-free'
+        license: 'royalty-free',
+        isNsfw: false
     });
 
-    const isStep1Valid = modelFile !== null;
+    const isStep1Valid = modelFile !== null && galleryFiles.length > 0;
     const isStep2Valid = formData.title.length >= 5 && formData.description.length >= 10;
 
     const steps = [
@@ -31,6 +38,89 @@ export default function UploadPage() {
         { id: 'details', label: 'Asset Details', icon: Info },
         { id: 'pricing', label: 'Pricing & Publish', icon: DollarSign },
     ];
+
+    const getPresignedUrl = async (file: File) => {
+        const { data } = await api.post('/models/upload-url', {
+            filename: file.name,
+            content_type: file.type || (file.name.endsWith('.glb') ? 'model/gltf-binary' : 'image/jpeg')
+        });
+        return data; // { upload_url, key }
+    };
+
+    const uploadFileToMinIO = async (file: File, url: string, onProgress?: (p: number) => void) => {
+        await axios.put(url, file, {
+            headers: {
+                'Content-Type': file.type || (file.name.endsWith('.glb') ? 'model/gltf-binary' : 'image/jpeg')
+            },
+            onUploadProgress: (progressEvent) => {
+                if (onProgress && progressEvent.total) {
+                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    onProgress(progress);
+                }
+            }
+        });
+    };
+
+    const handlePublish = async () => {
+        if (!modelFile) return;
+
+        try {
+            setIsLoading(true);
+
+            // 1. Upload Model
+            const modelUpload = await getPresignedUrl(modelFile);
+            await uploadFileToMinIO(modelFile, modelUpload.upload_url, (p) => setUploadProgress(p));
+
+            // 2. Upload Thumbnail & Gallery Images
+            let previewKey = '';
+            const galleryKeys: string[] = [];
+
+            for (let i = 0; i < galleryFiles.length; i++) {
+                const file = galleryFiles[i];
+                const upload = await getPresignedUrl(file);
+                await uploadFileToMinIO(file, upload.upload_url);
+
+                if (i === 0) {
+                    previewKey = upload.key;
+                } else {
+                    galleryKeys.push(upload.key);
+                }
+            }
+
+            const userStr = localStorage.getItem('user');
+            const user = userStr ? JSON.parse(userStr) : null;
+
+            if (!user || !user.id) {
+                alert("You must be logged in!");
+                setIsLoading(false);
+                return;
+            }
+
+            await api.post('/models', {
+                title: formData.title,
+                description: formData.description,
+                price: formData.isFree ? 0 : Number(formData.price),
+                file_url: modelUpload.key, // Store KEY, not signed URL
+                preview_url: previewKey,
+                gallery_urls: galleryKeys,
+                artist_id: user.id, // Explicitly sending artist_id as required by backend
+                category: formData.category,
+                tags: formData.tags.split(',').map(t => t.trim()),
+                license: formData.license,
+                is_nsfw: formData.isNsfw
+            });
+
+            // Success
+            router.push('/profile');
+
+        } catch (error: any) {
+            console.error(error);
+            alert(`Upload failed: ${error.response?.data?.message || error.message}`);
+        } finally {
+            setIsLoading(false);
+            setUploadProgress(0);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-black text-white pb-20">
@@ -61,7 +151,7 @@ export default function UploadPage() {
                         return (
                             <div key={step.id} className="relative z-10 flex flex-col items-center">
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isActive ? 'bg-yellow-400 text-black scale-110 shadow-[0_0_20px_rgba(250,204,21,0.3)]' :
-                                        isPast ? 'bg-green-500 text-white' : 'bg-gray-900 text-gray-500 border border-gray-800'
+                                    isPast ? 'bg-green-500 text-white' : 'bg-gray-900 text-gray-500 border border-gray-800'
                                     }`}>
                                     {isPast ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
                                 </div>
@@ -90,12 +180,13 @@ export default function UploadPage() {
                                     <FileUploader onFileSelect={setModelFile} accept=".glb,.gltf" maxSizeMB={100} />
                                 </div>
                                 <div className="space-y-4">
-                                    <label className="text-sm font-bold text-gray-300 block">Thumbnail Image</label>
-                                    <FileUploader
-                                        onFileSelect={setThumbnailFile}
+                                    <label className="text-sm font-bold text-gray-300 block">Preview Images (Required)</label>
+                                    <MultiFileUploader
+                                        onFilesSelect={setGalleryFiles}
                                         accept=".jpg,.jpeg,.png,.webp"
-                                        label="Upload Preview"
-                                        description="JPG, PNG or WEBP (Max 5MB)"
+                                        label="Upload Previews"
+                                        description="JPG, PNG or WEBP (Max 5MB each)"
+                                        maxFiles={5}
                                     />
                                 </div>
                             </div>
@@ -167,6 +258,20 @@ export default function UploadPage() {
                                             onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
                                         />
                                     </div>
+                                </div>
+
+                                <div className="flex items-center gap-3 p-4 bg-gray-900/50 border border-gray-800 rounded-xl">
+                                    <input
+                                        type="checkbox"
+                                        id="nsfw-checkbox"
+                                        checked={formData.isNsfw}
+                                        onChange={(e) => setFormData({ ...formData, isNsfw: e.target.checked })}
+                                        className="w-5 h-5 rounded border-gray-700 bg-black text-red-500 focus:ring-red-500 focus:ring-offset-gray-900 cursor-pointer"
+                                    />
+                                    <label htmlFor="nsfw-checkbox" className="text-sm font-medium text-gray-300 flex items-center cursor-pointer">
+                                        Mature Content (NSFW)
+                                        <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded ml-2">Applies blur filter</span>
+                                    </label>
                                 </div>
                             </div>
 
@@ -262,9 +367,24 @@ export default function UploadPage() {
                                     Back
                                 </button>
                                 <button
-                                    className="px-10 py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 text-black font-black rounded-xl shadow-[0_10px_40px_rgba(250,204,21,0.2)] flex items-center gap-3 transition-all hover:scale-[1.02] cursor-pointer"
+                                    onClick={handlePublish}
+                                    disabled={isLoading}
+                                    className="relative px-10 py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 text-black font-black rounded-xl shadow-[0_10px_40px_rgba(250,204,21,0.2)] flex items-center gap-3 transition-all hover:scale-[1.02] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
                                 >
-                                    Publish Asset
+                                    {isLoading && (
+                                        <div
+                                            className="absolute bottom-0 left-0 h-1 bg-black/20 transition-all duration-300"
+                                            style={{ width: `${uploadProgress}%` }}
+                                        />
+                                    )}
+                                    {isLoading ? (
+                                        <>
+                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                            <span>Publishing {uploadProgress > 0 ? `${uploadProgress}%` : ''}</span>
+                                        </>
+                                    ) : (
+                                        'Publish Asset'
+                                    )}
                                 </button>
                             </div>
                         </div>
@@ -274,3 +394,4 @@ export default function UploadPage() {
         </div>
     );
 }
+

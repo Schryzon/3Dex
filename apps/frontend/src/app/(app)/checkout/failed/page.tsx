@@ -3,8 +3,9 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { XCircle, ArrowLeft, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui';
+import { Suspense } from 'react';
 
-export default function CheckoutFailedPage() {
+function FailedContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const orderId = searchParams.get('order');
@@ -64,5 +65,13 @@ export default function CheckoutFailedPage() {
                 </p>
             </div>
         </div>
+    );
+}
+
+export default function CheckoutFailedPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-black" />}>
+            <FailedContent />
+        </Suspense>
     );
 }

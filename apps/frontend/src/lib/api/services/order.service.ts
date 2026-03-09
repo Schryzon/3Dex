@@ -1,5 +1,7 @@
 import { apiClient } from '../client';
 import { API_ENDPOINTS } from '@/lib/constants/api';
+import { USE_MOCK_DATA } from './product.service';
+import { cartService } from './cart.service';
 import type { Order } from '@/lib/types';
 
 interface CreateOrderRequest {
@@ -19,6 +21,20 @@ interface CreateOrderRequest {
 export const orderService = {
     async createOrder(data: CreateOrderRequest): Promise<Order> {
         return apiClient.post<Order>(API_ENDPOINTS.ORDERS.CREATE, data);
+    },
+
+    async checkout(modelIds: string[]): Promise<{ orderId: string; token: string; redirect_url: string }> {
+        if (USE_MOCK_DATA) {
+            // Clear mock cart on successful "checkout"
+            await cartService.clearCart();
+
+            return {
+                orderId: `mock-order-${Date.now()}`,
+                token: 'mock-snap-token',
+                redirect_url: '/checkout/success' // This will be handled by our frontend logic
+            };
+        }
+        return apiClient.post('/orders/checkout', { model_ids: modelIds });
     },
 
     async getOrders(): Promise<Order[]> {
