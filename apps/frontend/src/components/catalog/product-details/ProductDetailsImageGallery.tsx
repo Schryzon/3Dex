@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronLeft, ChevronRight, Box, Image as ImageIcon } from 'lucide-react';
-import ModelViewer3D from '@/components/catalog/ModelViewer3D';
+import { ModelViewer3D } from '@/components/catalog/viewer';
 
 interface ProductDetailsImageGalleryProps {
     images: string[];

@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { reviewService, Review, ReviewStats } from '@/lib/api/services/review.service';
 import { Star, MessageCircle, AlertCircle, CheckCircle } from 'lucide-react';
-import ProductReviewList from '../catalog/ProductReviewList';
-import ProductReviewForm from '../catalog/ProductReviewForm';
+import ProductReviewList from './ProductReviewList';
+import ProductReviewForm from './ProductReviewForm';
 import { useAuth } from '@/lib/hooks/useAuth';
 
 interface Props {

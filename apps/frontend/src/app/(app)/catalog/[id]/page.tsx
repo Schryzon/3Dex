@@ -9,16 +9,16 @@ import { Share2, Heart, Plus, Check, Download, Eye, ShoppingCart, FolderPlus, Al
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import { Suspense, lazy, useState } from 'react';
 import Link from 'next/link';
-import ProductDetails from '@/components/catalog/ProductDetails';
-import RelatedProducts from '@/components/catalog/RelatedProducts';
-import ProductReviews from '@/components/catalog/ProductReviews';
+import { ProductDetails } from '@/components/catalog/product-details';
+import { RelatedProducts } from '@/components/catalog/product-details';
+import { ProductReviews } from '@/components/catalog/reviews';
 import AddToCollectionModal from '@/components/collection/AddToCollectionModal';
 import { formatPrice } from '@/lib/utils';
 import { purchaseService } from '@/lib/api/services/purchase.service';
 import { toast } from 'react-hot-toast';
 
 // Lazy load 3D viewer for better performance
-const ProductViewer3D = lazy(() => import('@/components/catalog/ProductViewer3D'));
+const ProductViewer3D = lazy(() => import('@/components/catalog/viewer').then(mod => ({ default: mod.ProductViewer3D })));
 
 export default function CatalogDetailPage() {
     const params = useParams();

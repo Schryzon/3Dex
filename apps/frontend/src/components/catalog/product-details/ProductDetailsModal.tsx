@@ -3,11 +3,11 @@
 import Link from 'next/link';
 import { X, Star, ExternalLink } from 'lucide-react';
 import { useProductDetails } from '@/lib/hooks/useProductDetails';
-import ProductDetailsImageGallery from './product-details/ProductDetailsImageGallery';
-import ProductDetailsCTAButtons from './product-details/ProductDetailsCTAButtons';
-import ProductDetailsSpecGrid from './product-details/ProductDetailsSpecGrid';
-import ProductDetailsTabSection from './product-details/ProductDetailsTabSection';
-import ProductDetailsRelatedGrid from './product-details/ProductDetailsRelatedGrid';
+import ProductDetailsImageGallery from './ProductDetailsImageGallery';
+import ProductDetailsCTAButtons from './ProductDetailsCTAButtons';
+import ProductDetailsSpecGrid from './ProductDetailsSpecGrid';
+import ProductDetailsTabSection from './ProductDetailsTabSection';
+import ProductDetailsRelatedGrid from './ProductDetailsRelatedGrid';
 
 // Full product shape accepted by the modal
 interface ProductDetailsModalProps {

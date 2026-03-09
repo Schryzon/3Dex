@@ -1,7 +1,7 @@
 'use client';
 
-import ProductReviewForm from '@/components/catalog/ProductReviewForm';
-import ProductReviewList from '@/components/catalog/ProductReviewList';
+import { ProductReviewForm } from '@/components/catalog/reviews';
+import { ProductReviewList } from '@/components/catalog/reviews';
 import type { Review } from '@/lib/api/services/review.service';
 
 // The three available tab identifiers

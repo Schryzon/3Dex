@@ -81,7 +81,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
         theme: 'filled_black',
         size: 'large',
         text: 'signin_with',
-        shape: 'rectangular',
+        shape: 'pill',
         width: 400,
       });
 

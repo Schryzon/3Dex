@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { ChevronDown, LayoutGrid, List, ShoppingCart } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import CatalogProductCard from '@/components/catalog/CatalogProductCard';
-import CatalogFilters, { FilterState } from '@/components/catalog/CatalogFilters';
+import { CatalogProductCard } from '@/components/catalog/product-card';
+import { CatalogFilters, FilterState } from '@/components/catalog/filters';
 import { Skeleton } from '@/components/common/Loading';
 import { useInfiniteProducts } from '@/lib/hooks/useProducts';
 import { useWishlist } from '@/lib/hooks/useWishlist';

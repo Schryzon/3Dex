@@ -273,7 +273,7 @@ export default function LandingNavbar() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-gray-900 border-t border-gray-800">
+        <div className="lg:hidden bg-[#111111] border-t border-gray-800 absolute w-full max-h-[80vh] overflow-y-auto">
           <div className="px-4 py-4 space-y-3">
 
             {MOBILE_NAV.map(({ label, href }) => (
@@ -328,14 +328,14 @@ export default function LandingNavbar() {
               <div className="sm:hidden space-y-2 pt-2 border-t border-gray-800">
                 <button
                   onClick={() => { showLogin(); setMobileMenuOpen(false); }}
-                  className="w-full px-4 py-3 text-white hover:bg-gray-800 rounded-lg transition-colors text-left cursor-pointer"
+                  className="w-full px-4 py-3 text-white hover:bg-gray-800 rounded-lg transition-colors text-center cursor-pointer"
                   style={{ touchAction: 'manipulation' }}
                 >
                   Login
                 </button>
                 <button
                   onClick={() => { showRegister(); setMobileMenuOpen(false); }}
-                  className="w-full px-4 py-3 bg-yellow-400 text-black font-semibold rounded-lg hover:bg-yellow-300 transition-colors cursor-pointer"
+                  className="w-full px-4 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
                   style={{ touchAction: 'manipulation' }}
                 >
                   Register

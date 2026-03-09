@@ -6,7 +6,7 @@ import { ArrowRight, ShoppingCart } from 'lucide-react';
 import { useProducts } from '@/lib/hooks/useProducts';
 import { formatPrice } from '@/lib/utils';
 import { useInView } from '@/lib/hooks/useInView';
-import CatalogProductCard from '@/components/catalog/CatalogProductCard';
+import { CatalogProductCard } from '@/components/catalog/product-card';
 
 
 

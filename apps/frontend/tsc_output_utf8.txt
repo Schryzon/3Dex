@@ -1,0 +1,1 @@
+﻿src/components/catalog/product-details/RelatedProducts.tsx(5,29): error TS2307: Cannot find module './ProductCard' or its corresponding type declarations.

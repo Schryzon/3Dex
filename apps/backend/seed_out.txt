@@ -1,0 +1,36 @@
+🌱 Starting seed...
+DB URL (Effective): postgresql://threedex:****@127.0.0.1:5432/threedex
+PrismaClientKnownRequestError: 
+Invalid `p.user.upsert()` invocation in
+D:\INFORMATICS\SEMESTER 4\WEB DEVELOPMENT\3Dex\apps\backend\prisma\seed.ts:24:33
+
+  21 
+  22 // 1. Create Artist
+  23 const artistEmail = 'artist@3dex.com'
+→ 24 const artist = await p.user.upsert(
+Can't reach database server at 127.0.0.1:5432
+    at Vr.handleRequestError (D:\INFORMATICS\SEMESTER 4\WEB DEVELOPMENT\3Dex\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at Vr.handleAndLogRequestError (D:\INFORMATICS\SEMESTER 4\WEB DEVELOPMENT\3Dex\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at Vr.request (D:\INFORMATICS\SEMESTER 4\WEB DEVELOPMENT\3Dex\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async a (D:\INFORMATICS\SEMESTER 4\WEB DEVELOPMENT\3Dex\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:805:24)
+    at async main (D:\INFORMATICS\SEMESTER 4\WEB DEVELOPMENT\3Dex\apps\backend\prisma\seed.ts:24:20) {
+  code: 'P1001',
+  meta: {
+    modelName: 'User',
+    driverAdapterError: DriverAdapterError: DatabaseNotReachable
+        at PrismaPgAdapter.onError (D:\INFORMATICS\SEMESTER 4\WEB DEVELOPMENT\3Dex\node_modules\@prisma\adapter-pg\dist\index.js:687:11)
+        at D:\INFORMATICS\SEMESTER 4\WEB DEVELOPMENT\3Dex\node_modules\@prisma\adapter-pg\dist\index.js:720:68
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at async PrismaPgAdapter.startTransaction (D:\INFORMATICS\SEMESTER 4\WEB DEVELOPMENT\3Dex\node_modules\@prisma\adapter-pg\dist\index.js:720:18)
+        at async Mt.#n (D:\INFORMATICS\SEMESTER 4\WEB DEVELOPMENT\3Dex\node_modules\@prisma\client-engine-runtime\src\transaction-manager\transaction-manager.ts:125:31)
+        at async Mt.startInternalTransaction (D:\INFORMATICS\SEMESTER 4\WEB DEVELOPMENT\3Dex\node_modules\@prisma\client-engine-runtime\src\transaction-manager\transaction-manager.ts:92:12)
+        at async e.interpretNode (D:\INFORMATICS\SEMESTER 4\WEB DEVELOPMENT\3Dex\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:255:33)
+        at async e.run (D:\INFORMATICS\SEMESTER 4\WEB DEVELOPMENT\3Dex\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:93:23)
+        at async execute (D:\INFORMATICS\SEMESTER 4\WEB DEVELOPMENT\3Dex\node_modules\@prisma\client\src\runtime\core\engines\client\LocalExecutor.ts:81:12)
+        at async Dt.request (D:\INFORMATICS\SEMESTER 4\WEB DEVELOPMENT\3Dex\node_modules\@prisma\client\src\runtime\core\engines\client\ClientEngine.ts:461:22) {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.3.0'
+}

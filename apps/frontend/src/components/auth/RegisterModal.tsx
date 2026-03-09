@@ -68,7 +68,7 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
         theme: 'filled_black',
         size: 'large',
         text: 'signup_with',
-        shape: 'rectangular',
+        shape: 'pill',
         width: 400,
       });
 

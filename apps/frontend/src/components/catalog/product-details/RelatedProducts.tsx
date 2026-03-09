@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { apiClient } from '@/lib/api/client';
-import ProductCard from './ProductCard';
+import { ProductCard } from '../product-card';
 import { ChevronRight } from 'lucide-react';
 
 interface RelatedProduct {

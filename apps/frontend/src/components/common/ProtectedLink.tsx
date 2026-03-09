@@ -24,19 +24,10 @@ export default function ProtectedLink({
     const { isAuthenticated, showLogin } = useAuth();
 
     const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
-        console.log('🔗 ProtectedLink clicked:', {
-            href,
-            requireAuth,
-            isAuthenticated,
-            willBlock: requireAuth && !isAuthenticated
-        });
 
         if (requireAuth && !isAuthenticated) {
             e.preventDefault();
-            console.log('Access blocked - showing login modal');
             showLogin();
-        } else {
-            console.log('Access granted - navigating to:', href);
         }
     };
 

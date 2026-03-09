@@ -237,6 +237,52 @@ async function main() {
 
     console.log('💬 Created social interactions')
 
+    // 8. Tags
+    const tagNames = ['Low Poly', 'Sci-Fi', 'Game Ready', 'Architecture', 'Nature'];
+    const tags = [];
+    for (const tagName of tagNames) {
+        tags.push(await p.tag.upsert({
+            where: { name: tagName },
+            update: {},
+            create: { name: tagName },
+        }));
+    }
+    console.log(`🏷️ Created ${tags.length} tags`);
+
+    // Add tags to first model
+    const dbModels = await p.model.findMany();
+    if (dbModels.length > 0 && tags.length > 0) {
+        await p.model.update({
+            where: { id: dbModels[0].id },
+            data: { tags: { connect: [{ id: tags[0].id }, { id: tags[2].id }] } }
+        });
+
+        // Customer reviews first model
+        await p.review.upsert({
+            where: { user_id_model_id: { user_id: customer.id, model_id: dbModels[0].id } },
+            update: {},
+            create: { user_id: customer.id, model_id: dbModels[0].id, rating: 5, comment: 'Great model! Perfect for my game.' }
+        });
+
+        // Customer wishlist second model
+        if (dbModels.length > 1) {
+            await p.wishlist.upsert({
+                where: { user_id_model_id: { user_id: customer.id, model_id: dbModels[1].id } },
+                update: {},
+                create: { user_id: customer.id, model_id: dbModels[1].id }
+            });
+        }
+        console.log('⭐ Added Reviews and Wishlist items');
+    }
+
+    // 9. Follows
+    await p.follow.upsert({
+        where: { follower_id_following_id: { follower_id: customer.id, following_id: artist.id } },
+        update: {},
+        create: { follower_id: customer.id, following_id: artist.id }
+    });
+    console.log('👥 Created Follower relationships');
+
     console.log('✅ Seed complete!')
 }
 
