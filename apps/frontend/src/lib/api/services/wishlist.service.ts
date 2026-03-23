@@ -1,6 +1,10 @@
 import { apiClient } from '../client';
-import { API_ENDPOINTS } from '@/lib/constants/api';
+import { API_ENDPOINTS } from '@/lib/constants/endpoints';
 import type { WishlistItem } from '@/lib/types';
+
+export const wishlistKeys = {
+    all: ['wishlist'] as const,
+} as const;
 
 // Backend uses /:model_id as URL param (not request body)
 export const wishlistService = {

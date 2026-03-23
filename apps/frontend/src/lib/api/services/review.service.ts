@@ -1,5 +1,5 @@
 import { apiClient } from '../client';
-import { API_ENDPOINTS } from '@/lib/constants/api';
+import { API_ENDPOINTS } from '@/lib/constants/endpoints';
 
 export interface Review {
     id: string;
@@ -38,13 +38,13 @@ export const reviewService = {
      * Get all reviews for a specific model
      */
     getReviews: (modelId: string, page = 1) =>
-        apiClient.get<Review[]>(`${API_ENDPOINTS.REVIEWS.MODEL_LIST(modelId)}?page=${page}`),
+        apiClient.get<Review[]>(`${API_ENDPOINTS.REVIEWS.MODEL(modelId)}?page=${page}`),
 
     /**
      * Create a new review for a model
      */
     createReview: (modelId: string, review: CreateReviewData) =>
-        apiClient.post<Review>(API_ENDPOINTS.REVIEWS.MODEL_CREATE(modelId), review),
+        apiClient.post<Review>(API_ENDPOINTS.REVIEWS.MODEL(modelId), review),
 
     /**
      * Get reviews for a specific user (Artist/Provider)

@@ -1,8 +1,12 @@
 import { apiClient } from '../client';
-import { API_ENDPOINTS } from '@/lib/constants/api';
+import { API_ENDPOINTS } from '@/lib/constants/endpoints';
 import { USE_MOCK_DATA } from './product.service';
 import { MOCK_PRODUCTS } from '@/lib/mocks/products';
 import type { CartItem } from '@/lib/types';
+
+export const cartKeys = {
+    all: ['cart'] as const,
+} as const;
 
 const MOCK_CART_KEY = '3dex_mock_cart';
 

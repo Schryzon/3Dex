@@ -1,8 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { wishlistService } from '@/lib/api/services/wishlist.service';
-import { QUERY_KEYS } from '@/lib/constants/api';
+import { wishlistService, wishlistKeys } from '@/lib/api/services/wishlist.service';
 import { useAuth } from '@/features/auth';
 
 export function useWishlist() {
@@ -10,19 +9,19 @@ export function useWishlist() {
     const queryClient = useQueryClient();
 
     const { data: wishlistItems = [], isLoading } = useQuery({
-        queryKey: QUERY_KEYS.WISHLIST,
+        queryKey: wishlistKeys.all,
         queryFn: () => wishlistService.getWishlist(),
         enabled: isAuthenticated,
     });
 
     const addMutation = useMutation({
         mutationFn: (modelId: string) => wishlistService.addToWishlist(modelId),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEYS.WISHLIST }),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: wishlistKeys.all }),
     });
 
     const removeMutation = useMutation({
         mutationFn: (modelId: string) => wishlistService.removeFromWishlist(modelId),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEYS.WISHLIST }),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: wishlistKeys.all }),
     });
 
     const isInWishlist = (modelId: string) =>

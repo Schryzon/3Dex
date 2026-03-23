@@ -1,8 +1,13 @@
 import { apiClient } from '../client';
-import { API_ENDPOINTS } from '@/lib/constants/api';
+import { API_ENDPOINTS } from '@/lib/constants/endpoints';
 import { USE_MOCK_DATA } from './product.service';
 import { cartService } from './cart.service';
 import type { Order } from '@/lib/types';
+
+export const orderKeys = {
+    all: ['orders'] as const,
+    detail: (id: string) => [...orderKeys.all, id] as const,
+} as const;
 
 interface CreateOrderRequest {
     items: Array<{

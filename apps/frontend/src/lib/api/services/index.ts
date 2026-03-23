@@ -10,3 +10,5 @@ export { postService } from './post.service';
 export { reviewService } from './review.service';
 export { userService } from './user.service';
 export { notificationService } from './notification.service';
+export { collectionService } from './collection.service';
+export { analyticsService } from './analytics.service';

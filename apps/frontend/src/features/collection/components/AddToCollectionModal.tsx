@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import { collectionService, collectionKeys } from '@/lib/api/services/collection.service';
 import { X, Plus, Folder, Check, FolderPlus } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -22,21 +22,15 @@ export default function AddToCollectionModal({ modelId, isOpen, onClose }: AddTo
     const [newCollectionName, setNewCollectionName] = useState('');
 
     const { data: collections, isLoading } = useQuery({
-        queryKey: ['my-collections'],
-        queryFn: async () => {
-            const res = await api.get<{ data: Collection[] }>('/collections/my');
-            return res.data.data;
-        },
+        queryKey: collectionKeys.all,
+        queryFn: collectionService.getMyCollections,
         enabled: isOpen
     });
 
     const createCollectionMutation = useMutation({
-        mutationFn: async (name: string) => {
-            const res = await api.post<Collection>('/collections', { name, isPublic: true });
-            return res.data;
-        },
+        mutationFn: collectionService.createCollection,
         onSuccess: (newCollection) => {
-            queryClient.invalidateQueries({ queryKey: ['my-collections'] });
+            queryClient.invalidateQueries({ queryKey: collectionKeys.all });
             setIsCreating(false);
             setNewCollectionName('');
             toast.success('Collection created');
@@ -45,9 +39,7 @@ export default function AddToCollectionModal({ modelId, isOpen, onClose }: AddTo
     });
 
     const addToCollectionMutation = useMutation({
-        mutationFn: async (collectionId: string) => {
-            await api.post(`/collections/${collectionId}/items`, { modelId });
-        },
+        mutationFn: (collectionId: string) => collectionService.addToCollection(collectionId, modelId),
         onSuccess: () => {
             toast.success('Added to collection');
             onClose();

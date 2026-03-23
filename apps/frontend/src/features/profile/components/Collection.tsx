@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { purchaseService, Purchase } from '@/lib/api/services/purchase.service';
+import { purchaseService, purchaseKeys, Purchase } from '@/lib/api/services/purchase.service';
 import { FolderOpen, Download, Eye, Calendar, Filter, Search, Grid3x3, List, ChevronDown, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/features/auth';
@@ -16,7 +16,7 @@ export default function Collection() {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
   const { data: collections = [], isLoading } = useQuery({
-    queryKey: ['purchases'],
+    queryKey: purchaseKeys.all,
     queryFn: () => purchaseService.getPurchases(),
     enabled: !!user,
   });

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { postService } from '@/lib/api/services';
+import { postService, postKeys } from '@/lib/api/services/post.service';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Loader2, Send } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -18,7 +18,7 @@ export default function PostComments({ postId }: PostCommentsProps) {
     const [content, setContent] = useState('');
 
     const { data: comments, isLoading } = useQuery({
-        queryKey: ['post-comments', postId],
+        queryKey: postKeys.comments(postId),
         queryFn: () => postService.getComments(postId)
     });
 
@@ -26,7 +26,7 @@ export default function PostComments({ postId }: PostCommentsProps) {
         mutationFn: () => postService.addComment(postId, content),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['post-comments', postId] });
-            queryClient.invalidateQueries({ queryKey: ['community-feed'] }); // Update comment count
+            queryClient.invalidateQueries({ queryKey: postKeys.feed }); // Update comment count
             setContent('');
         },
         onError: (err: any) => {

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Shield, Zap, Award, Globe, Clock, Heart } from 'lucide-react';
 import { useInView } from '@/lib/hooks/useInView';
 import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/lib/api/client';
+import { analyticsService, analyticsKeys } from '@/lib/api/services/analytics.service';
 
 export default function FeaturesSection() {
     const { ref: leftRef, inView: leftVisible } = useInView({ threshold: 0.1 });
@@ -12,11 +12,8 @@ export default function FeaturesSection() {
     const { ref: bannerRef, inView: bannerVisible } = useInView({ threshold: 0.2 });
 
     const { data: stats } = useQuery({
-        queryKey: ['public-stats'],
-        queryFn: async () => {
-            const res = await apiClient.get('/analytics/public');
-            return res as any;
-        }
+        queryKey: analyticsKeys.publicStats,
+        queryFn: () => analyticsService.getPublicStats()
     });
 
     const displayStats = [

@@ -1,5 +1,11 @@
 import { apiClient } from '../client';
 
+export const postKeys = {
+    all: ['posts'] as const,
+    feed: ['community-feed'] as const,
+    comments: (postId: string) => ['post-comments', postId] as const,
+} as const;
+
 export interface Post {
     id: string;
     caption: string;

@@ -4,17 +4,14 @@ import Link from 'next/link';
 import { Box, Palette, Printer, ArrowRight } from 'lucide-react';
 import { useInView } from '@/lib/hooks/useInView';
 import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/lib/api/client';
+import { analyticsService, analyticsKeys } from '@/lib/api/services/analytics.service';
 
 export default function FeaturedCategories() {
     const { ref, inView } = useInView({ threshold: 0.1 });
 
     const { data: stats } = useQuery({
-        queryKey: ['public-stats'],
-        queryFn: async () => {
-            const res = await apiClient.get('/analytics/public');
-            return res as any; // apiClient.get returns data directly
-        }
+        queryKey: analyticsKeys.publicStats,
+        queryFn: () => analyticsService.getPublicStats()
     });
 
     return (

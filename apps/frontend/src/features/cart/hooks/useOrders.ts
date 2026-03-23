@@ -1,11 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { orderService } from '@/lib/api/services';
-import { QUERY_KEYS } from '@/lib/constants/api';
+import { orderService, orderKeys } from '@/lib/api/services/order.service';
 import type { Order } from '@/lib/types';
 
 export function useOrders() {
     const { data: orders = [], isLoading, error } = useQuery<Order[]>({
-        queryKey: QUERY_KEYS.ORDERS,
+        queryKey: orderKeys.all,
         queryFn: () => orderService.getOrders(),
     });
 

@@ -1,6 +1,11 @@
 import { apiClient } from '../client';
-import { API_ENDPOINTS } from '@/lib/constants/api';
+import { API_ENDPOINTS } from '@/lib/constants/endpoints';
 import type { LoginRequest, RegisterRequest, User } from '@/lib/types';
+
+export const authKeys = {
+    all: ['auth'] as const,
+    current: () => [...authKeys.all, 'current'] as const,
+} as const;
 
 // Shape returned by login, googleLogin.
 interface AuthResponse {

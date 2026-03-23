@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { cartService } from '@/lib/api/services';
-import { QUERY_KEYS } from '@/lib/constants/api';
+import { cartService, cartKeys } from '@/lib/api/services/cart.service';
 import { useAuth } from '@/features/auth';
 import type { CartItem } from '@/lib/types';
 
@@ -9,7 +8,7 @@ export function useCart() {
     const { isAuthenticated } = useAuth();
 
     const { data: items = [], isLoading } = useQuery<CartItem[]>({
-        queryKey: QUERY_KEYS.CART,
+        queryKey: cartKeys.all,
         queryFn: () => cartService.getCart(),
         enabled: isAuthenticated,
     });
@@ -18,7 +17,7 @@ export function useCart() {
         mutationFn: ({ modelId, quantity = 1 }: { modelId: string; quantity?: number }) =>
             cartService.addToCart(modelId, quantity),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CART });
+            queryClient.invalidateQueries({ queryKey: cartKeys.all });
         },
     });
 
@@ -26,21 +25,21 @@ export function useCart() {
         mutationFn: ({ itemId, quantity }: { itemId: string; quantity: number }) =>
             cartService.updateQuantity(itemId, quantity),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CART });
+            queryClient.invalidateQueries({ queryKey: cartKeys.all });
         },
     });
 
     const removeItemMutation = useMutation({
         mutationFn: (itemId: string) => cartService.removeItem(itemId),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CART });
+            queryClient.invalidateQueries({ queryKey: cartKeys.all });
         },
     });
 
     const clearCartMutation = useMutation({
         mutationFn: () => cartService.clearCart(),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CART });
+            queryClient.invalidateQueries({ queryKey: cartKeys.all });
         },
     });
 
