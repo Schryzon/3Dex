@@ -7,9 +7,9 @@ import {
     ArrowLeft, User, Printer, Settings2, Check, ChevronRight,
     Loader2, Plus, X, Sparkles, MapPin, Globe, FileText, Wrench, Palette, DollarSign, FileUp
 } from 'lucide-react';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/features/auth';
 import { userService } from '@/lib/api/services/user.service';
-import MultiFileUploader from '@/components/upload/MultiFileUploader';
+import MultiFileUploader from '@/features/upload/components/MultiFileUploader';
 import { api } from '@/lib/api';
 import axios from 'axios';
 

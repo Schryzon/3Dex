@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useAuth } from '@/components/auth/AuthProvider';
-import { useCart } from '@/lib/hooks/useCart';
+import { useAuth } from '@/features/auth';
+import { useCart } from '@/features/cart/hooks/useCart';
 import AppSidebar from '@/components/layout/app/AppSidebar';
 import AppTopbar from '@/components/layout/app/AppTopbar';
 import DevTools from '@/components/common/DevTools';

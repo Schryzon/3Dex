@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/features/auth';
 import { adminService } from '@/lib/api/services/admin.service';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';

@@ -6,7 +6,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { User } from '@/lib/types';
 import UserAvatar from '@/components/common/UserAvatar';
-import ModelGrid from '@/components/model/ModelGrid';
+import ModelGrid from '@/features/model/components/ModelGrid';
 import {
     MapPin,
     Calendar,
@@ -24,7 +24,7 @@ import {
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/lib/hooks/useAuth';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 
 export default function PublicProfilePage() {

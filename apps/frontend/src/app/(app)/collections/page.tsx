@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/features/auth';
 import { FolderOpen, Download, Package, Search } from 'lucide-react';
 import Link from 'next/link';
 

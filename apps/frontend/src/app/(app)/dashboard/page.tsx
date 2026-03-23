@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/features/auth';
 import { api } from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
 import { Sparkles, Package, Download, Heart, ArrowRight, LayoutDashboard, Clock, Star, Users, MessageSquare } from 'lucide-react';

@@ -1,7 +1,7 @@
 'use client';
 
-import { useWishlist } from '@/lib/hooks/useWishlist';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useWishlist } from '@/features/catalog/hooks/useWishlist';
+import { useAuth } from '@/features/auth';
 import { Heart, Search, Package, Loader2, X } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';

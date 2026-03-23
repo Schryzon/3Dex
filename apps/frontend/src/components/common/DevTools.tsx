@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/features/auth';
 import {
     Wrench,
     User,

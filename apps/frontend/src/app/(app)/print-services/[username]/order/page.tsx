@@ -7,7 +7,7 @@ import { api } from '@/lib/api';
 import { User, Model, PrintConfig } from '@/lib/types';
 import UserAvatar from '@/components/common/UserAvatar';
 import { Loader2, Plus, Trash2, ArrowRight } from 'lucide-react';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/features/auth';
 
 export default function PlaceOrderPage() {
     const params = useParams();

@@ -1,8 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useCart } from '@/lib/hooks/useCart';
-import { useAuth } from '@/lib/hooks/useAuth';
+import { useCart } from '@/features/cart/hooks/useCart';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useState } from 'react';
 import { formatPrice } from '@/lib/utils';
 import { orderService } from '@/lib/api/services';

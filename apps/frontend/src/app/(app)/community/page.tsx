@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { postService } from '@/lib/api/services';
-import { useAuth } from '@/lib/hooks/useAuth';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import UserAvatar from '@/components/common/UserAvatar';
 import { Loader2, Heart, MessageSquare, Send, Image as ImageIcon, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import PostComments from '@/components/community/PostComments';
+import PostComments from '@/features/community/components/PostComments';
 
 export default function CommunityPage() {
     const { user } = useAuth();

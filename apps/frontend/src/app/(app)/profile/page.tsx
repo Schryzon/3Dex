@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/features/auth';
 import {
     FolderOpen,
     Bookmark,
@@ -32,16 +32,16 @@ import Link from 'next/link';
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import UserAvatar from '@/components/common/UserAvatar';
-import ProfileSidebar from '@/components/profile/ProfileSidebar';
-import ServiceTab from '@/components/profile/ServiceTab';
-import JobsTab from '@/components/profile/JobsTab';
-import { useProducts } from '@/lib/hooks/useProducts';
+import ProfileSidebar from '@/features/profile/components/ProfileSidebar';
+import ServiceTab from '@/features/profile/components/ServiceTab';
+import JobsTab from '@/features/profile/components/JobsTab';
+import { useProducts } from '@/features/catalog/hooks/useProducts';
 import { api } from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/constants/api';
 import ConfirmModal from '@/components/common/ConfirmModal';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import ImageCropModal from '@/components/common/ImageCropModal';
-import ModelGrid from '@/components/model/ModelGrid';
+import ModelGrid from '@/features/model/components/ModelGrid';
 
 
 function UploadsTab({ userId }: { userId?: string }) {

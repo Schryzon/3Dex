@@ -7,10 +7,10 @@ import {
   FolderOpen, Heart, Upload, BarChart3, Users, FileText,
   LayoutDashboard
 } from 'lucide-react';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/features/auth';
 import ProtectedLink from '@/components/common/ProtectedLink';
 import { useState, useCallback, useEffect } from 'react';
-import { useCart } from '@/lib/hooks/useCart';
+import { useCart } from '@/features/cart/hooks/useCart';
 import UserAvatar from '@/components/common/UserAvatar';
 import Image from 'next/image';
 

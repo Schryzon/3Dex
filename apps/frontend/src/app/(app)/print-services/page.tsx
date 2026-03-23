@@ -8,8 +8,8 @@ import {
 } from 'lucide-react';
 import { printService } from '@/lib/api/services/print.service';
 import { User, ProviderFilters } from '@/lib/types';
-import ProviderCard from '@/components/print/ProviderCard';
-import { useAuth } from '@/components/auth/AuthProvider';
+import ProviderCard from '@/features/print/components/ProviderCard';
+import { useAuth } from '@/features/auth';
 import Link from 'next/link';
 
 // Service categories

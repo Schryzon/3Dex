@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/features/auth';
 import Link from 'next/link';
 import { ReactNode, MouseEvent } from 'react';
 
