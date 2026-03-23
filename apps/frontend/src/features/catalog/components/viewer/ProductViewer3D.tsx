@@ -11,9 +11,7 @@ interface ModelProps {
 }
 
 function Model({ url }: ModelProps) {
-  console.log(`[ProductViewer3D] useLoader starting for: ${url}`);
   const gltf = useLoader(GLTFLoader, url);
-  console.log(`[ProductViewer3D] useLoader success for: ${url}`);
 
   // Center and scale the model
   useEffect(() => {

@@ -80,7 +80,6 @@ function ErrorFallback() {
 }
 
 function Model({ url }: { url: string }) {
-    console.log(`[Model] useGLTF starting for: ${url}`);
 
     // Some AWS Presigned URLs have query parameters that block three.js from detecting the extension
     // react-three-fiber's useGLTF accepts an array or passes the URL straight.
@@ -95,7 +94,6 @@ function Model({ url }: { url: string }) {
         loader.setDRACOLoader(draco);
     });
 
-    console.log(`[Model] useGLTF success for: ${url}`);
     return <primitive object={scene} />;
 }
 
@@ -132,8 +130,6 @@ export default function ModelViewer3D({ modelUrl }: { modelUrl?: string }) {
 
     useEffect(() => {
         if (modelUrl) {
-            console.log("[3D Viewer] Attempting to load:", modelUrl);
-            console.log("[3D Viewer] Is real model check:", isRealModel);
         }
     }, [modelUrl, isRealModel]);
 

@@ -72,7 +72,6 @@ export default function ProfileEditPage({ onNavigate }: ProfileEditPageProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Add save logic here
-    console.log('Form submitted:', formData);
   };
 
   return (

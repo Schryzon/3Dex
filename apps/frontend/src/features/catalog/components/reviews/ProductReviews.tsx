@@ -45,10 +45,7 @@ export default function ProductReviews({ productId, isPurchased }: Props) {
   // Add new useEffect specifically for hasReviewed check
   useEffect(() => {
     if (user && reviews.length > 0) {
-      console.log('Current user ID:', user.id);
-      console.log('Review user_ids:', reviews.map((r: Review) => r.user_id));
       const alreadyReviewed = reviews.some((r: Review) => r.user_id === user.id);
-      console.log('Has reviewed:', alreadyReviewed);
       setHasReviewed(alreadyReviewed);
     } else {
       setHasReviewed(false);

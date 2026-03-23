@@ -5,7 +5,7 @@ import type { CartItem } from '@/types';
 
 export function useCart() {
     const queryClient = useQueryClient();
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, showLogin } = useAuth();
 
     const { data: items = [], isLoading } = useQuery<CartItem[]>({
         queryKey: cartKeys.all,
@@ -47,15 +47,39 @@ export function useCart() {
     const itemCount = items.reduce((total, item) => total + item.quantity, 0);
     const total = items.reduce((sum, item) => sum + ((item.model?.price ?? 0) * item.quantity), 0);
 
+    // Wrap mutations to intercept unauthenticated actions globally
+    const handleAddToCart = async (vars: { modelId: string; quantity?: number }) => {
+        if (!isAuthenticated) {
+            showLogin?.();
+            throw new Error('User must be logged in to add to cart');
+        }
+        return addToCartMutation.mutateAsync(vars);
+    };
+
+    const handleUpdateQuantity = async (vars: { itemId: string; quantity: number }) => {
+        if (!isAuthenticated) return;
+        return updateQuantityMutation.mutateAsync(vars);
+    };
+
+    const handleRemoveItem = async (itemId: string) => {
+        if (!isAuthenticated) return;
+        return removeItemMutation.mutateAsync(itemId);
+    };
+
+    const handleClearCart = async () => {
+        if (!isAuthenticated) return;
+        return clearCartMutation.mutateAsync();
+    };
+
     return {
         items,
         isLoading,
         itemCount,
         total,
-        addToCart: addToCartMutation.mutateAsync,
-        updateQuantity: updateQuantityMutation.mutateAsync,
-        removeItem: removeItemMutation.mutateAsync,
-        clearCart: clearCartMutation.mutateAsync,
+        addToCart: handleAddToCart,
+        updateQuantity: handleUpdateQuantity,
+        removeItem: handleRemoveItem,
+        clearCart: handleClearCart,
         isAddingToCart: addToCartMutation.isPending,
         isUpdating: updateQuantityMutation.isPending,
         isRemoving: removeItemMutation.isPending,
