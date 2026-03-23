@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Heart, Crown, Download, Star, ShoppingCart, Check } from 'lucide-react';
-import { useCart } from '@/features/cart/hooks/useCart';
+import { useCart } from '@/features/cart';
 
 const FORMAT_COLORS: Record<string, string> = {
     blend: 'bg-orange-500/10 text-orange-400 border-orange-500/20',

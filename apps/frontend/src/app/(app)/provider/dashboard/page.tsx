@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { printService } from '@/lib/api/services';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { LayoutDashboard, Package, Clock, CheckCircle, Truck, XCircle, AlertCircle, Info } from 'lucide-react';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/features/auth';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/components/ui';

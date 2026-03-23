@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth';
-import { useCart } from '@/features/cart/hooks/useCart';
+import { useCart } from '@/features/cart';
 import { reviewService } from '@/lib/api/services/review.service';
 import { Review } from '@/types';
 import { purchaseService } from '@/lib/api/services/purchase.service';

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { X, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { useAuth } from './AuthProvider';
+import { useAuth } from '../contexts/AuthContext';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 

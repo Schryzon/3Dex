@@ -6,7 +6,7 @@ import { Review, ReviewStats } from '@/types';
 import { Star, MessageCircle, AlertCircle, CheckCircle } from 'lucide-react';
 import ProductReviewList from './ProductReviewList';
 import ProductReviewForm from './ProductReviewForm';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/features/auth';
 
 interface Props {
   productId: string;

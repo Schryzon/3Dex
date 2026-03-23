@@ -24,7 +24,7 @@ import {
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/features/auth';
 
 
 export default function PublicProfilePage() {

@@ -10,7 +10,7 @@ import {
 import { useAuth } from '@/features/auth';
 import ProtectedLink from '@/components/common/ProtectedLink';
 import { useState, useCallback, useEffect } from 'react';
-import { useCart } from '@/features/cart/hooks/useCart';
+import { useCart } from '@/features/cart';
 import UserAvatar from '@/components/common/UserAvatar';
 import Image from 'next/image';
 

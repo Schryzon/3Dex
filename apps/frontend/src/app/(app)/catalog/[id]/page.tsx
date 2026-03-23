@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useProduct } from '@/features/catalog/hooks/useProducts';
-import { useCart } from '@/features/cart/hooks/useCart';
+import { useCart } from '@/features/cart';
 import { useWishlist } from '@/features/catalog/hooks/useWishlist';
 import { useAuth } from '@/features/auth';
 import { Share2, Heart, Plus, Check, Download, Eye, ShoppingCart, FolderPlus, AlertTriangle, ChevronLeft } from 'lucide-react';

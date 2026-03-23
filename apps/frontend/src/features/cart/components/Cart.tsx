@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useCart } from '@/features/cart/hooks/useCart';
+import { useCart } from '@/features/cart';
 import {
   ShoppingCart, Trash2, CheckCircle, Package,
   Calendar, ExternalLink, ShieldCheck, ChevronRight,

@@ -5,7 +5,7 @@ import { orderService } from '@/lib/api/services';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { ShoppingBag, ChevronRight, Clock, CheckCircle, XCircle, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/features/auth';
 import { useRouter } from 'next/navigation';
 
 export default function OrdersPage() {

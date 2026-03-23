@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { postService } from '@/lib/api/services';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/features/auth';
 import UserAvatar from '@/components/common/UserAvatar';
 import { Loader2, Heart, MessageSquare, Send, Image as ImageIcon, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';

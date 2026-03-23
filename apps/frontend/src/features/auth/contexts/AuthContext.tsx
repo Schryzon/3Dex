@@ -1,9 +1,9 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import LoginModal from './LoginModal';
-import RegisterModal from './RegisterModal';
-import UsernameSetupModal from './UsernameSetupModal';
+import LoginModal from '../components/LoginModal';
+import RegisterModal from '../components/RegisterModal';
+import UsernameSetupModal from '../components/UsernameSetupModal';
 import { authService } from '@/lib/api/services/auth.service';
 import { User, LoginRequest, RegisterRequest } from '@/types';
 
