@@ -2,7 +2,7 @@ import { apiClient } from '../client';
 import { API_ENDPOINTS } from '@/lib/constants/endpoints';
 import { USE_MOCK_DATA } from './product.service';
 import { MOCK_PRODUCTS } from '@/lib/mocks/products';
-import type { CartItem } from '@/lib/types';
+import type { CartItem } from '@/types';
 
 export const cartKeys = {
     all: ['cart'] as const,

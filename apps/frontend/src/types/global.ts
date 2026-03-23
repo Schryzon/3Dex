@@ -1,4 +1,4 @@
-import { User } from "./user";
+import { User } from "./auth";
 
 export interface ApiResponse<T> {
     data: T;

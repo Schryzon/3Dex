@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useAuth } from '@/features/auth';
 import EditModelModal from './EditModelModal';
 import ConfirmModal from '@/components/common/ConfirmModal';
-import type { Model } from '@/lib/types';
+import type { Model } from '@/types';
 
 interface ModelGridProps {
     artistId?: string;

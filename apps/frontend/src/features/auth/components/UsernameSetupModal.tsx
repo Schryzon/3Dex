@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { AtSign, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { authService } from '@/lib/api/services/auth.service';
 import { useRouter } from 'next/navigation';
-import type { User } from '@/lib/types';
+import type { User } from '@/types';
 
 interface UsernameSetupModalProps {
     isOpen: boolean;

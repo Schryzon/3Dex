@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { productService } from '@/lib/api/services';
 import { productKeys } from '@/lib/api/services/product.service';
-import type { ModelFilters } from '@/lib/types';
+import type { ModelFilters } from '@/types';
 
 export function useProducts(filters?: ModelFilters) {
     return useQuery({

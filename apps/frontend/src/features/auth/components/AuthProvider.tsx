@@ -5,7 +5,7 @@ import LoginModal from './LoginModal';
 import RegisterModal from './RegisterModal';
 import UsernameSetupModal from './UsernameSetupModal';
 import { authService } from '@/lib/api/services/auth.service';
-import { User, LoginRequest, RegisterRequest } from '@/lib/types';
+import { User, LoginRequest, RegisterRequest } from '@/types';
 
 interface AuthContextType {
   user: User | null;

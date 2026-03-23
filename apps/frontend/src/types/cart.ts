@@ -1,5 +1,14 @@
-import { Model } from "./product";
-import { User, Address } from "./user";
+import { Model } from "./catalog";
+
+export interface CartItem {
+    id: string;
+    model_id: string;
+    model: Model;
+    quantity: number;
+    print_config?: PrintConfig;
+    type?: 'DIGITAL' | 'PRINT';
+}
+import { User, Address } from "./auth";
 
 export interface PrintConfig {
     material: string;

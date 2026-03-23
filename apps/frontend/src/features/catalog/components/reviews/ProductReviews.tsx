@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { reviewService, Review, ReviewStats } from '@/lib/api/services/review.service';
+import { reviewService } from '@/lib/api/services/review.service';
+import { Review, ReviewStats } from '@/types';
 import { Star, MessageCircle, AlertCircle, CheckCircle } from 'lucide-react';
 import ProductReviewList from './ProductReviewList';
 import ProductReviewForm from './ProductReviewForm';

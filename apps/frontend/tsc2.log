@@ -1,0 +1,10 @@
+src/features/catalog/components/product-details/ProductDetailsTabSection.tsx(72,29): error TS2322: Type 'import("D:/INFORMATICS/SEMESTER 4/WEB DEVELOPMENT/3Dex/apps/frontend/src/lib/api/services/review.service").Review[]' is not assignable to type 'import("D:/INFORMATICS/SEMESTER 4/WEB DEVELOPMENT/3Dex/apps/frontend/src/types/catalog").Review[]'.
+  Type 'import("D:/INFORMATICS/SEMESTER 4/WEB DEVELOPMENT/3Dex/apps/frontend/src/lib/api/services/review.service").Review' is not assignable to type 'import("D:/INFORMATICS/SEMESTER 4/WEB DEVELOPMENT/3Dex/apps/frontend/src/types/catalog").Review'.
+    The types of 'user.avatar_url' are incompatible between these types.
+      Type 'string | null | undefined' is not assignable to type 'string | undefined'.
+        Type 'null' is not assignable to type 'string | undefined'.
+src/features/catalog/components/reviews/ProductReviews.tsx(147,30): error TS2322: Type 'import("D:/INFORMATICS/SEMESTER 4/WEB DEVELOPMENT/3Dex/apps/frontend/src/lib/api/services/review.service").Review[]' is not assignable to type 'import("D:/INFORMATICS/SEMESTER 4/WEB DEVELOPMENT/3Dex/apps/frontend/src/types/catalog").Review[]'.
+  Type 'import("D:/INFORMATICS/SEMESTER 4/WEB DEVELOPMENT/3Dex/apps/frontend/src/lib/api/services/review.service").Review' is not assignable to type 'import("D:/INFORMATICS/SEMESTER 4/WEB DEVELOPMENT/3Dex/apps/frontend/src/types/catalog").Review'.
+    The types of 'user.avatar_url' are incompatible between these types.
+      Type 'string | null | undefined' is not assignable to type 'string | undefined'.
+        Type 'null' is not assignable to type 'string | undefined'.

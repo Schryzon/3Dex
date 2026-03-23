@@ -7,7 +7,7 @@ import {
     Zap, ChevronLeft, ChevronRight, TrendingUp, Award
 } from 'lucide-react';
 import { printService } from '@/lib/api/services/print.service';
-import { User, ProviderFilters } from '@/lib/types';
+import { User, ProviderFilters } from '@/types';
 import ProviderCard from '@/features/print/components/ProviderCard';
 import { useAuth } from '@/features/auth';
 import Link from 'next/link';

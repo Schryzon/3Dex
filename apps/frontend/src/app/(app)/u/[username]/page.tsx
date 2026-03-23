@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { User } from '@/lib/types';
+import { User } from '@/types';
 import UserAvatar from '@/components/common/UserAvatar';
 import ModelGrid from '@/features/model/components/ModelGrid';
 import {

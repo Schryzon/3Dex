@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { User, ProviderConfig } from '@/lib/types';
+import { User, ProviderConfig } from '@/types';
 import UserAvatar from '@/components/common/UserAvatar';
 import { Star, MapPin, Box, Palette, Printer } from 'lucide-react';
 

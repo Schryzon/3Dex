@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/features/auth';
 import { api } from '@/lib/api';
-import { ProviderConfig } from '@/lib/types';
+import { ProviderConfig } from '@/types';
 import { Loader2, Plus, X, Save } from 'lucide-react';
 
 export default function ServiceTab() {

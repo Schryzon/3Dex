@@ -1,6 +1,6 @@
 import { apiClient } from '../client';
 import { API_ENDPOINTS } from '@/lib/constants/endpoints';
-import type { LoginRequest, RegisterRequest, User } from '@/lib/types';
+import type { LoginRequest, RegisterRequest, User } from '@/types';
 
 export const authKeys = {
     all: ['auth'] as const,

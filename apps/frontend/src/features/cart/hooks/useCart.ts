@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cartService, cartKeys } from '@/lib/api/services/cart.service';
 import { useAuth } from '@/features/auth';
-import type { CartItem } from '@/lib/types';
+import type { CartItem } from '@/types';
 
 export function useCart() {
     const queryClient = useQueryClient();

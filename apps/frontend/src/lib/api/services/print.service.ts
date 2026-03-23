@@ -1,5 +1,5 @@
 import { apiClient } from '../client';
-import type { ProviderFilters } from '@/lib/types';
+import type { ProviderFilters } from '@/types';
 
 
 export interface PrintJob {

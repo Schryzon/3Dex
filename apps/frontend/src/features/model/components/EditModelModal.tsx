@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { X, Save, Loader2 } from 'lucide-react';
 import { useUpdateProduct } from '@/features/catalog/hooks/useProducts';
-import type { Model } from '@/lib/types';
+import type { Model } from '@/types';
 
 interface EditModelModalProps {
     model: Model;

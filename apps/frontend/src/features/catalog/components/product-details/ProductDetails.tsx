@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Model } from '@/lib/types';
+import { Model } from '@/types';
 
 interface Props {
   product: Model;

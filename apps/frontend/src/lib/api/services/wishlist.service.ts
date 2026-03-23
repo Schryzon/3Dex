@@ -1,6 +1,6 @@
 import { apiClient } from '../client';
 import { API_ENDPOINTS } from '@/lib/constants/endpoints';
-import type { WishlistItem } from '@/lib/types';
+import type { WishlistItem } from '@/types';
 
 export const wishlistKeys = {
     all: ['wishlist'] as const,

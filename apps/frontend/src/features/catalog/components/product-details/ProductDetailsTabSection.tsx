@@ -2,7 +2,7 @@
 
 import { ProductReviewForm } from '@/features/catalog/components/reviews';
 import { ProductReviewList } from '@/features/catalog/components/reviews';
-import type { Review } from '@/lib/api/services/review.service';
+import type { Review } from '@/types';
 
 // The three available tab identifiers
 type TabId = 'description' | 'reviews' | 'files';

@@ -1,6 +1,6 @@
 import { Star, User } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { Review } from '@/lib/api/reviews';
+import { Review } from '@/types';
 import UserAvatar from '@/components/common/UserAvatar';
 
 interface ProductReviewListProps {

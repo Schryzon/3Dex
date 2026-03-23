@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/common/Loading';
 import { useInfiniteProducts } from '@/features/catalog/hooks/useProducts';
 import { useWishlist } from '@/features/catalog/hooks/useWishlist';
 import { useAuth } from '@/features/auth';
-import type { ModelFilters } from '@/lib/types';
+import type { ModelFilters } from '@/types';
 
 // Sort options
 const SORT_OPTIONS = [

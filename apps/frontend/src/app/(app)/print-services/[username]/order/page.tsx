@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { printService } from '@/lib/api/services/print.service';
 import { api } from '@/lib/api';
-import { User, Model, PrintConfig } from '@/lib/types';
+import { User, Model, PrintConfig } from '@/types';
 import UserAvatar from '@/components/common/UserAvatar';
 import { Loader2, Plus, Trash2, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/features/auth';

@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useOrders } from '@/features/cart/hooks/useOrders';
-import type { CartItem, Order } from '@/lib/types';
+import type { CartItem, Order } from '@/types';
 
 const EXCHANGE_RATE = 16800;
 

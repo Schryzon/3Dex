@@ -1,4 +1,4 @@
-import { Model } from '../types/product';
+import { Model } from '@/types';
 
 const CATEGORIES = ['Characters', 'Vehicles', 'Buildings', 'Props', 'Nature', 'Interior'];
 const FORMATS = ['.obj', '.fbx', '.blend', '.stl', '.glb'];

@@ -6,7 +6,7 @@ import type {
     ModelFilters,
     PaginatedResponse,
     Review
-} from '@/lib/types';
+} from '@/types';
 
 export const productKeys = {
     all: ['models'] as const,
