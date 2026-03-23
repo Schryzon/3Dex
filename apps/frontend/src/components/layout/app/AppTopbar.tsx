@@ -73,7 +73,7 @@ export default function AppTopbar({
           </button>
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 flex items-center justify-center">
-              <img src="/icon.png" alt="3Dex" className="w-full h-full object-contain" />
+              <img src="/3Dex.svg" alt="3Dex" className="w-full h-full object-contain" />
             </div>
           </Link>
         </div>

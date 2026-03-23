@@ -100,8 +100,8 @@ export default function LandingNavbar() {
 
           {/* Logo */}
           <Link href={isAuthenticated ? '/dashboard' : '/'} className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-10 h-10 flex items-center justify-center">
-              <Image src="/icon.png" alt="3Dex" width={50} height={50} />
+            <div className="w-7 h-7 flex items-center justify-center">
+              <Image src="/3Dex.svg" alt="3Dex" width={32} height={32} />
             </div>
             <span className="text-white font-bold text-xl md:text-2xl">3Dēx</span>
           </Link>

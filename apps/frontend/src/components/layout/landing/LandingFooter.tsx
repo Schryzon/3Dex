@@ -8,8 +8,8 @@ export default function LandingFooter() {
           {/* Logo & Tagline */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 text-black flex items-center justify-center">
-                <img src="/icon.png" alt="3Dex" className="w-full h-full object-contain" />
+              <div className="w-10 h-10 text-black flex items-center justify-center">
+                <img src="/3Dex.svg" alt="3Dex" className="w-full h-full object-contain" />
               </div>
               <span className="text-white font-bold text-2xl">3Dēx</span>
             </div>
