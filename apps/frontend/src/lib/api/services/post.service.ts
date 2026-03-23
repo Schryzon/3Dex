@@ -48,4 +48,16 @@ export const postService = {
     async addComment(postId: string, content: string): Promise<any> {
         return apiClient.post(`/posts/${postId}/comments`, { content });
     },
+
+    async deletePost(postId: string): Promise<{ message: string }> {
+        return apiClient.delete(`/posts/${postId}`);
+    },
+
+    async reportPost(postId: string, reason: string): Promise<{ message: string }> {
+        return apiClient.post('/reports', {
+            target_type: 'POST',
+            post_id: postId,
+            reason
+        });
+    },
 };

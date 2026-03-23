@@ -455,7 +455,7 @@ function ProfileContent() {
                                                             type="text"
                                                             value={formData.displayName}
                                                             onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
-                                                            placeholder="Mahesa Putra"
+                                                            placeholder="John Doe"
                                                             className="w-full bg-black/50 text-white px-4 py-3 rounded-xl border border-gray-800 focus:border-yellow-400 focus:outline-none focus:ring-4 focus:ring-yellow-400/10 transition-all"
                                                         />
                                                     </div>
@@ -597,7 +597,7 @@ function ProfileContent() {
                                                     type="text"
                                                     value={formData.receiverName}
                                                     onChange={(e) => setFormData({ ...formData, receiverName: e.target.value })}
-                                                    placeholder="e.g., Mahesa Putra"
+                                                    placeholder="e.g., John Doe"
                                                     className="w-full bg-black/50 text-white px-4 py-3 rounded-xl border border-gray-800 focus:border-yellow-400 focus:outline-none transition-all"
                                                 />
                                             </div>
