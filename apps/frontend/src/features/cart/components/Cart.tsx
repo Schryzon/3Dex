@@ -11,8 +11,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useOrders } from '@/features/cart/hooks/useOrders';
 import type { CartItem, Order } from '@/types';
-
-const EXCHANGE_RATE = 16800;
+import { USD_TO_IDR as EXCHANGE_RATE } from '@/lib/utils/price';
 
 function formatPrice(amount: number) {
   const idr = new Intl.NumberFormat('id-ID', {
@@ -291,12 +290,12 @@ export default function ShoppingCartPage() {
                   <div key={order.id} className="bg-[#111111] border border-white/[0.07] rounded-3xl overflow-hidden shadow-sm">
 
                     {/* Order header */}
-                    <div className="px-7 py-6 border-b border-white/[0.06] flex items-center justify-between bg-white/[0.02]">
+                    <div className="px-5 py-5 sm:px-7 sm:py-6 border-b border-white/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/[0.02]">
                       <div>
-                        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/20 mb-1.5">
-                          Invoice #{order.id.slice(-8).toUpperCase()}
+                        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/20 mb-2">
+                          Invoice #{(order.id || '').toString().slice(-8).toUpperCase()}
                         </p>
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-3">
                           <div className="flex items-center gap-2">
                             <Calendar size={13} strokeWidth={1.5} className="text-white/25" />
                             <span className="text-[13px] font-medium text-white/50">
@@ -305,35 +304,39 @@ export default function ShoppingCartPage() {
                               })}
                             </span>
                           </div>
-                          <div className="w-1 h-1 rounded-full bg-white/10" />
+                          <div className="w-1 h-1 rounded-full bg-white/10 hidden sm:block" />
                           <span className={`text-[10px] font-bold uppercase tracking-[0.1em] px-2.5 py-1 rounded-full border ${statusClass}`}>
                             {order.status}
                           </span>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/20 mb-1">Amount</p>
-                        <p className="text-[22px] font-bold font-mono tracking-tight text-yellow-400">{amt.idr}</p>
+                      <div className="text-left sm:text-right border-t border-white/[0.06] sm:border-0 pt-4 sm:pt-0 mt-2 sm:mt-0">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-white/20 mb-1">Total Amount</p>
+                        <p className="text-[20px] sm:text-[22px] font-bold font-mono tracking-tight text-yellow-400">{amt.idr}</p>
                       </div>
                     </div>
 
                     {/* Order items */}
-                    <div className="px-7 py-5 flex flex-col gap-4">
+                    <div className="px-5 py-5 sm:px-7 flex flex-col gap-4">
                       {order.items.map(item => (
-                        <div key={item.id} className="flex items-center gap-5 py-1.5">
-                          <div className="w-12 h-12 rounded-xl overflow-hidden bg-white/[0.04] border border-white/[0.06] flex-shrink-0">
+                        <div key={item.id} className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 py-2 border-b border-white/[0.04] last:border-0">
+                          <div className="w-full h-40 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-white/[0.04] border border-white/[0.06] shrink-0 relative">
                             <img
                               src={item.model?.thumbnails?.[0] || '/placeholder.jpg'}
-                              className="w-full h-full object-cover"
-                              alt=""
+                              className="absolute inset-0 w-full h-full object-cover"
+                              alt={item.model?.title || 'Deleted Product'}
                             />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-[14px] font-bold truncate tracking-tight">{item.model?.title || 'Unknown'}</p>
-                            <p className="text-[12px] text-white/30 uppercase tracking-widest font-medium mt-0.5">@{item.model?.artist?.username || 'Unknown'}</p>
+                            <p className="text-[14px] font-bold truncate tracking-tight text-white group-hover:text-yellow-400 transition-colors">
+                              {item.model?.title || 'Deleted Product'}
+                            </p>
+                            <p className="text-[12px] text-white/40 uppercase tracking-widest font-medium mt-1">
+                              @{item.model?.artist?.username || 'Unknown Artist'}
+                            </p>
                           </div>
                           {isPaid && (
-                            <button className="flex items-center gap-2 px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.08em] rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/50 hover:text-white hover:border-white/20 hover:bg-white/[0.06] transition-all cursor-pointer">
+                            <button className="w-full sm:w-auto flex items-center justify-center sm:justify-start gap-2 px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.08em] rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/50 hover:text-white hover:border-white/20 hover:bg-white/[0.06] transition-all cursor-pointer shrink-0">
                               <ExternalLink size={13} strokeWidth={2} />
                               Download
                             </button>

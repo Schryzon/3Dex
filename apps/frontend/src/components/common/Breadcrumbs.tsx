@@ -16,14 +16,18 @@ export interface BreadcrumbsProps {
 
 const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className }) => {
     return (
-        <nav
-            aria-label="Breadcrumb"
-            className={cn(
-                "flex items-center flex-wrap gap-2 text-sm text-gray-400 py-2 px-1 rounded-lg transition-all",
-                className
-            )}
-        >
-            <Link
+        <div className="relative w-full max-w-full">
+            {/* Fade out mask for mobile overflow indication */}
+            <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-black via-black/80 to-transparent pointer-events-none sm:hidden z-10" />
+            <nav
+                aria-label="Breadcrumb"
+                className={cn(
+                    "flex flex-nowrap items-center gap-2 text-sm text-gray-400 py-2 pl-1 pr-6 sm:pr-1 rounded-lg transition-all overflow-x-auto custom-scrollbar",
+                    className
+                )}
+                style={{ WebkitOverflowScrolling: 'touch', minWidth: 'min-content' }}
+            >
+                <Link
                 href="/dashboard"
                 className="flex items-center gap-1.5 hover:text-yellow-500 transition-colors group"
                 title="Home"
@@ -53,7 +57,8 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className }) => {
                     )}
                 </div>
             ))}
-        </nav>
+            </nav>
+        </div>
     );
 };
 

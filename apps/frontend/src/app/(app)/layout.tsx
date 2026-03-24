@@ -44,13 +44,15 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
   const pathname = usePathname();
 
-  // Routes accessible without login
   const isPublicRoute =
     pathname === '/' ||
     pathname.startsWith('/catalog') ||
     pathname.startsWith('/print-services') ||
     pathname.startsWith('/community') ||
-    pathname.startsWith('/u/');
+    pathname.startsWith('/u/') ||
+    pathname.startsWith('/become-artist') ||
+    pathname.startsWith('/become-provider') ||
+    pathname.startsWith('/apply');
 
   // Auth guard: redirect unauthenticated users only for private pages
   useEffect(() => {

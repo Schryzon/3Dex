@@ -91,6 +91,11 @@ function ProfileContent() {
     const [showProviderModal, setShowProviderModal] = useState(false);
     const [isApplyingProvider, setIsApplyingProvider] = useState(false);
 
+    // Dummy System Preferences State
+    const [emailNotifs, setEmailNotifs] = useState(true);
+    const [marketNotifs, setMarketNotifs] = useState(false);
+    const [autoAccept, setAutoAccept] = useState(false);
+
     const [formData, setFormData] = useState({
         username: user?.username || '',
         email: user?.email || '',
@@ -204,7 +209,18 @@ function ProfileContent() {
             await logout();
             router.push('/');
         } catch (error: any) {
-            showBannerNotif('error', error.response?.data?.message || 'Failed to delete account.');
+            const rawMsg = error.response?.data?.message || '';
+            let errorMsg = 'Failed to delete account. Please try again later.';
+            
+            if (rawMsg.includes('foreign key constraint') || rawMsg.includes('Order_user_id_fkey')) {
+                errorMsg = 'Delete unsuccessful: Account has active or past orders.';
+            } else if (rawMsg.toLowerCase().includes('violates') || rawMsg.toLowerCase().includes('prisma')) {
+                errorMsg = 'Delete unsuccessful: Account is linked to system records.';
+            } else if (rawMsg) {
+                errorMsg = rawMsg;
+            }
+            
+            showBannerNotif('error', errorMsg);
             setShowDeleteModal(false);
         } finally {
             setIsDeleting(false);
@@ -660,9 +676,9 @@ function ProfileContent() {
                                                 </div>
                                                 <button
                                                     onClick={() => setFormData({ ...formData, ecoPackaging: !formData.ecoPackaging })}
-                                                    className={`w-12 h-6 rounded-full relative transition-all duration-200 ${formData.ecoPackaging ? 'bg-green-500' : 'bg-gray-700'}`}
+                                                    className={`w-12 h-6 rounded-full relative transition-colors duration-200 shrink-0 ${formData.ecoPackaging ? 'bg-green-500' : 'bg-gray-700'}`}
                                                 >
-                                                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-200 ${formData.ecoPackaging ? 'right-1' : 'left-1'}`} />
+                                                    <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-200 ${formData.ecoPackaging ? 'translate-x-[24px]' : 'translate-x-0'}`} />
                                                 </button>
                                             </div>
                                         </div>
@@ -713,9 +729,12 @@ function ProfileContent() {
                                                     <p className="text-sm text-gray-500">Automatically accept print jobs that match your capabilities.</p>
                                                 </div>
                                             </div>
-                                            <div className="w-12 h-6 bg-gray-700 rounded-full relative cursor-pointer">
-                                                <div className="absolute left-1 top-1 w-4 h-4 bg-gray-400 rounded-full" />
-                                            </div>
+                                            <button
+                                                onClick={() => setAutoAccept(!autoAccept)}
+                                                className={`w-12 h-6 rounded-full relative cursor-pointer transition-colors duration-200 shrink-0 ${autoAccept ? 'bg-yellow-400' : 'bg-gray-700'}`}
+                                            >
+                                                <div className={`absolute left-1 top-1 w-4 h-4 rounded-full shadow-sm transition-transform duration-200 ${autoAccept ? 'bg-black translate-x-[24px]' : 'bg-gray-400 translate-x-0'}`} />
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -749,17 +768,7 @@ function ProfileContent() {
                         {/* ── TAB: NOTIFICATIONS ── */}
                         {activeTab === 'notifications' && (
                             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                <div className="p-6 bg-gray-900/40 rounded-2xl border border-gray-800 flex items-start gap-4 hover:border-yellow-400/30 transition-all cursor-pointer">
-                                    <div className="w-10 h-10 bg-yellow-400/10 rounded-xl flex items-center justify-center shrink-0">
-                                        <CheckCircle className="w-5 h-5 text-yellow-400" />
-                                    </div>
-                                    <div>
-                                        <p className="text-white font-semibold mb-1">Payment successful!</p>
-                                        <p className="text-sm text-gray-400">Your order #ORD-1234 has been confirmed. You can now download your items.</p>
-                                        <p className="text-xs text-gray-500 mt-2">2 hours ago</p>
-                                    </div>
-                                </div>
-                                <div className="p-6 bg-gray-900/40 rounded-2xl border border-gray-800 flex items-start gap-4 grayscale opacity-50">
+                                <div className="p-6 bg-gray-900/40 rounded-2xl border border-gray-800 flex items-start gap-4">
                                     <div className="w-10 h-10 bg-gray-800 rounded-xl flex items-center justify-center shrink-0">
                                         <Bell className="w-5 h-5 text-gray-400" />
                                     </div>
@@ -810,9 +819,9 @@ function ProfileContent() {
                                                 </div>
                                                 <button
                                                     onClick={() => setFormData({ ...formData, showNsfw: !formData.showNsfw })}
-                                                    className={`w-12 h-6 rounded-full relative cursor-pointer transition-colors ${formData.showNsfw ? 'bg-red-500' : 'bg-gray-700'}`}
+                                                    className={`w-12 h-6 rounded-full relative cursor-pointer transition-colors shrink-0 ${formData.showNsfw ? 'bg-red-500' : 'bg-gray-700'}`}
                                                 >
-                                                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${formData.showNsfw ? 'translate-x-7' : 'translate-x-1'}`} />
+                                                    <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-200 ${formData.showNsfw ? 'translate-x-[24px]' : 'translate-x-0'}`} />
                                                 </button>
                                             </div>
                                             <div className="flex items-center justify-between p-4 bg-gray-800/20 rounded-xl border border-gray-800">
@@ -820,18 +829,24 @@ function ProfileContent() {
                                                     <p className="text-white font-medium">Email Notifications</p>
                                                     <p className="text-sm text-gray-500">Receive weekly digests and important updates.</p>
                                                 </div>
-                                                <div className="w-12 h-6 bg-yellow-400 rounded-full relative cursor-pointer">
-                                                    <div className="absolute right-1 top-1 w-4 h-4 bg-black rounded-full shadow-sm" />
-                                                </div>
+                                                <button
+                                                    onClick={() => setEmailNotifs(!emailNotifs)}
+                                                    className={`w-12 h-6 rounded-full relative cursor-pointer transition-colors duration-200 shrink-0 ${emailNotifs ? 'bg-yellow-400' : 'bg-gray-700'}`}
+                                                >
+                                                    <div className={`absolute left-1 top-1 w-4 h-4 rounded-full shadow-sm transition-transform duration-200 ${emailNotifs ? 'bg-black translate-x-[24px]' : 'bg-gray-400 translate-x-0'}`} />
+                                                </button>
                                             </div>
                                             <div className="flex items-center justify-between p-4 bg-gray-800/20 rounded-xl border border-gray-800">
                                                 <div>
                                                     <p className="text-white font-medium">Marketplace Updates</p>
                                                     <p className="text-sm text-gray-500">Get notified when models you bookmarked go on sale.</p>
                                                 </div>
-                                                <div className="w-12 h-6 bg-gray-700 rounded-full relative cursor-pointer">
-                                                    <div className="absolute left-1 top-1 w-4 h-4 bg-gray-400 rounded-full shadow-sm" />
-                                                </div>
+                                                <button
+                                                    onClick={() => setMarketNotifs(!marketNotifs)}
+                                                    className={`w-12 h-6 rounded-full relative cursor-pointer transition-colors duration-200 shrink-0 ${marketNotifs ? 'bg-yellow-400' : 'bg-gray-700'}`}
+                                                >
+                                                    <div className={`absolute left-1 top-1 w-4 h-4 rounded-full shadow-sm transition-transform duration-200 ${marketNotifs ? 'bg-black translate-x-[24px]' : 'bg-gray-400 translate-x-0'}`} />
+                                                </button>
                                             </div>
                                         </div>
                                     </div>

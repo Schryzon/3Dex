@@ -24,7 +24,7 @@ export default function BecomeArtist() {
             {/* Dot grid */}
             <div className="absolute inset-0 bg-dot-grid opacity-[0.03] pointer-events-none" />
             {/* Yellow glow left */}
-            <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 40% 60% at 0% 50%, rgba(250,204,21,0.07) 0%, transparent 70%)' }} />
+            <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 40% 60% at 0% 50%, rgba(250,204,21,0.12) 0%, rgba(250,204,21,0) 70%)' }} />
 
             <div ref={ref} className="relative max-w-[1400px] mx-auto px-6 md:px-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
@@ -78,7 +78,7 @@ export default function BecomeArtist() {
                             alt="Artist workspace"
                             className="w-full h-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0" />
                     </div>
 
                     {/* Floating stat cards */}

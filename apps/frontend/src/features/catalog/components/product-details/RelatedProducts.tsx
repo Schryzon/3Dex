@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { apiClient } from '@/lib/api/client';
 import { ProductCard } from '../product-card';
 import { ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 
 interface RelatedProduct {
   id: string;
@@ -97,10 +98,10 @@ export default function RelatedProducts({ productId, categories }: Props) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-white">Related Products</h2>
-        <button className="text-yellow-500 hover:text-yellow-400 text-sm font-semibold flex items-center gap-1 transition-colors duration-300 group">
+        <Link href={`/catalog?category=${categories?.[0] || ''}`} className="text-yellow-500 hover:text-yellow-400 text-sm font-semibold flex items-center gap-1 transition-colors duration-300 group">
           View All
           <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-        </button>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -21,7 +21,7 @@ const ReactQueryDevtoolsProduction = React.lazy(() =>
     }))
 );
 
-export const ENABLE_DEVTOOLS = true;
+export const ENABLE_DEVTOOLS = process.env.NODE_ENV !== 'production';
 
 export default function DevTools() {
     const { user, setUser } = useAuth();

@@ -63,7 +63,7 @@ export default function FeaturedCategories() {
 
                     {/* Textures — spans 2 cols */}
                     <Link
-                        href="/textures"
+                        href="/catalog?category=Textures"
                         style={{ opacity: inView ? 1 : 0, transform: inView ? 'translateY(0)' : 'translateY(24px)', transition: 'opacity 0.6s ease 0.1s, transform 0.6s ease 0.1s' }}
                         className="group md:col-span-2 relative rounded-2xl overflow-hidden border border-white/[0.06] hover:border-yellow-400/25 transition-all duration-500"
                     >

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import React, { useState } from 'react';
 import { Heart, ShoppingCart, Eye } from 'lucide-react';
+import { formatPrice } from '@/lib/utils';
 
 interface Product {
   id: string;
@@ -34,6 +35,8 @@ export default function ProductCard({ product, onAddToCart, onToggleFavorite, is
   const finalPrice = product.discount
     ? product.price - (product.price * product.discount / 100)
     : product.price;
+
+  const formatted = formatPrice(finalPrice);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -119,9 +122,18 @@ export default function ProductCard({ product, onAddToCart, onToggleFavorite, is
                   />
                   <p className="text-gray-500 text-[10px] md:text-xs font-medium truncate">{product.seller.name}</p>
                 </div>
-                <span className="text-white font-black text-sm tracking-tight shrink-0 ml-2">
-                  ${finalPrice.toFixed(finalPrice % 1 === 0 ? 0 : 1)}
-                </span>
+                {product.price === 0 ? (
+                  <span className="text-blue-400 font-black text-sm tracking-tight shrink-0 ml-2">Free</span>
+                ) : (
+                  <div className="flex flex-col items-end shrink-0 ml-2">
+                    <span className="text-white font-black text-sm tracking-tight leading-none">
+                      {formatted.idr}
+                    </span>
+                    <span className="text-gray-400 text-[10px] font-medium mt-0.5">
+                      {formatted.usd}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 

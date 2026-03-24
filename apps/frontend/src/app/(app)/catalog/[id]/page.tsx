@@ -143,21 +143,23 @@ export default function CatalogDetailPage() {
         <div className="min-h-screen bg-black text-white">
             <div className="border-b border-gray-900">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-2">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-y-3 sm:gap-4 overflow-hidden w-full">
                         <button
                             onClick={() => router.back()}
-                            className="flex items-center gap-2 text-gray-400 hover:text-yellow-500 transition-colors duration-300 group text-sm"
+                            className="flex items-center gap-2 text-gray-400 hover:text-yellow-500 transition-colors duration-300 group text-sm shrink-0"
                         >
                             <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-300" />
                             <span>Back</span>
                         </button>
-                        <Breadcrumbs
-                            items={[
-                                { label: 'Catalog', href: '/catalog' },
-                                { label: product.category, href: `/catalog?category=${product.category}` },
-                                { label: product.title, active: true }
-                            ]}
-                        />
+                        <div className="w-full sm:w-auto overflow-hidden">
+                            <Breadcrumbs
+                                items={[
+                                    { label: 'Catalog', href: '/catalog' },
+                                    { label: product.category, href: `/catalog?category=${product.category}` },
+                                    { label: product.title, active: true }
+                                ]}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -389,7 +391,7 @@ export default function CatalogDetailPage() {
 
                             {/* Artist Info */}
                             <Link
-                                href={`/artist/${product.artistId}`}
+                                href={`/u/${product.artist?.username || ''}`}
                                 className="flex items-center gap-3 p-4 rounded-lg bg-gray-900 border border-gray-900 hover:border-gray-800 transition-all duration-300 group hover:shadow-lg hover:shadow-yellow-500/5"
                             >
                                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-gray-800 to-black flex items-center justify-center text-sm font-bold uppercase flex-shrink-0 border border-gray-800 group-hover:border-yellow-500/50 transition-all duration-300">

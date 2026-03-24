@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Heart, Crown, Download, Star, ShoppingCart, Check } from 'lucide-react';
 import { useCart } from '@/features/cart';
+import { formatPrice } from '@/lib/utils';
 
 const FORMAT_COLORS: Record<string, string> = {
     blend: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
@@ -57,8 +58,7 @@ export default function CatalogProductCard({
     const { addToCart, items } = useCart();
     const isInCart = items.some(item => item.model_id === id);
 
-    const displayPrice = isFree ? 'Free' : price ? `$${price.toFixed(0)}` : null;
-    const hasDiscount = discount && originalPrice;
+    const formatted = price ? formatPrice(price) : null;
 
     // List View - Compact horizontal card
     if (viewMode === 'list') {
@@ -133,11 +133,20 @@ export default function CatalogProductCard({
                                         <span className="text-gray-400 font-medium">{rating.toFixed(1)}</span>
                                     </div>
                                 )}
-                                {displayPrice && (
-                                    <span className={`text-base font-black ${isFree ? 'text-blue-400' : 'text-white'}`}>
-                                        {displayPrice}
+                                {isFree ? (
+                                    <span className="text-base font-black text-blue-400">
+                                        Free
                                     </span>
-                                )}
+                                ) : formatted ? (
+                                    <div className="flex flex-col items-end">
+                                        <span className="text-base font-black text-white leading-none">
+                                            {formatted.idr}
+                                        </span>
+                                        <span className="text-[10px] font-medium text-gray-400 mt-0.5">
+                                            {formatted.usd}
+                                        </span>
+                                    </div>
+                                ) : null}
                             </div>
                         </div>
                     </div>
@@ -251,11 +260,20 @@ export default function CatalogProductCard({
                             </h3>
                             <div className="flex items-center justify-between">
                                 <p className="text-gray-500 text-xs font-medium">{author}</p>
-                                {displayPrice && (
-                                    <span className={`font-black text-sm tracking-tight ${isFree ? 'text-blue-400' : 'text-white'}`}>
-                                        {displayPrice}
+                                {isFree ? (
+                                    <span className="font-black text-sm tracking-tight text-blue-400">
+                                        Free
                                     </span>
-                                )}
+                                ) : formatted ? (
+                                    <div className="flex flex-col items-end">
+                                        <span className="font-black text-sm tracking-tight text-white leading-none">
+                                            {formatted.idr}
+                                        </span>
+                                        <span className="text-[10px] font-medium text-gray-400 mt-0.5">
+                                            {formatted.usd}
+                                        </span>
+                                    </div>
+                                ) : null}
                             </div>
                         </div>
 
