@@ -46,7 +46,10 @@ api.interceptors.response.use(
                 pathname.startsWith('/catalog') ||
                 pathname.startsWith('/print-services') ||
                 pathname.startsWith('/community') ||
-                pathname.startsWith('/u/');
+                pathname.startsWith('/u/') ||
+                pathname.startsWith('/become-artist') ||
+                pathname.startsWith('/become-provider') ||
+                pathname.startsWith('/apply');
 
             // Redirect to root only when the user was on a protected page.
             // Skip the redirect on public routes to allow guest browsing.
