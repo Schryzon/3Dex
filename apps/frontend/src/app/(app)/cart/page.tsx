@@ -1,8 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/components/auth/AuthProvider';
-import ShoppingCartPage from '@/components/cart/Cart';
+import { useAuth } from '@/features/auth';
+import ShoppingCartPage from '@/features/cart/components/Cart';
 import { useEffect } from 'react';
 
 export default function Page() {

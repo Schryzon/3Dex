@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/features/auth';
 import {
     FolderOpen,
     Bookmark,
@@ -32,16 +32,16 @@ import Link from 'next/link';
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import UserAvatar from '@/components/common/UserAvatar';
-import ProfileSidebar from '@/components/profile/ProfileSidebar';
-import ServiceTab from '@/components/profile/ServiceTab';
-import JobsTab from '@/components/profile/JobsTab';
-import { useProducts } from '@/lib/hooks/useProducts';
+import ProfileSidebar from '@/features/profile/components/ProfileSidebar';
+import ServiceTab from '@/features/profile/components/ServiceTab';
+import JobsTab from '@/features/profile/components/JobsTab';
+import { useProducts } from '@/features/catalog/hooks/useProducts';
 import { api } from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/constants/api';
 import ConfirmModal from '@/components/common/ConfirmModal';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import ImageCropModal from '@/components/common/ImageCropModal';
-import ModelGrid from '@/components/model/ModelGrid';
+import ModelGrid from '@/features/model/components/ModelGrid';
 
 
 function UploadsTab({ userId }: { userId?: string }) {
@@ -455,7 +455,7 @@ function ProfileContent() {
                                                             type="text"
                                                             value={formData.displayName}
                                                             onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
-                                                            placeholder="Mahesa Putra"
+                                                            placeholder="John Doe"
                                                             className="w-full bg-black/50 text-white px-4 py-3 rounded-xl border border-gray-800 focus:border-yellow-400 focus:outline-none focus:ring-4 focus:ring-yellow-400/10 transition-all"
                                                         />
                                                     </div>
@@ -597,7 +597,7 @@ function ProfileContent() {
                                                     type="text"
                                                     value={formData.receiverName}
                                                     onChange={(e) => setFormData({ ...formData, receiverName: e.target.value })}
-                                                    placeholder="e.g., Mahesa Putra"
+                                                    placeholder="e.g., John Doe"
                                                     className="w-full bg-black/50 text-white px-4 py-3 rounded-xl border border-gray-800 focus:border-yellow-400 focus:outline-none transition-all"
                                                 />
                                             </div>

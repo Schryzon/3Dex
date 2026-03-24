@@ -1,5 +1,5 @@
 import { apiClient } from '../client';
-import { API_ENDPOINTS } from '@/lib/constants/api';
+import { API_ENDPOINTS } from '@/lib/constants/endpoints';
 
 interface CreatePaymentResponse {
     token: string;

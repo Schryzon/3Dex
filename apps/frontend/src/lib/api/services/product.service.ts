@@ -1,12 +1,22 @@
 import { apiClient } from '../client';
-import { API_ENDPOINTS } from '@/lib/constants/api';
+import { API_ENDPOINTS } from '@/lib/constants/endpoints';
 import { MOCK_PRODUCTS } from '@/lib/mocks/products';
 import type {
     Model,
     ModelFilters,
     PaginatedResponse,
     Review
-} from '@/lib/types';
+} from '@/types';
+
+export const productKeys = {
+    all: ['models'] as const,
+    lists: () => [...productKeys.all, 'list'] as const,
+    list: (filters?: ModelFilters) => [...productKeys.lists(), filters] as const,
+    details: () => [...productKeys.all, 'detail'] as const,
+    detail: (id: string) => [...productKeys.details(), id] as const,
+    reviews: (id: string) => [...productKeys.detail(id), 'reviews'] as const,
+    infinite: (filters?: ModelFilters) => [...productKeys.all, 'infinite', filters] as const,
+} as const;
 
 // Set this to true to use mock data, or false to use the real database
 export const USE_MOCK_DATA = false;
@@ -147,11 +157,11 @@ export const productService = {
     },
 
     async getProductReviews(id: string): Promise<Review[]> {
-        return apiClient.get<Review[]>(API_ENDPOINTS.REVIEWS.MODEL_LIST(id));
+        return apiClient.get<Review[]>(API_ENDPOINTS.REVIEWS.MODEL(id));
     },
 
     async addReview(id: string, data: { rating: number; comment: string }): Promise<Review> {
-        return apiClient.post<Review>(API_ENDPOINTS.REVIEWS.MODEL_CREATE(id), data);
+        return apiClient.post<Review>(API_ENDPOINTS.REVIEWS.MODEL(id), data);
     },
 
     async downloadProduct(id: string): Promise<{ downloadUrl: string; expiresAt: string; remainingDownloads: number }> {

@@ -17,7 +17,6 @@ export const api = axios.create({
 // because the browser attaches the auth cookie automatically
 api.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
-        console.log(`[API Request] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
         return config;
     },
     (error: AxiosError) => Promise.reject(error)

@@ -7,10 +7,10 @@ import {
   FolderOpen, Heart, Upload, BarChart3, Users, FileText,
   LayoutDashboard
 } from 'lucide-react';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/features/auth';
 import ProtectedLink from '@/components/common/ProtectedLink';
 import { useState, useCallback, useEffect } from 'react';
-import { useCart } from '@/lib/hooks/useCart';
+import { useCart } from '@/features/cart';
 import UserAvatar from '@/components/common/UserAvatar';
 import Image from 'next/image';
 
@@ -100,8 +100,8 @@ export default function LandingNavbar() {
 
           {/* Logo */}
           <Link href={isAuthenticated ? '/dashboard' : '/'} className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-10 h-10 flex items-center justify-center">
-              <Image src="/icon.png" alt="3Dex" width={50} height={50} />
+            <div className="w-7 h-7 flex items-center justify-center">
+              <Image src="/3Dex.svg" alt="3Dex" width={32} height={32} />
             </div>
             <span className="text-white font-bold text-xl md:text-2xl">3Dēx</span>
           </Link>
@@ -273,7 +273,7 @@ export default function LandingNavbar() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-gray-900 border-t border-gray-800">
+        <div className="lg:hidden bg-[#111111] border-t border-gray-800 absolute w-full max-h-[80vh] overflow-y-auto">
           <div className="px-4 py-4 space-y-3">
 
             {MOBILE_NAV.map(({ label, href }) => (
@@ -328,14 +328,14 @@ export default function LandingNavbar() {
               <div className="sm:hidden space-y-2 pt-2 border-t border-gray-800">
                 <button
                   onClick={() => { showLogin(); setMobileMenuOpen(false); }}
-                  className="w-full px-4 py-3 text-white hover:bg-gray-800 rounded-lg transition-colors text-left cursor-pointer"
+                  className="w-full px-4 py-3 text-white hover:bg-gray-800 rounded-lg transition-colors text-center cursor-pointer"
                   style={{ touchAction: 'manipulation' }}
                 >
                   Login
                 </button>
                 <button
                   onClick={() => { showRegister(); setMobileMenuOpen(false); }}
-                  className="w-full px-4 py-3 bg-yellow-400 text-black font-semibold rounded-lg hover:bg-yellow-300 transition-colors cursor-pointer"
+                  className="w-full px-4 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
                   style={{ touchAction: 'manipulation' }}
                 >
                   Register

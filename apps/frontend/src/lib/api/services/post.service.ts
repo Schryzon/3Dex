@@ -1,5 +1,11 @@
 import { apiClient } from '../client';
 
+export const postKeys = {
+    all: ['posts'] as const,
+    feed: ['community-feed'] as const,
+    comments: (postId: string) => ['post-comments', postId] as const,
+} as const;
+
 export interface Post {
     id: string;
     caption: string;
@@ -41,5 +47,17 @@ export const postService = {
 
     async addComment(postId: string, content: string): Promise<any> {
         return apiClient.post(`/posts/${postId}/comments`, { content });
+    },
+
+    async deletePost(postId: string): Promise<{ message: string }> {
+        return apiClient.delete(`/posts/${postId}`);
+    },
+
+    async reportPost(postId: string, reason: string): Promise<{ message: string }> {
+        return apiClient.post('/reports', {
+            target_type: 'POST',
+            post_id: postId,
+            reason
+        });
     },
 };

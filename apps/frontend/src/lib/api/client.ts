@@ -20,7 +20,6 @@ class ApiClient {
     // because the browser attaches the cookie automatically
     this.client.interceptors.request.use(
       (config) => {
-        console.log(`[apiClient Request] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
         return config;
       },
       (error) => Promise.reject(error)

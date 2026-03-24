@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { purchaseService } from '@/lib/api/services';
 import { Download, Search, Package, FileArchive, Clock, ExternalLink, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
-import { useAuth } from '@/lib/hooks/useAuth';
+import { useAuth } from '@/features/auth';
 import { useRouter } from 'next/navigation';
 import { formatFileSize, formatDate } from '@/lib/utils';
 import { useState } from 'react';

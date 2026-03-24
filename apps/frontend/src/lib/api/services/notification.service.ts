@@ -1,4 +1,5 @@
 import { apiClient } from '../client';
+import { API_ENDPOINTS } from '@/lib/constants/endpoints';
 
 export interface Notification {
     id: string;
@@ -18,15 +19,15 @@ export interface NotificationResponse {
 
 export const notificationService = {
     async getNotifications() {
-        const response = await apiClient.get<NotificationResponse>('/notifications');
+        const response = await apiClient.get<NotificationResponse>(API_ENDPOINTS.NOTIFICATIONS.LIST);
         return response as any; // apiClient returns data directly in some setups, but here we expect the full object
     },
 
     async markAsRead(id: string) {
-        return apiClient.put(`/notifications/${id}/read`);
+        return apiClient.put(API_ENDPOINTS.NOTIFICATIONS.MARK_READ(id));
     },
 
     async markAllAsRead() {
-        return apiClient.put('/notifications/read-all');
+        return apiClient.put(API_ENDPOINTS.NOTIFICATIONS.MARK_ALL_READ);
     }
 };

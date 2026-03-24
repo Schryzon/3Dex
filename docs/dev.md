@@ -1,241 +1,171 @@
-# 📘 dev.md — 3Dēx Development Guide
+# Development Guide - 3Dēx
 
-## A single source of truth for every baby.
-
+This document serves as the primary technical reference for the 3Dēx project.
 
 ---
 
-📌 Table of Contents
+## Table of Contents
 
-1. [What Is This Project?](#what-is-this-project)
+1. [Project Overview](#project-overview)
 2. [Tech Stack Overview](#tech-stack-overview)
-3. [Before You Start (VERY IMPORTANT)](#before-you-start-very-important)
-4. [Install Everything (Windows & Linux)](#install-everything-windows--linux)
-5. [Clone the Project](#clone-the-project)
-6. [Project Structure Explained](#project-structure-explained)
-7. [Environment Variables (.env)](#environment-variables-env)
+3. [Core Principles](#core-principles)
+4. [Installation Guide](#installation-guide)
+5. [Cloning the Project](#cloning-the-project)
+6. [Project Structure](#project-structure)
+7. [Environment Variables](#environment-variables)
 8. [Database Setup (PostgreSQL + Prisma)](#database-setup-postgresql--prisma)
 9. [Running the Project](#running-the-project)
-10. [Testing That Everything Works](#testing-that-everything-works)
-11. [Daily Git Workflow (NO COLLISIONS)](#daily-git-workflow-no-collisions)
-12. [Working From a NON‑Existing Folder](#working-from-a-nonexisting-folder)
-13. [Working From an EXISTING Folder](#working-from-an-existing-folder)
-14. [Merging Your Work Safely](#merging-your-work-safely)
-15. [Common Mistakes & Fixes](#common-mistakes--fixes)
-16. [Golden Rules (READ THIS TWICE)](#golden-rules-read-this-twice)
-
-
-
+10. [Verification Checklist](#verification-checklist)
+11. [Git Workflow](#git-workflow)
+12. [Working with a New Local Copy](#working-with-a-new-local-copy)
+13. [Updating an Existing Local Copy](#updating-an-existing-local-copy)
+14. [Safe Merging Strategy](#safe-merging-strategy)
+15. [Troubleshooting](#troubleshooting)
+16. [Core Rules](#core-rules)
 
 ---
 
-## What Is This Project?
+## Project Overview
 
-3Dēx is a completed MVP for a 3D services & asset marketplace with:
+3Dēx is a completed MVP for a 3D services and asset marketplace featuring:
 ```
 Frontend: Next.js + Tailwind
-
 Backend: Node.js + Express
-
 Database: PostgreSQL + Prisma
 ```
 
-This document tells you exactly how to become productive without breaking anything.
-
+This guide details the setup and development processes to ensure consistent implementation and avoid breaking changes.
 
 ---
 
 ## Tech Stack Overview
 
-### Layer	Tech
-```
-Frontend  ->  Next.js (React), Tailwind CSS
-Backend   ->  Node.js, Express
-Database  ->  PostgreSQL
-ORM       ->  Prisma
-Storage   ->  MinIO (S3 Compatible)
-Versions  ->  Git + GitHub
-```
-
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js (React), Tailwind CSS |
+| Backend | Node.js, Express |
+| Database | PostgreSQL |
+| ORM | Prisma |
+| Storage | MinIO (S3 Compatible) |
+| Version Control | Git + GitHub |
 
 ---
 
-## Before You Start (VERY IMPORTANT)
+## Core Principles
 
-### 🧠 Baby Mental Model
+### Development Mental Model
 
-- Code is shared
+- Code is shared across the team.
+- Database data is maintained locally and not shared.
+- Storage buckets are local for development purposes.
+- Secrets must never be committed to version control.
+- Features are developed on dedicated branches, not on the master branch.
 
-- Database data is NOT shared
-
-- **Storage bucket is NOT shared (local dev)**
-
-- Secrets are NEVER committed
-
-- We work on branches, not on master
-
-
-If you don’t understand this yet — it’s okay.
-
-This guide will enforce it for you.
-
+If you are new to these concepts, this guide will help you follow these practices.
 
 ---
 
-## Install Everything (Windows & Linux)
+## Installation Guide
 
-1. Install Git
+### 1. Git
+- Windows: [git-scm.com/download/win](https://git-scm.com/download/win)
+- Linux: `sudo apt install git`
 
-Windows: https://git-scm.com/download/win
-
-Linux:
-
-```sh
-sudo apt install git
-```
-Verify:
-```sh
-git --version
-```
+Verify: `git --version`
 
 ---
 
-2. Install Node.js (LTS ONLY)
+### 2. Node.js (LTS Version)
+- Download from: [nodejs.org](https://nodejs.org) (Choose the LTS version)
 
-https://nodejs.org (choose LTS)
-
-
-Verify:
-```sh
-node -v
-npm -v
-```
+Verify: `node -v`, `npm -v`
 
 ---
 
-3. Install PostgreSQL
+### 3. PostgreSQL
+- Windows: [postgresql.org/download/windows/](https://www.postgresql.org/download/windows/)
+- Linux: `sudo apt install postgresql postgresql-contrib`
 
-Windows: https://www.postgresql.org/download/windows/
+Verify: `psql --version`, `pg_isready`
 
-Linux:
-
-```sh
-sudo apt install postgresql postgresql-contrib
-```
-Verify:
-```sh
-psql --version
-pg_isready
-```
-Expected:
-```
-accepting connections
-```
-*Note: This is only if you installed PostgreSQL as a service, otherwise you have to start it manually.*
+*Note: Verification depends on whether PostgreSQL is installed as a service.*
 
 ---
 
-4. Install MinIO (Optional for local dev, prevents errors)
-
-You can run it via Docker:
+### 4. MinIO (Optional for local development)
+MinIO can be run via Docker:
 ```sh
 docker run -p 9000:9000 -p 9001:9001 minio/minio server /data --console-address ":9001"
 ```
-Or just install the binary.
-
 
 ---
 
-## Clone the Project
+## Cloning the Project
 ```sh
 git clone https://github.com/Schryzon/3Dex.git
 cd 3Dex
 ```
-If this works, you are officially a baby developer 👶✨
-
 
 ---
 
-## Project Structure Explained
+## Project Structure
 ```
 3Dex/
+├─ .github/       # CI/CD workflows
+├─ .vscode/       # Workspace settings
 ├─ apps/
-│  ├─ frontend/   # Next.js + Tailwind
-│  └─ backend/    # Express + Prisma
-├─ docs/          # Documentation
-├─ dev.md
-└─ README.md
+│  ├─ backend/    # Express backend
+│  └─ frontend/   # Next.js frontend
+├─ docs/          # Technical documentation
+├─ LICENSE        # Project license
+└─ README.md      # Main documentation
 ```
-❌ Do NOT add random folders
-
-❌ Do NOT put databases here
-
+Avoid adding redundant folders or storing databases within the repository.
 
 ---
 
-## Environment Variables (`.env`)
+## Environment Variables
 
 ### Backend (`apps/backend/.env`)
 Copy `apps/backend/.env.example` to `apps/backend/.env`.
 ```env
 DATABASE_URL="postgresql://YOUR_USERNAME:YOUR_PASSWORD@localhost:5432/threedex"
 PORT=4000
-# ... see .env.example for full list
 ```
 
 ### Frontend (`apps/frontend/.env.local`)
 Copy `apps/frontend/.env.local.example` to `apps/frontend/.env.local`.
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:4000
-# ... see .env.local.example for full list
 ```
 
 ### Docker (`.env.docker`)
 **For Docker Compose Only**.
 Copy `.env.docker.example` to `.env.docker`.
-This file combines both Backend and Frontend variables for the containerized environment.
 
-🚨 NEVER COMMIT THESE FILES
-They are already in `.gitignore`.
-
+Never commit these files; they are included in `.gitignore`.
 
 ---
 
 ## Database Setup (PostgreSQL + Prisma)
 
-If you're not using PostgreSQL as a service:
-```sh
-pg_ctl start -D "PATH_TO_DATA_FOLDER"
-```
-The data folder usually comes with the installation.
-Its path can be invoked via the following environment variable names:
-- `%PGDATA%` (Command Prompt)
-- `$env:PGDATA` (Powershell) 
-- `$PGDATA` (Linux)
-
-Example:
+If PostgreSQL is not running as a service, start it manually:
 ```powershell
 pg_ctl start -D $env:PGDATA
 ```
 
-Then, from apps/backend:
+Then, from `apps/backend`:
 ```sh
 npm install
 npx prisma migrate dev --name init
 npx prisma generate
 ```
-If this succeeds:
 
-- PostgreSQL is running
+Success indicators:
+- PostgreSQL is running.
+- Prisma connected successfully.
 
-- Prisma is connected
-
-- You are safe 🟢
-
-If you want to stop PostgreSQL, do:
-```sh
-pg_ctl stop
-```
+To stop PostgreSQL: `pg_ctl stop`
 
 ---
 
@@ -246,16 +176,7 @@ pg_ctl stop
 cd apps/backend
 npm run dev
 ```
-Check:
-```
-http://localhost:4000/health
-```
-Expected:
-```json
-{ "status": "ok" }
-```
-
----
+Health check: `http://localhost:4000/health` (Expected: `{ "status": "ok" }`)
 
 ### Frontend
 ```sh
@@ -263,146 +184,107 @@ cd apps/frontend
 npm install
 npm run dev
 ```
-Open:
-```
-http://localhost:3000
-```
+Access via: `http://localhost:3000`
 
 ---
 
-## Testing That Everything Works
+## Verification Checklist
 
-Checklist:
-
-[ ] Frontend loads
-
-[ ] Backend /health works
-
-[ ] No red errors
-
-[ ] Prisma migrate ran successfully
-
-
-If YES → you are fully set up 🎉
-
+- [ ] Frontend loads correctly.
+- [ ] Backend `/health` endpoint returns "ok".
+- [ ] No console errors.
+- [ ] Prisma migrations completed successfully.
 
 ---
 
-## Daily Git Workflow (NO COLLISIONS)
+## Git Workflow
 
-### Start work
+### Starting a New Task
 ```sh
 git checkout dev
 git pull origin dev
 git checkout -b feature/your-task-name
 ```
-### Save work
+
+### Saving Progress
 ```sh
 git add .
-git commit -m "clear description"
+git commit -m "Brief description of changes"
 git push -u origin feature/your-task-name
 ```
 
 ---
 
-## Working From a NON‑Existing Folder
-
-If you never cloned before:
+## Working with a New Local Copy
 ```sh
 git clone https://github.com/Schryzon/3Dex.git
 cd 3Dex
 git checkout dev
 ```
-Then follow setup steps above.
-
+Follow the setup steps mentioned above.
 
 ---
 
-## Working From an EXISTING Folder
-
-If you already cloned before:
+## Updating an Existing Local Copy
 ```sh
 git checkout dev
 git pull origin dev
-```
-Then create your feature branch:
-```sh
 git checkout -b feature/new-task
 ```
 
 ---
 
-## Merging Your Work Safely
+## Safe Merging Strategy
 
-Step 1: Update dev
+### Step 1: Update the Dev Branch
 ```sh
 git checkout dev
 git pull origin dev
 ```
-Step 2: Merge dev into your branch
+
+### Step 2: Merge Dev into Feature Branch
 ```sh
 git checkout feature/your-task
 git merge dev
 ```
-Fix conflicts here, not on dev.
+Resolve any conflicts locally in the feature branch.
 
-
----
-
-Step 3: Merge into dev
+### Step 3: Merge into Dev and Push
 ```sh
 git checkout dev
 git merge feature/your-task
 git push origin dev
 ```
-Step 4: Delete branch
+
+### Step 4: Cleanup
 ```sh
 git branch -d feature/your-task
 git push origin --delete feature/your-task
 ```
-Clean. Safe. Professional.
-
 
 ---
 
-## Common Mistakes & Fixes
+## Troubleshooting
 
-❌ “Git overwrote my work”
+- **"Git overwrote my work"**: Ensure you commit your changes before pulling updates.
+  ```sh
+  git add .
+  git commit -m "wip"
+  git pull
+  ```
 
-You didn’t commit before pulling.
-
-Fix:
-```sh
-git add .
-git commit -m "wip"
-git pull
-```
+- **"Prisma connection error"**: Verify PostgreSQL is running on the expected port (default 5432).
+  ```sh
+  pg_isready
+  ```
 
 ---
 
-❌ “Prisma can’t connect”
+## Core Rules
 
-Postgres isn’t running or port isn’t `5432`.
-
-Fix:
-
-1. Check if PostgreSQL is running
-```sh
-pg_isready
-```
-
-2. If not, start it manually at a certain port (`-p 5432`)
-Example: (Powershell)
-```powershell
-pg_ctl -o "-p 5432" start -D $env:PGDATA
-```
----
-
-## Golden Rules (READ THIS TWICE)
-1. ❌ Never code on master
-2. ✅ Always branch from dev
-3. ❌ Never commit .env
-4. ✅ One task = one branch
-5. ❌ Never share DB data
-6. ✅ Ask mommy before panicking
----
+1. Do not code directly on the master branch.
+2. Always branch from the dev branch.
+3. Never commit environment variables (.env).
+4. Dedicate one branch per task.
+5. Do not share local database data.
+6. Consult the team Lead or documentation if issues persist.

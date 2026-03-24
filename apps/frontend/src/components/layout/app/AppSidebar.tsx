@@ -90,7 +90,7 @@ export default function AppSidebar({
         {isSidebarOpen ? (
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 flex items-center justify-center shrink-0">
-              <img src="/icon.png" alt="3Dex" className="w-full h-full object-contain" />
+              <img src="/3Dex.svg" alt="3Dex" className="w-full h-full object-contain" />
             </div>
             <span className="text-white font-bold text-lg">3Dēx</span>
           </Link>

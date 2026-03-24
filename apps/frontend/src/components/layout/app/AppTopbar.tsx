@@ -16,6 +16,7 @@ import {
   LogOut
 } from 'lucide-react';
 import UserAvatar from '@/components/common/UserAvatar';
+import ProtectedLink from '@/components/common/ProtectedLink';
 
 interface AppTopbarProps {
   user: any;
@@ -72,7 +73,7 @@ export default function AppTopbar({
           </button>
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 flex items-center justify-center">
-              <img src="/icon.png" alt="3Dex" className="w-full h-full object-contain" />
+              <img src="/3Dex.svg" alt="3Dex" className="w-full h-full object-contain" />
             </div>
           </Link>
         </div>
@@ -95,14 +96,14 @@ export default function AppTopbar({
         <div className="flex items-center gap-1 md:gap-3">
 
           {/* Cart */}
-          <Link href="/cart" className="p-2 text-gray-500 hover:text-white relative transition-colors">
+          <ProtectedLink href="/cart" className="p-2 text-gray-500 hover:text-white relative transition-colors">
             <ShoppingCart className="w-5 h-5" />
             {mounted && cartItemsCount > 0 && (
               <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-yellow-400 text-black text-[10px] font-bold rounded-full flex items-center justify-center">
                 {cartItemsCount}
               </span>
             )}
-          </Link>
+          </ProtectedLink>
 
           {isLoggedIn ? (
             <div className="relative" ref={dropdownRef}>

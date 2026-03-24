@@ -1,18 +1,30 @@
 # 3Dēx Frontend
 
-This is the *frontend application* for 3Dēx, built with *Next.js* and *Tailwind CSS*.
-
-It handles:
-- ✅ Responsive UI & Modern UX (Tailwind CSS, Radix UI)
-- ✅ Protected Routes & Role-based authentication
-- ✅ Advanced API integration & State Management (React Query)
-- ✅ 3D Previews (Built-in canvas integrations)
-- ✅ Payment processing (Midtrans Sandbox integration)
-- ✅ Content Moderation interfaces (Admin Dashboards)
+This is the frontend application for 3Dēx, built with Next.js and Tailwind CSS.
 
 ---
 
-## 🧱 Tech Stack
+## Table of Contents
+- [Tech Stack](#tech-stack)
+- [Structure](#structure)
+- [Setup](#setup)
+- [Running the Development Server](#running-the-development-server)
+- [Design Workflow](#design-workflow)
+- [Important Notes](#important-notes)
+
+---
+
+It handles:
+- Responsive UI & Modern UX (Tailwind CSS, Radix UI)
+- Protected Routes & Role-based authentication
+- Advanced API integration & State Management (React Query)
+- 3D Previews (Built-in canvas integrations)
+- Payment processing (Midtrans Sandbox integration)
+- Content Moderation interfaces (Admin Dashboards)
+
+---
+
+## Tech Stack
 - Next.js (App Router)
 - React
 - Tailwind CSS
@@ -20,18 +32,20 @@ It handles:
 
 ---
 
-## 📂 Structure
+## Structure
 ```
 src/ 
-├─ app/            # Pages & routes 
+├─ app/            # Pages & routing 
 ├─ components/     # Reusable UI components 
-├─ features/       # Feature‑based UI logic 
-├─ lib/            # Helpers (fetchers, utils) 
-└─ styles/         # Global styles
+├─ features/       # Feature‑based logic 
+├─ lib/            # Core library and utilities 
+├─ styles/         # Global styles 
+├─ types/          # Global type definitions
+└─ __tests__/     # Test suites
 ```
 ---
 
-## ⚙️ Setup
+## Setup
 
 ### 1. Install dependencies
 ```bash
@@ -46,7 +60,7 @@ cp .env.local.example .env.local
 
 ---
 
-▶️ Run Development Server
+## Running the Development Server
 ```bash
 npm run dev
 ```
@@ -57,23 +71,16 @@ http://localhost:3000
 
 ---
 
-## 🎨 Design Workflow
+## Design Workflow
 
-1. UI is based on Figma designs
-
-2. Figma is a reference, not auto‑generated code
-
-3. Build UI component‑by‑component
-
-4. Match layout & spacing, not pixel‑perfect perfection
-
-
+1. UI development is based on Figma designs.
+2. Figma serves as a reference, not for auto‑generated code.
+3. Build the UI component‑by‑component.
+4. Aim for high fidelity in layout and spacing while maintaining flexibility.
 
 ---
 
-## ⚠️ Notes
+## Important Notes
 
-- Do NOT put secrets in frontend
-
-- Only variables starting with `NEXT_PUBLIC_` are accessible in browser
----
+- Do not store secrets in the frontend application.
+- Only environment variables prefixed with `NEXT_PUBLIC_` are accessible in the browser.

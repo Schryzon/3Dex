@@ -1,24 +1,24 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useProduct } from '@/lib/hooks/useProducts';
-import { useCart } from '@/lib/hooks/useCart';
-import { useWishlist } from '@/lib/hooks/useWishlist';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useProduct } from '@/features/catalog/hooks/useProducts';
+import { useCart } from '@/features/cart';
+import { useWishlist } from '@/features/catalog/hooks/useWishlist';
+import { useAuth } from '@/features/auth';
 import { Share2, Heart, Plus, Check, Download, Eye, ShoppingCart, FolderPlus, AlertTriangle, ChevronLeft } from 'lucide-react';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import { Suspense, lazy, useState } from 'react';
 import Link from 'next/link';
-import ProductDetails from '@/components/catalog/ProductDetails';
-import RelatedProducts from '@/components/catalog/RelatedProducts';
-import ProductReviews from '@/components/catalog/ProductReviews';
-import AddToCollectionModal from '@/components/collection/AddToCollectionModal';
+import { ProductDetails } from '@/features/catalog/components/product-details';
+import { RelatedProducts } from '@/features/catalog/components/product-details';
+import { ProductReviews } from '@/features/catalog/components/reviews';
+import AddToCollectionModal from '@/features/collection/components/AddToCollectionModal';
 import { formatPrice } from '@/lib/utils';
 import { purchaseService } from '@/lib/api/services/purchase.service';
 import { toast } from 'react-hot-toast';
 
 // Lazy load 3D viewer for better performance
-const ProductViewer3D = lazy(() => import('@/components/catalog/ProductViewer3D'));
+const ProductViewer3D = lazy(() => import('@/features/catalog/components/viewer').then(mod => ({ default: mod.ProductViewer3D })));
 
 export default function CatalogDetailPage() {
     const params = useParams();

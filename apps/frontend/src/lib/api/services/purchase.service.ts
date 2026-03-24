@@ -1,5 +1,9 @@
 import { apiClient } from '../client';
-import { API_ENDPOINTS } from '@/lib/constants/api';
+import { API_ENDPOINTS } from '@/lib/constants/endpoints';
+
+export const purchaseKeys = {
+    all: ['purchases'] as const,
+} as const;
 
 export interface Purchase {
     id: string;

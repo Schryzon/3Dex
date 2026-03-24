@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { useAuth } from '@/components/auth/AuthProvider';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/features/auth';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import {
     Wrench,
     User,
@@ -14,9 +15,37 @@ import {
     Printer
 } from 'lucide-react';
 
+const ReactQueryDevtoolsProduction = React.lazy(() =>
+    import('@tanstack/react-query-devtools/build/modern/production.js').then((d) => ({
+        default: d.ReactQueryDevtools,
+    }))
+);
+
+export const ENABLE_DEVTOOLS = true;
+
 export default function DevTools() {
     const { user, setUser } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
+    
+    // React Query DevTools toggle state
+    const [showQueryDevtools, setShowQueryDevtools] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+        if (localStorage.getItem('showQueryDevtools') === 'true') {
+            setShowQueryDevtools(true);
+        }
+    }, []);
+
+    const toggleQueryDevtools = () => {
+        setShowQueryDevtools((prev) => {
+            const next = !prev;
+            if (next) localStorage.setItem('showQueryDevtools', 'true');
+            else localStorage.removeItem('showQueryDevtools');
+            return next;
+        });
+    };
 
     const roles = [
         { id: 'CUSTOMER', label: 'Customer', icon: User, color: 'text-blue-400' },
@@ -34,9 +63,8 @@ export default function DevTools() {
         setIsOpen(false);
     };
 
-    if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined' && !window.location.hostname.includes('localhost')) {
-        return null;
-    }
+    if (!ENABLE_DEVTOOLS) return null;
+    if (!mounted) return null;
 
     return (
         <div className="fixed bottom-6 right-6 z-[9999]">
@@ -112,9 +140,35 @@ export default function DevTools() {
                                     {user ? 'Logged In' : 'Logged Out'}
                                 </span>
                             </div>
+
+                            {/* React Query DevTools Toggle */}
+                            <div className="flex items-center justify-between pt-3 border-t border-gray-800 mt-2">
+                                <div className="flex items-center gap-2 text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                                    <Database className="w-3 h-3 text-yellow-400" />
+                                    <span>Query DevTools</span>
+                                </div>
+                                <button
+                                    onClick={toggleQueryDevtools}
+                                    className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors focus:outline-none ${showQueryDevtools ? 'bg-yellow-400' : 'bg-gray-700'}`}
+                                    aria-pressed={showQueryDevtools}
+                                >
+                                    <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${showQueryDevtools ? 'translate-x-4' : 'translate-x-1'}`} />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Conditionally mount DevTools to avoid double-rendering overlap */}
+            {showQueryDevtools && (
+                process.env.NODE_ENV === 'production' ? (
+                    <React.Suspense fallback={null}>
+                        <ReactQueryDevtoolsProduction initialIsOpen={false} />
+                    </React.Suspense>
+                ) : (
+                    <ReactQueryDevtools initialIsOpen={false} />
+                )
             )}
         </div>
     );

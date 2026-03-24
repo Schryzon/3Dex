@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from '@/components/auth/AuthProvider';
+import { AuthProvider } from '@/features/auth';
 import { ReactQueryProvider } from '@/components/providers/ReactQueryProvider';
 import { Toaster } from 'react-hot-toast';
 
@@ -13,8 +13,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "3Dēx | 3D Marketplace",
-  description: "3D asset collection",
+  title: "3Dēx",
+  description: "3D asset marketplace and printing service",
+  icons: {
+    icon: "/3Dex.svg",
+  },
 };
 
 export default function RootLayout({
@@ -23,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body className={`${inter.className} antialiased bg-black text-white`}>
         <ReactQueryProvider>
           <AuthProvider>
@@ -32,7 +35,7 @@ export default function RootLayout({
           </AuthProvider>
         </ReactQueryProvider>
         <Script
-          src="https://accounts.google.com/gsi/client"
+          src="https://accounts.google.com/gsi/client?hl=en"
           strategy="afterInteractive"
         />
         <Script

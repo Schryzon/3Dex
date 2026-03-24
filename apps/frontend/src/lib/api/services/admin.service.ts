@@ -1,5 +1,5 @@
 import { api } from '@/lib/api';
-import { User, Model } from '@/lib/types';
+import { User, Model } from '@/types';
 
 export const adminService = {
     // Models

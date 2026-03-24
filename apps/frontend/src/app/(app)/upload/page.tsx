@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Box, Info, Tag, DollarSign, Check, ChevronRight, Layout, Loader2 } from 'lucide-react';
-import FileUploader from '@/components/upload/FileUploader';
-import MultiFileUploader from '@/components/upload/MultiFileUploader';
+import FileUploader from '@/features/upload/components/FileUploader';
+import MultiFileUploader from '@/features/upload/components/MultiFileUploader';
 import { api } from '@/lib/api';
 import axios from 'axios';
 

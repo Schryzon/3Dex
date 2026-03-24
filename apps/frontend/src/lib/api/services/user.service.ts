@@ -1,5 +1,10 @@
 import { apiClient } from '../client';
-import { API_ENDPOINTS } from '@/lib/constants/api';
+import { API_ENDPOINTS } from '@/lib/constants/endpoints';
+
+export const userKeys = {
+    all: ['user'] as const,
+    profile: () => [...userKeys.all, 'profile'] as const,
+} as const;
 
 export interface ArtistApplicationData {
     role: 'ARTIST';

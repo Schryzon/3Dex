@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Sparkles, Printer, ChevronRight, User, ShieldCheck } from 'lucide-react';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useAuth } from '@/features/auth';
 
 export default function ApplyHubPage() {
     const { isAuthenticated, isLoading } = useAuth();
