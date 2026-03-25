@@ -6,7 +6,7 @@ import {
   update_model_by_id,
   delete_model_by_id,
 } from "../services/model.service";
-import { get_download_url_s3 } from "../services/storage.service";
+import { get_download_url_s3, sign_user_urls } from "../services/storage.service";
 import { get_purchase } from "../services/purchase.service";
 import prisma from "../prisma";
 import { Auth_Request } from "../middlewares/auth.middleware";
@@ -180,6 +180,9 @@ export async function list_models(req: Request, res: Response) {
       if (model.file_url && !model.file_url.startsWith("http")) {
         model.file_url = await get_download_url_s3(model.file_url);
       }
+      if (model.artist) {
+        model.artist = await sign_user_urls(model.artist);
+      }
       return model;
     };
 
@@ -243,6 +246,9 @@ export async function get_model_detail(req: Request, res: Response) {
     }
     if (model.file_url && !model.file_url.startsWith("http")) {
       model.file_url = await get_download_url_s3(model.file_url);
+    }
+    if (model.artist) {
+      model.artist = await sign_user_urls(model.artist);
     }
 
     res.json(model);

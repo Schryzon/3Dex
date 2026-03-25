@@ -22,7 +22,7 @@ export default function HowItWorks() {
                 <div className="absolute inset-0 bg-gradient-to-b from-black via-black/80 to-black" />
             </div>
             {/* Centered yellow glow */}
-            <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 50% 60% at 50% 50%, rgba(250,204,21,0.06) 0%, transparent 70%)' }} />
+            <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 50% 60% at 50% 50%, rgba(250,204,21,0.12) 0%, rgba(250,204,21,0) 70%)' }} />
 
             <div className="relative max-w-[1400px] mx-auto px-6 md:px-10">
 

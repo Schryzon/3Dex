@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { register_user, login_user, google_login } from "../services/auth.service";
 import prisma from "../prisma";
 import { sign_token } from "../utils/jwt";
+import { sign_user_urls } from "../services/storage.service";
 
 // Cookie options shared by login and logout endpoints.
 // secure is disabled in development to allow HTTP (localhost).
@@ -38,13 +39,13 @@ export async function login(req: Request, res: Response) {
 
     // Return only the user object; the token travels via cookie, not body
     res.json({
-        user: {
+        user: await sign_user_urls({
             id: user.id,
             email: user.email,
             username: user.username,
             role: user.role,
             avatar_url: user.avatar_url,
-        },
+        }),
     });
 }
 
@@ -88,14 +89,14 @@ export async function google_auth(req: Request, res: Response) {
 
         // Return the user object and whether this is a new account
         res.json({
-            user: {
+            user: await sign_user_urls({
                 id: user.id,
                 email: user.email,
                 username: user.username,
                 role: user.role,
                 avatar_url: user.avatar_url,
                 display_name: user.display_name,
-            },
+            }),
             needs_username: isNew,
         });
     } catch (error: any) {
@@ -146,7 +147,7 @@ export async function complete_profile(req: any, res: Response) {
             },
         });
 
-        res.json(updated);
+        res.json(await sign_user_urls(updated));
     } catch (error: any) {
         res.status(500).json({ message: error.message });
     }
@@ -186,7 +187,7 @@ export async function get_me(req: any, res: Response) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        res.json(db_user);
+        res.json(await sign_user_urls(db_user));
     } catch (error: any) {
         res.status(500).json({ message: error.message });
     }

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { LucideIcon } from 'lucide-react';
+import ProtectedLink from '@/components/common/ProtectedLink';
 
 interface SidebarNavItemProps {
     label: string;
@@ -11,6 +12,7 @@ interface SidebarNavItemProps {
     isSidebarOpen: boolean;
     title?: string;
     count?: number;
+    requiresAuth?: boolean;
 }
 
 export default function SidebarNavItem({
@@ -21,9 +23,12 @@ export default function SidebarNavItem({
     isSidebarOpen,
     title,
     count,
+    requiresAuth,
 }: SidebarNavItemProps) {
+    const Component = requiresAuth ? ProtectedLink : Link;
+
     return (
-        <Link
+        <Component
             href={href}
             title={title}
             className={`relative flex items-center ${isSidebarOpen ? 'justify-start px-3' : 'justify-center px-2'
@@ -55,6 +60,6 @@ export default function SidebarNavItem({
             {count !== undefined && count > 0 && !isSidebarOpen && (
                 <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-[#111]" />
             )}
-        </Link>
+        </Component>
     );
 }

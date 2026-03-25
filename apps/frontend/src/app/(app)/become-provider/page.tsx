@@ -12,6 +12,7 @@ import { userService } from '@/lib/api/services/user.service';
 import MultiFileUploader from '@/features/upload/components/MultiFileUploader';
 import { api } from '@/lib/api';
 import axios from 'axios';
+import { USD_TO_IDR } from '@/lib/utils/price';
 
 type Step = 'profile' | 'equipment' | 'review';
 
@@ -38,6 +39,7 @@ export default function BecomeProviderPage() {
     const [selectedColors, setSelectedColors] = useState<string[]>([]);
     const [selectedPrinterTypes, setSelectedPrinterTypes] = useState<string[]>([]);
     const [basePrice, setBasePrice] = useState('');
+    const [currency, setCurrency] = useState<'idr' | 'usd'>('idr');
     const [maxX, setMaxX] = useState('');
     const [maxY, setMaxY] = useState('');
     const [maxZ, setMaxZ] = useState('');
@@ -84,7 +86,7 @@ export default function BecomeProviderPage() {
                 printerTypes: selectedPrinterTypes,
                 documents: documentKeys,
             };
-            if (basePrice) providerConfig.basePrice = Number(basePrice);
+            if (basePrice) providerConfig.basePrice = currency === 'idr' ? Number(basePrice) : Number(basePrice) * USD_TO_IDR;
             if (maxX && maxY && maxZ) {
                 providerConfig.maxDimensions = { x: Number(maxX), y: Number(maxY), z: Number(maxZ) };
             }
@@ -432,16 +434,41 @@ export default function BecomeProviderPage() {
                             {/* Base Price & Max Dimensions */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-bold text-gray-300 flex items-center gap-2">
-                                        <DollarSign className="w-4 h-4 text-gray-500" /> Base Price (Rp)
-                                    </label>
-                                    <input
-                                        type="number"
-                                        placeholder="e.g. 50000"
-                                        className="w-full bg-gray-900/50 border border-gray-800 rounded-xl px-4 py-3 outline-none focus:border-yellow-400 transition-colors text-white placeholder:text-gray-600"
-                                        value={basePrice}
-                                        onChange={e => setBasePrice(e.target.value)}
-                                    />
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-sm font-bold text-gray-300 flex items-center gap-2">
+                                            <DollarSign className="w-4 h-4 text-gray-500" /> Base Price
+                                        </label>
+                                        <div className="flex gap-1 bg-gray-900 rounded-lg p-0.5">
+                                            <button
+                                                onClick={() => setCurrency('idr')}
+                                                className={`px-2 py-0.5 text-[10px] font-medium rounded transition-all duration-300 ${currency === 'idr'
+                                                    ? 'bg-yellow-500 text-black shadow-lg shadow-yellow-500/20'
+                                                    : 'text-gray-400 hover:text-white'
+                                                    }`}
+                                            >
+                                                IDR
+                                            </button>
+                                            <button
+                                                onClick={() => setCurrency('usd')}
+                                                className={`px-2 py-0.5 text-[10px] font-medium rounded transition-all duration-300 ${currency === 'usd'
+                                                    ? 'bg-yellow-500 text-black shadow-lg shadow-yellow-500/20'
+                                                    : 'text-gray-400 hover:text-white'
+                                                    }`}
+                                            >
+                                                USD
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">{currency === 'idr' ? 'Rp' : '$'}</span>
+                                        <input
+                                            type="number"
+                                            placeholder={currency === 'idr' ? "e.g. 50000" : "e.g. 5.00"}
+                                            className="w-full bg-gray-900/50 border border-gray-800 rounded-xl pl-10 pr-4 py-3 outline-none focus:border-yellow-400 transition-colors text-white placeholder:text-gray-600"
+                                            value={basePrice}
+                                            onChange={e => setBasePrice(e.target.value)}
+                                        />
+                                    </div>
                                     <p className="text-xs text-gray-600">Starting price per print job</p>
                                 </div>
                                 <div className="space-y-2">
@@ -553,7 +580,7 @@ export default function BecomeProviderPage() {
                                         <div className="grid grid-cols-2 gap-3">
                                             <div>
                                                 <span className="text-gray-500">Base Price</span>
-                                                <span className="text-white font-medium block">{basePrice ? `Rp ${Number(basePrice).toLocaleString()}` : '—'}</span>
+                                                <span className="text-white font-medium block">{basePrice ? (currency === 'idr' ? `Rp ${Number(basePrice).toLocaleString()}` : `$${Number(basePrice).toFixed(2)}`) : '—'}</span>
                                             </div>
                                             <div>
                                                 <span className="text-gray-500">Max Build Volume</span>

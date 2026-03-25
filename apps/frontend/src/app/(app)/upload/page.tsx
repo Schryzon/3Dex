@@ -7,6 +7,7 @@ import FileUploader from '@/features/upload/components/FileUploader';
 import MultiFileUploader from '@/features/upload/components/MultiFileUploader';
 import { api } from '@/lib/api';
 import axios from 'axios';
+import { USD_TO_IDR } from '@/lib/utils/price';
 
 type Step = 'files' | 'details' | 'pricing';
 
@@ -17,6 +18,7 @@ export default function UploadPage() {
     const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
+    const [currency, setCurrency] = useState<'idr' | 'usd'>('idr');
 
     // Form Data
     const [formData, setFormData] = useState({
@@ -99,7 +101,7 @@ export default function UploadPage() {
             await api.post('/models', {
                 title: formData.title,
                 description: formData.description,
-                price: formData.isFree ? 0 : Number(formData.price),
+                price: formData.isFree ? 0 : (currency === 'idr' ? Number(formData.price) : Number(formData.price) * USD_TO_IDR),
                 file_url: modelUpload.key, // Store KEY, not signed URL
                 preview_url: previewKey,
                 gallery_urls: galleryKeys,
@@ -332,19 +334,41 @@ export default function UploadPage() {
 
                                 {!formData.isFree && (
                                     <div className="space-y-4 p-6 bg-gray-900/30 rounded-2xl border border-gray-800 animate-in zoom-in-95 duration-200">
-                                        <label className="text-sm font-bold text-gray-300">Set Price (USD)</label>
+                                        <div className="flex items-center justify-between mb-2">
+                                            <label className="text-sm font-bold text-gray-300">Set Price</label>
+                                            <div className="flex gap-1 bg-gray-900 rounded-lg p-0.5">
+                                                <button
+                                                    onClick={() => setCurrency('idr')}
+                                                    className={`px-2 py-1 text-xs font-medium rounded transition-all duration-300 ${currency === 'idr'
+                                                        ? 'bg-yellow-500 text-black shadow-lg shadow-yellow-500/20'
+                                                        : 'text-gray-400 hover:text-white'
+                                                        }`}
+                                                >
+                                                    IDR
+                                                </button>
+                                                <button
+                                                    onClick={() => setCurrency('usd')}
+                                                    className={`px-2 py-1 text-xs font-medium rounded transition-all duration-300 ${currency === 'usd'
+                                                        ? 'bg-yellow-500 text-black shadow-lg shadow-yellow-500/20'
+                                                        : 'text-gray-400 hover:text-white'
+                                                        }`}
+                                                >
+                                                    USD
+                                                </button>
+                                            </div>
+                                        </div>
                                         <div className="relative">
-                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
+                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">{currency === 'idr' ? 'Rp' : '$'}</span>
                                             <input
                                                 type="number"
-                                                className="w-full bg-black border border-gray-800 rounded-xl pl-8 pr-4 py-4 outline-none focus:border-yellow-400 transition-colors text-2xl font-bold"
+                                                className="w-full bg-black border border-gray-800 rounded-xl pl-10 pr-4 py-4 outline-none focus:border-yellow-400 transition-colors text-2xl font-bold"
                                                 value={formData.price}
                                                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                                             />
                                         </div>
-                                        <div className="flex justify-between text-xs text-gray-500 px-1">
-                                            <span>Min: $1.00</span>
-                                            <span>Max: $5,000.00</span>
+                                        <div className="flex justify-between text-xs text-gray-500 px-1 mt-2">
+                                            <span>Min: {currency === 'idr' ? 'Rp 15.000' : '$1.00'}</span>
+                                            <span>Max: {currency === 'idr' ? 'Rp 75.000.000' : '$5,000.00'}</span>
                                         </div>
                                     </div>
                                 )}

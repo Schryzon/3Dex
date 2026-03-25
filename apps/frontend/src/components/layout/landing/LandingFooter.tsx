@@ -92,8 +92,8 @@ export default function LandingFooter() {
                 </Link>
               </li>
               <li>
-                <a href="mailto:support@3dex.com" className="text-gray-400 hover:text-white transition-colors">
-                  support@3dex.com
+                <a href="mailto:3dexweb@gmail.com" className="text-gray-400 hover:text-white transition-colors">
+                  3dexweb@gmail.com
                 </a>
               </li>
             </ul>
@@ -103,21 +103,36 @@ export default function LandingFooter() {
           <div>
             <h3 className="text-white font-bold text-lg mb-4">We accept</h3>
             <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="bg-white px-3 py-2 rounded text-blue-600 font-bold text-sm">
+              {/* International */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="bg-white px-2.5 py-1.5 rounded text-blue-600 font-bold text-[11px]">
                   PayPal
                 </div>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <div className="bg-white px-3 py-2 rounded text-xs font-bold text-blue-900">
+                <div className="bg-white px-2.5 py-1.5 rounded text-[11px] font-bold text-blue-900">
                   VISA
                 </div>
-                <div className="bg-white px-3 py-2 rounded text-xs font-bold">
+                <div className="bg-white px-2.5 py-1.5 rounded text-[11px] font-bold">
                   <span className="text-red-600">Master</span>
                   <span className="text-orange-500">Card</span>
                 </div>
-                <div className="bg-blue-400 px-3 py-2 rounded text-xs font-bold text-white">
-                  AMEX
+              </div>
+
+              {/* Local (Indonesia) */}
+              <div className="flex items-center gap-2 flex-wrap mt-2">
+                <div className="bg-[#ED2128] border border-white/10 px-2.5 py-1.5 rounded text-[11px] font-bold text-white shadow-sm shadow-[#ED2128]/20">
+                  QRIS
+                </div>
+                <div className="bg-[#00AA13] px-2.5 py-1.5 rounded text-[11px] font-bold text-white tracking-wide shadow-sm shadow-[#00AA13]/20">
+                  GoPay
+                </div>
+                <div className="bg-[#4C2A86] px-2.5 py-1.5 rounded text-[11px] font-bold text-white shadow-sm shadow-[#4C2A86]/20">
+                  OVO
+                </div>
+                <div className="bg-[#005EAA] px-2.5 py-1.5 rounded text-[11px] font-bold text-white shadow-sm shadow-[#005EAA]/20">
+                  BCA
+                </div>
+                <div className="bg-white px-2.5 py-1.5 rounded text-[11px] font-bold text-[#003D79] shadow-sm shadow-black/5 flex items-center">
+                  mandiri
                 </div>
               </div>
             </div>

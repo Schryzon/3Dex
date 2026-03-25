@@ -28,7 +28,7 @@ export default function Hero() {
       {/* Background */}
       <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: HERO_IMAGE }} />
       <div className="absolute inset-0 bg-gradient-to-r from-black via-black/75 to-black/20" />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/60" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/0 to-black/60" />
 
       {/* Content */}
       <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 md:px-10 pt-20 pb-20">
@@ -74,7 +74,7 @@ export default function Hero() {
       </div>
 
       {/* Bottom fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-black/0 pointer-events-none" />
 
     </section>
   );
