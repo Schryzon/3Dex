@@ -13,30 +13,31 @@ import { useState, useCallback, useEffect } from 'react';
 import { useCart } from '@/features/cart';
 import UserAvatar from '@/components/common/UserAvatar';
 import Image from 'next/image';
+import { ROUTES } from '@/lib/constants/routes';
 
 const ROLE_MENU_ITEMS = {
   ADMIN: [
-    { icon: LayoutDashboard, label: 'Dashboard', href: '/admin/dashboard' },
-    { icon: Users, label: 'Users', href: '/admin/users' },
-    { icon: FileText, label: 'Models', href: '/admin/models' },
-    { icon: BarChart3, label: 'Reports', href: '/admin/reports' },
+    { icon: LayoutDashboard, label: 'Dashboard', href: ROUTES.ADMIN.DASHBOARD },
+    { icon: Users, label: 'Users', href: ROUTES.ADMIN.USERS },
+    { icon: FileText, label: 'Models', href: ROUTES.ADMIN.MODELS },
+    { icon: BarChart3, label: 'Reports', href: ROUTES.ADMIN.REPORTS },
   ],
   ARTIST: [
-    { icon: Upload, label: 'Upload Asset', href: '/upload' },
-    { icon: FolderOpen, label: 'Collections', href: '/profile?tab=collections' },
-    { icon: Heart, label: 'Saved Assets', href: '/saved' },
-    { icon: LayoutDashboard, label: 'My Uploads', href: '/profile?tab=uploads' },
-    { icon: BarChart3, label: 'Analytics', href: '/artist/analytics' },
+    { icon: Upload, label: 'Upload Asset', href: ROUTES.ARTIST.UPLOAD },
+    { icon: FolderOpen, label: 'Collections', href: ROUTES.USER.PROFILE_COLLECTIONS },
+    { icon: Heart, label: 'Saved Assets', href: ROUTES.USER.SAVED },
+    { icon: LayoutDashboard, label: 'My Uploads', href: ROUTES.USER.PROFILE_UPLOADS },
+    { icon: BarChart3, label: 'Analytics', href: ROUTES.ARTIST.ANALYTICS },
   ],
   PROVIDER: [
-    { icon: LayoutDashboard, label: 'Dashboard', href: '/provider/dashboard' },
-    { icon: FolderOpen, label: 'Print Jobs', href: '/provider/jobs' },
-    { icon: Heart, label: 'Saved Assets', href: '/saved' },
+    { icon: LayoutDashboard, label: 'Dashboard', href: ROUTES.PROVIDER.DASHBOARD },
+    { icon: FolderOpen, label: 'Print Jobs', href: ROUTES.PROVIDER.JOBS },
+    { icon: Heart, label: 'Saved Assets', href: ROUTES.USER.SAVED },
   ],
   CUSTOMER: [
-    { icon: FolderOpen, label: 'Collections', href: '/profile?tab=collections' },
-    { icon: Heart, label: 'Saved Assets', href: '/saved' },
-    { icon: ShoppingCart, label: 'My Orders', href: '/orders' },
+    { icon: FolderOpen, label: 'Collections', href: ROUTES.USER.PROFILE_COLLECTIONS },
+    { icon: Heart, label: 'Saved Assets', href: ROUTES.USER.SAVED },
+    { icon: ShoppingCart, label: 'My Orders', href: ROUTES.USER.ORDERS },
   ],
 };
 
@@ -49,9 +50,9 @@ const NAV_LABELS: Record<MegaMenuType, string> = {
 };
 
 const MOBILE_NAV = [
-  { label: '3D Models', href: '/catalog' },
-  { label: '3D Printer', href: '/cg-models' },
-  { label: 'Textures', href: '/textures' },
+  { label: '3D Models', href: ROUTES.PUBLIC.CATALOG },
+  { label: '3D Printer', href: ROUTES.PUBLIC.PRINT_SERVICES },
+  { label: 'Textures', href: ROUTES.PUBLIC.TEXTURES },
 ];
 
 export default function LandingNavbar() {
@@ -99,7 +100,7 @@ export default function LandingNavbar() {
         <div className="flex items-center justify-between gap-4">
 
           {/* Logo */}
-          <Link href={isAuthenticated ? '/dashboard' : '/'} className="flex items-center gap-2 flex-shrink-0">
+          <Link href={isAuthenticated ? ROUTES.USER.DASHBOARD : ROUTES.PUBLIC.HOME} className="flex items-center gap-2 flex-shrink-0">
             <div className="w-7 h-7 flex items-center justify-center">
               <Image src="/3Dex.svg" alt="3Dex" width={32} height={32} />
             </div>
@@ -109,21 +110,21 @@ export default function LandingNavbar() {
           {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-6">
             <Link
-              href="/catalog"
+              href={ROUTES.PUBLIC.CATALOG}
               className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors cursor-pointer"
             >
               <span className="text-gray-500">○</span>
               <span>3D Models</span>
             </Link>
             <Link
-              href="/cg-models"
+              href={ROUTES.PUBLIC.PRINT_SERVICES}
               className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors cursor-pointer"
             >
               <span className="text-gray-500">○</span>
               <span>3D Printer</span>
             </Link>
             <Link
-              href="/textures"
+              href={ROUTES.PUBLIC.TEXTURES}
               className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors cursor-pointer"
             >
               <span className="text-gray-500">○</span>
@@ -155,7 +156,7 @@ export default function LandingNavbar() {
           <div className="flex items-center gap-2 md:gap-3">
 
             {/* Cart */}
-            <ProtectedLink href="/cart" className="text-gray-300 hover:text-white transition-colors p-2 cursor-pointer relative group">
+            <ProtectedLink href={ROUTES.USER.CART} className="text-gray-300 hover:text-white transition-colors p-2 cursor-pointer relative group">
               <ShoppingCart className="w-6 h-6" />
               {cartItemCount > 0 && (
                 <span className="absolute top-0 right-0 w-4 h-4 bg-yellow-400 text-black text-[10px] font-black rounded-full flex items-center justify-center border-2 border-black group-hover:scale-110 transition-transform">
@@ -199,7 +200,7 @@ export default function LandingNavbar() {
                     <div className="bg-[#111111] backdrop-blur-md border border-gray-800 rounded-lg shadow-2xl py-2">
 
                       <Link
-                        href="/profile"
+                        href={ROUTES.USER.PROFILE}
                         onClick={() => setUserMenuOpen(false)}
                         className="block px-4 py-3 border-b border-gray-800 hover:bg-gray-800/60 transition-colors"
                       >
@@ -290,7 +291,7 @@ export default function LandingNavbar() {
             {isAuthenticated && (
               <div className="border-t border-gray-800 pt-3 space-y-2">
                 <Link
-                  href="/dashboard"
+                  href={ROUTES.USER.DASHBOARD}
                   className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -298,7 +299,7 @@ export default function LandingNavbar() {
                   <span className="text-sm font-semibold">Dashboard</span>
                 </Link>
                 <Link
-                  href="/profile"
+                  href={ROUTES.USER.PROFILE}
                   className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -306,7 +307,7 @@ export default function LandingNavbar() {
                   <span className="text-sm font-semibold">{user?.username}</span>
                 </Link>
                 <Link
-                  href="/collections"
+                  href={ROUTES.USER.PROFILE_COLLECTIONS}
                   className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -314,7 +315,7 @@ export default function LandingNavbar() {
                   Collections
                 </Link>
                 <Link
-                  href="/saved"
+                  href={ROUTES.USER.SAVED}
                   className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >

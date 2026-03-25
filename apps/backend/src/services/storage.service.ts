@@ -33,3 +33,15 @@ export async function get_download_url_s3(key: string) {
 
     return await getSignedUrl(s3, command, { expiresIn: 3600 });
 }
+
+export async function sign_user_urls(user: any) {
+    if (!user) return user;
+    const u = { ...user };
+    if (u.avatar_url && !u.avatar_url.startsWith("http")) {
+        u.avatar_url = await get_download_url_s3(u.avatar_url);
+    }
+    if (u.banner_url && !u.banner_url.startsWith("http")) {
+        u.banner_url = await get_download_url_s3(u.banner_url);
+    }
+    return u;
+}

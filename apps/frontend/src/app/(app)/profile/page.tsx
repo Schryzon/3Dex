@@ -38,6 +38,7 @@ import JobsTab from '@/features/profile/components/JobsTab';
 import { useProducts } from '@/features/catalog/hooks/useProducts';
 import { api } from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/constants/api';
+import { MINIO_BASE_URL } from '@/lib/constants/endpoints';
 import ConfirmModal from '@/components/common/ConfirmModal';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import ImageCropModal from '@/components/common/ImageCropModal';
@@ -67,12 +68,14 @@ function ProfileContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const bannerInputRef = useRef<HTMLInputElement>(null);
 
     const [upgrading, setUpgrading] = useState(false);
     const [upgradeStatus, setUpgradeStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [activeTab, setActiveTab] = useState<TabType>('profile');
     const [saveBanner, setSaveBanner] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+    const [isUploadingBanner, setIsUploadingBanner] = useState(false);
 
     // Image Cropping
     const [cropModal, setCropModal] = useState<{
@@ -176,6 +179,7 @@ function ProfileContent() {
 
         // Set the correct uploading state based on type
         if (type === 'avatar') setIsUploadingAvatar(true);
+        else setIsUploadingBanner(true);
 
         try {
             const fileName = `${type}_${user?.id}_${Date.now()}.jpg`;
@@ -197,7 +201,8 @@ function ProfileContent() {
         } catch (error: any) {
             showBannerNotif('error', `Failed to upload ${type}.`);
         } finally {
-            setIsUploadingAvatar(false);
+            if (type === 'avatar') setIsUploadingAvatar(false);
+            else setIsUploadingBanner(false);
         }
     };
 
@@ -277,6 +282,13 @@ function ProfileContent() {
                 accept="image/*"
                 className="hidden"
                 onChange={(e) => handleImageSelect(e, 'avatar')}
+            />
+            <input
+                ref={bannerInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleImageSelect(e, 'banner')}
             />
 
 
@@ -420,8 +432,32 @@ function ProfileContent() {
                         {activeTab === 'profile' && (
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
                                 {/* Avatar Card */}
-                                <div className="bg-gray-900/40 rounded-2xl p-8 border border-gray-800 flex flex-col md:flex-row items-center gap-8 relative">
-                                    <div className="relative group/avatar">
+                                <div className="bg-gray-900/40 rounded-2xl p-8 border border-gray-800 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden group/banner">
+                                    {/* Banner Background */}
+                                    <div className="absolute inset-0 z-0">
+                                        {user?.banner_url ? (
+                                            <img
+                                                src={user.banner_url.startsWith('http') ? user.banner_url : `${MINIO_BASE_URL}/3dex-models/${user.banner_url}`}
+                                                alt="Banner"
+                                                className="w-full h-full object-cover opacity-50"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full bg-gradient-to-r from-gray-900 to-gray-800 opacity-80" />
+                                        )}
+                                        <div className="absolute inset-0 bg-black/40" />
+                                    </div>
+
+                                    {/* Banner Upload Button */}
+                                    <button
+                                        onClick={() => bannerInputRef.current?.click()}
+                                        disabled={isUploadingBanner}
+                                        className="absolute top-4 right-4 z-20 px-3 py-1.5 bg-black/60 cursor-pointer hover:bg-black/80 backdrop-blur-md border border-white/10 text-white text-xs font-bold rounded-lg flex items-center gap-2 transition-all opacity-0 group-hover/banner:opacity-100"
+                                    >
+                                        {isUploadingBanner ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+                                        Change Banner
+                                    </button>
+
+                                    <div className="relative z-10 group/avatar">
                                         <UserAvatar user={user} size="xl" className="border-4 cursor-pointer border-gray-800 shadow-2xl transition-transform group-hover/avatar:scale-105" />
                                         <button
                                             onClick={() => fileInputRef.current?.click()}
@@ -433,9 +469,9 @@ function ProfileContent() {
                                                 : <Camera className="w-5 h-5" />}
                                         </button>
                                     </div>
-                                    <div className="flex-1 text-center md:text-left">
+                                    <div className="relative z-10 flex-1 text-center md:text-left">
                                         <h3 className="text-2xl font-bold text-white mb-1">{user?.display_name || user?.username}</h3>
-                                        <p className="text-gray-400 mb-4">@{user?.username} · {user?.email}</p>
+                                        <p className="text-gray-300 mb-4">@{user?.username} · {user?.email}</p>
                                         <Link
                                             href={`/u/${user?.username}`}
                                             className="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-sm font-medium rounded-lg border border-gray-700 transition-all"

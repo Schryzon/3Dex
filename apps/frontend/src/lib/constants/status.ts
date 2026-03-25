@@ -1,0 +1,14 @@
+export const MODEL_STATUS = {
+    PENDING: 'PENDING',
+    APPROVED: 'APPROVED',
+    REJECTED: 'REJECTED',
+} as const;
+
+export const ORDER_STATUS = {
+    PENDING: 'PENDING',
+    PROCESSING: 'PROCESSING',
+    PRINTING: 'PRINTING',
+    SHIPPED: 'SHIPPED',
+    DELIVERED: 'DELIVERED',
+    CANCELLED: 'CANCELLED',
+} as const;

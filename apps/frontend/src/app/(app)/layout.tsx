@@ -10,6 +10,7 @@ import DevTools from '@/components/common/DevTools';
 import { useQuery } from '@tanstack/react-query';
 import { notificationService } from '@/lib/api/services';
 import { SIDEBAR_MENU, SIDEBAR_MY_STUFF, SIDEBAR_ARTIST, SIDEBAR_PROVIDER, SIDEBAR_ADMIN, SIDEBAR_BOTTOM } from '@/lib/constants/navigation';
+import { ROUTES } from '@/lib/constants/routes';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -45,26 +46,26 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname();
 
   const isPublicRoute =
-    pathname === '/' ||
-    pathname.startsWith('/catalog') ||
-    pathname.startsWith('/print-services') ||
-    pathname.startsWith('/community') ||
+    pathname === ROUTES.PUBLIC.HOME ||
+    pathname.startsWith(ROUTES.PUBLIC.CATALOG) ||
+    pathname.startsWith(ROUTES.PUBLIC.PRINT_SERVICES) ||
+    pathname.startsWith(ROUTES.PUBLIC.COMMUNITY) ||
     pathname.startsWith('/u/') ||
-    pathname.startsWith('/become-artist') ||
-    pathname.startsWith('/become-provider') ||
+    pathname.startsWith(ROUTES.PUBLIC.BECOME_ARTIST) ||
+    pathname.startsWith(ROUTES.PUBLIC.BECOME_PROVIDER) ||
     pathname.startsWith('/apply');
 
   // Auth guard: redirect unauthenticated users only for private pages
   useEffect(() => {
     // Only redirect if: loading is done, NOT logged in, AND path is NOT public
     if (!isAuthLoading && !isLoggedIn && !isPublicRoute) {
-      router.replace('/');
+      router.replace(ROUTES.PUBLIC.HOME);
     }
   }, [isAuthLoading, isLoggedIn, isPublicRoute, router]);
 
   const handleLogout = () => {
     logout();
-    router.replace('/');
+    router.replace(ROUTES.PUBLIC.HOME);
   };
 
   // Map sidebar items to include count for notifications

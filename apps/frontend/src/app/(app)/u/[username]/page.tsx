@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -20,9 +20,14 @@ import {
     Users,
     ChevronLeft,
     Camera,
+    Loader2,
+    AlertTriangle,
+    X,
 } from 'lucide-react';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
+import ImageCropModal from '@/components/common/ImageCropModal';
 import { useRouter } from 'next/navigation';
+import { MINIO_BASE_URL } from '@/lib/constants/endpoints';
 import Link from 'next/link';
 import { useAuth } from '@/features/auth';
 
@@ -30,9 +35,17 @@ import { useAuth } from '@/features/auth';
 export default function PublicProfilePage() {
     const { username } = useParams();
     const router = useRouter();
+    const bannerInputRef = useRef<HTMLInputElement>(null);
+    const [isUploadingBanner, setIsUploadingBanner] = useState(false);
+    const [uploadError, setUploadError] = useState('');
+    const [cropModal, setCropModal] = useState<{
+        isOpen: boolean;
+        image: string;
+        aspect: number;
+    }>({ isOpen: false, image: '', aspect: 16 / 5 });
     const [activeTab, setActiveTab] = useState<'models' | 'posts' | 'about'>('models');
 
-    const { data: user, isLoading, error } = useQuery({
+    const { data: user, isLoading, error, refetch: refetchUser } = useQuery({
         queryKey: ['user', username],
         queryFn: async () => {
             const res = await api.get<User>(`/users/${username}`);
@@ -84,6 +97,53 @@ export default function PublicProfilePage() {
         }
     };
 
+    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            setCropModal({
+                isOpen: true,
+                image: reader.result as string,
+                aspect: 16 / 5,
+            });
+        };
+        reader.readAsDataURL(file);
+        e.target.value = '';
+    };
+
+    const handleCropComplete = async (croppedBlob: Blob) => {
+        setCropModal(prev => ({ ...prev, isOpen: false }));
+        setIsUploadingBanner(true);
+        setUploadError('');
+        try {
+            const fileName = `banner_${currentUser?.id}_${Date.now()}.jpg`;
+            const { data: { url, key } } = await api.post('/storage/upload-url', {
+                filename: fileName,
+                content_type: 'image/jpeg',
+            });
+
+            const uploadRes = await fetch(url, {
+                method: 'PUT',
+                body: croppedBlob,
+                headers: { 'Content-Type': 'image/jpeg' },
+            });
+
+            if (!uploadRes.ok) {
+                throw new Error(`Upload failed with status: ${uploadRes.status}`);
+            }
+
+            await api.patch('/users/profile', { banner_url: key });
+            await refetchUser();
+        } catch (error: any) {
+            console.error('Failed to upload banner:', error);
+            setUploadError(error.message || 'Failed to upload banner. Please try again.');
+        } finally {
+            setIsUploadingBanner(false);
+        }
+    };
+
     if (isLoading) {
         return (
             <div className="min-h-screen bg-[#0a0a0a] pt-20 flex justify-center">
@@ -105,11 +165,29 @@ export default function PublicProfilePage() {
     const bannerSrc = user.banner_url
         ? user.banner_url.startsWith('http')
             ? user.banner_url
-            : `${process.env.NEXT_PUBLIC_STORAGE_URL}/${user.banner_url}`
+            : `${MINIO_BASE_URL}/3dex-models/${user.banner_url}`
         : null;
 
     return (
         <div className="min-h-screen bg-[#0a0a0a]">
+            {/* Hidden files & modals */}
+            <input
+                ref={bannerInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageSelect}
+            />
+            {cropModal.isOpen && (
+                <ImageCropModal
+                    image={cropModal.image}
+                    aspect={cropModal.aspect}
+                    title="Crop Banner"
+                    onClose={() => setCropModal(prev => ({ ...prev, isOpen: false }))}
+                    onCropComplete={handleCropComplete}
+                />
+            )}
+
             {/* Header / Navigation */}
             <div className="bg-[#0a0a0a]/80 backdrop-blur-md border-b border-white/5 sticky top-0 z-30">
                 <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
@@ -146,13 +224,25 @@ export default function PublicProfilePage() {
 
                 {/* Button layer outside overflow-hidden */}
                 {isOwner && (
-                    <Link
-                        href="/profile"
-                        className="absolute bottom-4 right-4 z-10 px-4 py-2 bg-black/60 backdrop-blur-md border border-white/10 text-white text-sm font-bold rounded-xl flex items-center gap-2 hover:bg-black/80 transition-opacity duration-200 opacity-0 group-hover:opacity-100"
+                    <button
+                        onClick={() => bannerInputRef.current?.click()}
+                        disabled={isUploadingBanner}
+                        className="absolute bottom-4 right-4 z-10 px-4 py-2 bg-black/60 backdrop-blur-md border border-white/10 text-white text-sm font-bold rounded-xl flex items-center gap-2 hover:bg-black/80 transition-opacity duration-200 opacity-0 group-hover:opacity-100 disabled:opacity-50 cursor-pointer"
                     >
-                        <Camera className="w-4 h-4" />
-                        Change Banner
-                    </Link>
+                        {isUploadingBanner ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+                        {isUploadingBanner ? 'Uploading...' : 'Change Banner'}
+                    </button>
+                )}
+                
+                {/* Error Banner */}
+                {uploadError && (
+                    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 px-4 py-2 bg-red-500 text-white text-sm font-bold rounded-xl shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+                        <AlertTriangle className="w-4 h-4" />
+                        {uploadError}
+                        <button onClick={() => setUploadError('')} className="ml-2 hover:opacity-75">
+                            <X className="w-3 h-3" />
+                        </button>
+                    </div>
                 )}
             </div>
 
@@ -171,8 +261,8 @@ export default function PublicProfilePage() {
                     </div>
 
                     <div className="flex-1 pb-2">
-                        <h1 className="text-3xl font-bold text-white mb-1">{user.display_name || user.username}</h1>
-                        <p className="text-gray-400 font-medium">@{user.username}</p>
+                        <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">{user.display_name || user.username}</h1>
+                        <p className="text-gray-300 font-medium">@{user.username}</p>
 
                         <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-400">
                             {user.location && (

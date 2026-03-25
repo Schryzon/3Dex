@@ -73,6 +73,7 @@ export default function AppSidebar({
           isSidebarOpen={isSidebarOpen}
           title={!isSidebarOpen ? item.label : undefined}
           count={item.count}
+          requiresAuth={item.requiresAuth}
         />
       );
     })

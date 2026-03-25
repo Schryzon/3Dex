@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import UserAvatar from '@/components/common/UserAvatar';
 import ProtectedLink from '@/components/common/ProtectedLink';
+import { ROUTES } from '@/lib/constants/routes';
 
 interface AppTopbarProps {
   user: any;
@@ -71,7 +72,7 @@ export default function AppTopbar({
           >
             <Menu className="w-6 h-6" />
           </button>
-          <Link href="/" className="flex items-center gap-2">
+          <Link href={ROUTES.PUBLIC.HOME} className="flex items-center gap-2">
             <div className="w-8 h-8 flex items-center justify-center">
               <img src="/3Dex.svg" alt="3Dex" className="w-full h-full object-contain" />
             </div>
@@ -96,7 +97,7 @@ export default function AppTopbar({
         <div className="flex items-center gap-1 md:gap-3">
 
           {/* Cart */}
-          <ProtectedLink href="/cart" className="p-2 text-gray-500 hover:text-white relative transition-colors">
+          <ProtectedLink href={ROUTES.USER.CART} className="p-2 text-gray-500 hover:text-white relative transition-colors">
             <ShoppingCart className="w-5 h-5" />
             {mounted && cartItemsCount > 0 && (
               <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-yellow-400 text-black text-[10px] font-bold rounded-full flex items-center justify-center">
@@ -127,7 +128,11 @@ export default function AppTopbar({
                     <p className="text-gray-500 text-xs">{user?.email}</p>
                   </div>
                   <div className="py-1">
-                    <Link href="/notifications" className="flex items-center justify-between px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
+                    <Link href={ROUTES.USER.PROFILE} className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
+                      <User className="w-4 h-4" />
+                      <span className="text-sm">My Profile</span>
+                    </Link>
+                    <Link href={ROUTES.USER.NOTIFICATIONS} className="flex items-center justify-between px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
                       <div className="flex items-center gap-3">
                         <Bell className="w-4 h-4" />
                         <span className="text-sm">Notifications</span>
@@ -136,19 +141,15 @@ export default function AppTopbar({
                         <span className="px-1.5 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full">{notificationsCount}</span>
                       )}
                     </Link>
-                    <Link href="/profile" className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
-                      <User className="w-4 h-4" />
-                      <span className="text-sm">My Profile</span>
-                    </Link>
-                    <Link href="/downloads" className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
+                    <Link href={ROUTES.USER.DOWNLOADS} className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
                       <Download className="w-4 h-4" />
                       <span className="text-sm">My Downloads</span>
                     </Link>
-                    <Link href="/orders" className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
+                    <Link href={ROUTES.USER.ORDERS} className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
                       <Package className="w-4 h-4" />
                       <span className="text-sm">My Orders</span>
                     </Link>
-                    <Link href="/saved" className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
+                    <Link href={ROUTES.USER.SAVED} className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
                       <Heart className="w-4 h-4" />
                       <span className="text-sm">Saved Items</span>
                     </Link>

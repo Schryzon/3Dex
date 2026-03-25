@@ -3,6 +3,7 @@ import { Response } from "express";
 import { Auth_Request } from "../middlewares/auth.middleware";
 import prisma from "../prisma";
 import { Prisma } from "@prisma/client";
+import { sign_user_urls } from "../services/storage.service";
 
 /**
  * List all users (Admin only)
@@ -67,7 +68,7 @@ export async function update_profile(req: Auth_Request, res: Response): Promise<
         }
     });
 
-    res.json(user);
+    res.json(await sign_user_urls(user));
 }
 
 /**
@@ -138,7 +139,7 @@ export async function apply_for_role(req: Auth_Request, res: Response): Promise<
         data: updateData,
     });
 
-    res.json({ message: "Application submitted successfully!", user });
+    res.json({ message: "Application submitted successfully!", user: await sign_user_urls(user) });
 }
 
 /**
@@ -182,7 +183,7 @@ export async function get_public_profile(req: Auth_Request, res: Response): Prom
         return;
     }
 
-    res.json(user);
+    res.json(await sign_user_urls(user));
 }
 
 /**

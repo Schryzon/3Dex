@@ -11,6 +11,7 @@ interface ProtectedLinkProps {
     requireAuth?: boolean;
     onClick?: () => void;
     onMouseEnter?: () => void;
+    title?: string;
 }
 
 export default function ProtectedLink({
@@ -19,7 +20,8 @@ export default function ProtectedLink({
     className = '',
     requireAuth = true,
     onClick,
-    onMouseEnter
+    onMouseEnter,
+    title
 }: ProtectedLinkProps) {
     const { isAuthenticated, showLogin } = useAuth();
 
@@ -32,7 +34,7 @@ export default function ProtectedLink({
     };
 
     return (
-        <Link href={href} className={className} onClick={handleClick}>
+        <Link href={href} className={className} onClick={handleClick} title={title}>
             {children}
         </Link>
     );
