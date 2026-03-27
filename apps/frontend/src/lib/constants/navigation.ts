@@ -40,13 +40,12 @@ export const SIDEBAR_MY_STUFF: NavItem[] = [
     { id: 'notifications', label: 'Notifications', icon: Bell, href: ROUTES.USER.NOTIFICATIONS },
     { id: 'downloads', label: 'Downloads', icon: Download, href: ROUTES.USER.DOWNLOADS },
     { id: 'orders', label: 'My Orders', icon: Package, href: ROUTES.USER.ORDERS },
-    { id: 'saved', label: 'Saved', icon: Heart, href: ROUTES.USER.SAVED },
+    { id: 'library', label: 'My Library', icon: FolderOpen, href: ROUTES.USER.LIBRARY },
 ];
 
 export const SIDEBAR_ARTIST: NavItem[] = [
     { id: 'upload', label: 'Upload Asset', icon: Upload, href: ROUTES.ARTIST.UPLOAD },
     { id: 'my-uploads', label: 'My Uploads', icon: LayoutDashboard, href: ROUTES.USER.PROFILE_UPLOADS },
-    { id: 'collections', label: 'Collections', icon: FolderOpen, href: ROUTES.USER.PROFILE_COLLECTIONS },
     { id: 'analytics', label: 'Analytics', icon: BarChart3, href: ROUTES.ARTIST.ANALYTICS },
 ];
 

@@ -87,7 +87,7 @@ export async function add_to_collection(collectionId: string, modelId: string, u
     const model = await prisma.model.findUnique({ where: { id: modelId } });
     if (!model) throw new Error("Model not found");
 
-    return prisma.collectionItem.create({
+    return prisma.collection_Item.create({
         data: {
             collection_id: collectionId,
             model_id: modelId
@@ -99,7 +99,7 @@ export async function remove_from_collection(collectionId: string, modelId: stri
     const collection = await prisma.collection.findUnique({ where: { id: collectionId } });
     if (!collection || collection.user_id !== userId) throw new Error("Collection not found or unauthorized");
 
-    const item = await prisma.collectionItem.findUnique({
+    const item = await prisma.collection_Item.findUnique({
         where: {
             collection_id_model_id: { collection_id: collectionId, model_id: modelId }
         }
@@ -107,7 +107,7 @@ export async function remove_from_collection(collectionId: string, modelId: stri
 
     if (!item) throw new Error("Item not found in collection");
 
-    return prisma.collectionItem.delete({
+    return prisma.collection_Item.delete({
         where: { id: item.id }
     });
 }

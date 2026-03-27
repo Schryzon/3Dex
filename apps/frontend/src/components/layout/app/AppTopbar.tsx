@@ -12,6 +12,7 @@ import {
   Download,
   Package,
   Heart,
+  FolderOpen,
   Settings,
   LogOut
 } from 'lucide-react';
@@ -149,9 +150,9 @@ export default function AppTopbar({
                       <Package className="w-4 h-4" />
                       <span className="text-sm">My Orders</span>
                     </Link>
-                    <Link href={ROUTES.USER.SAVED} className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
-                      <Heart className="w-4 h-4" />
-                      <span className="text-sm">Saved Items</span>
+                    <Link href={ROUTES.USER.LIBRARY} className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
+                      <FolderOpen className="w-4 h-4" />
+                      <span className="text-sm">My Library</span>
                     </Link>
                   </div>
                   <div className="border-t border-white/[0.06] py-1">

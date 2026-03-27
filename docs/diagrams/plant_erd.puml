@@ -1,0 +1,290 @@
+@startuml
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 50
+
+entity User {
+  * id : String <<PK>>
+  --
+  * email : String <<UK>>
+  * username : String <<UK>>
+  password : String
+  google_id : String <<UK>>
+  role : Role
+  account_status : Account_Status
+  status_history : Json[]
+  approved_at : DateTime
+  rejected_at : DateTime
+  display_name : String
+  bio : String
+  avatar_url : String
+  banner_url : String
+  location : String
+  website : String
+  addresses : Json[]
+  portfolio : Json[]
+  provider_config : Json
+  social_twitter : String
+  social_instagram : String
+  social_artstation : String
+  social_behance : String
+  rating : Float
+  review_count : Int
+  two_factor_enabled : Boolean
+  last_login_at : DateTime
+  show_nsfw : Boolean
+  * created_at : DateTime
+  * updated_at : DateTime
+}
+
+entity Model {
+  * id : String <<PK>>
+  --
+  * title : String
+  description : String
+  * price : Int
+  * file_url : String
+  preview_url : String
+  gallery_urls : String[]
+  status : Model_Status
+  is_nsfw : Boolean
+  * artist_id : String <<FK>>
+  category_id : String <<FK>>
+  avg_rating : Float
+  review_count : Int
+  * created_at : DateTime
+}
+
+entity Purchase {
+  * id : String <<PK>>
+  --
+  * user_id : String <<FK>>
+  * model_id : String <<FK>>
+  * price_paid : Int
+  * license : License_Type
+  * created_at : DateTime
+}
+
+entity Category {
+  * id : String <<PK>>
+  --
+  * name : String <<UK>>
+  * slug : String <<UK>>
+  * created_at : DateTime
+}
+
+entity Tag {
+  * id : String <<PK>>
+  --
+  * name : String <<UK>>
+  * created_at : DateTime
+}
+
+entity Review {
+  * id : String <<PK>>
+  --
+  * rating : Int
+  comment : String
+  * user_id : String <<FK>>
+  * model_id : String <<FK>>
+  * created_at : DateTime
+  * updated_at : DateTime
+}
+
+entity Wishlist {
+  * id : String <<PK>>
+  --
+  * user_id : String <<FK>>
+  * model_id : String <<FK>>
+  * created_at : DateTime
+}
+
+entity Cart_Item {
+  * id : String <<PK>>
+  --
+  * user_id : String <<FK>>
+  * model_id : String <<FK>>
+  * quantity : Int
+  * created_at : DateTime
+  * updated_at : DateTime
+}
+
+entity Order {
+  * id : String <<PK>>
+  --
+  * user_id : String <<FK>>
+  provider_id : String <<FK>>
+  * total_amount : Int
+  * status : Order_Status
+  * type : Order_Type
+  courier_name : String
+  tracking_number : String
+  shipping_address : Json
+  snap_token : String
+  snap_redirect_url : String
+  * created_at : DateTime
+  * updated_at : DateTime
+}
+
+entity Order_Item {
+  * id : String <<PK>>
+  --
+  * order_id : String <<FK>>
+  model_id : String <<FK>>
+  * price : Int
+  print_config : Json
+  print_status : Print_Status
+  * created_at : DateTime
+}
+
+entity Payment {
+  * id : String <<PK>>
+  --
+  * order_id : String <<FK>>
+  * transaction_id : String <<UK>>
+  * payment_type : String
+  * gross_amount : Int
+  * transaction_status : String
+  fraud_status : String
+  raw_response : Json
+  * created_at : DateTime
+}
+
+entity User_Review {
+  * id : String <<PK>>
+  --
+  * reviewer_id : String <<FK>>
+  * target_user_id : String <<FK>>
+  * rating : Int
+  comment : String
+  * created_at : DateTime
+}
+
+entity Post {
+  * id : String <<PK>>
+  --
+  * user_id : String <<FK>>
+  caption : String
+  media_urls : String[]
+  is_nsfw : Boolean
+  like_count : Int
+  comment_count : Int
+  * created_at : DateTime
+  * updated_at : DateTime
+}
+
+entity Post_Like {
+  * id : String <<PK>>
+  --
+  * user_id : String <<FK>>
+  * post_id : String <<FK>>
+  * created_at : DateTime
+}
+
+entity Post_Comment {
+  * id : String <<PK>>
+  --
+  * user_id : String <<FK>>
+  * post_id : String <<FK>>
+  * content : String
+  * created_at : DateTime
+  * updated_at : DateTime
+}
+
+entity Stats {
+  * id : String <<PK>>
+  --
+  * period_start : DateTime
+  * period_end : DateTime
+  * data : Json
+  * created_at : DateTime
+}
+
+entity Follow {
+  * id : String <<PK>>
+  --
+  * follower_id : String <<FK>>
+  * following_id : String <<FK>>
+  * created_at : DateTime
+}
+
+entity Notification {
+  * id : String <<PK>>
+  --
+  * user_id : String <<FK>>
+  * type : String
+  * title : String
+  * message : String
+  * is_read : Boolean
+  data : Json
+  * created_at : DateTime
+}
+
+entity Collection {
+  * id : String <<PK>>
+  --
+  * user_id : String <<FK>>
+  * name : String
+  description : String
+  * is_public : Boolean
+  * created_at : DateTime
+  * updated_at : DateTime
+}
+
+entity Collection_Item {
+  * id : String <<PK>>
+  --
+  * collection_id : String <<FK>>
+  * model_id : String <<FK>>
+  * added_at : DateTime
+}
+
+entity Report {
+  * id : String <<PK>>
+  --
+  * reporter_id : String <<FK>>
+  * target_type : Report_Target
+  model_id : String <<FK>>
+  post_id : String <<FK>>
+  comment_id : String <<FK>>
+  * reason : String
+  * status : Report_Status
+  * created_at : DateTime
+}
+
+User ||--o{ Model : "artist"
+User ||--o{ Purchase : "purchases"
+User ||--o{ Review : "writes"
+User ||--o{ Wishlist : "has item"
+User ||--o{ Cart_Item : "in cart"
+User ||--o{ Order : "places (customer)"
+User ||--o{ Order : "fulfills (provider)"
+User ||--o{ User_Review : "reviews user"
+User ||--o{ User_Review : "reviewed by"
+User ||--o{ Post : "posts"
+User ||--o{ Post_Like : "likes"
+User ||--o{ Post_Comment : "comments on"
+User ||--o{ Follow : "follower"
+User ||--o{ Follow : "following"
+User ||--o{ Notification : "receives"
+User ||--o{ Collection : "owns"
+User ||--o{ Report : "reports"
+
+Model }o--|| Category : "belongs to"
+Model }o--o{ Tag : "has tags"
+Model ||--o{ Purchase : "in purchase"
+Model ||--o{ Review : "has review"
+Model ||--o{ Wishlist : "in wishlist"
+Model ||--o{ Cart_Item : "in cart"
+Model ||--o{ Order_Item : "in order"
+Model ||--o{ Collection_Item : "in collection"
+
+Order ||--|{ Order_Item : "contains"
+Order ||--|{ Payment : "has"
+
+Post ||--o{ Post_Like : "liked by"
+Post |o--o{ Post_Comment : "commented by"
+
+Collection ||--|{ Collection_Item : "contains"
+
+@enduml

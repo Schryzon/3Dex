@@ -8,7 +8,7 @@ export async function list_cart(req: Auth_Request, res: Response) {
     const user_id = req.user.id;
 
     try {
-        const items = await (prisma as any).cartItem.findMany({
+        const items = await prisma.cart_Item.findMany({
             where: { user_id },
             include: {
                 model: {
@@ -60,7 +60,7 @@ export async function add_to_cart(req: Auth_Request, res: Response) {
         }
 
         // Upsert: add or update quantity
-        const item = await (prisma as any).cartItem.upsert({
+        const item = await prisma.cart_Item.upsert({
             where: {
                 user_id_model_id: { user_id, model_id: modelId },
             },
@@ -97,7 +97,7 @@ export async function add_to_cart(req: Auth_Request, res: Response) {
 // PATCH /cart/:id — Update cart item quantity
 export async function update_cart_item(req: Auth_Request, res: Response) {
     const user_id = req.user.id;
-    const item_id = req.params.id;
+    const item_id = req.params.id as string;
     const { quantity } = req.body;
 
     if (!quantity || quantity < 1) {
@@ -105,7 +105,7 @@ export async function update_cart_item(req: Auth_Request, res: Response) {
     }
 
     try {
-        const item = await (prisma as any).cartItem.findFirst({
+        const item = await prisma.cart_Item.findFirst({
             where: { id: item_id, user_id },
         });
 
@@ -113,7 +113,7 @@ export async function update_cart_item(req: Auth_Request, res: Response) {
             return res.status(404).json({ message: "Cart item not found" });
         }
 
-        const updated = await (prisma as any).cartItem.update({
+        const updated = await prisma.cart_Item.update({
             where: { id: item_id },
             data: { quantity },
             include: {
@@ -135,10 +135,10 @@ export async function update_cart_item(req: Auth_Request, res: Response) {
 // DELETE /cart/:id — Remove item from cart
 export async function remove_from_cart(req: Auth_Request, res: Response) {
     const user_id = req.user.id;
-    const item_id = req.params.id;
+    const item_id = req.params.id as string;
 
     try {
-        const item = await (prisma as any).cartItem.findFirst({
+        const item = await prisma.cart_Item.findFirst({
             where: { id: item_id, user_id },
         });
 
@@ -146,7 +146,7 @@ export async function remove_from_cart(req: Auth_Request, res: Response) {
             return res.status(404).json({ message: "Cart item not found" });
         }
 
-        await (prisma as any).cartItem.delete({ where: { id: item_id } });
+        await prisma.cart_Item.delete({ where: { id: item_id } });
         res.json({ message: "Item removed from cart" });
     } catch (error: any) {
         res.status(500).json({ message: error.message });
@@ -158,7 +158,7 @@ export async function clear_cart(req: Auth_Request, res: Response) {
     const user_id = req.user.id;
 
     try {
-        await (prisma as any).cartItem.deleteMany({ where: { user_id } });
+        await prisma.cart_Item.deleteMany({ where: { user_id } });
         res.json({ message: "Cart cleared" });
     } catch (error: any) {
         res.status(500).json({ message: error.message });

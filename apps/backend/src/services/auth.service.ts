@@ -80,7 +80,7 @@ export async function google_login(credential: string) {
     console.log('[AUTH] Google ID:', googleId);
 
     // Check if user exists by google_id
-    let user = await (prisma.user as any).findUnique({
+    let user = await prisma.user.findUnique({
         where: { google_id: googleId }
     });
 
@@ -103,7 +103,7 @@ export async function google_login(credential: string) {
 
     if (user) {
         console.log('[AUTH] Linking Google to existing account:', email);
-        user = await (prisma.user as any).update({
+        user = await prisma.user.update({
             where: { id: user.id },
             data: {
                 google_id: googleId,
@@ -117,7 +117,7 @@ export async function google_login(credential: string) {
     console.log('[AUTH] Creating new user from Google:', email);
     const tempUsername = email.split('@')[0] + '_' + Math.random().toString(36).substring(2, 6);
 
-    user = await (prisma.user as any).create({
+    user = await prisma.user.create({
         data: {
             email,
             username: tempUsername,
