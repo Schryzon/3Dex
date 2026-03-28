@@ -6,6 +6,7 @@ import {
     toggle_2fa,
     apply_for_role,
     get_public_profile,
+    search_users,
     delete_account
 } from "../controllers/user.controller";
 import { require_auth } from "../middlewares/auth.middleware";
@@ -102,6 +103,31 @@ router.post("/apply-role", require_auth, apply_for_role);
  *         description: Account deleted
  */
 router.delete("/me", require_auth, delete_account);
+
+/**
+ * @openapi
+ * /users/search:
+ *   get:
+ *     summary: Search for users
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Search query (username or display name)
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *           enum: [ARTIST, PROVIDER]
+ *         description: Filter by role
+ *     responses:
+ *       200:
+ *         description: List of matching users
+ */
+router.get("/search", search_users);
 
 /**
  * @openapi

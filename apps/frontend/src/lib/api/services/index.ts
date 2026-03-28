@@ -6,7 +6,7 @@ export { orderService } from './order.service';
 export { paymentService } from './payment.service';
 export { purchaseService } from './purchase.service';
 export { printService } from './print.service';
-export { postService } from './post.service';
+export { postService, postKeys } from './post.service';
 export { reviewService } from './review.service';
 export { userService } from './user.service';
 export { notificationService } from './notification.service';

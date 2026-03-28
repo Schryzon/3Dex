@@ -17,6 +17,15 @@ export async function get_user_collections(userId: string) {
         include: {
             _count: {
                 select: { items: true }
+            },
+            items: {
+                take: 3,
+                orderBy: { added_at: 'desc' },
+                include: {
+                    model: {
+                        select: { preview_url: true }
+                    }
+                }
             }
         },
         orderBy: { created_at: 'desc' }
@@ -29,6 +38,15 @@ export async function get_public_collections(userId: string) {
         include: {
             _count: {
                 select: { items: true }
+            },
+            items: {
+                take: 3,
+                orderBy: { added_at: 'desc' },
+                include: {
+                    model: {
+                        select: { preview_url: true }
+                    }
+                }
             }
         },
         orderBy: { created_at: 'desc' }
@@ -87,7 +105,17 @@ export async function add_to_collection(collectionId: string, modelId: string, u
     const model = await prisma.model.findUnique({ where: { id: modelId } });
     if (!model) throw new Error("Model not found");
 
-    return prisma.collection_Item.create({
+    // Check if already in collection
+    const existing = await prisma.collectionItem.findFirst({
+        where: {
+            collection_id: collectionId,
+            model_id: modelId
+        }
+    });
+
+    if (existing) return existing;
+
+    return prisma.collectionItem.create({
         data: {
             collection_id: collectionId,
             model_id: modelId
@@ -99,15 +127,16 @@ export async function remove_from_collection(collectionId: string, modelId: stri
     const collection = await prisma.collection.findUnique({ where: { id: collectionId } });
     if (!collection || collection.user_id !== userId) throw new Error("Collection not found or unauthorized");
 
-    const item = await prisma.collection_Item.findUnique({
+    const item = await prisma.collectionItem.findFirst({
         where: {
-            collection_id_model_id: { collection_id: collectionId, model_id: modelId }
+            collection_id: collectionId,
+            model_id: modelId
         }
     });
 
     if (!item) throw new Error("Item not found in collection");
 
-    return prisma.collection_Item.delete({
+    return prisma.collectionItem.delete({
         where: { id: item.id }
     });
 }

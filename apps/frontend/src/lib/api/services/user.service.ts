@@ -48,4 +48,23 @@ export const userService = {
             data
         );
     },
+
+    async searchUsers(query: string, role?: string) {
+        const params = new URLSearchParams();
+        if (query) params.append('q', query);
+        if (role) params.append('role', role);
+        return apiClient.get<any[]>(`${API_ENDPOINTS.USERS.SEARCH}?${params.toString()}`);
+    },
+
+    async getPublicProfile(username: string) {
+        return apiClient.get<any>(API_ENDPOINTS.USERS.PUBLIC_PROFILE(username));
+    },
+    
+    async followUser(userId: string) {
+        return apiClient.post<{ message: string }>(API_ENDPOINTS.USERS.FOLLOW(userId));
+    },
+    
+    async unfollowUser(userId: string) {
+        return apiClient.delete<{ message: string }>(API_ENDPOINTS.USERS.UNFOLLOW(userId));
+    }
 };

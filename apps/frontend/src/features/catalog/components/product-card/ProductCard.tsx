@@ -57,7 +57,7 @@ export default function ProductCard({ product, onAddToCart, onToggleFavorite, is
   return (
     <Link href={`/catalog/${product.id}`}>
       <div
-        className="group relative bg-[#0c0c0c] rounded-xl overflow-hidden border border-white/[0.04] hover:border-yellow-400/30 transition-all duration-500 cursor-pointer hover:shadow-2xl hover:shadow-yellow-400/5"
+        className="group relative bg-[#0c0c0c] rounded-xl overflow-hidden border border-white/[0.04] hover:border-yellow-400/30 cursor-pointer transition-all duration-500 hover:shadow-2xl hover:shadow-yellow-400/5"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >

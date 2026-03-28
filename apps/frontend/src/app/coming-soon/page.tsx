@@ -17,7 +17,7 @@ export default function ComingSoonPage() {
                 </h1>
 
                 <p className="text-gray-400 mb-10 leading-relaxed text-lg">
-                    Halaman ini sedang dalam tahap pengembangan. Kami sedang bekerja keras untuk menghadirkannya secepat mungkin!
+                    This page is currently under development. We're working hard to bring it to you as soon as possible!
                 </p>
 
                 <Link
@@ -25,7 +25,7 @@ export default function ComingSoonPage() {
                     className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-gray-200 transition-colors w-full sm:w-auto"
                 >
                     <ArrowLeft className="w-5 h-5" />
-                    Kembali ke Beranda
+                    Back to Home
                 </Link>
             </div>
         </div>

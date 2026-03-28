@@ -10,15 +10,17 @@ import Link from 'next/link';
 
 interface PostCommentsProps {
     postId: string;
+    hideInput?: boolean;
+    noMaxHeight?: boolean;
 }
 
-export default function PostComments({ postId }: PostCommentsProps) {
+export default function PostComments({ postId, hideInput, noMaxHeight }: PostCommentsProps) {
     const { user } = useAuth();
     const queryClient = useQueryClient();
     const [content, setContent] = useState('');
 
     const { data: comments, isLoading } = useQuery({
-        queryKey: postKeys.comments(postId),
+        queryKey: ['post-comments', postId],
         queryFn: () => postService.getComments(postId)
     });
 
@@ -27,6 +29,7 @@ export default function PostComments({ postId }: PostCommentsProps) {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['post-comments', postId] });
             queryClient.invalidateQueries({ queryKey: postKeys.feed }); // Update comment count
+            queryClient.invalidateQueries({ queryKey: ['post-detail', postId] });
             setContent('');
         },
         onError: (err: any) => {
@@ -35,22 +38,22 @@ export default function PostComments({ postId }: PostCommentsProps) {
     });
 
     return (
-        <div className="pt-4 mt-4 border-t border-gray-800 space-y-4">
+        <div className={`space-y-4 ${!hideInput ? 'pt-4 mt-4 border-t border-gray-800' : ''}`}>
             {/* Comment List */}
             {isLoading ? (
                 <div className="flex justify-center p-4">
                     <Loader2 className="w-5 h-5 text-gray-500 animate-spin" />
                 </div>
             ) : (
-                <div className="space-y-4 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                <div className={`space-y-4 pr-2 custom-scrollbar ${!noMaxHeight ? 'max-h-60 overflow-y-auto' : ''}`}>
                     {comments?.map((comment) => (
                         <div key={comment.id} className="flex gap-3">
                             <div className="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0">
                                 {comment.user.avatar_url ? (
                                     <img src={comment.user.avatar_url} className="w-full h-full rounded-full object-cover" />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-400">
-                                        {comment.user.username[0].toUpperCase()}
+                                    <div className="w-full h-full flex items-center justify-center text-[10px] font-black text-gray-500 uppercase">
+                                        {comment.user.username[0]}
                                     </div>
                                 )}
                             </div>
@@ -59,7 +62,7 @@ export default function PostComments({ postId }: PostCommentsProps) {
                                     <Link href={`/u/${comment.user.username}`} className="text-sm font-bold text-white hover:underline">
                                         {comment.user.username}
                                     </Link>
-                                    <span className="text-[10px] text-gray-500">
+                                    <span className="text-[10px] text-gray-500 font-medium">
                                         {formatDistanceToNow(new Date(comment.created_at))} ago
                                     </span>
                                 </div>
@@ -74,14 +77,14 @@ export default function PostComments({ postId }: PostCommentsProps) {
             )}
 
             {/* Post Comment Input */}
-            {user && (
+            {!hideInput && user && (
                 <div className="flex gap-3 pt-2">
                     <div className="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 mt-1">
                         {user.avatar_url ? (
                             <img src={user.avatar_url} className="w-full h-full rounded-full object-cover" />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-400">
-                                {user.username[0].toUpperCase()}
+                            <div className="w-full h-full flex items-center justify-center text-[10px] font-black text-gray-500 uppercase">
+                                {user.username[0]}
                             </div>
                         )}
                     </div>

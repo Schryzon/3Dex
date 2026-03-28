@@ -26,7 +26,14 @@ import {
     ExternalLink,
     ArrowUpRight,
     Loader2,
-    AlertTriangle
+    AlertTriangle,
+    Heart,
+    Package,
+    Pencil,
+    Check,
+    MoreVertical,
+    Plus,
+    Lock
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect, useRef, Suspense } from 'react';
@@ -43,6 +50,9 @@ import ConfirmModal from '@/components/common/ConfirmModal';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import ImageCropModal from '@/components/common/ImageCropModal';
 import ModelGrid from '@/features/model/components/ModelGrid';
+import { useCollections } from '@/features/collection/hooks/useCollections';
+import { useWishlist } from '@/features/catalog/hooks/useWishlist';
+import { formatPrice } from '@/lib/utils';
 
 
 function UploadsTab({ userId }: { userId?: string }) {
@@ -59,6 +69,372 @@ function UploadsTab({ userId }: { userId?: string }) {
         </div>
     );
 }
+
+function ProfileCollectionDropdown({ collectionId, collectionName, isPublic, onRename, onDelete, onTogglePublic }: {
+    collectionId: string;
+    collectionName: string;
+    isPublic: boolean;
+    onRename: (id: string, name: string) => Promise<any>;
+    onDelete: (id: string) => Promise<any>;
+    onTogglePublic: (id: string, isPublic: boolean) => Promise<any>;
+}) {
+    const [open, setOpen] = useState(false);
+    const [mode, setMode] = useState<'idle' | 'rename' | 'confirm-delete'>('idle');
+    const [renameValue, setRenameValue] = useState(collectionName);
+    const [isLoading, setIsLoading] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) {
+                setOpen(false);
+                setMode('idle');
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    const handleRename = async () => {
+        if (!renameValue.trim() || renameValue === collectionName) { setMode('idle'); setOpen(false); return; }
+        setIsLoading(true);
+        try { await onRename(collectionId, renameValue.trim()); }
+        finally { setIsLoading(false); setOpen(false); setMode('idle'); }
+    };
+
+    const handleDelete = async () => {
+        setIsLoading(true);
+        try { await onDelete(collectionId); }
+        finally { setIsLoading(false); setOpen(false); setMode('idle'); }
+    };
+
+    const handleTogglePublic = async () => {
+        setIsLoading(true);
+        try { await onTogglePublic(collectionId, !isPublic); }
+        finally { setIsLoading(false); setOpen(false); }
+    };
+
+    const MenuContent = () => (
+        <div className="overflow-hidden">
+            {mode === 'idle' && (
+                <>
+                    <button onClick={(e) => { e.stopPropagation(); setMode('rename'); setRenameValue(collectionName); }}
+                        className="w-full flex items-center gap-4 px-5 py-4 sm:py-3 text-base sm:text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors text-left font-medium">
+                        <Pencil className="w-5 h-5 sm:w-4 sm:h-4 text-blue-400" /> Rename
+                    </button>
+                    <button onClick={(e) => { e.stopPropagation(); handleTogglePublic(); }} disabled={isLoading}
+                        className="w-full flex items-center gap-4 px-5 py-4 sm:py-3 text-base sm:text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors text-left font-medium disabled:opacity-50">
+                        {isPublic ? <Lock className="w-5 h-5 sm:w-4 sm:h-4 text-orange-400" /> : <Globe className="w-5 h-5 sm:w-4 sm:h-4 text-emerald-400" />}
+                        Make {isPublic ? 'Private' : 'Public'}
+                    </button>
+                    <div className="h-px bg-gray-800/50 mx-2" />
+                    <button onClick={(e) => { e.stopPropagation(); setMode('confirm-delete'); }}
+                        className="w-full flex items-center gap-4 px-5 py-4 sm:py-3 text-base sm:text-sm text-red-500 hover:bg-red-500/10 transition-colors text-left font-bold">
+                        <Trash2 className="w-5 h-5 sm:w-4 sm:h-4" /> Delete Collection
+                    </button>
+                </>
+            )}
+            {mode === 'rename' && (
+                <div className="p-5 sm:p-4 space-y-4">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest px-1">Rename Collection</p>
+                    <input autoFocus type="text" value={renameValue} onChange={(e) => setRenameValue(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleRename(); if (e.key === 'Escape') { setMode('idle'); setOpen(false); } }}
+                        className="w-full bg-black/50 border border-gray-700 text-white text-base sm:text-sm px-4 py-3 rounded-2xl focus:border-yellow-400 focus:outline-none transition-all" />
+                    <div className="flex gap-3">
+                        <button onClick={(e) => { e.stopPropagation(); setMode('idle'); }} className="flex-1 text-sm py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl transition-colors font-bold">Cancel</button>
+                        <button onClick={(e) => { e.stopPropagation(); handleRename(); }} disabled={isLoading || !renameValue.trim()}
+                            className="flex-1 text-sm py-3 bg-yellow-400 hover:bg-yellow-300 text-black font-black rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Save
+                        </button>
+                    </div>
+                </div>
+            )}
+            {mode === 'confirm-delete' && (
+                <div className="p-5 sm:p-4 space-y-4">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest px-1 text-red-400">Delete Collection?</p>
+                    <p className="text-sm text-gray-400 px-1 leading-relaxed">This action is permanent and cannot be undone.</p>
+                    <div className="flex gap-3 pt-1">
+                        <button onClick={(e) => { e.stopPropagation(); setMode('idle'); }} className="flex-1 text-sm py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl transition-colors font-bold">Cancel</button>
+                        <button onClick={(e) => { e.stopPropagation(); handleDelete(); }} disabled={isLoading}
+                            className="flex-1 text-sm py-3 bg-red-600 hover:bg-red-500 text-white font-black rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />} Delete
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+
+    return (
+        <div ref={ref} className="relative z-30" onClick={(e) => e.preventDefault()}>
+            <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(!open); setMode('idle'); }}
+                className="p-2 text-gray-400 hover:text-yellow-400 hover:bg-yellow-400/10 rounded-xl transition-all active:scale-90">
+                <MoreVertical className="w-6 h-6 sm:w-5 sm:h-5" />
+            </button>
+            {/* Desktop Dropdown */}
+            {open && (
+                <div className="hidden sm:block absolute right-0 top-full mt-2 w-64 bg-[#1a1a1a] border border-gray-800 rounded-2xl shadow-2xl z-40 overflow-hidden animate-in fade-in zoom-in-95 duration-150 origin-top-right">
+                    <MenuContent />
+                </div>
+            )}
+
+            {/* Mobile Actions Modal */}
+            {open && (
+                <div className="sm:hidden fixed inset-0 z-[100] flex items-center justify-center px-4 animate-in fade-in duration-200">
+                    <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={() => setOpen(false)} />
+                    <div className="relative w-full max-w-xs bg-[#111111] border border-white/10 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="flex items-center justify-between p-4 border-b border-white/5">
+                            <span className="text-sm font-black text-white px-1">Manage Collection</span>
+                            <button onClick={() => setOpen(false)} className="p-2 text-gray-500 hover:text-white"><X className="w-5 h-5" /></button>
+                        </div>
+                        <MenuContent />
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+function CollectionsTabContent() {
+    const { collections, isLoading, createCollection, renameCollection, deleteCollection, updateCollection } = useCollections();
+    const [isCreatingOpen, setIsCreatingOpen] = useState(false);
+    const [newCollectionName, setNewCollectionName] = useState('');
+
+    const handleCreate = async () => {
+        if (!newCollectionName.trim()) return;
+        try {
+            await createCollection(newCollectionName.trim());
+            setNewCollectionName('');
+            setIsCreatingOpen(false);
+        } catch { /* handled by hook */ }
+    };
+
+    if (isLoading) return (
+        <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-yellow-400 animate-spin" /></div>
+    );
+
+    return (
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div className="flex items-center justify-between gap-4">
+                <div>
+                    <h3 className="text-xl font-bold text-white tracking-tight">My Collections</h3>
+                    <p className="text-sm text-gray-500 font-medium">{collections.length} folder{collections.length !== 1 ? 's' : ''}</p>
+                </div>
+                <button onClick={() => setIsCreatingOpen(true)}
+                    className="flex shrink-0 items-center justify-center gap-2 px-5 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-black font-bold rounded-2xl transition-all shadow-xl shadow-yellow-400/10 text-xs sm:text-sm active:scale-95 cursor-pointer">
+                    <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span>New Collection</span>
+                </button>
+            </div>
+
+            {collections.length === 0 ? (
+                <div className="text-center py-20 bg-[#111111]/40 rounded-3xl border border-gray-800/40 border-dashed">
+                    <div className="w-16 h-16 bg-gray-900/50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <FolderOpen className="w-8 h-8 text-gray-700" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2">No collections yet</h3>
+                    <p className="text-gray-500 mb-8 max-w-xs mx-auto text-sm leading-relaxed text-xs">Organize your 3D assets into custom folders for better management.</p>
+                    <button onClick={() => setIsCreatingOpen(true)} className="inline-flex items-center gap-2 px-8 py-3 bg-yellow-400 hover:bg-yellow-300 text-black font-bold rounded-2xl transition-all text-sm cursor-pointer shadow-xl shadow-yellow-400/10 active:scale-95">
+                        <Plus className="w-4 h-4" /> Create Collection
+                    </button>
+                </div>
+            ) : (
+                <div className="grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-6">
+                    {collections.map((collection: any) => {
+                        const items = collection.items || [];
+                        const hasItems = items.length > 0;
+
+                        return (
+                            <div key={collection.id} className="group relative">
+                                {/* Action Buttons Container - NO OVERFLOW-HIDDEN HERE */}
+                                <div className="absolute top-2 right-2 z-30">
+                                    <ProfileCollectionDropdown
+                                        collectionId={collection.id}
+                                        collectionName={collection.name}
+                                        isPublic={collection.is_public}
+                                        onRename={(id, name) => renameCollection({ id, name })}
+                                        onDelete={(id) => deleteCollection(id)}
+                                        onTogglePublic={(id, isPublic) => updateCollection({ id, data: { isPublic } })}
+                                    />
+                                </div>
+
+                                <Link href={`/collections/${collection.id}`} className="block">
+                                    {/* Visual Container - HAS OVERFLOW-HIDDEN */}
+                                    <div className="aspect-[4/3] w-full bg-gradient-to-br from-gray-900 to-black relative overflow-hidden rounded-[1.8rem] ring-1 ring-white/5 group-hover:ring-yellow-400/30 transition-all duration-500">
+                                        <div className="w-full h-full flex gap-1 p-1">
+                                            {hasItems ? (
+                                                <>
+                                                    {/* Pinterest Main Image */}
+                                                    <div className="flex-[2] h-full rounded-2xl overflow-hidden bg-gray-800/20">
+                                                        <img
+                                                            src={items[0]?.model?.preview_url ? (items[0].model.preview_url.startsWith('http') ? items[0].model.preview_url : `${MINIO_BASE_URL}/3dex-models/${items[0].model.preview_url}`) : ''}
+                                                            alt=""
+                                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                                        />
+                                                    </div>
+                                                    {/* Side Previews */}
+                                                    <div className="flex-1 flex flex-col gap-1">
+                                                        <div className="flex-1 rounded-xl overflow-hidden bg-gray-800/20">
+                                                            {items[1] && (
+                                                                <img
+                                                                    src={items[1]?.model?.preview_url ? (items[1].model.preview_url.startsWith('http') ? items[1].model.preview_url : `${MINIO_BASE_URL}/3dex-models/${items[1].model.preview_url}`) : ''}
+                                                                    alt=""
+                                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                                                />
+                                                            )}
+                                                        </div>
+                                                        <div className="flex-1 rounded-xl overflow-hidden bg-gray-800/20 flex items-center justify-center">
+                                                            {items[2] ? (
+                                                                <img
+                                                                    src={items[2]?.model?.preview_url ? (items[2].model.preview_url.startsWith('http') ? items[2].model.preview_url : `${MINIO_BASE_URL}/3dex-models/${items[2].model.preview_url}`) : ''}
+                                                                    alt=""
+                                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-8 h-8 bg-white/5 rounded-xl flex items-center justify-center">
+                                                                    <FolderOpen className="w-4 h-4 text-white/10" />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                /* Empty State Placeholder */
+                                                <div className="w-full h-full flex flex-col items-center justify-center relative">
+                                                    <FolderOpen className="absolute -right-4 -bottom-4 w-32 h-32 text-white/[0.02] -rotate-12" />
+                                                    <div className="w-10 h-10 bg-gray-800/40 backdrop-blur-md rounded-2xl flex items-center justify-center group-hover:bg-yellow-400 group-hover:text-black transition-all duration-500 shadow-inner group-hover:rotate-6">
+                                                        <FolderOpen className="w-5 h-5" />
+                                                    </div>
+                                                    <div className="mt-3 flex -space-x-1.5">
+                                                        <div className="w-6 h-6 rounded-md bg-gray-800 border-2 border-[#0a0a0a]" />
+                                                        <div className="w-6 h-6 rounded-md bg-gray-700 border-2 border-[#0a0a0a]" />
+                                                        <div className="w-6 h-6 rounded-md bg-gray-600 border-2 border-[#0a0a0a]" />
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Text Details */}
+                                    <div className="p-3">
+                                        <div className="flex items-center justify-between gap-2 mb-1">
+                                            <h4 className="font-bold text-white text-sm md:text-base group-hover:text-yellow-400 transition-colors truncate">{collection.name}</h4>
+                                            <span className={`shrink-0 flex items-center gap-1.5 px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-tighter ${
+                                                collection.is_public
+                                                    ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+                                                    : 'bg-orange-500/10 text-orange-500 border border-orange-500/20'
+                                            }`}>
+                                                {collection.is_public ? <Globe className="w-2 h-2" /> : <Lock className="w-2 h-2" />}
+                                                {collection.is_public ? 'Pub' : 'Priv'}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-[9px] text-gray-500 font-bold uppercase tracking-widest opacity-60">
+                                            <Package className="w-3 h-3" />
+                                            {collection._count?.items ?? 0}
+                                        </div>
+                                    </div>
+                                </Link>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* Create Modal */}
+            {isCreatingOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setIsCreatingOpen(false)} />
+                    <div className="relative w-full max-w-md bg-[#111111] border border-gray-800 rounded-3xl p-6 sm:p-8 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                        <div className="flex items-center justify-between mb-8">
+                            <h2 className="text-xl font-black text-white tracking-tight">New <span className="text-yellow-400">Collection</span></h2>
+                            <button onClick={() => setIsCreatingOpen(false)} className="text-gray-500 hover:text-white p-2 rounded-xl hover:bg-white/5 transition-all"><X className="w-6 h-6" /></button>
+                        </div>
+                        <div className="space-y-6">
+                            <input autoFocus type="text" value={newCollectionName} onChange={(e) => setNewCollectionName(e.target.value)}
+                                placeholder="e.g., Summer Series 2024"
+                                className="w-full bg-black/40 border border-gray-800 rounded-2xl px-5 py-4 text-white text-base font-medium outline-none focus:border-yellow-400 transition-all"
+                                onKeyDown={(e) => e.key === 'Enter' && handleCreate()} />
+                            <div className="flex gap-4">
+                                <button onClick={() => setIsCreatingOpen(false)} className="flex-1 px-6 py-4 bg-gray-900 text-gray-400 font-bold rounded-2xl hover:bg-gray-800 hover:text-white transition-all text-sm font-bold">Cancel</button>
+                                <button onClick={handleCreate} disabled={!newCollectionName.trim()} className="flex-1 px-6 py-4 bg-yellow-400 text-black font-black rounded-2xl hover:bg-yellow-300 transition-all disabled:opacity-50 text-sm shadow-xl shadow-yellow-400/10 active:scale-95">Create</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+function BookmarksTabContent() {
+    const { wishlistItems, isLoading, removeFromWishlist } = useWishlist();
+    const [removingId, setRemovingId] = useState<string | null>(null);
+
+    const handleRemove = async (modelId: string) => {
+        setRemovingId(modelId);
+        try { await removeFromWishlist(modelId); } 
+        finally { setRemovingId(null); }
+    };
+
+    if (isLoading) return (
+        <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-yellow-400 animate-spin" /></div>
+    );
+
+    return (
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div>
+                <h3 className="text-lg sm:text-xl font-bold text-white">Saved Assets</h3>
+                <p className="text-sm text-gray-400">{wishlistItems.length} item{wishlistItems.length !== 1 ? 's' : ''} in your wishlist</p>
+            </div>
+
+            {wishlistItems.length === 0 ? (
+                <div className="text-center py-16 bg-gray-900/20 rounded-2xl border border-gray-800 border-dashed">
+                    <Heart className="w-14 h-14 text-gray-700 mx-auto mb-4" />
+                    <h3 className="text-lg font-bold text-white mb-2">Your wishlist is empty</h3>
+                    <p className="text-gray-400 mb-6 max-w-xs mx-auto text-sm">Items you save in the catalog will appear here for easy access.</p>
+                    <Link href="/catalog" className="inline-flex items-center gap-2 px-6 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-black font-bold rounded-xl transition-all text-sm">
+                        Discover Models
+                    </Link>
+                </div>
+            ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+                    {wishlistItems.map((item: any) => {
+                        const model = item.model || {};
+                        const modelId = item.model_id || item.modelId;
+                        const thumb = model.preview_url || (model.thumbnails?.[0] || '/placeholder.jpg');
+                        const price = model.price || 0;
+                        return (
+                            <div key={item.id || modelId} className="group relative bg-gray-900/50 rounded-xl border border-gray-800 hover:border-yellow-400/40 overflow-hidden transition-all duration-300">
+                                <button onClick={() => handleRemove(modelId)} disabled={removingId === modelId}
+                                    className="absolute top-2 right-2 z-10 w-6 h-6 sm:w-7 sm:h-7 bg-black/70 hover:bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all disabled:opacity-50">
+                                    {removingId === modelId ? <Loader2 className="w-3 h-3 animate-spin" /> : <X className="w-3 h-3" />}
+                                </button>
+                                <Link href={`/catalog/${modelId}`}>
+                                    <div className="aspect-[4/3] overflow-hidden bg-gray-900">
+                                        <img src={thumb} alt={model.title || 'Model'} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                    </div>
+                                </Link>
+                                <div className="p-2.5 sm:p-3">
+                                    <Link href={`/catalog/${modelId}`}>
+                                        <h4 className="font-semibold text-white text-xs sm:text-sm truncate hover:text-yellow-400 transition-colors mb-0.5">{model.title || 'Untitled'}</h4>
+                                    </Link>
+                                    <p className="text-[10px] sm:text-xs text-gray-500 mb-2 truncate">by {model.artist?.username || 'Unknown'}</p>
+                                    <div className="flex items-center justify-between gap-1">
+                                        <span className="font-bold text-yellow-400 text-xs">{price === 0 ? 'Free' : formatPrice(price).idr}</span>
+                                        <Link href={`/catalog/${modelId}`} className="text-[10px] sm:text-xs px-2 py-1 bg-yellow-400 hover:bg-yellow-300 text-black font-semibold rounded-lg transition-colors">View</Link>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+}
+
+
 
 
 type TabType = 'profile' | 'settings' | 'collections' | 'bookmarks' | 'notifications' | 'uploads' | 'analytics' | 'billing' | 'shipping' | 'service' | 'jobs' | 'workshop';
@@ -779,26 +1155,12 @@ function ProfileContent() {
 
                         {/* ── TAB: COLLECTIONS ── */}
                         {activeTab === 'collections' && (
-                            <div className="text-center py-20 bg-gray-900/20 rounded-2xl border border-gray-800 border-dashed animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                <FolderOpen className="w-16 h-16 text-gray-700 mx-auto mb-4" />
-                                <h3 className="text-xl font-bold text-white mb-2">No collections yet</h3>
-                                <p className="text-gray-400 mb-8 max-w-sm mx-auto">Start creating collections to organize your favorite 3D models.</p>
-                                <Link href="/catalog" className="inline-flex items-center gap-2 px-6 py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-all">
-                                    Explore Catalog
-                                </Link>
-                            </div>
+                            <CollectionsTabContent />
                         )}
 
                         {/* ── TAB: BOOKMARKS ── */}
                         {activeTab === 'bookmarks' && (
-                            <div className="text-center py-20 bg-gray-900/20 rounded-2xl border border-gray-800 border-dashed animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                <Bookmark className="w-16 h-16 text-gray-700 mx-auto mb-4" />
-                                <h3 className="text-xl font-bold text-white mb-2">Your wishlist is empty</h3>
-                                <p className="text-gray-400 mb-8 max-w-sm mx-auto">Items you save in the catalog will appear here for easy access later.</p>
-                                <Link href="/catalog" className="inline-flex items-center gap-2 px-6 py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-all">
-                                    Discover Models
-                                </Link>
-                            </div>
+                            <BookmarksTabContent />
                         )}
 
                         {/* ── TAB: NOTIFICATIONS ── */}

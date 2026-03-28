@@ -187,6 +187,54 @@ export async function get_public_profile(req: Auth_Request, res: Response): Prom
 }
 
 /**
+ * Search/Discovery for users (Publicly accessible)
+ */
+export async function search_users(req: Auth_Request, res: Response): Promise<void> {
+    const { q, role } = req.query;
+
+    if (!q && !role) {
+        res.status(400).json({ message: "Search query or role is required!" });
+        return;
+    }
+
+    const where: Prisma.UserWhereInput = {
+        account_status: 'APPROVED'
+    };
+
+    if (q) {
+        where.OR = [
+            { username: { contains: q as string, mode: 'insensitive' } },
+            { display_name: { contains: q as string, mode: 'insensitive' } }
+        ];
+    }
+
+    if (role && ['ARTIST', 'PROVIDER'].includes(role as string)) {
+        where.role = role as any;
+    }
+
+    const users = await prisma.user.findMany({
+        where,
+        take: 10,
+        select: {
+            id: true,
+            username: true,
+            display_name: true,
+            avatar_url: true,
+            bio: true,
+            role: true,
+            rating: true,
+            review_count: true
+        }
+    });
+
+    const signed_users = await Promise.all(
+        users.map(u => sign_user_urls(u))
+    );
+
+    res.json(signed_users);
+}
+
+/**
  * Change user password
  */
 export async function change_password(req: Auth_Request, res: Response): Promise<void> {

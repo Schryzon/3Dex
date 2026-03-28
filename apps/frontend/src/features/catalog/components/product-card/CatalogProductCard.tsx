@@ -190,7 +190,7 @@ export default function CatalogProductCard({
                     <img
                         src={image}
                         alt={title}
-                        className={`absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${imageLoaded ? 'block' : 'hidden'
+                        className={`absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-102 ${imageLoaded ? 'block' : 'hidden'
                             }`}
                         onLoad={() => setImageLoaded(true)}
                     />

@@ -19,7 +19,7 @@ export const productKeys = {
 } as const;
 
 // Set this to true to use mock data, or false to use the real database
-export const USE_MOCK_DATA = false;
+export const USE_MOCK_DATA = true;
 
 
 const mapModel = (item: any): Model => ({

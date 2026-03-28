@@ -1,29 +1,75 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { postService } from '@/lib/api/services';
+import { postService, userService } from '@/lib/api/services';
 import { useAuth } from '@/features/auth';
-import UserAvatar from '@/components/common/UserAvatar';
-import { Loader2, Heart, MessageSquare, Send, Image as ImageIcon, AlertTriangle, MoreVertical, Trash2, Flag } from 'lucide-react';
+import { 
+    Loader2, Heart, MessageSquare, Send, Image as ImageIcon, 
+    AlertTriangle, MoreVertical, Trash2, Flag, Sparkles, Users, X,
+    Mail, ShieldAlert, EyeOff, Scale, HelpCircle
+} from 'lucide-react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import PostComments from '@/features/community/components/PostComments';
+import UserSearch from '@/features/community/components/UserSearch';
+import PostDetailModal from '@/features/community/components/PostDetailModal';
 
 export default function CommunityPage() {
     const { user } = useAuth();
     const queryClient = useQueryClient();
-    const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
-    const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
+    const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<'all' | 'explore' | 'following'>('all');
 
     // New Post State
     const [caption, setCaption] = useState('');
     const [mediaUrl, setMediaUrl] = useState('');
     const [isNsfw, setIsNsfw] = useState(false);
 
-    const { data: posts, isLoading } = useQuery({
+    // Menu & Report UI State
+    const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+    const [reportingPost, setReportingPost] = useState<any | null>(null);
+
+    const REPORT_REASONS = [
+        { id: 'spam', label: 'Spam or misleading', icon: <Mail className="w-5 h-5 text-blue-400" /> },
+        { id: 'harassment', label: 'Harassment or hate speech', icon: <ShieldAlert className="w-5 h-5 text-red-400" /> },
+        { id: 'inappropriate', label: 'Inappropriate content', icon: <EyeOff className="w-5 h-5 text-yellow-400" /> },
+        { id: 'intellectual', label: 'Intellectual property violation', icon: <Scale className="w-5 h-5 text-purple-400" /> },
+        { id: 'other', label: 'Other issue', icon: <HelpCircle className="w-5 h-5 text-gray-400" /> },
+    ];
+
+    const { data: realPosts, isLoading } = useQuery({
         queryKey: ['community-feed'],
         queryFn: () => postService.getFeed()
+    });
+
+    // Fetch real artists for featured section
+    const { data: realArtists, isLoading: isCreatorsLoading } = useQuery({
+        queryKey: ['community-artists'],
+        queryFn: () => userService.searchUsers('', 'ARTIST')
+    });
+
+    const posts = useMemo(() => realPosts || [], [realPosts]);
+
+    // Filter Logic (Algorithm)
+    const filteredPosts = useMemo(() => {
+        if (activeTab === 'all') return posts;
+        if (activeTab === 'explore') {
+            // "Explore" algorithm Show posts with likes > 50 or recently created high-engagement ones
+            return [...posts].sort((a, b) => (b.like_count || 0) - (a.like_count || 0));
+        }
+        if (activeTab === 'following') {
+            // "Following" algorithm In mock mode, show posts from specific users
+            return posts.filter(p => ['GhostMesh', 'NeonForge', 'CyberVoxel'].includes(p.user.username));
+        }
+        return posts;
+    }, [activeTab, posts]);
+
+    const followMutation = useMutation({
+        mutationFn: (userId: string) => userService.followUser(userId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['community-feed'] });
+            queryClient.invalidateQueries({ queryKey: ['post-detail'] });
+        }
     });
 
     const createPostMutation = useMutation({
@@ -47,6 +93,17 @@ export default function CommunityPage() {
         mutationFn: (postId: string) => postService.toggleLike(postId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['community-feed'] });
+            queryClient.invalidateQueries({ queryKey: ['post-detail'] });
+        }
+    });
+
+    const reportMutation = useMutation({
+        mutationFn: ({ postId, reason }: { postId: string; reason: string }) => postService.reportPost(postId, reason),
+        onSuccess: () => {
+            alert('Report submitted successfully. Thank you for keeping 3Dex safe!');
+        },
+        onError: (err: any) => {
+            alert(err.response?.data?.message || 'Failed to submit report');
         }
     });
 
@@ -54,222 +111,458 @@ export default function CommunityPage() {
         mutationFn: (postId: string) => postService.deletePost(postId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['community-feed'] });
-            setOpenMenus({});
+            setOpenMenuId(null);
         },
         onError: (err: any) => {
             alert(err.response?.data?.message || 'Failed to delete post');
         }
     });
 
-    const reportPostMutation = useMutation({
-        mutationFn: ({ postId, reason }: { postId: string, reason: string }) => postService.reportPost(postId, reason),
-        onSuccess: () => {
-            alert('Report submitted successfully!');
-            setOpenMenus({});
-        },
-        onError: (err: any) => {
-            alert(err.response?.data?.message || 'Failed to report post');
-        }
-    });
-
     const canPost = user?.role === 'ARTIST' || user?.role === 'PROVIDER';
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] pt-24 pb-12 px-4">
-            <div className="max-w-2xl mx-auto space-y-8">
-
-                {/* Header */}
-                <div className="flex justify-between items-end">
-                    <div>
-                        <h1 className="text-3xl font-bold text-white mb-2 font-outfit">Community Feed</h1>
-                        <p className="text-gray-400">See what artists and providers are working on.</p>
+        <div className="min-h-screen bg-[#0a0a0a] pt-0 pb-20 px-4">
+            {/* Discovery Hub Layout Grid */}
+            <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
+                
+                {/* --- Left Column: Feed & Highlights (8/12) --- */}
+                <div className="lg:col-span-8 space-y-6 pt-6">
+                    
+                    {/* Header Section (Mobile Optimized) */}
+                    <div className="lg:hidden text-center mb-6">
+                         <h1 className="text-2xl font-black text-white tracking-tight">Community Feed</h1>
+                         <p className="text-gray-500 text-xs mt-1">Discover the next generation of 3D creators.</p>
+                         <div className="mt-4">
+                            <UserSearch />
+                         </div>
                     </div>
-                </div>
 
-                {/* Create Post Widget */}
-                {canPost && (
-                    <div className="bg-[#141414] border border-gray-800 rounded-2xl p-4 shadow-xl">
-                        <div className="flex gap-4">
-                            <div className="w-10 h-10 rounded-full bg-gray-800 flex-shrink-0">
-                                {user?.avatar_url ? <img src={user.avatar_url} className="w-full h-full rounded-full" /> : <div className="w-full h-full flex items-center justify-center font-bold">{user?.username?.[0].toUpperCase()}</div>}
-                            </div>
-                            <div className="flex-1 space-y-4">
-                                <textarea
-                                    placeholder="What are you working on?"
-                                    className="w-full bg-transparent border-none focus:ring-0 text-white placeholder-gray-500 resize-none h-20"
-                                    value={caption}
-                                    onChange={(e) => setCaption(e.target.value)}
-                                />
-                                {mediaUrl && (
-                                    <div className="relative rounded-lg overflow-hidden h-40 w-full bg-gray-900 border border-gray-800">
-                                        <img src={mediaUrl} alt="Preview" className="w-full h-full object-cover" />
-                                        <button
-                                            onClick={() => setMediaUrl('')}
-                                            className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors"
+                    {/* Featured Creators Carousel */}
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between px-1">
+                             <h1 className="text-[10px] font-bold text-gray-500 tracking-widest flex items-center gap-2">
+                                <Sparkles className="w-3 h-3 text-yellow-500" /> Discover Artists
+                             </h1>
+                        </div>
+        
+                        <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar snap-x no-scrollbar">
+                            {isCreatorsLoading ? (
+                                // Creators Skeleton
+                                [...Array(8)].map((_, i) => (
+                                    <div key={i} className="flex-shrink-0 animate-pulse flex flex-col items-center gap-2 w-20">
+                                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gray-800/50" />
+                                        <div className="w-12 h-2 bg-gray-800/50 rounded" />
+                                    </div>
+                                ))
+                            ) : realArtists && realArtists.length > 0 ? (
+                                realArtists.map(creator => (
+                                    <div key={creator.id} className="flex-shrink-0 group flex flex-col items-center gap-2 snap-center w-20 transition-all active:scale-95">
+                                        <Link 
+                                            href={`/u/${creator.username}`}
+                                            className="relative"
                                         >
-                                            ✕
+                                            <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-tr from-yellow-400/20 to-amber-600/20 p-[2px] shadow-lg group-hover:from-yellow-400 group-hover:to-amber-600 transition-all duration-500">
+                                                <div className="w-full h-full rounded-full bg-black p-[2px]">
+                                                    {creator.avatar_url ? (
+                                                        <img 
+                                                            src={creator.avatar_url} 
+                                                            className="w-full h-full rounded-full object-cover filter brightness-90 group-hover:brightness-110 transition-all" 
+                                                            alt={creator.username}
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full rounded-full bg-gray-900 flex items-center justify-center text-gray-600 font-bold uppercase text-[10px]">
+                                                            {creator.username?.[0]}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </Link>
+                                        <span className="text-[10px] font-bold text-gray-500 group-hover:text-white transition-colors truncate w-full text-center">
+                                            {creator.username}
+                                        </span>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-[10px] text-gray-600 font-medium px-2 py-4">No artists featured yet.</p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Feed Tabs & Action Bar */}
+                    <div className="flex items-center justify-between border-b border-gray-800/50 pb-1">
+                        <div className="flex gap-6">
+                            {['all', 'explore', 'following'].map((tab) => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab as any)}
+                                    className={`relative pb-3 text-sm font-bold capitalize transition-colors ${
+                                        activeTab === tab ? 'text-yellow-400' : 'text-gray-600 hover:text-gray-400'
+                                    }`}
+                                >
+                                    {tab}
+                                    {activeTab === tab && (
+                                        <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.5)]" />
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Create Post Widget */}
+                    {canPost && (
+                        <div className="bg-[#111]/30 backdrop-blur-xl border border-gray-800/50 rounded-3xl p-5 shadow-2xl relative overflow-hidden group">
+                             <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-400/5 blur-3xl -mr-16 -mt-16" />
+                            <div className="flex gap-4 relative">
+                                <div className="w-11 h-11 rounded-full bg-gray-800 flex-shrink-0 ring-2 ring-gray-900 overflow-hidden">
+                                    {user?.avatar_url ? (
+                                        <img src={user.avatar_url} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center font-bold text-gray-500 uppercase text-xs">
+                                            {user?.username?.[0]}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex-1 space-y-4">
+                                    <textarea
+                                        placeholder="Share your latest project..."
+                                        className="w-full bg-transparent border-none focus:ring-0 text-white placeholder-gray-600 resize-none h-14 text-sm font-medium"
+                                        value={caption}
+                                        onChange={(e) => setCaption(e.target.value)}
+                                    />
+                                    {mediaUrl && (
+                                        <div className="relative rounded-2xl overflow-hidden h-44 w-full bg-black border border-gray-800 shadow-inner group/preview">
+                                            <img src={mediaUrl} alt="Preview" className="w-full h-full object-cover" />
+                                            <button
+                                                onClick={() => setMediaUrl('')}
+                                                className="absolute top-3 right-3 bg-black/60 hover:bg-red-500 text-white rounded-full p-1.5 transition-all shadow-lg scale-90 group-hover/preview:scale-100"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between items-center pt-3 border-t border-gray-800/50">
+                                        <div className="flex gap-4 items-center">
+                                            <button
+                                                onClick={() => {
+                                                    const url = prompt('Enter Image URL manually:');
+                                                    if (url) setMediaUrl(url);
+                                                }}
+                                                className="text-gray-400 hover:text-yellow-400 p-2 rounded-xl hover:bg-yellow-400/5 transition-all flex items-center gap-2 group/btn"
+                                            >
+                                                <ImageIcon className="w-5 h-5" />
+                                                <span className="text-xs font-bold hidden sm:inline">Add media</span>
+                                            </button>
+                                            <label className="flex items-center gap-2 cursor-pointer group/nsfw">
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={isNsfw} 
+                                                    onChange={(e) => setIsNsfw(e.target.checked)} 
+                                                    className="w-4 h-4 rounded-lg bg-gray-800 border-gray-700 text-red-500 focus:ring-red-500/20 transition-colors" 
+                                                />
+                                                <span className="text-[10px] font-bold text-gray-500 group-hover/nsfw:text-red-400 transition-colors tracking-widest uppercase">NSFW</span>
+                                            </label>
+                                        </div>
+                                        <button
+                                            onClick={() => createPostMutation.mutate()}
+                                            disabled={!caption.trim() || !mediaUrl || createPostMutation.isPending}
+                                            className="bg-yellow-400 hover:bg-yellow-300 disabled:opacity-20 text-black font-black px-6 py-2 rounded-xl transition-all active:scale-[0.95] flex items-center gap-2 shadow-lg shadow-yellow-400/10"
+                                        >
+                                            {createPostMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                                            <span className="text-sm">Post</span>
                                         </button>
                                     </div>
-                                )}
-                                <div className="flex justify-between items-center pt-2 border-t border-gray-800">
-                                    <div className="flex gap-4 items-center">
-                                        <button
-                                            onClick={() => {
-                                                const url = prompt('Enter image URL:');
-                                                if (url) setMediaUrl(url);
-                                            }}
-                                            className="text-yellow-400 hover:text-yellow-300 p-2 rounded-lg hover:bg-yellow-400/10 transition-colors"
-                                        >
-                                            <ImageIcon className="w-5 h-5" />
-                                        </button>
-                                        <label className="flex items-center gap-2 cursor-pointer text-gray-400 hover:text-white transition-colors">
-                                            <input type="checkbox" checked={isNsfw} onChange={(e) => setIsNsfw(e.target.checked)} className="rounded border-gray-700 bg-gray-900 text-red-500 focus:ring-red-500 focus:ring-offset-gray-900" />
-                                            <span className="text-sm font-medium">NSFW Content</span>
-                                        </label>
-                                    </div>
-                                    <button
-                                        onClick={() => createPostMutation.mutate()}
-                                        disabled={!caption.trim() || !mediaUrl || createPostMutation.isPending}
-                                        className="bg-yellow-400 hover:bg-yellow-300 disabled:opacity-50 text-black font-bold px-4 py-2 rounded-lg transition-all active:scale-[0.98] flex items-center gap-2"
-                                    >
-                                        {createPostMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                                        Post
-                                    </button>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {/* Feed */}
-                {isLoading ? (
-                    <div className="flex justify-center py-20">
-                        <Loader2 className="w-8 h-8 text-yellow-400 animate-spin" />
-                    </div>
-                ) : (
+                    {/* Main Post Feed */}
                     <div className="space-y-6">
-                        {posts?.map(post => (
-                            <div key={post.id} className="bg-[#141414] border border-gray-800 rounded-2xl overflow-hidden shadow-lg hover:border-gray-700 transition-colors">
-                                {/* Post Header */}
-                                <div className="p-4 flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-gray-800">
-                                        {post.user.avatar_url ? <img src={post.user.avatar_url} className="w-full h-full rounded-full" /> : <div className="w-full h-full flex items-center justify-center font-bold">{post.user.username[0].toUpperCase()}</div>}
+                        {isLoading ? (
+                            // Feed Skeleton
+                            [...Array(3)].map((_, i) => (
+                                <div key={i} className="bg-[#0f0f0f] border border-gray-800 rounded-[32px] overflow-hidden animate-pulse">
+                                    <div className="p-4 flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-gray-800" />
+                                        <div className="space-y-2">
+                                            <div className="w-24 h-2 bg-gray-800 rounded" />
+                                            <div className="w-16 h-1.5 bg-gray-900 rounded" />
+                                        </div>
                                     </div>
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <Link href={`/u/${post.user.username}`} className="font-bold text-white hover:underline">
-                                                {post.user.display_name || post.user.username}
+                                    <div className="aspect-video bg-gray-900" />
+                                    <div className="p-6 space-y-3">
+                                        <div className="w-full h-2 bg-gray-800 rounded" />
+                                        <div className="w-2/3 h-2 bg-gray-800 rounded" />
+                                    </div>
+                                </div>
+                            ))
+                        ) : filteredPosts && filteredPosts.length > 0 ? (
+                            filteredPosts.map(post => (
+                                <div key={post.id} className="bg-[#0f0f0f] border border-gray-800 rounded-[32px] overflow-hidden group shadow-2xl transition-all hover:border-gray-700/50">
+                                    {/* Post Header */}
+                                    <div className="p-4 flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <Link href={`/u/${post.user.username}`} className="relative group/avatar">
+                                                <div className="w-10 h-10 rounded-full bg-gray-800 overflow-hidden ring-2 ring-transparent group-hover/avatar:ring-yellow-400 transition-all duration-300 flex items-center justify-center">
+                                                    {post.user.avatar_url ? (
+                                                        <img src={post.user.avatar_url} className="w-full h-full object-cover" alt={post.user.username} />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gray-900 flex items-center justify-center font-bold text-gray-600 uppercase text-xs">
+                                                            {post.user.username?.[0]}
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </Link>
-                                            {(['ARTIST', 'PROVIDER', 'ADMIN'].includes(post.user.role)) && (
-                                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${post.user.role === 'ARTIST' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
-                                                    post.user.role === 'PROVIDER' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                                                        'bg-red-500/10 text-red-400 border-red-500/20'
+                                            <div>
+                                                <div className="flex items-center gap-1.5 flex-wrap">
+                                                    <Link href={`/u/${post.user.username}`} className="text-sm font-black text-white hover:text-yellow-400 transition-colors">
+                                                        {post.user.display_name || post.user.username}
+                                                    </Link>
+                                                    {user?.id !== post.user.id && (
+                                                        <>
+                                                            <span className="w-0.5 h-0.5 rounded-full bg-gray-700" />
+                                                            <button 
+                                                                onClick={() => followMutation.mutate(post.user.id)}
+                                                                className="text-[11px] cursor-pointer font-bold text-yellow-400 hover:text-white transition-colors"
+                                                            >
+                                                                Follow
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-1.5 mt-0.5">
+                                                    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded ${
+                                                        post.user.role === 'ARTIST' ? 'bg-purple-500/10 text-purple-400' :
+                                                        post.user.role === 'PROVIDER' ? 'bg-blue-500/10 text-blue-400' : 'text-gray-600'
                                                     }`}>
-                                                    {post.user.role}
-                                                </span>
+                                                        {post.user.role}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="relative">
+                                            <button className={`p-1.5 rounded-lg transition-all ${openMenuId === post.id ? 'bg-gray-800 text-white' : 'text-gray-600 hover:text-white hover:bg-gray-800/50'}`}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setOpenMenuId(openMenuId === post.id ? null : post.id);
+                                                }}
+                                            >
+                                                <MoreVertical className="w-4 h-4" />
+                                            </button>
+
+                                            {openMenuId === post.id && (
+                                                <div className="absolute right-0 mt-2 w-48 bg-[#111] border border-gray-800 rounded-2xl shadow-2xl py-2 z-30 animate-in fade-in zoom-in duration-200">
+                                                    {(user?.role === 'ADMIN' || user?.id === post.user.id) && (
+                                                        <button 
+                                                            onClick={() => {
+                                                                if (confirm('Are you sure you want to delete this post permanently?')) {
+                                                                    deletePostMutation.mutate(post.id);
+                                                                }
+                                                            }}
+                                                            className="w-full flex items-center gap-3 px-4 py-2.5 text-[11px] font-bold text-red-400 hover:bg-red-400/10 transition-colors"
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                            Delete post
+                                                        </button>
+                                                    )}
+                                                    <button 
+                                                        onClick={() => {
+                                                            setReportingPost(post);
+                                                            setOpenMenuId(null);
+                                                        }}
+                                                        className="w-full flex items-center gap-3 px-4 py-2.5 text-[11px] font-bold text-gray-300 hover:bg-white/5 transition-colors"
+                                                    >
+                                                        <Flag className="w-3.5 h-3.5" />
+                                                        Report post
+                                                    </button>
+                                                </div>
                                             )}
                                         </div>
-                                        <p className="text-xs text-gray-500">{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</p>
                                     </div>
 
-                                    {/* Action Menu */}
-                                    <div className="ml-auto relative">
-                                        <button
-                                            onClick={() => setOpenMenus(prev => ({ ...prev, [post.id]: !prev[post.id] }))}
-                                            className="p-2 text-gray-500 hover:text-white rounded-lg hover:bg-gray-800 transition-colors"
+                                    {/* Main Post Image */}
+                                    {post.media_urls.length > 0 && (
+                                        <div 
+                                            onClick={() => setSelectedPostId(post.id)}
+                                            className="relative w-full aspect-[4/5] sm:aspect-video overflow-hidden bg-[#111] cursor-pointer ring-1 ring-gray-800/20 group/img shadow-inner"
                                         >
-                                            <MoreVertical className="w-5 h-5" />
-                                        </button>
-
-                                        {openMenus[post.id] && (
-                                            <div className="absolute right-0 mt-2 w-48 bg-[#1a1a1a] border border-gray-800 rounded-xl shadow-2xl py-1 z-20">
-                                                {(user?.role === 'ADMIN' || user?.id === post.user.id) && (
-                                                    <button
-                                                        onClick={() => {
-                                                            if (window.confirm('Are you sure you want to delete this post?')) {
-                                                                deletePostMutation.mutate(post.id);
-                                                            }
-                                                        }}
-                                                        className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                        Delete Post
-                                                    </button>
-                                                )}
-                                                {user?.id !== post.user.id && (
-                                                    <button
-                                                        onClick={() => {
-                                                            const reason = window.prompt('Please enter the reason for reporting:');
-                                                            if (reason) {
-                                                                reportPostMutation.mutate({ postId: post.id, reason });
-                                                            }
-                                                        }}
-                                                        className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 transition-colors"
-                                                    >
-                                                        <Flag className="w-4 h-4" />
-                                                        Report Post
-                                                    </button>
-                                                )}
+                                            <img 
+                                                src={post.media_urls[0]} 
+                                                className="w-full h-full object-cover transition-transform duration-700 group-hover/img:scale-105" 
+                                                alt="Post media" 
+                                            />
+                                            {/* Hover Overlay */}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 flex items-end p-8">
+                                                <div className="flex items-center gap-6">
+                                                    <div className="flex items-center gap-2 text-white">
+                                                        <Heart className="w-5 h-5 fill-red-500 text-red-500" />
+                                                        <span className="font-black">{post.like_count || 0}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-white">
+                                                        <MessageSquare className="w-5 h-5 fill-white" />
+                                                        <span className="font-black">{post.comment_count || 0}</span>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Media */}
-                                {post.media_urls.length > 0 && (
-                                    <div className="relative w-full aspect-video bg-gray-900 overflow-hidden">
-                                        <img
-                                            src={post.media_urls[0]}
-                                            alt="Post content"
-                                            className={`w-full h-full object-cover ${post.is_nsfw && !user?.show_nsfw ? 'blur-2xl scale-110' : ''}`}
-                                        />
-                                        {post.is_nsfw && !user?.show_nsfw && (
-                                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 text-white z-10 pointer-events-none">
-                                                <AlertTriangle className="w-12 h-12 text-red-500 mb-2 opacity-80 drop-shadow-lg" />
-                                                <p className="font-bold tracking-wide drop-shadow-md">NSFW Content</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* Content & Actions */}
-                                <div className="p-4">
-                                    {post.caption && (
-                                        <p className="text-gray-300 mb-4 whitespace-pre-wrap">{post.caption}</p>
+                                        </div>
                                     )}
 
-                                    <div className="flex items-center gap-6 pt-4 border-t border-gray-800">
-                                        <button
-                                            onClick={() => toggleLikeMutation.mutate(post.id)}
-                                            className={`flex items-center gap-2 text-sm font-medium transition-colors ${post.is_liked ? 'text-red-500' : 'text-gray-400 hover:text-white'}`}
-                                        >
-                                            <Heart className={`w-5 h-5 ${post.is_liked ? 'fill-current' : ''}`} />
-                                            <span>{post.like_count ?? post._count?.likes ?? 0}</span>
-                                        </button>
-                                        <button
-                                            onClick={() => setOpenComments(prev => ({ ...prev, [post.id]: !prev[post.id] }))}
-                                            className={`flex items-center gap-2 text-sm font-medium transition-colors ${openComments[post.id] ? 'text-yellow-400' : 'text-gray-400 hover:text-white'}`}
-                                        >
-                                            <MessageSquare className="w-5 h-5" />
-                                            <span>{post.comment_count ?? post._count?.comments ?? 0}</span>
-                                        </button>
+                                    {/* Compact Actions bar */}
+                                    <div className="px-6 py-4 space-y-4">
+                                        <div className="flex items-center gap-6">
+                                            <button
+                                                onClick={() => {
+                                                    if (!user) return;
+                                                    toggleLikeMutation.mutate(post.id);
+                                                }}
+                                                className={`transition-all hover:scale-125 active:scale-90 flex items-center gap-2 ${post.is_liked ? 'text-red-500' : 'text-gray-300 hover:text-white'}`}
+                                            >
+                                                <Heart className={`w-6 h-6 ${post.is_liked ? 'fill-current' : ''}`} />
+                                                <span className="text-xs font-black">{post.like_count || 0}</span>
+                                            </button>
+                                            <button
+                                                onClick={() => setSelectedPostId(post.id)}
+                                                className="text-gray-300 hover:text-white hover:scale-125 active:scale-95 transition-all flex items-center gap-2"
+                                            >
+                                                <MessageSquare className="w-6 h-6" />
+                                                <span className="text-xs font-black">{post.comment_count || 0}</span>
+                                            </button>
+                                        </div>
+
+                                        {post.caption && (
+                                            <p className="text-[13px] text-gray-300 leading-relaxed font-medium">
+                                                <span className="font-black mr-2 text-white">{post.user.username}</span>
+                                                {post.caption}
+                                            </p>
+                                        )}
+                                        
+                                        <div className="pt-2">
+                                            <p className="text-[10px] font-black text-gray-700 tracking-wider">
+                                                {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                                            </p>
+                                        </div>
                                     </div>
-
-                                    {openComments[post.id] && (
-                                        <PostComments postId={post.id} />
-                                    )}
                                 </div>
-                            </div>
-                        ))}
-
-                        {posts?.length === 0 && (
-                            <div className="text-center py-20 bg-gray-900/20 rounded-2xl border border-dashed border-gray-800">
-                                <p className="text-gray-500">No posts yet. Be the first to share something!</p>
+                            ))
+                        ) : (
+                            // Empty State
+                            <div className="py-20 flex flex-col items-center justify-center text-center space-y-4 bg-[#0a0a0a] border-2 border-dashed border-gray-900 rounded-[40px]">
+                                <div className="w-20 h-20  rounded-3xl flex items-center justify-center mb-2">
+                                    <Sparkles className="w-10 h-10 text-gray-700" />
+                                </div>
+                                <div>
+                                    <h4 className="text-xl font-black text-white">No posts yet</h4>
+                                    <p className="text-sm text-gray-600 max-w-xs mx-auto mt-2 leading-relaxed">
+                                        Be the first to share your work with the community and get discovered!
+                                    </p>
+                                </div>
                             </div>
                         )}
                     </div>
-                )}
+                </div>
+
+                {/* --- Right Column: Sidebar Discovery (4/12) --- */}
+                <div className="hidden lg:block lg:col-span-4 space-y-6 sticky top-8 h-fit pt-6">
+                    
+                    {/* Page Branding */}
+                    <div className="px-2">
+                        <h1 className="text-3xl font-black text-white tracking-tight leading-none mb-2">Discovery</h1>
+                        <p className="text-gray-500 text-xs leading-snug">Inspire and connect with the best creators.</p>
+                    </div>
+
+                    {/* Integrated Search Module */}
+                    <div className="bg-[#111]/40 border border-gray-800/50 rounded-3xl p-6 shadow-2xl relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-400/5 blur-3xl -mr-12 -mt-12 group-hover:bg-yellow-400/10 transition-colors duration-500" />
+                        <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <Users className="w-3 h-3" /> Quick discovery
+                        </h3>
+                        <UserSearch />
+                    </div>
+
+                    {/* Trending Tags (Resilient UI) */}
+                    <div className="bg-[#0f0f0f] border border-gray-800 rounded-3xl p-6 shadow-xl">
+                        <div className="flex items-center justify-between mb-5">
+                            <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
+                                <AlertTriangle className="w-3.5 h-3.5 text-yellow-500" /> Trending subjects
+                            </h3>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            <div className="w-full py-8 border border-dashed border-gray-800 rounded-2xl flex flex-col items-center justify-center gap-2 text-center px-4">
+                                <div className="p-2 bg-gray-900 rounded-xl text-gray-600">
+                                    <Flag className="w-4 h-4" />
+                                </div>
+                                <p className="text-[10px] text-gray-600 font-bold leading-relaxed">
+                                    Subjects emerge as the <br /> community grows.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    {/* Footer Links */}
+                    <div className="px-6 flex flex-wrap gap-x-4 gap-y-2 opacity-30 text-[8px] font-bold text-gray-500 uppercase tracking-widest justify-center">
+                        <Link href="/coming-soon" className="hover:text-white transition-colors">Safety</Link>
+                        <Link href="/coming-soon" className="hover:text-white transition-colors">Creators</Link>
+                        <Link href="/coming-soon" className="hover:text-white transition-colors">Rules</Link>
+                        <Link href="/coming-soon" className="hover:text-white transition-colors">Privacy</Link>
+                        <p className="mt-2 w-full text-center">© 2026 3Dex Community</p>
+                    </div>
+                </div>
             </div>
+
+            {/* Premium Report Modal */}
+            {reportingPost && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="w-full max-w-sm bg-[#0f0f0f] border border-gray-800 rounded-[32px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+                        <div className="p-6 border-b border-gray-800 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-lg font-black text-white leading-tight">Report Post</h3>
+                                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Select a reason for reporting</p>
+                            </div>
+                            <button 
+                                onClick={() => setReportingPost(null)}
+                                className="p-2 text-gray-500 hover:text-white hover:bg-gray-800 rounded-full transition-all"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="p-2">
+                            {REPORT_REASONS.map((reason) => (
+                                <button
+                                    key={reason.id}
+                                    onClick={() => {
+                                        reportMutation.mutate({ postId: reportingPost.id, reason: reason.label });
+                                        setReportingPost(null);
+                                    }}
+                                    className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-white/5 transition-all group text-left"
+                                >
+                                    <div className="w-10 h-10 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                                        {reason.icon}
+                                    </div>
+                                    <div>
+                                        <p className="text-[13px] font-bold text-gray-300 group-hover:text-white transition-colors">{reason.label}</p>
+                                        <p className="text-[10px] text-gray-600 font-medium">Flag this content for review</p>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                        <div className="p-6 bg-gray-900/20">
+                            <p className="text-[10px] text-gray-500 text-center leading-relaxed">
+                                Our community rules help keep 3Dex safe. <br />
+                                <Link href="/coming-soon" className="text-yellow-400 hover:underline font-bold transition-all">Read more about our rules.</Link>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Premium Instagram-Style Modal */}
+            <PostDetailModal 
+                isOpen={!!selectedPostId} 
+                postId={selectedPostId || ''} 
+                onClose={() => setSelectedPostId(null)} 
+            />
         </div>
     );
 }
+

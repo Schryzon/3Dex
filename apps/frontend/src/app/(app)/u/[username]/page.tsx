@@ -23,6 +23,11 @@ import {
     Loader2,
     AlertTriangle,
     X,
+    Globe,
+    Lock,
+    Package,
+    FolderOpen,
+    Pencil,
 } from 'lucide-react';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import ImageCropModal from '@/components/common/ImageCropModal';
@@ -43,7 +48,7 @@ export default function PublicProfilePage() {
         image: string;
         aspect: number;
     }>({ isOpen: false, image: '', aspect: 16 / 5 });
-    const [activeTab, setActiveTab] = useState<'models' | 'posts' | 'about'>('models');
+    const [activeTab, setActiveTab] = useState<'models' | 'posts' | 'collections'>('models');
 
     const { data: user, isLoading, error, refetch: refetchUser } = useQuery({
         queryKey: ['user', username],
@@ -223,15 +228,28 @@ export default function PublicProfilePage() {
                 </div>
 
                 {/* Button layer outside overflow-hidden */}
+                {/* Change Banner Button */}
                 {isOwner && (
-                    <button
-                        onClick={() => bannerInputRef.current?.click()}
-                        disabled={isUploadingBanner}
-                        className="absolute bottom-4 right-4 z-10 px-4 py-2 bg-black/60 backdrop-blur-md border border-white/10 text-white text-sm font-bold rounded-xl flex items-center gap-2 hover:bg-black/80 transition-opacity duration-200 opacity-0 group-hover:opacity-100 disabled:opacity-50 cursor-pointer"
-                    >
-                        {isUploadingBanner ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
-                        {isUploadingBanner ? 'Uploading...' : 'Change Banner'}
-                    </button>
+                    <>
+                        {/* Desktop Version */}
+                        <button
+                            onClick={() => bannerInputRef.current?.click()}
+                            disabled={isUploadingBanner}
+                            className="hidden md:flex absolute bottom-4 right-4 z-10 px-4 py-2 bg-black/60 backdrop-blur-md border border-white/10 text-white text-sm font-bold rounded-xl items-center gap-2 hover:bg-black/80 transition-opacity duration-200 opacity-0 group-hover:opacity-100 disabled:opacity-50 cursor-pointer"
+                        >
+                            {isUploadingBanner ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+                            <span>{isUploadingBanner ? 'Uploading...' : 'Change Banner'}</span>
+                        </button>
+
+                        {/* Mobile Version: Pencil icon on the left */}
+                        <button
+                            onClick={() => bannerInputRef.current?.click()}
+                            disabled={isUploadingBanner}
+                            className="md:hidden absolute bottom-4 left-4 z-20 p-2.5 bg-black/60 backdrop-blur-md border border-white/10 text-white rounded-xl flex items-center justify-center disabled:opacity-50 cursor-pointer shadow-lg active:scale-95"
+                        >
+                            {isUploadingBanner ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4" />}
+                        </button>
+                    </>
                 )}
                 
                 {/* Error Banner */}
@@ -343,15 +361,15 @@ export default function PublicProfilePage() {
                             <div className="flex gap-6">
                                 <button
                                     onClick={() => setActiveTab('models')}
-                                    className={`pb-4 text-sm font-bold border-b-2 transition-colors ${activeTab === 'models' ? 'border-yellow-400 text-white' : 'border-transparent text-gray-500 hover:text-gray-300'}`}
+                                    className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'models' ? 'border-yellow-400 text-white' : 'border-transparent text-gray-500 hover:text-gray-300'}`}
                                 >
                                     Models
                                 </button>
                                 <button
-                                    onClick={() => setActiveTab('about')}
-                                    className={`pb-4 text-sm font-bold border-b-2 transition-colors ${activeTab === 'about' ? 'border-yellow-400 text-white' : 'border-transparent text-gray-500 hover:text-gray-300'}`}
+                                    onClick={() => setActiveTab('collections')}
+                                    className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'collections' ? 'border-yellow-400 text-white' : 'border-transparent text-gray-500 hover:text-gray-300'}`}
                                 >
-                                    About
+                                    Collections
                                 </button>
                             </div>
                         </div>
@@ -360,59 +378,15 @@ export default function PublicProfilePage() {
                             <ModelGrid artistId={user.id} />
                         )}
 
-                        {activeTab === 'about' && (
-                            <div className="bg-gray-900/40 border border-gray-800 rounded-2xl p-6">
-                                <h3 className="text-lg font-bold text-white mb-4">About {user.display_name || user.username}</h3>
-                                {user.role === 'PROVIDER' && user.provider_config && (
-                                    <div className="mb-6">
-                                        <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Service Capabilities</h4>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <span className="text-gray-500 text-sm block mb-1">Materials</span>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {user.provider_config.materials.map((m: string) => (
-                                                        <span key={m} className="px-2 py-1 bg-gray-800 text-gray-300 text-xs rounded">{m}</span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <span className="text-gray-500 text-sm block mb-1">Printer Types</span>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {user.provider_config.printerTypes.map((p: string) => (
-                                                        <span key={p} className="px-2 py-1 bg-gray-800 text-gray-300 text-xs rounded">{p}</span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Socials</h4>
-                                <div className="flex gap-4">
-                                    {user.social_twitter && (
-                                        <Link href={`https://twitter.com/${user.social_twitter}`} target="_blank" className="p-2 bg-gray-800 rounded-lg text-blue-400 hover:bg-gray-700 transition-colors">
-                                            <Twitter className="w-5 h-5" />
-                                        </Link>
-                                    )}
-                                    {user.social_instagram && (
-                                        <Link href={`https://instagram.com/${user.social_instagram}`} target="_blank" className="p-2 bg-gray-800 rounded-lg text-pink-500 hover:bg-gray-700 transition-colors">
-                                            <Instagram className="w-5 h-5" />
-                                        </Link>
-                                    )}
-                                    {user.social_artstation && (
-                                        <Link href={`https://artstation.com/${user.social_artstation}`} target="_blank" className="p-2 bg-gray-800 rounded-lg text-blue-300 hover:bg-gray-700 transition-colors">
-                                            <LinkIcon className="w-5 h-5" />
-                                        </Link>
-                                    )}
-                                </div>
-                            </div>
+                        {activeTab === 'collections' && (
+                            <PublicCollectionsTab userId={user.id} />
                         )}
                     </div>
 
                     {/* Sidebar Right */}
                     <div className="hidden lg:block space-y-6">
-                        <div className="bg-gray-900/40 border border-gray-800 rounded-2xl p-6">
-                            <h3 className="font-bold text-white mb-4">Stats</h3>
+                        <div className="bg-gray-900/40 border border-gray-800 rounded-3xl p-6">
+                            <h3 className="font-bold text-white mb-4 uppercase text-xs tracking-widest text-gray-500">Stats</h3>
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center text-sm">
                                     <span className="text-gray-400">Rating</span>
@@ -426,9 +400,133 @@ export default function PublicProfilePage() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Socials moved to sidebar */}
+                        <div className="bg-gray-900/40 border border-gray-800 rounded-3xl p-6">
+                            <h3 className="font-bold text-white mb-4 uppercase text-xs tracking-widest text-gray-500">Socials</h3>
+                            <div className="flex flex-wrap gap-3">
+                                {user.social_twitter && (
+                                    <Link href={`https://twitter.com/${user.social_twitter}`} target="_blank" className="p-3 bg-gray-800 rounded-xl text-blue-400 hover:bg-gray-700 transition-colors">
+                                        <Twitter className="w-5 h-5" />
+                                    </Link>
+                                )}
+                                {user.social_instagram && (
+                                    <Link href={`https://instagram.com/${user.social_instagram}`} target="_blank" className="p-3 bg-gray-800 rounded-xl text-pink-500 hover:bg-gray-700 transition-colors">
+                                        <Instagram className="w-5 h-5" />
+                                    </Link>
+                                )}
+                                {user.website && (
+                                    <Link href={user.website} target="_blank" className="p-3 bg-gray-800 rounded-xl text-yellow-400 hover:bg-gray-700 transition-colors">
+                                        <LinkIcon className="w-5 h-5" />
+                                    </Link>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
+    );
+}
+
+function PublicCollectionsTab({ userId }: { userId: string }) {
+    const { data: collections, isLoading } = useQuery({
+        queryKey: ['public-collections', userId],
+        queryFn: async () => {
+            const res = await api.get<{ data: any[] }>(`/collections/user/${userId}`);
+            return res.data.data;
+        },
+        enabled: !!userId
+    });
+
+    if (isLoading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-yellow-400 animate-spin" /></div>;
+
+    if (!collections || collections.length === 0) {
+        return (
+            <div className="text-center py-20 bg-[#111111]/20 rounded-[2.5rem] border border-gray-800/40 border-dashed">
+                <FolderOpen className="w-16 h-16 text-gray-800 mx-auto mb-4" />
+                <p className="text-gray-500 font-medium">No public collections yet.</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-8">
+            {collections.map((collection: any) => {
+                const items = collection.items || [];
+                const hasItems = items.length > 0;
+
+                return (
+                    <Link key={collection.id} href={`/collections/${collection.id}`} className="group block">
+                        <div className="aspect-[4/3] w-full bg-gradient-to-br from-gray-900 to-black relative overflow-hidden rounded-[2.2rem] ring-1 ring-white/5 group-hover:ring-yellow-400/30 transition-all duration-500">
+                            <div className="w-full h-full flex gap-1 p-1">
+                                {hasItems ? (
+                                    <>
+                                        {/* Pinterest Main Image */}
+                                        <div className="flex-[2] h-full rounded-2xl overflow-hidden bg-gray-800/20">
+                                            <img
+                                                src={items[0]?.model?.preview_url ? (items[0].model.preview_url.startsWith('http') ? items[0].model.preview_url : `${MINIO_BASE_URL}/3dex-models/${items[0].model.preview_url}`) : ''}
+                                                alt=""
+                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                            />
+                                        </div>
+                                        {/* Side Previews */}
+                                        <div className="flex-1 flex flex-col gap-1">
+                                            <div className="flex-1 rounded-xl overflow-hidden bg-gray-800/20">
+                                                {items[1] && (
+                                                    <img
+                                                        src={items[1]?.model?.preview_url ? (items[1].model.preview_url.startsWith('http') ? items[1].model.preview_url : `${MINIO_BASE_URL}/3dex-models/${items[1].model.preview_url}`) : ''}
+                                                        alt=""
+                                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                                    />
+                                                )}
+                                            </div>
+                                            <div className="flex-1 rounded-xl overflow-hidden bg-gray-800/20 flex items-center justify-center">
+                                                {items[2] ? (
+                                                    <img
+                                                        src={items[2]?.model?.preview_url ? (items[2].model.preview_url.startsWith('http') ? items[2].model.preview_url : `${MINIO_BASE_URL}/3dex-models/${items[2].model.preview_url}`) : ''}
+                                                        alt=""
+                                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                                    />
+                                                ) : (
+                                                    <div className="w-8 h-8 bg-white/5 rounded-xl flex items-center justify-center">
+                                                        <FolderOpen className="w-4 h-4 text-white/10" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div >
+                                    </>
+                                ) : (
+                                    /* Empty State Visual */
+                                    <div className="w-full h-full flex flex-col items-center justify-center relative">
+                                        <FolderOpen className="absolute -right-6 -bottom-6 w-32 h-32 text-white/[0.03] -rotate-12" />
+                                        <div className="w-14 h-14 bg-gray-800/40 backdrop-blur-md rounded-2xl flex items-center justify-center group-hover:bg-yellow-400 group-hover:text-black transition-all duration-500 shadow-inner group-hover:rotate-6">
+                                            <FolderOpen className="w-6 h-6" />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Details Info */}
+                        <div className="mt-4 px-2">
+                            <div className="flex items-center justify-between gap-3 mb-1.5">
+                                <h3 className="font-bold text-white text-sm md:text-base truncate group-hover:text-yellow-400 transition-colors">
+                                    {collection.name}
+                                </h3>
+                                <span className={`shrink-0 flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-tighter bg-emerald-500/10 text-emerald-500 border border-emerald-500/20`}>
+                                    <Globe className="w-2.5 h-2.5" />
+                                    Public
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2 text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-widest opacity-60">
+                                <Package className="w-3.5 h-3.5" />
+                                {collection._count?.items ?? 0} Assets
+                            </div>
+                        </div>
+                    </Link>
+                );
+            })}
         </div>
     );
 }
