@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { postService, postKeys, userService } from '@/lib/api/services';
+import { postService, postKeys, userService, type Post } from '@/lib/api/services';
 import { useAuth } from '@/features/auth';
 import { 
     X, Heart, MessageSquare, Send, Loader2, MoreVertical, 
@@ -39,15 +39,14 @@ export default function PostDetailModal({ postId, isOpen, onClose }: PostDetailM
     // Fetch Full Post Detail
     const { data: post, isLoading } = useQuery({
         queryKey: ['post-detail', postId],
-        queryFn: () => {
+        queryFn: async () => {
             // First check query cache
-            const feedPosts = queryClient.getQueryData<any[]>(['community-feed']);
+            const feedPosts = queryClient.getQueryData<Post[]>(['community-feed']);
             const foundInFeed = feedPosts?.find(p => p.id === postId);
             if (foundInFeed) return foundInFeed;
 
-            // Fallback to MOCK_POSTS
-            const { MOCK_POSTS } = require('@/features/community/constants/mockData');
-            return MOCK_POSTS.find((p: any) => p.id === postId) || null;
+            // Fallback to Actual API Call
+            return postService.getPostById(postId);
         },
         enabled: isOpen && !!postId
     });

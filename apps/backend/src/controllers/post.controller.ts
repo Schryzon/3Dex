@@ -250,3 +250,35 @@ export async function get_post_stats(req: Auth_Request, res: Response): Promise<
     });
 }
 
+/**
+ * Get a single post by id
+ */
+export async function get_post_by_id(req: Auth_Request, res: Response): Promise<void>{
+    const post_id = req.params.post_id as string;
+
+    const post = await prisma.post.findUnique({
+        where: { id: post_id },
+        include: {
+            user: { select: { id: true, username: true, display_name: true, avatar_url: true, role: true } },
+            _count: { select: { likes: true, comments: true } },
+            likes: {
+                where: { user_id: req.user?.id },
+                select: { user_id: true }
+            }
+        }
+    });
+
+    if(!post){
+        res.status(404).json({ message: "Post not found!" });
+        return;
+    }
+
+    const data = {
+        ...post,
+        is_liked: post.likes.length > 0,
+        likes: undefined
+    };
+
+    res.json(data);
+}
+

@@ -60,4 +60,8 @@ export const postService = {
             reason
         });
     },
+
+    async getPostById(postId: string): Promise<Post> {
+        return apiClient.get<Post>(`/posts/${postId}`);
+    },
 };
