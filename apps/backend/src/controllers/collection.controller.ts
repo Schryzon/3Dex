@@ -1,108 +1,141 @@
 import { Request, Response } from "express";
 import * as collectionService from "../services/collection.service";
 
-export async function create_collection(req: Request, res: Response) {
-    const userId = req.user!.id;
-    const { name, description, isPublic } = req.body;
+/**
+ * Handle collection creation
+ */
+export async function create_collection(req: Request, res: Response){
+    const user_id = req.user!.id;
+    const { name, description: desc, isPublic: is_pub } = req.body;
 
-    if (!name) return res.status(400).json({ message: "Name is required" });
+    if(!name){
+        return res.status(400).json({ message: "Name is required" });
+    }
 
-    try {
-        const collection = await collectionService.create_collection(userId, name, description, isPublic);
-        res.status(201).json(collection);
-    } catch (error: any) {
-        res.status(400).json({ message: error.message });
+    try{
+        const coll = await collectionService.create_collection(user_id, name, desc, is_pub);
+        res.status(201).json(coll);
+    }catch(err: any){
+        res.status(400).json({ message: err.message });
     }
 }
 
-export async function get_my_collections(req: Request, res: Response) {
-    const userId = req.user!.id;
-    try {
-        const collections = await collectionService.get_user_collections(userId);
-        res.json({ data: collections });
-    } catch (error: any) {
-        res.status(500).json({ message: error.message });
+/**
+ * Get current user's collections
+ */
+export async function get_my_collections(req: Request, res: Response){
+    const user_id = req.user!.id;
+    try{
+        const colls = await collectionService.get_user_collections(user_id);
+        res.json({ data: colls });
+    }catch(err: any){
+        res.status(500).json({ message: err.message });
     }
 }
 
-export async function get_user_public_collections(req: Request, res: Response) {
-    const targetUserId = req.params.userId as string;
-    try {
-        const collections = await collectionService.get_public_collections(targetUserId);
-        res.json({ data: collections });
-    } catch (error: any) {
-        res.status(500).json({ message: error.message });
+/**
+ * Get public collections for a target user
+ */
+export async function get_user_public_collections(req: Request, res: Response){
+    const target_id = req.params.userId as string;
+    try{
+        const colls = await collectionService.get_public_collections(target_id);
+        res.json({ data: colls });
+    }catch(err: any){
+        res.status(500).json({ message: err.message });
     }
 }
 
-export async function get_collection(req: Request, res: Response) {
-    const collectionId = req.params.id as string;
-    const currentUserId = req.user?.id; // May be undefined if not logged in
+/**
+ * Get collection by id
+ */
+export async function get_collection(req: Request, res: Response){
+    const coll_id = req.params.id as string;
+    const current_id = req.user?.id;
 
-    try {
-        const collection = await collectionService.get_collection_details(collectionId);
-        if (!collection) return res.status(404).json({ message: "Collection not found" });
+    try{
+        const coll = await collectionService.get_collection_details(coll_id);
+        if(!coll){
+            return res.status(404).json({ message: "Collection not found" });
+        }
 
-        // If private, only owner can view
-        if (!collection.is_public && collection.user_id !== currentUserId) {
+        if(!coll.is_public && coll.user_id !== current_id){
             return res.status(403).json({ message: "Unauthorized access to private collection" });
         }
 
-        res.json(collection);
-    } catch (error: any) {
-        res.status(500).json({ message: error.message });
+        res.json(coll);
+    }catch(err: any){
+        res.status(500).json({ message: err.message });
     }
 }
 
-export async function update_collection(req: Request, res: Response) {
-    const userId = req.user!.id;
-    const collectionId = req.params.id as string;
-    const { name, description, isPublic } = req.body;
+/**
+ * Update collection details
+ */
+export async function update_collection(req: Request, res: Response){
+    const user_id = req.user!.id;
+    const coll_id = req.params.id as string;
+    const { name, description: desc, isPublic: is_pub } = req.body;
 
-    try {
-        const updated = await collectionService.update_collection(collectionId, userId, { name, description, isPublic });
+    try{
+        const updated = await collectionService.update_collection(coll_id, user_id, { 
+            name, 
+            desc, 
+            is_public: is_pub 
+        });
         res.json(updated);
-    } catch (error: any) {
-        res.status(400).json({ message: error.message });
+    }catch(err: any){
+        res.status(400).json({ message: err.message });
     }
 }
 
-export async function delete_collection(req: Request, res: Response) {
-    const userId = req.user!.id;
-    const collectionId = req.params.id as string;
+/**
+ * Delete a collection
+ */
+export async function delete_collection(req: Request, res: Response){
+    const user_id = req.user!.id;
+    const coll_id = req.params.id as string;
 
-    try {
-        await collectionService.delete_collection(collectionId, userId);
+    try{
+        await collectionService.delete_collection(coll_id, user_id);
         res.json({ message: "Collection deleted" });
-    } catch (error: any) {
-        res.status(400).json({ message: error.message });
+    }catch(err: any){
+        res.status(400).json({ message: err.message });
     }
 }
 
-export async function add_item(req: Request, res: Response) {
-    const userId = req.user!.id;
-    const collectionId = req.params.id as string;
-    const { modelId } = req.body;
+/**
+ * Add model to collection
+ */
+export async function add_item(req: Request, res: Response){
+    const user_id = req.user!.id;
+    const coll_id = req.params.id as string;
+    const { modelId: mod_id } = req.body;
 
-    if (!modelId) return res.status(400).json({ message: "modelId is required" });
+    if(!mod_id){
+        return res.status(400).json({ message: "modelId is required" });
+    }
 
-    try {
-        const item = await collectionService.add_to_collection(collectionId, modelId, userId);
+    try{
+        const item = await collectionService.add_to_collection(coll_id, mod_id, user_id);
         res.json(item);
-    } catch (error: any) {
-        res.status(400).json({ message: error.message });
+    }catch(err: any){
+        res.status(400).json({ message: err.message });
     }
 }
 
-export async function remove_item(req: Request, res: Response) {
-    const userId = req.user!.id;
-    const collectionId = req.params.id as string;
-    const modelId = req.params.modelId as string;
+/**
+ * Remove model from collection
+ */
+export async function remove_item(req: Request, res: Response){
+    const user_id = req.user!.id;
+    const coll_id = req.params.id as string;
+    const mod_id = req.params.modelId as string;
 
-    try {
-        await collectionService.remove_from_collection(collectionId, modelId, userId);
+    try{
+        await collectionService.remove_from_collection(coll_id, mod_id, user_id);
         res.json({ message: "Item removed from collection" });
-    } catch (error: any) {
-        res.status(400).json({ message: error.message });
+    }catch(err: any){
+        res.status(400).json({ message: err.message });
     }
 }
