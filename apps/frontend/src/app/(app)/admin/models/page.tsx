@@ -2,6 +2,7 @@
 
 import { useAuth } from '@/features/auth';
 import { api } from '@/lib/api';
+import { productKeys } from '@/lib/api/services/product.service';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -304,6 +305,7 @@ export default function AdminModelsPage() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['admin-pending-models'] });
+            queryClient.invalidateQueries({ queryKey: productKeys.all });
             setActionId(null);
             setSelectedModel(null);
         },
@@ -317,6 +319,7 @@ export default function AdminModelsPage() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['admin-pending-models'] });
+            queryClient.invalidateQueries({ queryKey: productKeys.all });
             setActionId(null);
             setSelectedModel(null);
         },

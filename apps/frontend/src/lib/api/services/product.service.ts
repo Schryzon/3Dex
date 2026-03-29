@@ -23,7 +23,7 @@ export const productKeys = {
  * For real purchases against the API and Midtrans, set to `false` and configure env below.
  * @see apps/frontend/.env.local.example
  */
-export const USE_MOCK_DATA = process.env.NODE_ENV !== 'production';
+export const USE_MOCK_DATA = false;
 
 
 const mapModel = (item: any): Model => ({
