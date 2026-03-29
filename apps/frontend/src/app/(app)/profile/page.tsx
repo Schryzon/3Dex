@@ -1003,9 +1003,26 @@ function ProfileContent() {
                                         <p className="text-xs text-gray-500 mt-2">All assets online</p>
                                     </div>
                                 </div>
-                                <div className="bg-gray-900/40 p-8 rounded-2xl border border-gray-800 h-64 flex items-center justify-center">
-                                    <p className="text-gray-500">Sales Chart Visualization Coming Soon</p>
+                                <div className="bg-gray-900/40 p-8 rounded-2xl border border-gray-800 flex flex-col gap-6">
+                                    <div className="flex items-end gap-2 h-32">
+                                        {[40, 70, 45, 90, 65, 80, 100, 55, 75, 60, 85, 95].map((h, i) => (
+                                            <div 
+                                                key={i} 
+                                                className="flex-1 bg-gradient-to-t from-emerald-500/20 to-emerald-500/60 rounded-t-lg transition-all hover:to-emerald-400"
+                                                style={{ height: `${h}%` }}
+                                            />
+                                        ))}
+                                    </div>
+                                    <div className="flex justify-between text-[10px] text-gray-600 font-bold uppercase tracking-widest px-2">
+                                        <span>Jan</span>
+                                        <span>Mar</span>
+                                        <span>May</span>
+                                        <span>Jul</span>
+                                        <span>Sep</span>
+                                        <span>Nov</span>
+                                    </div>
                                 </div>
+
                             </div>
                         )}
 

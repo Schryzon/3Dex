@@ -590,10 +590,10 @@ export default function CommunityPage() {
 
                     {/* Footer Links */}
                     <div className="px-6 flex flex-wrap gap-x-4 gap-y-2 opacity-30 text-[8px] font-bold text-gray-500 uppercase tracking-widest justify-center">
-                        <Link href="/coming-soon" className="hover:text-white transition-colors">Safety</Link>
-                        <Link href="/coming-soon" className="hover:text-white transition-colors">Creators</Link>
-                        <Link href="/coming-soon" className="hover:text-white transition-colors">Rules</Link>
-                        <Link href="/coming-soon" className="hover:text-white transition-colors">Privacy</Link>
+                        <Link href="/safety" className="hover:text-white transition-colors">Safety</Link>
+                        <Link href="/creators" className="hover:text-white transition-colors">Creators</Link>
+                        <Link href="/community-rules" className="hover:text-white transition-colors">Rules</Link>
+                        <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy</Link>
                         <p className="mt-2 w-full text-center">© 2026 3Dex Community</p>
                     </div>
                 </div>
@@ -638,7 +638,7 @@ export default function CommunityPage() {
                         <div className="p-6 bg-gray-900/20">
                             <p className="text-[10px] text-gray-500 text-center leading-relaxed">
                                 Our community rules help keep 3Dex safe. <br />
-                                <Link href="/coming-soon" className="text-yellow-400 hover:underline font-bold transition-all">Read more about our rules.</Link>
+                                <Link href="/community-rules" className="text-yellow-400 hover:underline font-bold transition-all">Read more about our rules.</Link>
                             </p>
                         </div>
                     </div>

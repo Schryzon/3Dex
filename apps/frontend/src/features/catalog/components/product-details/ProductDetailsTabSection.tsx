@@ -75,12 +75,35 @@ export default function ProductDetailsTabSection({
                     </div>
                 )}
 
-                {/* Files tab: placeholder until file list feature is implemented */}
+                {/* Files tab: simulated file list placeholder */}
                 {activeTab === 'files' && (
-                    <div className="text-gray-500 text-sm">
-                        <p>File list coming soon...</p>
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl border border-gray-800">
+                           <div className="flex items-center gap-3">
+                             <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-xs font-bold text-gray-500">ZIP</div>
+                             <div>
+                                <p className="text-sm font-bold text-gray-300">ProjectFiles.zip</p>
+                                <p className="text-[10px] text-gray-600 font-bold uppercase tracking-wider">Source Assets</p>
+                             </div>
+                           </div>
+                           <span className="text-[10px] font-bold text-gray-700">1.2 GB</span>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-900/50 rounded-xl border border-gray-800">
+                           <div className="flex items-center gap-3">
+                             <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center text-xs font-bold text-gray-500">BLEND</div>
+                             <div>
+                                <p className="text-sm font-bold text-gray-300">Model_Scene.blend</p>
+                                <p className="text-[10px] text-gray-600 font-bold uppercase tracking-wider">3D Source</p>
+                             </div>
+                           </div>
+                           <span className="text-[10px] font-bold text-gray-700">450 MB</span>
+                        </div>
+                        <p className="text-[10px] text-center text-gray-600 font-bold uppercase tracking-widest pt-4">
+                           Full file access available upon purchase
+                        </p>
                     </div>
                 )}
+
             </div>
         </div>
     );
