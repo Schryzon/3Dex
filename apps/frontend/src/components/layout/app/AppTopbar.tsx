@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Search,
   ShoppingCart,
@@ -14,7 +15,8 @@ import {
   Heart,
   FolderOpen,
   Settings,
-  LogOut
+  LogOut,
+  X
 } from 'lucide-react';
 import UserAvatar from '@/components/common/UserAvatar';
 import ProtectedLink from '@/components/common/ProtectedLink';
@@ -47,7 +49,26 @@ export default function AppTopbar({
   showLogin,
   showRegister,
 }: AppTopbarProps) {
+  const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const mobileSearchRef = useRef<HTMLInputElement>(null);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (q) {
+      router.push(`/catalog?search=${encodeURIComponent(q)}`);
+      setMobileSearchOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    if (mobileSearchOpen && mobileSearchRef.current) {
+      mobileSearchRef.current.focus();
+    }
+  }, [mobileSearchOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -62,8 +83,8 @@ export default function AppTopbar({
     };
   }, [isAvatarDropdownOpen, setAvatarDropdownOpen]);
   return (
-    <header className="sticky top-0 z-30 h-14 bg-[#111]/95 backdrop-blur-sm border-b border-white/[0.06]">
-      <div className="h-full flex items-center justify-between px-4 md:px-6">
+    <header className="sticky top-0 z-30 bg-[#111]/95 backdrop-blur-sm border-b border-white/[0.06]">
+      <div className="h-14 flex items-center justify-between px-4 md:px-6">
 
         {/* Mobile Logo & Menu Toggle */}
         <div className="flex items-center gap-3 lg:hidden">
@@ -80,22 +101,43 @@ export default function AppTopbar({
           </Link>
         </div>
 
-        {/* Global Search */}
-        <div className="flex-1 max-w-2xl mx-4 hidden md:block">
+        {/* Global Search — Desktop */}
+        <form onSubmit={handleSearch} className="flex-1 max-w-2xl mx-4 hidden md:block">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
             <input
               type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search 3D models, textures, and more..."
-              className="w-full pl-12 pr-4 py-2 bg-[#1a1a1a] border border-white/[0.06] rounded-full text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all text-sm"
+              className="w-full pl-11 pr-9 py-2 bg-[#1a1a1a] border border-white/[0.06] rounded-full text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all text-sm"
             />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
-        </div>
+        </form>
 
+        {/* Mobile: spacer + search icon */}
         <div className="flex-1 md:hidden" />
 
         {/* Action Icons & User Menu */}
         <div className="flex items-center gap-1 md:gap-3">
+
+          {/* Mobile Search Toggle */}
+          <button
+            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+            className="p-2 text-gray-500 hover:text-white transition-colors md:hidden cursor-pointer"
+            aria-label="Toggle search"
+          >
+            {mobileSearchOpen ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
+          </button>
 
           {/* Cart */}
           <ProtectedLink href={ROUTES.USER.CART} className="p-2 text-gray-500 hover:text-white relative transition-colors">
@@ -186,6 +228,32 @@ export default function AppTopbar({
         </div>
 
       </div>
+
+      {/* Mobile Search Drawer */}
+      {mobileSearchOpen && (
+        <div className="md:hidden px-4 py-2 border-t border-white/[0.06] bg-[#111]/95 animate-in slide-in-from-top-2 duration-200">
+          <form onSubmit={handleSearch} className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+            <input
+              ref={mobileSearchRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search 3D models, textures..."
+              className="w-full pl-10 pr-9 py-2.5 bg-[#1a1a1a] border border-white/[0.08] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-yellow-500/50 transition-all text-sm"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </form>
+        </div>
+      )}
     </header>
   );
 }

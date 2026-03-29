@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef, Suspense } from 'react';
-import { ChevronDown, LayoutGrid, List, ShoppingCart } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import { ChevronDown, LayoutGrid, List, ShoppingCart, Search, X } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CatalogProductCard } from '@/features/catalog/components/product-card';
 import { CatalogFilters, FilterState } from '@/features/catalog/components/filters';
@@ -40,11 +40,50 @@ function CatalogContent() {
     const [showSortDropdown, setShowSortDropdown] = useState(false);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [isFilterExpanded, setFilterExpanded] = useState(false);
+    const [localSearch, setLocalSearch] = useState(searchQuery);
     const [filters, setFilters] = useState<FilterState>({
         formats: [],
         price: 'all',
         types: [],
     });
+
+    // Keep local input in sync when URL search param changes externally
+    useEffect(() => {
+        setLocalSearch(searchQuery);
+    }, [searchQuery]);
+
+    const handleSearchSubmit = useCallback(
+        (e?: React.FormEvent) => {
+            e?.preventDefault();
+            const q = localSearch.trim();
+            const params = new URLSearchParams(window.location.search);
+            if (q) {
+                params.set('search', q);
+            } else {
+                params.delete('search');
+            }
+            router.push(`/catalog?${params.toString()}`);
+        },
+        [localSearch, router]
+    );
+
+    // Debounce: auto-search 500ms after user stops typing
+    useEffect(() => {
+        const t = setTimeout(() => {
+            const q = localSearch.trim();
+            if (q !== searchQuery) {
+                const params = new URLSearchParams(window.location.search);
+                if (q) {
+                    params.set('search', q);
+                } else {
+                    params.delete('search');
+                }
+                router.push(`/catalog?${params.toString()}`);
+            }
+        }, 500);
+        return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [localSearch]);
     // Build API filters (without page, as it's managed by useInfiniteQuery)
     const apiFilters: ModelFilters = {
         category: activeCategory !== 'all' ? activeCategory : undefined,
@@ -134,6 +173,30 @@ function CatalogContent() {
 
     return (
         <div className="max-w-[1800px] mx-auto px-4 md:px-6 py-4">
+            {/* Search Bar */}
+            <form
+                onSubmit={handleSearchSubmit}
+                className="relative mb-4"
+            >
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                <input
+                    type="text"
+                    value={localSearch}
+                    onChange={(e) => setLocalSearch(e.target.value)}
+                    placeholder="Search 3D models, textures, characters..."
+                    className="w-full pl-10 pr-10 py-2.5 bg-[#141414] border border-white/[0.07] rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-yellow-500/40 focus:border-yellow-500/30 transition-all text-sm"
+                />
+                {localSearch && (
+                    <button
+                        type="button"
+                        onClick={() => { setLocalSearch(''); router.push('/catalog'); }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-white transition-colors"
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
+                )}
+            </form>
+
             {/* Category Tabs */}
             <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide mb-4">
                 {CATEGORIES.map((category) => (
@@ -317,6 +380,7 @@ function CatalogContent() {
                             onClick={() => {
                                 setFilters({ formats: [], price: 'all', types: [] });
                                 setActiveCategory('all');
+                                setLocalSearch('');
                                 if (searchQuery) router.push('/catalog');
                             }}
                             className="group relative px-8 py-3.5 bg-white text-black font-black rounded-xl hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer overflow-hidden shadow-[0_0_30px_rgba(255,255,255,0.1)]"
