@@ -1,16 +1,28 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import LoginModal from '../components/LoginModal';
 import RegisterModal from '../components/RegisterModal';
 import UsernameSetupModal from '../components/UsernameSetupModal';
 import { authService } from '@/lib/api/services/auth.service';
 import { User, LoginRequest, RegisterRequest } from '@/types';
+import { ROUTES } from '@/lib/constants/routes';
+
+function disableGoogleAutoSelect() {
+  if (typeof window === 'undefined') return;
+  try {
+    (window as unknown as { google?: { accounts?: { id?: { disableAutoSelect?: () => void } } } }).google?.accounts?.id?.disableAutoSelect?.();
+  } catch {
+    /* ignore */
+  }
+}
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  skipAuthRedirect: boolean;
   showLogin: () => void;
   showRegister: () => void;
   hideModals: () => void;
@@ -33,11 +45,14 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const [user, setUserState] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showUsernameSetupModal, setShowUsernameSetupModal] = useState(false);
+  /** When true, app layout should not redirect guests away (session expired mid-page). */
+  const [skipAuthRedirect, setSkipAuthRedirect] = useState(false);
 
   // On mount, validate the session by calling /auth/me.
   // The HTTP-only cookie is sent automatically by the browser.
@@ -64,12 +79,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setIsLoading(false));
   }, []);
 
+  useEffect(() => {
+    const onSessionExpired = () => {
+      setSkipAuthRedirect(true);
+      setShowLoginModal(true);
+      setShowRegisterModal(false);
+      setUserState(null);
+      authService.clearStoredUser();
+    };
+    window.addEventListener('auth:session-expired', onSessionExpired);
+    return () => window.removeEventListener('auth:session-expired', onSessionExpired);
+  }, []);
+
   const login = async (credentials: LoginRequest) => {
     // Server sets the HTTP-only cookie in the response
     const { user: userData } = await authService.login(credentials);
     // Cache user data in localStorage for instant UI on next load
     authService.storeUser(userData);
     setUserState(userData);
+    setSkipAuthRedirect(false);
   };
 
   const register = async (data: RegisterRequest) => {
@@ -83,6 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const response = await authService.googleLogin(credential);
     authService.storeUser(response.user);
     setUserState(response.user);
+    setSkipAuthRedirect(false);
 
     // If this is a brand-new Google account, prompt for username before continuing
     if (response.needs_username) {
@@ -91,10 +120,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
+    disableGoogleAutoSelect();
     // Server clears the HTTP-only cookie
     await authService.logout();
     authService.clearStoredUser();
     setUserState(null);
+    setSkipAuthRedirect(false);
   };
 
   // Allow direct user mutation (e.g. after profile update)
@@ -122,11 +153,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setShowRegisterModal(false);
   };
 
+  const handleLoginModalClose = () => {
+    hideModals();
+    if (skipAuthRedirect) {
+      setSkipAuthRedirect(false);
+      router.replace(ROUTES.PUBLIC.LANDING);
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
       isAuthenticated: !!user,
       isLoading,
+      skipAuthRedirect,
       showLogin,
       showRegister,
       hideModals,
@@ -142,8 +182,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {/* Global auth modals */}
       <LoginModal
         isOpen={showLoginModal}
-        onClose={hideModals}
+        onClose={handleLoginModalClose}
         onSwitchToRegister={showRegister}
+        sessionExpired={skipAuthRedirect && showLoginModal}
       />
 
       <RegisterModal

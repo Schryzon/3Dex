@@ -18,6 +18,7 @@ import {
   SIDEBAR_BOTTOM,
   NavItem
 } from '@/lib/constants/navigation';
+import { ROUTES } from '@/lib/constants/routes';
 import SidebarNavItem from './sidebar/SidebarNavItem';
 import SidebarSection from './sidebar/SidebarSection';
 
@@ -56,8 +57,7 @@ export default function AppSidebar({
 
   const renderNavItems = (items: NavItem[]) => (
     items.map((item) => {
-      // Dynamic href for Home based on auth state
-      const href = item.id === 'home' ? (isLoggedIn ? '/dashboard' : '/') : item.href;
+      const href = item.href;
 
       const isActive = pathname === href ||
         (href !== '/' && pathname?.startsWith(href + '/')) ||
@@ -89,7 +89,7 @@ export default function AppSidebar({
       {/* Logo Section */}
       <div className="h-14 flex items-center justify-between px-4 border-b border-white/[0.06]">
         {isSidebarOpen ? (
-          <Link href="/" className="flex items-center gap-2">
+          <Link href={ROUTES.PUBLIC.LANDING} className="flex items-center gap-2">
             <div className="w-8 h-8 flex items-center justify-center shrink-0">
               <img src="/3Dex.svg" alt="3Dex" className="w-full h-full object-contain" />
             </div>

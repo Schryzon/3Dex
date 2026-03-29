@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth';
 import ShoppingCartPage from '@/features/cart/components/Cart';
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 
 export default function Page() {
   const router = useRouter();
@@ -23,5 +23,9 @@ export default function Page() {
     );
   }
 
-  return <ShoppingCartPage />;
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#080808] grid place-items-center"><div className="w-5 h-5 rounded-full border-2 border-white/10 border-t-yellow-400 animate-spin" /></div>}>
+      <ShoppingCartPage />
+    </Suspense>
+  );
 }

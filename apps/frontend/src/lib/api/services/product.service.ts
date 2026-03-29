@@ -18,7 +18,11 @@ export const productKeys = {
     infinite: (filters?: ModelFilters) => [...productKeys.all, 'infinite', filters] as const,
 } as const;
 
-// Set this to true to use mock data, or false to use the real database
+/**
+ * When true: catalog/cart use mocks (localStorage cart; checkout returns a fake Snap token).
+ * For real purchases against the API and Midtrans, set to `false` and configure env below.
+ * @see apps/frontend/.env.local.example
+ */
 export const USE_MOCK_DATA = true;
 
 

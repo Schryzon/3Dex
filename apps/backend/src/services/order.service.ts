@@ -1,45 +1,91 @@
 import prisma from "../prisma";
 import { create_snap_transaction, verify_signature } from "./midtrans.service";
 
+export type CheckoutLine = { model_id: string; quantity: number };
+
 /**
  * create_order
- * Creates a new order and initiates Midtrans Snap transaction
+ * Creates a new order from cart-aligned line items and initiates Midtrans Snap.
+ * Validates that requested lines match the user's cart (model_id + quantity per line).
  */
-export async function create_order(user_id: string, model_ids: string[]) {
-    // 1. Fetch models to get current prices
-    const models = await prisma.model.findMany({
-        where: {
-            id: { in: model_ids },
-        },
-    });
-
-    if (models.length !== model_ids.length) {
-        throw new Error("One or more items not found");
+export async function create_order(user_id: string, items: CheckoutLine[]) {
+    if (!items?.length) {
+        throw new Error("items array is required");
     }
 
-    // 2. Calculate Total (IDR)
-    const total_amount = models.reduce((sum, model) => sum + model.price, 0);
+    for (const it of items) {
+        if (!it.model_id || it.quantity < 1) {
+            throw new Error("Each item needs model_id and quantity >= 1");
+        }
+    }
 
-    // 3. Create Pending Order
+    const cart_rows = await prisma.cart_Item.findMany({
+        where: { user_id },
+    });
+
+    const cartQty = new Map<string, number>();
+    for (const row of cart_rows) {
+        cartQty.set(row.model_id, row.quantity);
+    }
+
+    const requestQty = new Map<string, number>();
+    for (const it of items) {
+        requestQty.set(it.model_id, (requestQty.get(it.model_id) ?? 0) + it.quantity);
+    }
+
+    if (cartQty.size !== requestQty.size) {
+        throw new Error("Checkout items must match your cart");
+    }
+    for (const [model_id, qty] of requestQty) {
+        if (cartQty.get(model_id) !== qty) {
+            throw new Error("Checkout items must match your cart");
+        }
+    }
+
+    const model_ids = [...requestQty.keys()];
+    const models = await prisma.model.findMany({
+        where: { id: { in: model_ids } },
+    });
+    const modelMap = new Map(models.map((m) => [m.id, m]));
+
+    let total_amount = 0;
+    const lineCreates: { model_id: string; price: number; quantity: number }[] = [];
+
+    for (const [model_id, quantity] of requestQty) {
+        const model = modelMap.get(model_id);
+        if (!model) {
+            throw new Error("One or more items not found");
+        }
+        if (model.price === 0) {
+            throw new Error("Free models are not sold via checkout");
+        }
+        const line_total = model.price * quantity;
+        total_amount += line_total;
+        lineCreates.push({
+            model_id: model.id,
+            price: model.price,
+            quantity,
+        });
+    }
+
     const order = await prisma.order.create({
         data: {
             user_id,
             total_amount,
             status: "PENDING",
-            type: "ASSET", // Default for now
+            type: "ASSET",
             items: {
-                create: models.map((model) => ({
-                    model_id: model.id,
-                    price: model.price,
+                create: lineCreates.map((line) => ({
+                    model_id: line.model_id,
+                    price: line.price,
+                    quantity: line.quantity,
                 })),
             },
         },
     });
 
-    // 4. Get Snap Token
     const snap_response = await create_snap_transaction(order.id, total_amount);
 
-    // 5. Update Order with Token
     await prisma.order.update({
         where: { id: order.id },
         data: {
@@ -71,7 +117,6 @@ export async function handle_payment_webhook(notification: any) {
         fraud_status,
     } = notification;
 
-    // 1. Verify Signature
     const is_valid = verify_signature(
         order_id,
         status_code,
@@ -83,12 +128,10 @@ export async function handle_payment_webhook(notification: any) {
         throw new Error("Invalid Signature");
     }
 
-    // 2. Determine New Status
     let new_status: "PAID" | "PENDING" | "FAILED" | "CANCELLED" = "PENDING";
 
     if (transaction_status == "capture") {
         if (fraud_status == "challenge") {
-            // TODO: Handle excessive fraud challenge
             new_status = "PENDING";
         } else if (fraud_status == "accept") {
             new_status = "PAID";
@@ -105,7 +148,6 @@ export async function handle_payment_webhook(notification: any) {
         new_status = "PENDING";
     }
 
-    // 3. Update Order and Log Payment
     const order = await prisma.order.update({
         where: { id: order_id },
         data: {
@@ -126,13 +168,10 @@ export async function handle_payment_webhook(notification: any) {
         },
     });
 
-    // 4. If PAID, Grant Access (Create Purchases)
     if (new_status === "PAID") {
-        // Check for existing purchases to avoid duplicates
-        // (Prisma createMany is safer, or loop)
         for (const item of order.items) {
             if (item.model_id) {
-                // Upsert to be safe
+                const line_total = item.price * (item.quantity ?? 1);
                 await prisma.purchase.upsert({
                     where: {
                         user_id_model_id: {
@@ -140,11 +179,11 @@ export async function handle_payment_webhook(notification: any) {
                             model_id: item.model_id,
                         },
                     },
-                    update: {}, // Already exists, do nothing
+                    update: {},
                     create: {
                         user_id: order.user_id,
                         model_id: item.model_id,
-                        price_paid: item.price,
+                        price_paid: line_total,
                         license: "PERSONAL_USE",
                     },
                 });

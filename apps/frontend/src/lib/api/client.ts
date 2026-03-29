@@ -40,21 +40,35 @@ class ApiClient {
           );
         }
 
-        if (error.response?.status === 401) {
-          const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+        if (error.response?.status === 401 && typeof window !== 'undefined') {
+          const reqUrl = error.config?.url || '';
+          const isAuthMeRequest = reqUrl.includes('/auth/me');
 
+          // Clear stale HTTP-only cookie without importing auth.service (avoids circular dependency with this client).
+          fetch(`${API_BASE_URL.replace(/\/$/, '')}/auth/logout`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+          }).catch(() => {});
+
+          try {
+            localStorage.removeItem('user');
+          } catch {
+            /* ignore */
+          }
+
+          const pathname = window.location.pathname;
           const isPublicRoute =
             pathname === '/' ||
+            pathname === '/landing' ||
             pathname === '' ||
             pathname.startsWith('/catalog') ||
             pathname.startsWith('/print-services') ||
             pathname.startsWith('/community') ||
             pathname.startsWith('/u/');
 
-          // Redirect to root only when the user was on a protected page.
-          // Skip the redirect on public routes to allow guest browsing.
-          if (!isPublicRoute) {
-            window.location.href = '/';
+          if (!isAuthMeRequest && !isPublicRoute) {
+            window.dispatchEvent(new CustomEvent('auth:session-expired'));
           }
         }
 

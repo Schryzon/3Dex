@@ -249,6 +249,7 @@ function CatalogContent() {
                             isFree={product.price === 0}
                             discount={undefined}
                             author={product.artist.username}
+                            authorAvatar={product.artist.avatar_url}
                             isSaved={isInWishlist(product.id)}
                             onSave={() => handleSave(product.id)}
                             onClick={() => handleProductClick(product.id)}

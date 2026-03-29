@@ -1,11 +1,14 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { useCart } from '@/features/cart';
 import { useAuth } from '@/features/auth';
 import { useState } from 'react';
 import { formatPrice } from '@/lib/utils';
 import { orderService } from '@/lib/api/services';
+import { orderKeys } from '@/lib/api/services/order.service';
+import { cartKeys } from '@/lib/api/services/cart.service';
 import {
     ArrowLeft, Lock, ChevronRight, Loader2,
     QrCode, Building2, Wallet, CreditCard,
@@ -13,6 +16,16 @@ import {
 } from 'lucide-react';
 
 declare global { interface Window { snap: any; } }
+
+async function waitForMidtransSnap(maxMs = 20000): Promise<void> {
+    const start = Date.now();
+    while (typeof window !== 'undefined' && !(window as any).snap) {
+        if (Date.now() - start > maxMs) {
+            throw new Error('Payment gateway not loaded. Please refresh and try again.');
+        }
+        await new Promise((r) => setTimeout(r, 120));
+    }
+}
 
 const PAYMENT_METHODS = [
     {
@@ -98,6 +111,7 @@ function Field({
 
 export default function CheckoutPage() {
     const router = useRouter();
+    const queryClient = useQueryClient();
     const { user, isLoading: authLoading } = useAuth();
     const { items, total, clearCart } = useCart();
 
@@ -132,38 +146,44 @@ export default function CheckoutPage() {
         setIsProcessing(true);
         setError(null);
         try {
-            const modelIds = items.map(i => i.model.id);
-            const { orderId, token } = await orderService.checkout(modelIds);
+            const lines = items.map((i) => ({
+                model_id: i.model_id,
+                quantity: i.quantity,
+            }));
+            const { orderId, token } = await orderService.checkout(lines);
             setServerOrderId(orderId);
 
-            // Bypass Midtrans for mock tokens
             if (token === 'mock-snap-token') {
-                setTimeout(() => {
-                    clearCart();
+                setTimeout(async () => {
+                    await clearCart();
+                    queryClient.invalidateQueries({ queryKey: cartKeys.all });
+                    queryClient.invalidateQueries({ queryKey: orderKeys.all });
                     setCheckoutStatus('success');
                     setIsProcessing(false);
                 }, 1000);
                 return;
             }
 
-            if (window.snap) {
-                window.snap.pay(token, {
-                    onSuccess: () => {
-                        clearCart();
-                        setCheckoutStatus('success');
-                        setIsProcessing(false);
-                    },
-                    onPending: () => {
-                        setCheckoutStatus('pending');
-                        setIsProcessing(false);
-                    },
-                    onError: () => {
-                        setCheckoutStatus('failed');
-                        setIsProcessing(false);
-                    },
-                    onClose: () => setIsProcessing(false),
-                });
-            } else throw new Error('Payment gateway not loaded');
+            await waitForMidtransSnap();
+            window.snap.pay(token, {
+                onSuccess: async () => {
+                    await clearCart();
+                    queryClient.invalidateQueries({ queryKey: cartKeys.all });
+                    queryClient.invalidateQueries({ queryKey: orderKeys.all });
+                    setCheckoutStatus('success');
+                    setIsProcessing(false);
+                },
+                onPending: () => {
+                    queryClient.invalidateQueries({ queryKey: orderKeys.all });
+                    setCheckoutStatus('pending');
+                    setIsProcessing(false);
+                },
+                onError: () => {
+                    setCheckoutStatus('failed');
+                    setIsProcessing(false);
+                },
+                onClose: () => setIsProcessing(false),
+            });
         } catch (err: any) {
             setError(err.response?.data?.message || err.message || 'Checkout failed. Please try again.');
             setIsProcessing(false);
@@ -270,6 +290,9 @@ export default function CheckoutPage() {
                         <div id="payment-methods" className="scroll-mt-24">
                             <SectionCard>
                                 <CardHeader title="Payment Method" />
+                                <p className="px-6 pt-2 pb-0 text-[11px] text-white/35 leading-relaxed">
+                                    Actual payment channel (QRIS, VA, card, e-wallet) is selected inside the secure Midtrans window after you place the order — the options below are a quick reference only.
+                                </p>
                                 <div className="px-6 py-6 flex flex-col gap-3">
                                     {PAYMENT_METHODS.map(m => {
                                         const active = method === m.id;
@@ -371,17 +394,17 @@ export default function CheckoutPage() {
                                                 @{item.model.artist?.username || 'Unknown'}
                                             </p>
                                             <span className="inline-block mt-2 text-[10px] font-bold uppercase tracking-[0.1em] px-2 py-0.5 rounded bg-white/[0.06] text-white/35">
-                                                3D Model
+                                                3D Model · License
                                             </span>
                                         </div>
 
-                                        {/* Price */}
+                                        {/* Price (one license per line) */}
                                         <div className="text-right flex-shrink-0">
                                             <p className="text-[14px] font-mono font-medium">
                                                 {formatPrice(item.model.price).idr}
                                             </p>
                                             <p className="text-[11px] font-mono text-white/30 mt-0.5">
-                                                ~${formatPrice(item.model.price).usd}
+                                                {formatPrice(item.model.price).usd}
                                             </p>
                                         </div>
                                     </div>
@@ -577,10 +600,10 @@ export default function CheckoutPage() {
                                 </p>
                                 <div className="flex flex-col gap-3">
                                     <button
-                                        onClick={() => router.push('/cart')}
+                                        onClick={() => router.push('/cart?tab=orders')}
                                         className="w-full py-4 bg-yellow-400 text-black text-[15px] font-bold rounded-2xl hover:bg-yellow-300 transition-colors cursor-pointer shadow-lg active:scale-[0.98]"
                                     >
-                                        View Assets
+                                        View invoices
                                     </button>
                                     <button
                                         onClick={() => router.push('/catalog')}

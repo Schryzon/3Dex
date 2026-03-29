@@ -30,7 +30,7 @@ export interface NavItem {
 }
 
 export const SIDEBAR_MENU: NavItem[] = [
-    { id: 'home', label: 'Home', icon: Home, href: ROUTES.PUBLIC.HOME },
+    { id: 'home', label: 'Home', icon: Home, href: ROUTES.USER.DASHBOARD, requiresAuth: true },
     { id: 'browse', label: 'Catalog', icon: Grid3x3, href: ROUTES.PUBLIC.CATALOG },
     { id: 'print', label: 'Print Services', icon: Boxes, href: ROUTES.PUBLIC.PRINT_SERVICES },
     { id: 'community', label: 'Community', icon: Users, href: ROUTES.PUBLIC.COMMUNITY, requiresAuth: true },

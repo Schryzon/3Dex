@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Heart, Crown, Download, Star, ShoppingCart, Check } from 'lucide-react';
+import { Heart, Star, ShoppingCart, Check } from 'lucide-react';
 import { useCart } from '@/features/cart';
 import { formatPrice } from '@/lib/utils';
 
@@ -21,6 +21,7 @@ interface CatalogProductCardProps {
     isFree?: boolean;
     discount?: number;
     author?: string;
+    authorAvatar?: string;
     isSaved?: boolean;
     onSave?: () => void;
     onClick?: () => void;
@@ -41,6 +42,7 @@ export default function CatalogProductCard({
     isFree = false,
     discount,
     author,
+    authorAvatar,
     isSaved = false,
     onSave,
     onClick,
@@ -100,7 +102,23 @@ export default function CatalogProductCard({
                                     {title}
                                 </h3>
                                 {author && (
-                                    <p className="text-gray-500 text-[10px] md:text-xs font-medium truncate leading-tight">{author}</p>
+                                    <div
+                                        className="flex items-center gap-1.5 min-w-0"
+                                        title={author}
+                                    >
+                                        {authorAvatar ? (
+                                            <img
+                                                src={authorAvatar}
+                                                alt=""
+                                                className="w-4 h-4 md:w-5 md:h-5 rounded-full border border-white/10 shrink-0 object-cover"
+                                            />
+                                        ) : (
+                                            <span className="flex h-4 w-4 md:h-5 md:w-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-[8px] md:text-[9px] font-bold text-gray-400">
+                                                {author.charAt(0).toUpperCase()}
+                                            </span>
+                                        )}
+                                        <p className="hidden md:block text-gray-500 text-xs font-medium truncate leading-tight">{author}</p>
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -210,26 +228,37 @@ export default function CatalogProductCard({
                         )}
                     </div>
 
-                    {/* Quick Actions overlay */}
-                    <div className={`absolute top-3 right-3 flex flex-col gap-2 transition-all duration-300 z-10 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'}`}>
-                        {/* Save Button */}
+                    {/* Quick Actions — mobile: always visible & compact; md+: show on hover */}
+                    <div
+                        className={[
+                            'absolute top-2.5 right-2.5 z-10 flex flex-row items-center rounded-xl border border-white/[0.08] bg-black/50 backdrop-blur-md shadow-md shadow-black/25 transition-all duration-300',
+                            'gap-0.5 p-0.5 max-md:opacity-100 max-md:translate-x-0 max-md:pointer-events-auto',
+                            'md:top-3 md:right-3 md:gap-1 md:rounded-2xl md:p-1 md:shadow-lg',
+                            isHovered
+                                ? 'opacity-100 translate-x-0'
+                                : 'max-md:opacity-100 max-md:translate-x-0 md:pointer-events-none md:opacity-0 md:translate-x-3',
+                        ].join(' ')}
+                    >
                         <button
+                            type="button"
+                            aria-label={isSaved ? 'Remove from saved' : 'Save'}
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 onSave?.();
                             }}
-                            className={`p-2.5 cursor-pointer rounded-xl backdrop-blur-md transition-all duration-300 ${isSaved
-                                ? 'bg-red-500 text-white shadow-lg shadow-red-500/25'
-                                : 'bg-black/40 text-white hover:bg-white/10 border border-white/10'
+                            className={`cursor-pointer rounded-lg transition-all duration-300 max-md:p-1.5 md:rounded-xl md:p-2 ${isSaved
+                                ? 'bg-red-500/90 text-white shadow-inner'
+                                : 'text-white hover:bg-white/10'
                                 }`}
                         >
-                            <Heart className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
+                            <Heart className={`h-3.5 w-3.5 md:h-4 md:w-4 ${isSaved ? 'fill-current' : ''}`} />
                         </button>
 
-                        {/* Quick Add To Cart */}
                         {!isFree && (
                             <button
+                                type="button"
+                                aria-label={isInCart ? 'In cart' : 'Add to cart'}
                                 onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
@@ -237,24 +266,48 @@ export default function CatalogProductCard({
                                         addToCart({ modelId: id });
                                     }
                                 }}
-                                className={`p-2.5 cursor-pointer rounded-xl backdrop-blur-md transition-all duration-300 ${isInCart
-                                    ? 'bg-green-500 text-white shadow-lg shadow-green-500/25'
-                                    : 'bg-yellow-400 text-black hover:bg-yellow-300 border border-yellow-400/20 shadow-lg shadow-yellow-400/20'
+                                className={`cursor-pointer rounded-lg transition-all duration-300 max-md:p-1.5 md:rounded-xl md:p-2 ${isInCart
+                                    ? 'bg-emerald-500 text-white shadow-inner'
+                                    : 'bg-yellow-400 text-black hover:bg-yellow-300'
                                     }`}
                             >
-                                {isInCart ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
+                                {isInCart ? (
+                                    <Check className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                                ) : (
+                                    <ShoppingCart className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                                )}
                             </button>
                         )}
                     </div>
 
                     {/* Info Overlay Panel (Bottom) */}
                     <div className="absolute bottom-0 left-0 right-0 p-4 pt-10 bg-gradient-to-t from-[#0c0c0c] to-transparent">
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-1.5">
                             <h3 className="text-white font-bold text-sm md:text-base line-clamp-1 group-hover:text-yellow-400 transition-colors">
                                 {title}
                             </h3>
-                            <div className="flex items-end justify-between gap-2">
-                                <p className="text-gray-500 text-[10px] font-medium truncate min-w-0 pb-0.5">{author}</p>
+                            <div className="flex items-center justify-between gap-2">
+                                {author ? (
+                                    <div
+                                        className="flex min-w-0 flex-1 items-center gap-1.5"
+                                        title={author}
+                                    >
+                                        {authorAvatar ? (
+                                            <img
+                                                src={authorAvatar}
+                                                alt=""
+                                                className="h-5 w-5 shrink-0 rounded-full border border-white/10 object-cover ring-1 ring-white/5"
+                                            />
+                                        ) : (
+                                            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-[9px] font-bold text-gray-400 ring-1 ring-white/5">
+                                                {author.charAt(0).toUpperCase()}
+                                            </span>
+                                        )}
+                                        <p className="hidden md:block truncate text-[10px] font-medium text-gray-500">{author}</p>
+                                    </div>
+                                ) : (
+                                    <span className="min-w-0 flex-1" />
+                                )}
                                 {isFree ? (
                                     <span className="font-black text-xs md:text-sm tracking-tight text-blue-400 shrink-0">
                                         Free

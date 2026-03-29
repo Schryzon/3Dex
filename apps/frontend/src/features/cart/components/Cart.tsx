@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useCart } from '@/features/cart';
 import {
   ShoppingCart, Trash2, CheckCircle, Package,
@@ -35,9 +36,15 @@ export default function ShoppingCartPage() {
   const [isSuccess, setIsSuccess] = useState(false);
 
   const { items, removeItem, total, clearCart } = useCart();
+  const searchParams = useSearchParams();
   const { orders } = useOrders();
 
   useEffect(() => { setMounted(true); }, []);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'orders') setActiveTab('orders');
+  }, [searchParams]);
 
   if (!mounted) return <div className="min-h-screen bg-[#080808]" />;
 
@@ -106,7 +113,9 @@ export default function ShoppingCartPage() {
 
                   <div className="flex flex-col gap-3 lg:gap-3.5">
                     {items.map((item: CartItem) => {
-                      const price = formatPrice(item.model?.price ?? 0);
+                      const unitIdr = item.model?.price ?? 0;
+                      const lineIdr = unitIdr * item.quantity;
+                      const price = formatPrice(lineIdr);
                       return (
                         <div
                           key={item.id}
@@ -140,16 +149,16 @@ export default function ShoppingCartPage() {
                               </button>
                             </div>
 
-                            <div className="flex items-end justify-between mt-3 lg:mt-4">
-                              <div className="flex gap-1.5 lg:gap-2">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mt-3 lg:mt-4">
+                              <div className="flex flex-wrap gap-1.5 lg:gap-2 min-w-0">
                                 <span className="px-2 py-0.5 lg:px-2.5 lg:py-1 bg-white/[0.05] border border-white/[0.08] rounded text-[9px] lg:text-[10px] font-bold uppercase tracking-[0.08em] text-white/35">
                                   {item.model?.fileFormat?.[0] || 'GLB'}
                                 </span>
                                 <span className="px-2 py-0.5 lg:px-2.5 lg:py-1 bg-yellow-400/[0.08] border border-yellow-400/[0.15] rounded text-[9px] lg:text-[10px] font-bold uppercase tracking-[0.08em] text-yellow-400/70 hidden sm:inline-block">
-                                  Pro License
+                                  License ×1
                                 </span>
                               </div>
-                              <div className="text-right">
+                              <div className="text-right sm:pl-4 shrink-0">
                                 <p className="text-[15px] lg:text-[18px] font-bold font-mono leading-none">{price.idr}</p>
                                 <p className="text-[11px] lg:text-[12px] font-mono text-white/25 mt-0.5 lg:mt-1">~${price.usd}</p>
                               </div>
@@ -318,7 +327,11 @@ export default function ShoppingCartPage() {
 
                     {/* Order items */}
                     <div className="px-5 py-5 sm:px-7 flex flex-col gap-4">
-                      {order.items.map(item => (
+                      {order.items.map(item => {
+                        const qty = item.quantity ?? 1;
+                        const lineIdr = (item.price ?? 0) * qty;
+                        const lineFmt = formatPrice(lineIdr);
+                        return (
                         <div key={item.id} className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 py-2 border-b border-white/[0.04] last:border-0">
                           <div className="w-full h-40 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-white/[0.04] border border-white/[0.06] shrink-0 relative">
                             <img
@@ -335,6 +348,10 @@ export default function ShoppingCartPage() {
                               @{item.model?.artist?.username || 'Unknown Artist'}
                             </p>
                           </div>
+                          <div className="text-right sm:text-left shrink-0">
+                            <p className="text-[13px] font-mono font-semibold text-white/90">{lineFmt.idr}</p>
+                            <p className="text-[10px] font-mono text-white/25">~${lineFmt.usd}</p>
+                          </div>
                           {isPaid && (
                             <button className="w-full sm:w-auto flex items-center justify-center sm:justify-start gap-2 px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.08em] rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/50 hover:text-white hover:border-white/20 hover:bg-white/[0.06] transition-all cursor-pointer shrink-0">
                               <ExternalLink size={13} strokeWidth={2} />
@@ -342,7 +359,8 @@ export default function ShoppingCartPage() {
                             </button>
                           )}
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 );

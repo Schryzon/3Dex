@@ -285,8 +285,11 @@ model Order_Item {
   model_id String?
   model    Model? @relation(fields: [model_id], references: [id])
 
-  price Int // IDR at time of purchase
-  
+  /// Unit price in IDR at time of purchase
+  price Int
+  /// Line quantity (digital goods; total line = price * quantity)
+  quantity Int @default(1)
+
   // Print Config
   print_config Json? // { material, color, scale, ... }
   print_status Print_Status @default(PENDING)

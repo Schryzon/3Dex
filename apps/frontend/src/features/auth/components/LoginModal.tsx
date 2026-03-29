@@ -26,9 +26,11 @@ interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSwitchToRegister?: () => void;
+  /** Shown when the session expired while using the app (re-auth required). */
+  sessionExpired?: boolean;
 }
 
-export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
+export default function LoginModal({ isOpen, onClose, onSwitchToRegister, sessionExpired }: LoginModalProps) {
   const { login, googleLogin } = useAuth();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -143,6 +145,11 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister }: Logi
         <div className="p-6">
           {/* Header */}
           <h2 className="text-2xl font-bold text-white mb-1">Login</h2>
+          {sessionExpired && (
+            <p className="text-sm text-amber-400/90 mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2">
+              Your session has expired. Please sign in again to continue.
+            </p>
+          )}
           <p className="text-gray-400 mb-4">
             New to 3Dēx?{' '}
             <button onClick={onSwitchToRegister} className="text-yellow-400 cursor-pointer hover:text-yellow-300">

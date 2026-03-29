@@ -18,7 +18,7 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children }: AppLayoutProps) {
   const router = useRouter();
-  const { user, isAuthenticated: isLoggedIn, isLoading: isAuthLoading, logout, showLogin, showRegister } = useAuth();
+  const { user, isAuthenticated: isLoggedIn, isLoading: isAuthLoading, logout, showLogin, showRegister, skipAuthRedirect } = useAuth();
   const { items: cartItems } = useCart();
 
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -47,6 +47,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
   const isPublicRoute =
     pathname === ROUTES.PUBLIC.HOME ||
+    pathname === ROUTES.PUBLIC.LANDING ||
     pathname.startsWith(ROUTES.PUBLIC.CATALOG) ||
     pathname.startsWith(ROUTES.PUBLIC.PRINT_SERVICES) ||
     pathname.startsWith(ROUTES.PUBLIC.COMMUNITY) ||
@@ -58,14 +59,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
   // Auth guard: redirect unauthenticated users only for private pages
   useEffect(() => {
     // Only redirect if: loading is done, NOT logged in, AND path is NOT public
-    if (!isAuthLoading && !isLoggedIn && !isPublicRoute) {
-      router.replace(ROUTES.PUBLIC.HOME);
+    if (!isAuthLoading && !isLoggedIn && !isPublicRoute && !skipAuthRedirect) {
+      router.replace(ROUTES.PUBLIC.LANDING);
     }
-  }, [isAuthLoading, isLoggedIn, isPublicRoute, router]);
+  }, [isAuthLoading, isLoggedIn, isPublicRoute, skipAuthRedirect, router]);
 
   const handleLogout = () => {
     logout();
-    router.replace(ROUTES.PUBLIC.HOME);
+    router.replace(ROUTES.PUBLIC.LANDING);
   };
 
   // Map sidebar items to include count for notifications

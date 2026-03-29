@@ -73,7 +73,7 @@ export default function AppTopbar({
           >
             <Menu className="w-6 h-6" />
           </button>
-          <Link href={ROUTES.PUBLIC.HOME} className="flex items-center gap-2">
+          <Link href={ROUTES.PUBLIC.LANDING} className="flex items-center gap-2">
             <div className="w-8 h-8 flex items-center justify-center">
               <img src="/3Dex.svg" alt="3Dex" className="w-full h-full object-contain" />
             </div>

@@ -5,7 +5,7 @@ import { useProduct } from '@/features/catalog/hooks/useProducts';
 import { useCart } from '@/features/cart';
 import { useWishlist } from '@/features/catalog/hooks/useWishlist';
 import { useAuth } from '@/features/auth';
-import { Share2, Heart, Plus, Check, Download, Eye, ShoppingCart, FolderPlus, AlertTriangle, ChevronLeft } from 'lucide-react';
+import { Share2, Heart, Plus, Check, Download, Eye, ShoppingCart, FolderPlus, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import { Suspense, lazy, useState } from 'react';
 import Link from 'next/link';
@@ -138,6 +138,10 @@ export default function CatalogDetailPage() {
             </div>
         );
     }
+
+    const artistUsername = product.artist?.username?.trim();
+    const artistAvatarUrl = product.artist?.avatar_url;
+    const artistInitial = artistUsername?.[0]?.toUpperCase() || '?';
 
     return (
         <div className="min-h-screen bg-black text-white">
@@ -387,26 +391,51 @@ export default function CatalogDetailPage() {
                                         </button>
                                     </>
                                 )}
-                            </div>
 
-                            {/* Artist Info */}
-                            <Link
-                                href={`/u/${product.artist?.username || ''}`}
-                                className="flex items-center gap-3 p-4 rounded-lg bg-gray-900 border border-gray-900 hover:border-gray-800 transition-all duration-300 group hover:shadow-lg hover:shadow-yellow-500/5"
-                            >
-                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-gray-800 to-black flex items-center justify-center text-sm font-bold uppercase flex-shrink-0 border border-gray-800 group-hover:border-yellow-500/50 transition-all duration-300">
-                                    {product.artist?.username?.[0] || 'A'}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-xs text-gray-500">Created by</p>
-                                    <p className="text-sm font-semibold text-white group-hover:text-yellow-500 transition-colors duration-300 truncate">
-                                        {product.artist?.username || 'Anonymous'}
-                                    </p>
-                                </div>
-                                <svg className="w-4 h-4 text-gray-600 group-hover:text-yellow-500 group-hover:translate-x-1 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                            </Link>
+                                {/* Creator — compact row directly under CTA */}
+                                {artistUsername ? (
+                                    <Link
+                                        href={`/u/${artistUsername}`}
+                                        className="group flex w-full items-center gap-2.5 rounded-xl border border-white/[0.07] bg-gradient-to-r from-white/[0.03] to-transparent px-3 py-2 outline-none transition-all hover:border-yellow-500/30 hover:from-yellow-500/[0.06] hover:to-transparent"
+                                    >
+                                        <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full border border-white/10 bg-[#141414] shadow-inner">
+                                            {artistAvatarUrl ? (
+                                                <img
+                                                    src={artistAvatarUrl}
+                                                    alt=""
+                                                    className="h-full w-full object-cover"
+                                                    referrerPolicy="no-referrer"
+                                                />
+                                            ) : (
+                                                <span className="flex h-full w-full items-center justify-center text-[11px] font-bold text-gray-400">
+                                                    {artistInitial}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="min-w-0 flex-1 text-left">
+                                            <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-gray-500">
+                                                Creator
+                                            </p>
+                                            <p className="truncate text-[13px] font-semibold text-white transition-colors group-hover:text-yellow-400">
+                                                @{artistUsername}
+                                            </p>
+                                        </div>
+                                        <ChevronRight className="h-4 w-4 shrink-0 text-gray-600 transition-transform group-hover:translate-x-0.5 group-hover:text-yellow-500/90" aria-hidden />
+                                    </Link>
+                                ) : (
+                                    <div className="flex w-full items-center gap-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2 opacity-80">
+                                        <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full border border-white/10 bg-[#141414]">
+                                            <span className="flex h-full w-full items-center justify-center text-[11px] font-bold text-gray-500">
+                                                {artistInitial}
+                                            </span>
+                                        </div>
+                                        <div className="min-w-0 flex-1 text-left">
+                                            <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-gray-600">Creator</p>
+                                            <p className="truncate text-[13px] font-medium text-gray-500">Unknown</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
 
                             {/* Specs */}
                             <div className="space-y-3">

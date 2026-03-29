@@ -8,6 +8,12 @@ export async function list_cart(req: Auth_Request, res: Response) {
     const user_id = req.user.id;
 
     try {
+        // Digital goods: one license per model — normalize legacy rows
+        await prisma.cart_Item.updateMany({
+            where: { user_id, quantity: { not: 1 } },
+            data: { quantity: 1 },
+        });
+
         const items = await prisma.cart_Item.findMany({
             where: { user_id },
             include: {
@@ -41,7 +47,7 @@ export async function list_cart(req: Auth_Request, res: Response) {
 // POST /cart/add — Add item to cart
 export async function add_to_cart(req: Auth_Request, res: Response) {
     const user_id = req.user.id;
-    const { modelId, quantity = 1 } = req.body;
+    const { modelId } = req.body;
 
     if (!modelId) {
         return res.status(400).json({ message: "modelId is required" });
@@ -59,18 +65,18 @@ export async function add_to_cart(req: Auth_Request, res: Response) {
             return res.status(400).json({ message: "Free models cannot be added to the cart. Please download them directly." });
         }
 
-        // Upsert: add or update quantity
+        // One license per model — quantity is always 1 (re-add keeps a single line)
         const item = await prisma.cart_Item.upsert({
             where: {
                 user_id_model_id: { user_id, model_id: modelId },
             },
             update: {
-                quantity: { increment: quantity },
+                quantity: 1,
             },
             create: {
                 user_id,
                 model_id: modelId,
-                quantity,
+                quantity: 1,
             },
             include: {
                 model: {
@@ -100,8 +106,10 @@ export async function update_cart_item(req: Auth_Request, res: Response) {
     const item_id = req.params.id as string;
     const { quantity } = req.body;
 
-    if (!quantity || quantity < 1) {
-        return res.status(400).json({ message: "quantity must be >= 1" });
+    if (quantity !== 1) {
+        return res.status(400).json({
+            message: "Digital licenses are one per model. Remove the item if you no longer want it.",
+        });
     }
 
     try {
@@ -115,7 +123,7 @@ export async function update_cart_item(req: Auth_Request, res: Response) {
 
         const updated = await prisma.cart_Item.update({
             where: { id: item_id },
-            data: { quantity },
+            data: { quantity: 1 },
             include: {
                 model: {
                     include: {

@@ -100,7 +100,7 @@ export default function LandingNavbar() {
         <div className="flex items-center justify-between gap-4">
 
           {/* Logo */}
-          <Link href={isAuthenticated ? ROUTES.USER.DASHBOARD : ROUTES.PUBLIC.HOME} className="flex items-center gap-2 flex-shrink-0">
+          <Link href={ROUTES.PUBLIC.LANDING} className="flex items-center gap-2 flex-shrink-0">
             <div className="w-7 h-7 flex items-center justify-center">
               <Image src="/3Dex.svg" alt="3Dex" width={32} height={32} />
             </div>
