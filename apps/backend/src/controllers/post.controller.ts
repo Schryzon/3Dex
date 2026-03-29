@@ -48,7 +48,19 @@ export async function get_feed_posts(req: Auth_Request, res: Response): Promise<
         take: limit,
         skip,
         include: {
-            user: { select: { id: true, username: true, display_name: true, avatar_url: true, role: true } },
+            user: { 
+                select: { 
+                    id: true, 
+                    username: true, 
+                    display_name: true, 
+                    avatar_url: true, 
+                    role: true,
+                    followers: {
+                        where: { follower_id: req.user?.id },
+                        select: { follower_id: true }
+                    }
+                } 
+            },
             _count: { select: { likes: true, comments: true } },
             likes: {
                 where: { user_id: req.user?.id }, // Check if current user liked
@@ -57,10 +69,15 @@ export async function get_feed_posts(req: Auth_Request, res: Response): Promise<
         }
     });
 
-    // Transform to add is_liked flag
+    // Transform to add is_liked and is_followed flags
     const feed = posts.map(post => ({
         ...post,
         is_liked: post.likes.length > 0,
+        user: {
+            ...post.user,
+            is_followed: (post.user as any).followers.length > 0,
+            followers: undefined
+        },
         likes: undefined // Remove raw likes array
     }));
 
@@ -82,7 +99,19 @@ export async function get_user_posts(req: Auth_Request, res: Response): Promise<
         take: limit,
         skip,
         include: {
-            user: { select: { id: true, username: true, display_name: true, avatar_url: true, role: true } },
+            user: { 
+                select: { 
+                    id: true, 
+                    username: true, 
+                    display_name: true, 
+                    avatar_url: true, 
+                    role: true,
+                    followers: {
+                        where: { follower_id: req.user?.id },
+                        select: { follower_id: true }
+                    }
+                } 
+            },
             _count: { select: { likes: true, comments: true } },
             likes: {
                 where: { user_id: req.user?.id },
@@ -94,6 +123,11 @@ export async function get_user_posts(req: Auth_Request, res: Response): Promise<
     const feed = posts.map(post => ({
         ...post,
         is_liked: post.likes.length > 0,
+        user: {
+            ...post.user,
+            is_followed: (post.user as any).followers.length > 0,
+            followers: undefined
+        },
         likes: undefined
     }));
 
@@ -259,7 +293,19 @@ export async function get_post_by_id(req: Auth_Request, res: Response): Promise<
     const post = await prisma.post.findUnique({
         where: { id: post_id },
         include: {
-            user: { select: { id: true, username: true, display_name: true, avatar_url: true, role: true } },
+            user: { 
+                select: { 
+                    id: true, 
+                    username: true, 
+                    display_name: true, 
+                    avatar_url: true, 
+                    role: true,
+                    followers: {
+                        where: { follower_id: req.user?.id },
+                        select: { follower_id: true }
+                    }
+                } 
+            },
             _count: { select: { likes: true, comments: true } },
             likes: {
                 where: { user_id: req.user?.id },
@@ -276,6 +322,11 @@ export async function get_post_by_id(req: Auth_Request, res: Response): Promise<
     const data = {
         ...post,
         is_liked: post.likes.length > 0,
+        user: {
+            ...post.user,
+            is_followed: (post.user as any).followers.length > 0,
+            followers: undefined
+        },
         likes: undefined
     };
 

@@ -30,7 +30,7 @@ export default function DashboardPage() {
             {/* Welcome Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-yellow-400/10 to-transparent p-8 rounded-2xl border border-yellow-400/20">
                 <div>
-                    <h1 className="text-3xl font-bold text-white mb-2">Welcome back, {user?.username}! 👋</h1>
+                    <h1 className="text-3xl font-bold text-white mb-2">Welcome back, {user?.username}!</h1>
                     <p className="text-gray-400">Manage your 3D assets, downloads, and orders from your dashboard.</p>
                 </div>
                 <Link

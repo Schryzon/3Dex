@@ -95,29 +95,24 @@ export default function CatalogProductCard({
                     {/* Content */}
                     <div className="flex-1 p-3 md:p-4 flex flex-col justify-between min-w-0">
                         <div>
-                            <div className="flex items-start justify-between gap-2">
+                            <div className="flex flex-col gap-0.5">
                                 <h3 className="text-white text-sm md:text-base font-bold line-clamp-1 group-hover:text-yellow-400 transition-colors">
                                     {title}
                                 </h3>
-                                <div className="flex items-center gap-1.5 shrink-0">
-                                    {isFree && (
-                                        <span className="text-[10px] font-bold text-blue-400 tracking-wider">FREE</span>
-                                    )}
-                                </div>
+                                {author && (
+                                    <p className="text-gray-500 text-[10px] md:text-xs font-medium truncate leading-tight">{author}</p>
+                                )}
                             </div>
-                            {author && (
-                                <p className="text-gray-500 text-xs font-medium mt-0.5">{author}</p>
-                            )}
                         </div>
 
                         {/* Bottom row */}
-                        <div className="flex items-center justify-between gap-4 mt-2">
+                        <div className="flex items-end justify-between gap-2 mt-2">
                             {/* Formats */}
-                            <div className="flex items-center gap-1.5 overflow-hidden">
-                                {formats.slice(0, 4).map((format) => (
+                            <div className="flex flex-wrap items-center gap-1 min-w-0">
+                                {formats.slice(0, 3).map((format) => (
                                     <span
                                         key={format}
-                                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border ${FORMAT_COLORS[format] || 'bg-white/5 text-gray-400 border-white/10'
+                                        className={`text-[8px] md:text-[9px] font-bold px-1.5 py-0.5 rounded-md border shrink-0 ${FORMAT_COLORS[format] || 'bg-white/5 text-gray-400 border-white/10'
                                             }`}
                                     >
                                         {format.toUpperCase()}
@@ -126,23 +121,23 @@ export default function CatalogProductCard({
                             </div>
 
                             {/* Price + Rating */}
-                            <div className="flex items-center gap-3 shrink-0">
+                            <div className="flex flex-col items-end gap-1 shrink-0 text-right">
                                 {rating !== undefined && (
-                                    <div className="flex items-center gap-1 text-xs">
-                                        <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+                                    <div className="flex items-center gap-1 text-[10px] md:text-xs">
+                                        <Star className="w-3 h-3 md:w-3.5 md:h-3.5 text-yellow-500 fill-yellow-500" />
                                         <span className="text-gray-400 font-medium">{rating.toFixed(1)}</span>
                                     </div>
                                 )}
                                 {isFree ? (
-                                    <span className="text-base font-black text-blue-400">
+                                    <span className="text-xs md:text-base font-black text-blue-400">
                                         Free
                                     </span>
                                 ) : formatted ? (
                                     <div className="flex flex-col items-end">
-                                        <span className="text-base font-black text-white leading-none">
+                                        <span className="text-xs md:text-base font-black text-white leading-none whitespace-nowrap">
                                             {formatted.idr}
                                         </span>
-                                        <span className="text-[10px] font-medium text-gray-400 mt-0.5">
+                                        <span className="text-[9px] md:text-[10px] font-medium text-gray-400 mt-0.5 whitespace-nowrap">
                                             {formatted.usd}
                                         </span>
                                     </div>
@@ -258,18 +253,18 @@ export default function CatalogProductCard({
                             <h3 className="text-white font-bold text-sm md:text-base line-clamp-1 group-hover:text-yellow-400 transition-colors">
                                 {title}
                             </h3>
-                            <div className="flex items-center justify-between">
-                                <p className="text-gray-500 text-xs font-medium">{author}</p>
+                            <div className="flex items-end justify-between gap-2">
+                                <p className="text-gray-500 text-[10px] font-medium truncate min-w-0 pb-0.5">{author}</p>
                                 {isFree ? (
-                                    <span className="font-black text-sm tracking-tight text-blue-400">
+                                    <span className="font-black text-xs md:text-sm tracking-tight text-blue-400 shrink-0">
                                         Free
                                     </span>
                                 ) : formatted ? (
-                                    <div className="flex flex-col items-end">
-                                        <span className="font-black text-sm tracking-tight text-white leading-none">
+                                    <div className="flex flex-col items-end shrink-0 text-right">
+                                        <span className="font-black text-[10px] sm:text-xs md:text-sm tracking-tight text-white leading-none whitespace-nowrap">
                                             {formatted.idr}
                                         </span>
-                                        <span className="text-[10px] font-medium text-gray-400 mt-0.5">
+                                        <span className="text-[8px] sm:text-[9px] md:text-[10px] font-medium text-gray-400 mt-0.5 whitespace-nowrap">
                                             {formatted.usd}
                                         </span>
                                     </div>

@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { postService, userService } from '@/lib/api/services';
+import { MINIO_BASE_URL } from '@/lib/constants/endpoints';
 import { useAuth } from '@/features/auth';
 import { 
     Loader2, Heart, MessageSquare, Send, Image as ImageIcon, 
     AlertTriangle, MoreVertical, Trash2, Flag, Sparkles, Users, X,
-    Mail, ShieldAlert, EyeOff, Scale, HelpCircle
+    Mail, ShieldAlert, EyeOff, Scale, HelpCircle,
+    Plus, PlusCircle, CheckCircle2
 } from 'lucide-react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
@@ -22,8 +24,10 @@ export default function CommunityPage() {
 
     // New Post State
     const [caption, setCaption] = useState('');
-    const [mediaUrl, setMediaUrl] = useState('');
+    const [mediaUrls, setMediaUrls] = useState<string[]>([]);
+    const [uploadingFiles, setUploadingFiles] = useState<{ id: string; name: string; progress: number; }[]>([]);
     const [isNsfw, setIsNsfw] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Menu & Report UI State
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -72,16 +76,24 @@ export default function CommunityPage() {
         }
     });
 
+    const unfollowMutation = useMutation({
+        mutationFn: (userId: string) => userService.unfollowUser(userId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['community-feed'] });
+            queryClient.invalidateQueries({ queryKey: ['post-detail'] });
+        }
+    });
+
     const createPostMutation = useMutation({
         mutationFn: () => postService.createPost({
             caption,
-            media_urls: [mediaUrl],
+            media_urls: mediaUrls,
             is_nsfw: isNsfw
         }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['community-feed'] });
             setCaption('');
-            setMediaUrl('');
+            setMediaUrls([]);
             setIsNsfw(false);
         },
         onError: (err: any) => {
@@ -117,6 +129,57 @@ export default function CommunityPage() {
             alert(err.response?.data?.message || 'Failed to delete post');
         }
     });
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
+
+        if (mediaUrls.length + files.length > 8) {
+            alert('You can only upload up to 8 images.');
+            return;
+        }
+
+        const newUploadingFiles = files.map(file => ({
+            id: Math.random().toString(36).substr(2, 9),
+            name: file.name,
+            progress: 0
+        }));
+
+        setUploadingFiles(prev => [...prev, ...newUploadingFiles]);
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const uploadId = newUploadingFiles[i].id;
+
+            try {
+                // 1. Get presigned URL
+                const { url, key } = await postService.getUploadUrl(file.name, file.type);
+
+                // 2. PUT file to URL (with progress)
+                await postService.uploadToPresignedUrl(url, file, (progress: number) => {
+                    setUploadingFiles(prev => prev.map(f => 
+                        f.id === uploadId ? { ...f, progress } : f
+                    ));
+                });
+
+                // 3. Add to mediaUrls
+                setMediaUrls(prev => [...prev, key]);
+                
+                // 4. Remove from uploading list
+                setUploadingFiles(prev => prev.filter(f => f.id !== uploadId));
+            } catch (error) {
+                console.error('Upload failed:', error);
+                alert(`Failed to upload ${file.name}`);
+                setUploadingFiles(prev => prev.filter(f => f.id !== uploadId));
+            }
+        }
+        
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const removeMedia = (index: number) => {
+        setMediaUrls(prev => prev.filter((_, i) => i !== index));
+    };
 
     const canPost = user?.role === 'ARTIST' || user?.role === 'PROVIDER';
 
@@ -223,34 +286,58 @@ export default function CommunityPage() {
                                     )}
                                 </div>
                                 <div className="flex-1 space-y-4">
+                                    
+                                    {/* Media Preview Grid */}
+                                    {(mediaUrls.length > 0 || uploadingFiles.length > 0) && (
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                            {mediaUrls.map((url, idx) => (
+                                                <div key={idx} className="relative rounded-xl overflow-hidden aspect-square bg-black border border-gray-800 shadow-inner group/preview">
+                                                    <img src={url.startsWith('http') ? url : `${MINIO_BASE_URL}/3dex-models/${url}`} alt="Preview" className="w-full h-full object-cover" />
+                                                    <button
+                                                        onClick={() => removeMedia(idx)}
+                                                        className="absolute top-2 right-2 bg-black/60 hover:bg-red-500 text-white rounded-full p-1 transition-all shadow-lg scale-90 group-hover/preview:scale-100"
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                            {uploadingFiles.map((file) => (
+                                                <div key={file.id} className="relative rounded-xl overflow-hidden aspect-square bg-gray-800/40 backdrop-blur-sm border border-gray-700 flex flex-col items-center justify-center p-4">
+
+                                                    <Loader2 className="w-6 h-6 text-gray-500 animate-spin mb-2" />
+                                                    <div className="w-full bg-gray-700/50 h-1.5 rounded-full overflow-hidden">
+                                                        <div 
+                                                            className="bg-yellow-400 h-full transition-all duration-300" 
+                                                            style={{ width: `${file.progress}%` }}
+                                                        />
+                                                    </div>
+                                                    <span className="text-[10px] text-gray-400 mt-2 truncate w-full text-center">{file.name}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                     <textarea
                                         placeholder="Share your latest project..."
-                                        className="w-full bg-transparent border-none focus:ring-0 text-white placeholder-gray-600 resize-none h-14 text-sm font-medium"
+                                        className="w-full outline-none text-white placeholder-gray-600 resize-none h-20 text-sm font-medium"
                                         value={caption}
                                         onChange={(e) => setCaption(e.target.value)}
                                     />
-                                    {mediaUrl && (
-                                        <div className="relative rounded-2xl overflow-hidden h-44 w-full bg-black border border-gray-800 shadow-inner group/preview">
-                                            <img src={mediaUrl} alt="Preview" className="w-full h-full object-cover" />
-                                            <button
-                                                onClick={() => setMediaUrl('')}
-                                                className="absolute top-3 right-3 bg-black/60 hover:bg-red-500 text-white rounded-full p-1.5 transition-all shadow-lg scale-90 group-hover/preview:scale-100"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    )}
-                                    <div className="flex justify-between items-center pt-3 border-t border-gray-800/50">
+                                    <div className="flex justify-between items-center pt-3 border-t border-gray-900/40">
                                         <div className="flex gap-4 items-center">
+                                            <input 
+                                                type="file" 
+                                                ref={fileInputRef} 
+                                                onChange={handleFileUpload} 
+                                                multiple 
+                                                accept="image/*" 
+                                                className="hidden" 
+                                            />
                                             <button
-                                                onClick={() => {
-                                                    const url = prompt('Enter Image URL manually:');
-                                                    if (url) setMediaUrl(url);
-                                                }}
+                                                onClick={() => fileInputRef.current?.click()}
                                                 className="text-gray-400 hover:text-yellow-400 p-2 rounded-xl hover:bg-yellow-400/5 transition-all flex items-center gap-2 group/btn"
                                             >
                                                 <ImageIcon className="w-5 h-5" />
-                                                <span className="text-xs font-bold hidden sm:inline">Add media</span>
+                                                <span className="text-xs font-bold hidden sm:inline">Add gallery</span>
                                             </button>
                                             <label className="flex items-center gap-2 cursor-pointer group/nsfw">
                                                 <input 
@@ -264,7 +351,7 @@ export default function CommunityPage() {
                                         </div>
                                         <button
                                             onClick={() => createPostMutation.mutate()}
-                                            disabled={!caption.trim() || !mediaUrl || createPostMutation.isPending}
+                                            disabled={!caption.trim() || mediaUrls.length === 0 || createPostMutation.isPending || uploadingFiles.length > 0}
                                             className="bg-yellow-400 hover:bg-yellow-300 disabled:opacity-20 text-black font-black px-6 py-2 rounded-xl transition-all active:scale-[0.95] flex items-center gap-2 shadow-lg shadow-yellow-400/10"
                                         >
                                             {createPostMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
@@ -322,10 +409,12 @@ export default function CommunityPage() {
                                                         <>
                                                             <span className="w-0.5 h-0.5 rounded-full bg-gray-700" />
                                                             <button 
-                                                                onClick={() => followMutation.mutate(post.user.id)}
-                                                                className="text-[11px] cursor-pointer font-bold text-yellow-400 hover:text-white transition-colors"
+                                                                onClick={() => post.user.is_followed ? unfollowMutation.mutate(post.user.id) : followMutation.mutate(post.user.id)}
+                                                                className={`text-[10px] sm:text-[11px] cursor-pointer font-bold transition-colors ${
+                                                                    post.user.is_followed ? 'text-gray-500 hover:text-white' : 'text-yellow-400 hover:text-white'
+                                                                }`}
                                                             >
-                                                                Follow
+                                                                {post.user.is_followed ? 'Followed' : 'Follow'}
                                                             </button>
                                                         </>
                                                     )}

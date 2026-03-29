@@ -297,7 +297,7 @@ export default function CatalogDetailPage() {
                             {/* Price */}
                             <div className="border-y border-gray-900 py-4">
                                 <div className="flex items-end justify-between mb-2">
-                                    <div className="text-3xl font-bold text-white">
+                                    <div className="text-xl lg:text-3xl font-bold text-white">
                                         {currency === 'idr' ? formatPrice(product.price).idr : formatPrice(product.price).usd}
                                     </div>
                                     <div className="flex gap-1 bg-gray-900 rounded-lg p-0.5">

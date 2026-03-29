@@ -298,7 +298,7 @@ function CatalogContent() {
             {!isLoading && !error && products.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-15 px-4 animate-in fade-in zoom-in-95 duration-700">
                     <div className="relative mb-8">
-                        <div className="absolute inset-0 bg-blue-500/20 rounded-full" />
+                        <div className="absolute inset-0 bg-gray-700/50 rounded-full" />
                         <div className="relative w-28 h-28 bg-[#0a0a0a] border border-white/10 rounded-2xl flex items-center justify-center shadow-2xl overflow-hidden group">
                             <ShoppingCart className="w-12 h-12 text-gray-500 group-hover:scale-110 transition-transform duration-500" />
                         </div>

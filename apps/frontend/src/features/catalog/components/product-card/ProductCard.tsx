@@ -113,23 +113,23 @@ export default function ProductCard({ product, onAddToCart, onToggleFavorite, is
               <h3 className="text-white font-bold text-sm md:text-base line-clamp-1 group-hover:text-yellow-400 transition-colors">
                 {product.title}
               </h3>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 min-w-0">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 min-w-0 flex-1">
                   <img
                     src={product.seller.avatar}
                     alt={product.seller.name}
-                    className="w-4 h-4 rounded-full border border-white/10"
+                    className="w-4 h-4 rounded-full border border-white/10 shrink-0"
                   />
                   <p className="text-gray-500 text-[10px] md:text-xs font-medium truncate">{product.seller.name}</p>
                 </div>
                 {product.price === 0 ? (
-                  <span className="text-blue-400 font-black text-sm tracking-tight shrink-0 ml-2">Free</span>
+                  <span className="text-blue-400 font-black text-xs md:text-sm tracking-tight shrink-0">Free</span>
                 ) : (
-                  <div className="flex flex-col items-end shrink-0 ml-2">
-                    <span className="text-white font-black text-sm tracking-tight leading-none">
+                  <div className="flex flex-col items-end shrink-0 text-right">
+                    <span className="text-white font-black text-xl md:text-lg tracking-tight leading-none whitespace-nowrap">
                       {formatted.idr}
                     </span>
-                    <span className="text-gray-400 text-[10px] font-medium mt-0.5">
+                    <span className="text-gray-400 text-sm md:text-xs font-medium mt-0.5 whitespace-nowrap">
                       {formatted.usd}
                     </span>
                   </div>
