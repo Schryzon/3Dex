@@ -261,7 +261,7 @@ function CollectionsTabContent() {
 
                                 <Link href={`/collections/${collection.id}`} className="block">
                                     {/* Visual Container - HAS OVERFLOW-HIDDEN */}
-                                    <div className="aspect-[4/3] w-full bg-gradient-to-br from-gray-900 to-black relative overflow-hidden rounded-[1.8rem] ring-1 ring-white/5 group-hover:ring-yellow-400/30 transition-all duration-500">
+                                    <div className="aspect-[4/3] w-full bg-gray-800/40 relative overflow-hidden rounded-[1.8rem] ring-1 ring-white/5 group-hover:ring-yellow-400/30 transition-all duration-500">
                                         <div className="w-full h-full flex gap-1 p-1">
                                             {hasItems ? (
                                                 <>
@@ -827,7 +827,7 @@ function ProfileContent() {
                                     <button
                                         onClick={() => bannerInputRef.current?.click()}
                                         disabled={isUploadingBanner}
-                                        className="absolute top-4 right-4 z-20 px-3 py-1.5 bg-black/60 cursor-pointer hover:bg-black/80 backdrop-blur-md border border-white/10 text-white text-xs font-bold rounded-lg flex items-center gap-2 transition-all opacity-0 group-hover/banner:opacity-100"
+                                        className="absolute top-4 right-4 z-20 px-3 py-1.5 bg-black/60 cursor-pointer hover:bg-black/80 backdrop-blur-md border border-white/10 text-white text-xs font-bold rounded-lg flex items-center gap-2 transition-all opacity-100 sm:opacity-0 sm:group-hover/banner:opacity-100"
                                     >
                                         {isUploadingBanner ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
                                         Change Banner
