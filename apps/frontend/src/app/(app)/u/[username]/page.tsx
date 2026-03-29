@@ -32,7 +32,7 @@ import {
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import ImageCropModal from '@/components/common/ImageCropModal';
 import { useRouter } from 'next/navigation';
-import { MINIO_BASE_URL } from '@/lib/constants/endpoints';
+import { getStorageUrl } from '@/lib/utils/storage';
 import Link from 'next/link';
 import { useAuth } from '@/features/auth';
 
@@ -167,11 +167,7 @@ export default function PublicProfilePage() {
     }
 
     const isOwner = currentUser?.id === user.id;
-    const bannerSrc = user.banner_url
-        ? user.banner_url.startsWith('http')
-            ? user.banner_url
-            : `${MINIO_BASE_URL}/3dex-models/${user.banner_url}`
-        : null;
+    const bannerSrc = getStorageUrl(user.banner_url);
 
     return (
         <div className="min-h-screen bg-[#0a0a0a]">
@@ -465,7 +461,7 @@ function PublicCollectionsTab({ userId }: { userId: string }) {
                                         {/* Main Image */}
                                         <div className="flex-[2] h-full rounded-2xl overflow-hidden bg-gray-800/20">
                                             <img
-                                                src={items[0]?.model?.preview_url ? (items[0].model.preview_url.startsWith('http') ? items[0].model.preview_url : `${MINIO_BASE_URL}/3dex-models/${items[0].model.preview_url}`) : ''}
+                                                src={getStorageUrl(items[0]?.model?.preview_url)}
                                                 alt=""
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                             />
@@ -475,7 +471,7 @@ function PublicCollectionsTab({ userId }: { userId: string }) {
                                             <div className="flex-1 rounded-xl overflow-hidden bg-gray-800/20">
                                                 {items[1] && (
                                                     <img
-                                                        src={items[1]?.model?.preview_url ? (items[1].model.preview_url.startsWith('http') ? items[1].model.preview_url : `${MINIO_BASE_URL}/3dex-models/${items[1].model.preview_url}`) : ''}
+                                                        src={getStorageUrl(items[1]?.model?.preview_url)}
                                                         alt=""
                                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                                     />
@@ -484,7 +480,7 @@ function PublicCollectionsTab({ userId }: { userId: string }) {
                                             <div className="flex-1 rounded-xl overflow-hidden bg-gray-800/20 flex items-center justify-center">
                                                 {items[2] ? (
                                                     <img
-                                                        src={items[2]?.model?.preview_url ? (items[2].model.preview_url.startsWith('http') ? items[2].model.preview_url : `${MINIO_BASE_URL}/3dex-models/${items[2].model.preview_url}`) : ''}
+                                                        src={getStorageUrl(items[2]?.model?.preview_url)}
                                                         alt=""
                                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                                     />

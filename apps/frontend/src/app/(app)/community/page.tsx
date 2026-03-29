@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { postService, userService } from '@/lib/api/services';
-import { MINIO_BASE_URL } from '@/lib/constants/endpoints';
+import { getStorageUrl } from '@/lib/utils/storage';
 import { useAuth } from '@/features/auth';
 import { 
     Loader2, Heart, MessageSquare, Send, Image as ImageIcon, 
@@ -228,7 +228,7 @@ export default function CommunityPage() {
                                                 <div className="w-full h-full rounded-full bg-black p-[2px]">
                                                     {creator.avatar_url ? (
                                                         <img 
-                                                            src={creator.avatar_url} 
+                                                            src={getStorageUrl(creator.avatar_url)} 
                                                             className="w-full h-full rounded-full object-cover filter brightness-90 group-hover:brightness-110 transition-all" 
                                                             alt={creator.username}
                                                         />
@@ -278,7 +278,7 @@ export default function CommunityPage() {
                             <div className="flex gap-4 relative">
                                 <div className="w-11 h-11 rounded-full bg-gray-800 flex-shrink-0 ring-2 ring-gray-900 overflow-hidden">
                                     {user?.avatar_url ? (
-                                        <img src={user.avatar_url} className="w-full h-full object-cover" />
+                                        <img src={getStorageUrl(user.avatar_url)} className="w-full h-full object-cover" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center font-bold text-gray-500 uppercase text-xs">
                                             {user?.username?.[0]}
@@ -292,7 +292,7 @@ export default function CommunityPage() {
                                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                             {mediaUrls.map((url, idx) => (
                                                 <div key={idx} className="relative rounded-xl overflow-hidden aspect-square bg-black border border-gray-800 shadow-inner group/preview">
-                                                    <img src={url.startsWith('http') ? url : `${MINIO_BASE_URL}/3dex-models/${url}`} alt="Preview" className="w-full h-full object-cover" />
+                                                    <img src={getStorageUrl(url)} alt="Preview" className="w-full h-full object-cover" />
                                                     <button
                                                         onClick={() => removeMedia(idx)}
                                                         className="absolute top-2 right-2 bg-black/60 hover:bg-red-500 text-white rounded-full p-1 transition-all shadow-lg scale-90 group-hover/preview:scale-100"
@@ -392,7 +392,7 @@ export default function CommunityPage() {
                                             <Link href={`/u/${post.user.username}`} className="relative group/avatar">
                                                 <div className="w-10 h-10 rounded-full bg-gray-800 overflow-hidden ring-2 ring-transparent group-hover/avatar:ring-yellow-400 transition-all duration-300 flex items-center justify-center">
                                                     {post.user.avatar_url ? (
-                                                        <img src={post.user.avatar_url} className="w-full h-full object-cover" alt={post.user.username} />
+                                                        <img src={getStorageUrl(post.user.avatar_url)} className="w-full h-full object-cover" alt={post.user.username} />
                                                     ) : (
                                                         <div className="w-full h-full bg-gray-900 flex items-center justify-center font-bold text-gray-600 uppercase text-xs">
                                                             {post.user.username?.[0]}
@@ -476,7 +476,7 @@ export default function CommunityPage() {
                                             className="relative w-full aspect-[4/5] sm:aspect-video overflow-hidden bg-[#111] cursor-pointer ring-1 ring-gray-800/20 group/img shadow-inner"
                                         >
                                             <img 
-                                                src={post.media_urls[0]} 
+                                                src={getStorageUrl(post.media_urls[0])} 
                                                 className="w-full h-full object-cover transition-transform duration-700 group-hover/img:scale-105" 
                                                 alt="Post media" 
                                             />
