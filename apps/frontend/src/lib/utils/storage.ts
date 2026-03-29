@@ -16,7 +16,8 @@ export const getStorageUrl = (path: string | undefined | null): string => {
     }
 
     // Otherwise, prefix with base URL and default bucket
-    // Note: bucket is hardcoded to '3dex-models' to match the system's structure
+    // Note: use bucket from env or default to '3dex-models'
+    const bucket = process.env.NEXT_PUBLIC_STORAGE_BUCKET || '3dex-models';
     const base = MINIO_BASE_URL.replace(/\/$/, '');
-    return `${base}/3dex-models/${path}`;
+    return `${base}/${bucket.replace(/^\//, '')}/${path.replace(/^\//, '')}`;
 };
