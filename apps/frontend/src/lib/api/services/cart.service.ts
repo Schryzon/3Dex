@@ -26,9 +26,10 @@ function mapCartItem(raw: any): CartItem {
             images: model.preview_url ? [model.preview_url] : [],
             modelFileUrl: model.file_url || '',
             fileFormat: model.file_url
-                ? [model.file_url.split('.').pop()?.toUpperCase() || 'GLB']
-                : ['GLB'],
+                ? (model.file_url.split('.').pop()?.toUpperCase() || 'GLB')
+                : 'GLB',
             category: model.category?.name || 'General',
+            license: model.license || 'PERSONAL_USE',
             tags: [],
             isPrintable: false,
             status: model.status || 'APPROVED',
