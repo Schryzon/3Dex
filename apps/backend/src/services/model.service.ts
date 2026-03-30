@@ -66,6 +66,7 @@ export function get_model_by_id(model_id: string) {
       license: true,
       is_printable: true,
       file_format: true,
+      artist_id: true,
       artist: {
         select: {
           id: true,
