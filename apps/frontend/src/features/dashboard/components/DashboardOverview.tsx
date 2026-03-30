@@ -308,7 +308,6 @@ export default function DashboardOverview() {
                 rating={model.rating}
                 reviewCount={model.reviewCount}
                 formats={Array.isArray(model.fileFormat) ? model.fileFormat : []}
-                polyCount={model.polyCount != null ? String(model.polyCount) : undefined}
               />
             ))}
           </div>

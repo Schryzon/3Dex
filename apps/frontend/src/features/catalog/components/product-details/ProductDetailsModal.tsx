@@ -26,7 +26,6 @@ interface ProductDetailsModalProps {
         rating: number;
         reviewCount: number;
         formats: string[];
-        polyCount: string;
         hasTextures: boolean;
         isRigged: boolean;
         isAnimated: boolean;
@@ -178,10 +177,9 @@ export default function ProductDetailsModal({
                                 }}
                             />
 
-                            {/* Spec grid: formats, polygon count, features, license, tags */}
+                            {/* Spec grid: formats, features, license, tags */}
                             <ProductDetailsSpecGrid
                                 formats={product.formats}
-                                polyCount={product.polyCount}
                                 hasTextures={product.hasTextures}
                                 isRigged={product.isRigged}
                                 isAnimated={product.isAnimated}

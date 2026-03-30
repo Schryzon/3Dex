@@ -128,7 +128,6 @@ export default function PopularModels() {
                                 rating={model.rating}
                                 reviewCount={model.reviewCount}
                                 formats={model.specifications?.formats || []}
-                                polyCount={model.specifications?.polygons?.toLocaleString()}
                             />
                         </div>
                     ))}

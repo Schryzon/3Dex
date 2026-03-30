@@ -59,7 +59,7 @@ export default function HowItWorks() {
                                 <h3 className="text-xl font-black text-white">Discover</h3>
                             </div>
                             <p className="text-gray-500 text-sm leading-relaxed">
-                                Browse thousands of curated 3D models, textures, and assets. Filter by format, polygon count, license, and more.
+                                Browse thousands of curated 3D models, textures, and assets. Filter by format, license, and more.
                             </p>
                             <ul className="mt-4 space-y-1.5">
                                 {['Advanced search & filters', 'Preview before purchase', 'Verified artist profiles'].map(item => (

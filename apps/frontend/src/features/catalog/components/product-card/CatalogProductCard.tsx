@@ -30,7 +30,6 @@ interface CatalogProductCardProps {
     formats?: string[];
     rating?: number;
     reviewCount?: number;
-    polyCount?: string;
     viewMode?: 'grid' | 'list';
 }
 
@@ -51,7 +50,6 @@ export default function CatalogProductCard({
     formats = [],
     rating,
     reviewCount,
-    polyCount,
     viewMode = 'grid',
 }: CatalogProductCardProps) {
     const [isHovered, setIsHovered] = useState(false);

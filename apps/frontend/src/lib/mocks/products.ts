@@ -41,11 +41,11 @@ const generateMockProducts = (count: number): Model[] => {
             thumbnails: [THUMBNAILS[Math.floor(Math.random() * THUMBNAILS.length)]],
             images: [THUMBNAILS[Math.floor(Math.random() * THUMBNAILS.length)]],
             modelFileUrl: '#',
-            fileFormat: formats,
-            polyCount: Math.floor(Math.random() * 100000) + 500,
+            fileFormat: formats[0],
             category,
             tags: [category.toLowerCase(), 'low-poly', 'game-ready', 'pbr'],
             isPrintable: Math.random() > 0.7,
+            license: 'COMMERCIAL_USE',
             status: 'APPROVED',
             artistId: artist.username.toLowerCase(),
             artist: {

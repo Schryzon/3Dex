@@ -16,7 +16,6 @@ interface Product {
     avatar: string;
   };
   specifications?: {
-    polygons: number;
     version: string;
   };
 }

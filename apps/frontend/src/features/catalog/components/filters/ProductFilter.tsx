@@ -6,7 +6,6 @@ interface FilterOptions {
   categories: string[];
   priceRange: [number, number];
   software: string[];
-  polygonRange: [number, number];
   fileFormats: string[];
   features: string[];
 }
@@ -23,7 +22,6 @@ export default function ProductFilter({ onFilterChange, initialFilters }: Props)
     categories: [],
     priceRange: [0, 1000],
     software: [],
-    polygonRange: [0, 1000000],
     fileFormats: [],
     features: [],
   });
@@ -32,7 +30,6 @@ export default function ProductFilter({ onFilterChange, initialFilters }: Props)
     categories: [] as string[],
     priceRange: [0, 1000] as [number, number],
     software: [] as string[],
-    polygonRange: [0, 1000000] as [number, number],
     fileFormats: [] as string[],
     features: [] as string[],
     sortBy: 'recent' as 'recent' | 'price-low' | 'price-high' | 'popular' | 'rating',
@@ -105,7 +102,6 @@ export default function ProductFilter({ onFilterChange, initialFilters }: Props)
       categories: [],
       priceRange: [0, 1000] as [number, number],
       software: [],
-      polygonRange: [0, 1000000] as [number, number],
       fileFormats: [],
       features: [],
       sortBy: 'recent' as const,
