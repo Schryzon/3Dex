@@ -95,6 +95,17 @@ export async function apply_for_role(req: Auth_Request, res: Response): Promise<
         return;
     }
 
+    // Role Constraints: Artists cannot apply for Provider, and vice versa.
+    const current_role = req.user.role;
+    if (current_role === 'ARTIST' && role === 'PROVIDER') {
+        res.status(400).json({ message: "Existing Artists cannot apply for Provider role. Please revert to a regular user first." });
+        return;
+    }
+    if (current_role === 'PROVIDER' && role === 'ARTIST') {
+        res.status(400).json({ message: "Existing Providers cannot apply for Artist role. Please revert to a regular user first." });
+        return;
+    }
+
     if (role === 'ARTIST' && (!portfolio || !Array.isArray(portfolio) || portfolio.length === 0)) {
         res.status(400).json({ message: "Portfolio is required for Artist application!" });
         return;
@@ -304,4 +315,46 @@ export async function delete_account(req: Auth_Request, res: Response): Promise<
     // Clear auth cookie
     res.clearCookie('token', { httpOnly: true, sameSite: 'lax' });
     res.json({ message: "Account deleted successfully." });
+}
+/**
+ * Revert Artist or Provider back to Customer
+ */
+export async function revert_to_customer(req: Auth_Request, res: Response): Promise<void> {
+    const { id, role } = req.user;
+
+    // Security check: ADMINs cannot use this
+    if (role === 'ADMIN') {
+        res.status(403).json({ message: "Administrators cannot revert their role." });
+        return;
+    }
+
+    // Check if already customer
+    if (role === 'CUSTOMER') {
+        res.status(400).json({ message: "You are already a regular user." });
+        return;
+    }
+
+    try {
+        const user = await prisma.user.update({
+            where: { id },
+            data: {
+                role: 'CUSTOMER',
+                account_status: 'APPROVED',
+                status_history: {
+                    push: {
+                        status: 'CUSTOMER',
+                        timestamp: new Date().toISOString(),
+                        reason: `User manually reverted from ${role} to CUSTOMER`
+                    }
+                }
+            }
+        });
+
+        res.json({ 
+            message: "Successfully reverted to regular user.", 
+            user: await sign_user_urls(user) 
+        });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
 }

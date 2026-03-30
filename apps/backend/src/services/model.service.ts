@@ -11,6 +11,9 @@ export async function create_model(data: {
   category_id?: string;
   tags?: string[];
   is_nsfw?: boolean;
+  license?: "PERSONAL_USE" | "COMMERCIAL_USE";
+  is_printable?: boolean;
+  file_format?: string;
 }) {
   const { tags, ...rest } = data;
 
@@ -60,6 +63,9 @@ export function get_model_by_id(model_id: string) {
       gallery_urls: true,
       created_at: true,
       is_nsfw: true,
+      license: true,
+      is_printable: true,
+      file_format: true,
       artist: {
         select: {
           id: true,
@@ -77,6 +83,9 @@ export async function update_model_by_id(
     description?: string;
     price?: number;
     category?: string;
+    license?: "PERSONAL_USE" | "COMMERCIAL_USE";
+    is_printable?: boolean;
+    file_format?: string;
   }
 ) {
   let category_id: string | undefined = undefined;
@@ -101,6 +110,9 @@ export async function update_model_by_id(
       ...(data.description !== undefined && { description: data.description }),
       ...(data.price !== undefined && { price: data.price }),
       ...(category_id !== undefined && { category_id }),
+      ...(data.license !== undefined && { license: data.license }),
+      ...(data.is_printable !== undefined && { is_printable: data.is_printable }),
+      ...(data.file_format !== undefined && { file_format: data.file_format }),
     },
     include: {
       tags: true,

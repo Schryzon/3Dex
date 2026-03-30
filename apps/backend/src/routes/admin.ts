@@ -6,7 +6,8 @@ import {
     list_users_by_status,
     approve_user,
     reject_user,
-    trigger_stats_aggregation
+    trigger_stats_aggregation,
+    get_dashboard_summary
 } from "../controllers/admin.controller";
 import {
     get_reports,
@@ -174,6 +175,21 @@ router.post("/users/:id/reject", require_auth, require_admin, reject_user);
  *         description: Stats aggregated
  */
 router.post("/stats/trigger", require_auth, require_admin, trigger_stats_aggregation);
+
+/**
+ * @openapi
+ * /admin/summary:
+ *   get:
+ *     summary: Get dashboard summary for admin
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dashboard summary
+ */
+router.get("/summary", require_auth, require_admin, get_dashboard_summary);
 
 // Report Management
 /**

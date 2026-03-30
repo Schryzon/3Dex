@@ -320,11 +320,10 @@ function CollectionsTabContent() {
                                     <div className="p-3">
                                         <div className="flex items-center justify-between gap-2 mb-1">
                                             <h4 className="font-bold text-white text-sm md:text-base group-hover:text-yellow-400 transition-colors truncate">{collection.name}</h4>
-                                            <span className={`shrink-0 flex items-center gap-1.5 px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-tighter ${
-                                                collection.is_public
+                                            <span className={`shrink-0 flex items-center gap-1.5 px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-tighter ${collection.is_public
                                                     ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
                                                     : 'bg-orange-500/10 text-orange-500 border border-orange-500/20'
-                                            }`}>
+                                                }`}>
                                                 {collection.is_public ? <Globe className="w-2 h-2" /> : <Lock className="w-2 h-2" />}
                                                 {collection.is_public ? 'Pub' : 'Priv'}
                                             </span>
@@ -373,7 +372,7 @@ function BookmarksTabContent() {
 
     const handleRemove = async (modelId: string) => {
         setRemovingId(modelId);
-        try { await removeFromWishlist(modelId); } 
+        try { await removeFromWishlist(modelId); }
         finally { setRemovingId(null); }
     };
 
@@ -469,6 +468,12 @@ function ProfileContent() {
     // Provider apply modal
     const [showProviderModal, setShowProviderModal] = useState(false);
     const [isApplyingProvider, setIsApplyingProvider] = useState(false);
+
+    // Revert role modals
+    const [showRevertModal, setShowRevertModal] = useState(false);
+    const [showRevertConfirmModal, setShowRevertConfirmModal] = useState(false);
+    const [revertConfirmInput, setRevertConfirmInput] = useState('');
+    const [isReverting, setIsReverting] = useState(false);
 
     // Dummy System Preferences State
     const [emailNotifs, setEmailNotifs] = useState(true);
@@ -592,7 +597,7 @@ function ProfileContent() {
         } catch (error: any) {
             const rawMsg = error.response?.data?.message || '';
             let errorMsg = 'Failed to delete account. Please try again later.';
-            
+
             if (rawMsg.includes('foreign key constraint') || rawMsg.includes('Order_user_id_fkey')) {
                 errorMsg = 'Delete unsuccessful: Account has active or past orders.';
             } else if (rawMsg.toLowerCase().includes('violates') || rawMsg.toLowerCase().includes('prisma')) {
@@ -600,7 +605,7 @@ function ProfileContent() {
             } else if (rawMsg) {
                 errorMsg = rawMsg;
             }
-            
+
             showBannerNotif('error', errorMsg);
             setShowDeleteModal(false);
         } finally {
@@ -646,6 +651,23 @@ function ProfileContent() {
         } finally {
             setIsApplyingProvider(false);
             setUpgrading(false);
+        }
+    };
+
+    const handleConfirmRevert = async () => {
+        if (revertConfirmInput !== 'REVERT') return;
+        setIsReverting(true);
+        try {
+            const res = await api.post('/users/revert-role');
+            setUser(res.data.user);
+            showBannerNotif('success', 'You have reverted to a regular user.');
+            setShowRevertConfirmModal(false);
+            setRevertConfirmInput('');
+            setActiveTab('profile'); // Switch to profile tab to see changes
+        } catch (error: any) {
+            showBannerNotif('error', error.response?.data?.message || 'Failed to revert role.');
+        } finally {
+            setIsReverting(false);
         }
     };
 
@@ -696,6 +718,73 @@ function ProfileContent() {
                 variant="default"
                 isLoading={isApplyingProvider}
             />
+
+            {/* Revert Role First Confirmation */}
+            <ConfirmModal
+                isOpen={showRevertModal}
+                onClose={() => setShowRevertModal(false)}
+                onConfirm={() => {
+                    setShowRevertModal(false);
+                    setShowRevertConfirmModal(true);
+                }}
+                title="Revert to Regular User?"
+                message={
+                    <div className="space-y-4">
+                        <p>
+                            You are about to revert your account to a <strong className="text-white">Regular Customer</strong>.
+                        </p>
+                        <ul className="list-disc list-inside text-xs space-y-1 text-gray-400">
+                            <li>Your Artist/Provider profile will be hidden.</li>
+                            <li>All your active models/services will be unlisted from the catalog.</li>
+                            <li>You will need to re-apply and get approval to become an Artist/Provider again.</li>
+                        </ul>
+                    </div>
+                }
+                confirmLabel="Next Step"
+                variant="default"
+            />
+
+            {/* Revert Role Final Confirmation (Double Check) */}
+            {showRevertConfirmModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => !isReverting && setShowRevertConfirmModal(false)} />
+                    <div className="relative bg-[#141414] rounded-2xl shadow-2xl w-full max-w-md border border-orange-500/30 overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="h-1 w-full bg-orange-500" />
+                        <div className="p-8">
+                            <div className="w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center mb-4">
+                                <AlertTriangle className="w-6 h-6 text-orange-500" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-white mb-2">Final Confirmation</h2>
+                            <p className="text-gray-400 text-sm mb-6">
+                                Please type <strong className="text-white">REVERT</strong> below to confirm. This action will immediately unlist your assets.
+                            </p>
+                            <input
+                                type="text"
+                                value={revertConfirmInput}
+                                onChange={(e) => setRevertConfirmInput(e.target.value)}
+                                className="w-full bg-gray-800/80 text-white px-4 py-3 rounded-xl border border-gray-700 focus:border-orange-500 focus:outline-none mb-4 transition-colors placeholder:text-gray-600"
+                                placeholder="REVERT"
+                            />
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => { setShowRevertConfirmModal(false); setRevertConfirmInput(''); }}
+                                    disabled={isReverting}
+                                    className="flex-1 px-4 py-3 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-white font-bold rounded-xl transition-all"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleConfirmRevert}
+                                    disabled={revertConfirmInput !== 'REVERT' || isReverting}
+                                    className="flex-1 px-4 py-3 bg-orange-600 hover:bg-orange-500 disabled:bg-gray-700 disabled:text-gray-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+                                >
+                                    {isReverting ? <><Loader2 className="w-4 h-4 animate-spin" />Reverting...</> : 'Confirm Revert'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Delete Account Confirmation Modal */}
             {showDeleteModal && (
@@ -757,7 +846,7 @@ function ProfileContent() {
                 <Breadcrumbs
                     items={[
                         { label: 'Profile', href: '/profile' },
-                        { label: activeTab, active: true }
+                        { label: activeTab.charAt(0).toUpperCase() + activeTab.slice(1), active: true }
                     ]}
                     className="mb-8"
                 />
@@ -992,7 +1081,7 @@ function ProfileContent() {
                                     </div>
                                     <div className="bg-gray-900/40 p-6 rounded-2xl border border-gray-800">
                                         <p className="text-sm text-gray-400 mb-1">Total Earnings</p>
-                                        <p className="text-3xl font-bold text-white">$4,820.00</p>
+                                        <p className="text-3xl font-bold text-white">{formatPrice(4820).idr}</p>
                                         <p className="text-xs text-green-400 mt-2 flex items-center gap-1">
                                             <Sparkles className="w-3 h-3" /> +8% this month
                                         </p>
@@ -1006,8 +1095,8 @@ function ProfileContent() {
                                 <div className="bg-gray-900/40 p-8 rounded-2xl border border-gray-800 flex flex-col gap-6">
                                     <div className="flex items-end gap-2 h-32">
                                         {[40, 70, 45, 90, 65, 80, 100, 55, 75, 60, 85, 95].map((h, i) => (
-                                            <div 
-                                                key={i} 
+                                            <div
+                                                key={i}
                                                 className="flex-1 bg-gradient-to-t from-emerald-500/20 to-emerald-500/60 rounded-t-lg transition-all hover:to-emerald-400"
                                                 style={{ height: `${h}%` }}
                                             />
@@ -1180,22 +1269,6 @@ function ProfileContent() {
                             <BookmarksTabContent />
                         )}
 
-                        {/* ── TAB: NOTIFICATIONS ── */}
-                        {activeTab === 'notifications' && (
-                            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                <div className="p-6 bg-gray-900/40 rounded-2xl border border-gray-800 flex items-start gap-4">
-                                    <div className="w-10 h-10 bg-gray-800 rounded-xl flex items-center justify-center shrink-0">
-                                        <Bell className="w-5 h-5 text-gray-400" />
-                                    </div>
-                                    <div>
-                                        <p className="text-white font-semibold mb-1">Welcome to 3Dēx!</p>
-                                        <p className="text-sm text-gray-400">Thanks for joining our community of 3D creators and enthusiasts.</p>
-                                        <p className="text-xs text-gray-500 mt-2">Yesterday</p>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
                         {/* ── TAB: SETTINGS ── */}
                         {activeTab === 'settings' && (
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -1276,6 +1349,31 @@ function ProfileContent() {
                                     </div>
                                 </div>
 
+                                {/* Revert Role Section */}
+                                {(user?.role === 'ARTIST' || user?.role === 'PROVIDER') && (
+                                    <div className="bg-orange-500/5 rounded-2xl border border-orange-500/20 overflow-hidden mb-8">
+                                        <div className="px-8 py-6 border-b border-orange-500/20 bg-orange-500/5">
+                                            <h3 className="text-lg font-bold text-orange-400">Role Management</h3>
+                                            <p className="text-sm text-gray-400">Manage your creator status on the platform.</p>
+                                        </div>
+                                        <div className="p-8">
+                                            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                                                <div>
+                                                    <p className="text-white font-semibold mb-1">Revert to Resident User</p>
+                                                    <p className="text-sm text-gray-500">Stop being an {user.role.toLowerCase()} and become a regular customer. Your active listings will be unlisted.</p>
+                                                </div>
+                                                <button
+                                                    onClick={() => setShowRevertModal(true)}
+                                                    className="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-orange-600/20 hover:bg-orange-600 text-orange-400 hover:text-white border border-orange-500/40 hover:border-orange-600 font-bold rounded-xl transition-all"
+                                                >
+                                                    <ArrowUpRight className="w-4 h-4 rotate-180" />
+                                                    Revert Role
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Danger Zone */}
                                 <div className="bg-red-500/5 rounded-2xl border border-red-500/20 overflow-hidden">
                                     <div className="px-8 py-6 border-b border-red-500/20 bg-red-500/5">
@@ -1304,13 +1402,39 @@ function ProfileContent() {
                         {/* ── TAB: BILLING ── */}
                         {activeTab === 'billing' && (
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                <div className="bg-gray-900/40 rounded-2xl border border-gray-800 p-8 flex flex-col items-center text-center shadow-xl">
-                                    <CreditCard className="w-16 h-16 text-gray-700 mb-4" />
-                                    <h3 className="text-xl font-bold text-white mb-2">Billing & Payments</h3>
-                                    <p className="text-gray-400 mb-8 max-w-sm">Manage your payment methods and view your transaction history.</p>
-                                    <button className="px-8 py-3 bg-yellow-400 text-black font-bold rounded-xl hover:bg-yellow-300 transition-all shadow-lg">
-                                        Add Payment Method
-                                    </button>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="bg-gray-900/40 p-8 rounded-2xl border border-gray-800 flex flex-col items-center text-center">
+                                        <div className="w-16 h-16 bg-yellow-400/10 rounded-2xl flex items-center justify-center mb-6 ring-1 ring-yellow-400/20">
+                                            <CreditCard className="w-8 h-8 text-yellow-400" />
+                                        </div>
+                                        <h3 className="text-xl font-bold text-white mb-2">Wallets & Cards</h3>
+                                        <p className="text-gray-400 mb-8 max-w-xs text-sm">Save your payment methods for faster checkout and secure withdrawals.</p>
+                                        <button className="w-full py-3 bg-yellow-400 hover:bg-yellow-300 text-black font-black rounded-xl transition-all shadow-xl shadow-yellow-400/10">
+                                            Add Payment Method
+                                        </button>
+                                    </div>
+                                    <div className="bg-gray-900/40 p-8 rounded-2xl border border-gray-800">
+                                        <div className="flex items-center justify-between mb-6">
+                                            <h3 className="text-lg font-bold text-white">Recent Transactions</h3>
+                                            <button className="text-xs text-yellow-400 hover:underline">View All</button>
+                                        </div>
+                                        <div className="space-y-4">
+                                            {[1, 2, 3].map(i => (
+                                                <div key={i} className="flex items-center justify-between p-3 bg-black/40 rounded-xl border border-white/5">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center">
+                                                            <Package className="w-4 h-4 text-gray-500" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-xs font-bold text-white">Asset Purchase</p>
+                                                            <p className="text-[10px] text-gray-500">March {24 + i}, 2024</p>
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-xs font-black text-emerald-400">-{formatPrice(15 + i).idr}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         )}

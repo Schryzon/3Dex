@@ -5,6 +5,7 @@ import {
     change_password,
     toggle_2fa,
     apply_for_role,
+    revert_to_customer,
     get_public_profile,
     search_users,
     delete_account
@@ -88,6 +89,21 @@ router.post("/security/2fa", require_auth, toggle_2fa);
  *         description: Application submitted
  */
 router.post("/apply-role", require_auth, apply_for_role);
+
+/**
+ * @openapi
+ * /users/revert-role:
+ *   post:
+ *     summary: Revert Artist or Provider back to regular user
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Reverted successfully
+ */
+router.post("/revert-role", require_auth, revert_to_customer);
 
 /**
  * @openapi

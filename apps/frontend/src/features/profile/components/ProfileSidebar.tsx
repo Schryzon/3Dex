@@ -12,7 +12,8 @@ import {
     Package,
     Printer,
     Box,
-    Settings2
+    Settings2,
+    ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 
@@ -38,10 +39,9 @@ export default function ProfileSidebar({ activeTab, setActiveTab }: ProfileSideb
                 { id: 'collections', label: 'Collections', icon: FolderOpen },
                 { id: 'bookmarks', label: 'Saved Assets', icon: Bookmark },
                 { id: 'shipping', label: 'Orders & Shipping', icon: Package },
-                { id: 'notifications', label: 'Notifications', icon: Bell },
             ]
         },
-        ...(user?.role === 'ARTIST' || user?.role === 'ADMIN' ? [
+        ...(user?.role === 'ARTIST' ? [
             {
                 title: 'Creator Tools',
                 items: [
@@ -51,13 +51,21 @@ export default function ProfileSidebar({ activeTab, setActiveTab }: ProfileSideb
                 ]
             }
         ] : []),
-        ...(user?.role === 'PROVIDER' || user?.role === 'ADMIN' ? [
+        ...(user?.role === 'PROVIDER' ? [
             {
                 title: 'Provider Tools',
                 items: [
                     { id: 'service', label: 'My Service', icon: Printer },
                     { id: 'jobs', label: 'Print Jobs', icon: Box },
                     { id: 'workshop', label: 'Workshop Setup', icon: Settings2 },
+                ]
+            }
+        ] : []),
+        ...(user?.role === 'ADMIN' ? [
+            {
+                title: 'Administration',
+                items: [
+                    { id: 'admin-dashboard', label: 'Dashboard', icon: ShieldCheck, href: '/admin/dashboard' },
                 ]
             }
         ] : [])
@@ -71,9 +79,23 @@ export default function ProfileSidebar({ activeTab, setActiveTab }: ProfileSideb
                         {section.title}
                     </h4>
                     <div className="flex md:flex-col gap-1 overflow-x-auto md:overflow-visible pb-2 md:pb-0 scrollbar-hide no-scrollbar">
-                        {section.items.map((item) => {
+                        {section.items.map((item: any) => {
                             const Icon = item.icon;
                             const isActive = activeTab === item.id;
+                            
+                            if (item.href) {
+                                return (
+                                    <a
+                                        key={item.id}
+                                        href={item.href}
+                                        className="flex-shrink-0 flex items-center gap-3 px-4 md:px-3 py-2 md:py-2.5 rounded-xl transition-all text-xs md:text-sm font-medium whitespace-nowrap text-red-400 hover:bg-red-400/10 hover:text-red-300"
+                                    >
+                                        <Icon className="w-4 h-4" />
+                                        {item.label}
+                                    </a>
+                                );
+                            }
+
                             return (
                                 <button
                                     key={item.id}

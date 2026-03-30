@@ -16,7 +16,8 @@ import {
   FolderOpen,
   Settings,
   LogOut,
-  X
+  X,
+  ShieldCheck
 } from 'lucide-react';
 import UserAvatar from '@/components/common/UserAvatar';
 import ProtectedLink from '@/components/common/ProtectedLink';
@@ -171,6 +172,12 @@ export default function AppTopbar({
                     <p className="text-gray-500 text-xs">{user?.email}</p>
                   </div>
                   <div className="py-1">
+                    {user?.role === 'ADMIN' && (
+                      <Link href="/admin/dashboard" className="flex items-center gap-3 px-4 py-2.5 text-red-400 hover:bg-red-400/10 hover:text-red-300 transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
+                        <ShieldCheck className="w-4 h-4" />
+                        <span className="text-sm font-bold">Admin Dashboard</span>
+                      </Link>
+                    )}
                     <Link href={ROUTES.USER.PROFILE} className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
                       <User className="w-4 h-4" />
                       <span className="text-sm">My Profile</span>

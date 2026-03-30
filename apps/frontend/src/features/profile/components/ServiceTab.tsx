@@ -132,7 +132,7 @@ export default function ServiceTab() {
                     <ListInput label="Printer Models" field="printerTypes" placeholder="e.g. Ender 3 V2, Prusa i3 MK3S" />
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-300">Base Price ($)</label>
+                        <label className="text-sm font-medium text-gray-300">Base Price (IDR)</label>
                         <input
                             type="number"
                             value={config.basePrice || 0}

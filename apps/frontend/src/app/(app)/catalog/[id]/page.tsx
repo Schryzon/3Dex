@@ -442,16 +442,14 @@ export default function CatalogDetailPage() {
                                 <h3 className="text-sm font-semibold text-white">Specifications</h3>
                                 <div className="space-y-2 text-sm">
                                     <div className="flex justify-between py-2 border-b border-gray-900 hover:border-yellow-500/20 transition-colors duration-300 group">
-                                        <span className="text-gray-400 group-hover:text-gray-300">Polygons</span>
-                                        <span className="text-white font-medium">{product.polyCount?.toLocaleString() || 'N/A'}</span>
-                                    </div>
-                                    <div className="flex justify-between py-2 border-b border-gray-900 hover:border-yellow-500/20 transition-colors duration-300 group">
                                         <span className="text-gray-400 group-hover:text-gray-300">Format</span>
-                                        <span className="text-white font-medium">{product.fileFormat?.join(', ') || 'OBJ'}</span>
+                                        <span className="text-white font-medium uppercase">{product.fileFormat || 'GLB'}</span>
                                     </div>
                                     <div className="flex justify-between py-2 border-b border-gray-900 hover:border-yellow-500/20 transition-colors duration-300 group">
                                         <span className="text-gray-400 group-hover:text-gray-300">License</span>
-                                        <span className="text-yellow-500 font-medium">Standard</span>
+                                        <span className="text-yellow-500 font-medium">
+                                            {product.license === 'COMMERCIAL_USE' ? 'Commercial' : 'Personal'}
+                                        </span>
                                     </div>
                                     <div className="flex justify-between py-2 hover:border-yellow-500/20 transition-colors duration-300 group">
                                         <span className="text-gray-400 group-hover:text-gray-300">3D Printable</span>
@@ -472,10 +470,14 @@ export default function CatalogDetailPage() {
                                 </div>
                                 <ul className="space-y-2 text-xs text-gray-300">
                                     <li className="flex items-start gap-2 hover:text-white transition-colors duration-300">
-                                        <svg className="w-3.5 h-3.5 text-yellow-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        <svg className={`w-3.5 h-3.5 ${product.license === 'COMMERCIAL_USE' ? 'text-yellow-500' : 'text-red-500'} mt-0.5 flex-shrink-0`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            {product.license === 'COMMERCIAL_USE' ? (
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            ) : (
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            )}
                                         </svg>
-                                        <span>Commercial use</span>
+                                        <span>{product.license === 'COMMERCIAL_USE' ? 'Commercial use' : 'Personal use only'}</span>
                                     </li>
                                     <li className="flex items-start gap-2 hover:text-white transition-colors duration-300">
                                         <svg className="w-3.5 h-3.5 text-yellow-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">

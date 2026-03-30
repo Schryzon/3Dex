@@ -108,6 +108,9 @@ model Model {
   
   status      Model_Status @default(PENDING)
   is_nsfw     Boolean     @default(false)
+  license     License_Type @default(PERSONAL_USE)
+  is_printable Boolean     @default(true)
+  file_format String       @default("glb")
 
   artist_id String
   artist    User   @relation("artist_models", fields: [artist_id], references: [id])

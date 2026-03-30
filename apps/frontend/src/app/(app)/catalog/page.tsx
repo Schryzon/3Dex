@@ -173,29 +173,6 @@ function CatalogContent() {
 
     return (
         <div className="max-w-[1800px] mx-auto px-4 md:px-6 py-4">
-            {/* Search Bar */}
-            <form
-                onSubmit={handleSearchSubmit}
-                className="relative mb-4"
-            >
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-                <input
-                    type="text"
-                    value={localSearch}
-                    onChange={(e) => setLocalSearch(e.target.value)}
-                    placeholder="Search 3D models, textures, characters..."
-                    className="w-full pl-10 pr-10 py-2.5 bg-[#141414] border border-white/[0.07] rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-yellow-500/40 focus:border-yellow-500/30 transition-all text-sm"
-                />
-                {localSearch && (
-                    <button
-                        type="button"
-                        onClick={() => { setLocalSearch(''); router.push('/catalog'); }}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-white transition-colors"
-                    >
-                        <X className="w-4 h-4" />
-                    </button>
-                )}
-            </form>
 
             {/* Category Tabs */}
             <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide mb-4">
@@ -318,10 +295,9 @@ function CatalogContent() {
                             onClick={() => handleProductClick(product.id)}
                             price={product.price}
                             originalPrice={undefined}
-                            formats={product.fileFormat}
+                            formats={[product.fileFormat]}
                             rating={product.rating || 0}
                             reviewCount={product.reviewCount || 0}
-                            polyCount={product.polyCount?.toString() || 'N/A'}
                             viewMode={viewMode}
                         />
                     ))}
