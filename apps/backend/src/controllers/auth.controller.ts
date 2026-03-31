@@ -148,6 +148,17 @@ export async function complete_profile(req: any, res: Response) {
             },
         });
 
+        // Reissue the token with the fresh username
+        const token = sign_token({
+            id: updated.id,
+            email: updated.email,
+            username: updated.username,
+            role: updated.role,
+        });
+
+        // Update the session cookie
+        res.cookie("3dex_session", token, COOKIE_OPTIONS);
+
         res.json(await sign_user_urls(updated));
     } catch (error: any) {
         res.status(500).json({ message: error.message });
@@ -195,6 +206,17 @@ export async function get_me(req: any, res: Response) {
         if (!db_user) {
             return res.status(404).json({ message: "User not found" });
         }
+
+        // Reissue the token with the freshest user data
+        const token = sign_token({
+            id: db_user.id,
+            email: db_user.email,
+            username: db_user.username,
+            role: db_user.role,
+        });
+
+        // Update the session cookie
+        res.cookie("3dex_session", token, COOKIE_OPTIONS);
 
         res.json(await sign_user_urls(db_user));
     } catch (error: any) {
