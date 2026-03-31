@@ -78,7 +78,7 @@ export async function middleware(request: NextRequest) {
   if (isPublicPath(pathname)) {
     // Special case if authenticated and hitting '/', redirect to dashboard
     if (pathname === '/') {
-      const token = request.cookies.get('token')?.value;
+      const token = request.cookies.get('3dex_session')?.value;
       if (token && JWT_SECRET) {
         try {
           const secret = new TextEncoder().encode(JWT_SECRET);
@@ -86,7 +86,7 @@ export async function middleware(request: NextRequest) {
           return NextResponse.redirect(new URL('/dashboard', request.url));
         } catch {
           const res = NextResponse.next();
-          res.cookies.delete('token');
+          res.cookies.delete('3dex_session');
           return res;
         }
       }
@@ -94,7 +94,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = request.cookies.get('token')?.value;
+  const token = request.cookies.get('3dex_session')?.value;
 
   // No token not logged in redirect to /landing
   if (!token) {
@@ -114,7 +114,7 @@ export async function middleware(request: NextRequest) {
   } catch {
     // Invalid/expired token  treat as unauthenticated
     const res = NextResponse.redirect(new URL('/landing', request.url));
-    res.cookies.delete('token');
+    res.cookies.delete('3dex_session');
     return res;
   }
 
