@@ -36,7 +36,7 @@ export async function login(req: Request, res: Response) {
     });
 
     // Set the JWT as an HTTP-only cookie — JS cannot read this
-    res.cookie("token", token, COOKIE_OPTIONS);
+    res.cookie("3dex_session", token, COOKIE_OPTIONS);
 
     // Return only the user object; the token travels via cookie, not body
     res.json({
@@ -86,7 +86,7 @@ export async function google_auth(req: Request, res: Response) {
         });
 
         // Set the JWT as an HTTP-only cookie
-        res.cookie("token", token, COOKIE_OPTIONS);
+        res.cookie("3dex_session", token, COOKIE_OPTIONS);
 
         // Return the user object and whether this is a new account
         res.json({
@@ -157,11 +157,18 @@ export async function complete_profile(req: any, res: Response) {
 
 // Clear the auth cookie — effectively logs the user out
 export async function logout(req: Request, res: Response) {
-    res.clearCookie("token", {
+    res.clearCookie("3dex_session", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         domain: process.env.NODE_ENV === "production" ? ".3dex.studio" : undefined,
+    });
+    // Also try to clear any legacy domain-less ghost cookie
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        domain: undefined,
     });
     res.json({ message: "Logged out successfully" });
 }

@@ -12,7 +12,7 @@ export function require_auth(
   next: NextFunction,
 ) {
   // Cookie is automatically sent by the browser on every request
-  const token = (req.cookies as any)?.token;
+  const token = (req.cookies as any)?.['3dex_session'];
 
   if (!token) {
     return res.status(401).json({ message: "Missing token!" });
@@ -33,7 +33,7 @@ export function optional_auth(
   res: Response,
   next: NextFunction,
 ) {
-  const token = (req.cookies as any)?.token;
+  const token = (req.cookies as any)?.['3dex_session'];
 
   if (token) {
     try {
