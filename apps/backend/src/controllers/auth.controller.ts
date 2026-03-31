@@ -10,6 +10,7 @@ const COOKIE_OPTIONS = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax" as const,
+    domain: process.env.NODE_ENV === "production" ? ".3dex.studio" : undefined,
     // 7 days in milliseconds
     maxAge: 7 * 24 * 60 * 60 * 1000,
 };
@@ -160,6 +161,7 @@ export async function logout(req: Request, res: Response) {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
+        domain: process.env.NODE_ENV === "production" ? ".3dex.studio" : undefined,
     });
     res.json({ message: "Logged out successfully" });
 }
