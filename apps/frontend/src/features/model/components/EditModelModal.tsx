@@ -99,16 +99,16 @@ export default function EditModelModal({ model, onClose }: EditModelModalProps) 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-400 mb-1.5">
-                                    Price <span className="text-gray-600">(0 = Free)</span>
+                                    Price (IDR) <span className="text-gray-600">(0 = Free)</span>
                                 </label>
                                 <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">Rp</span>
                                     <input
                                         type="number"
                                         min={0}
-                                        step={0.01}
+                                        step={1}
                                         value={form.price}
-                                        onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })}
+                                        onChange={(e) => setForm({ ...form, price: Math.max(0, Math.floor(Number(e.target.value) || 0)) })}
                                         className="w-full bg-black/50 text-white pl-7 pr-4 py-3 rounded-xl border border-gray-800 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-400/10 transition-all text-sm"
                                     />
                                 </div>

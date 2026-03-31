@@ -17,11 +17,11 @@ export default function SocialProof() {
     return (
         <div className="relative bg-[#080808] overflow-hidden py-6">
 
-            {/* Top border — subtle yellow tint */}
+            {/* Top border subtle yellow tint */}
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400/20 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
 
-            {/* Fade edges — outside overflow-hidden wrapper so they're not clipped */}
+            {/* Fade edges outside overflow-hidden wrapper so they're not clipped */}
             <div className="absolute left-0 top-0 bottom-0 w-40 bg-gradient-to-r from-[#080808] via-[#080808]/80 to-transparent z-10 pointer-events-none" />
             <div className="absolute right-0 top-0 bottom-0 w-40 bg-gradient-to-l from-[#080808] via-[#080808]/80 to-transparent z-10 pointer-events-none" />
 

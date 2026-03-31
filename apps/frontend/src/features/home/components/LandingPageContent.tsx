@@ -10,7 +10,7 @@ import FeaturesSection from '@/features/home/components/FeaturesSection';
 
 export default function LandingPageContent() {
   return (
-    <>
+    <main id="main-content">
       <Hero />
       <FeaturedCategories />
       <SocialProof />
@@ -18,6 +18,6 @@ export default function LandingPageContent() {
       <HowItWorks />
       <BecomeArtist />
       <FeaturesSection />
-    </>
+    </main>
   );
 }

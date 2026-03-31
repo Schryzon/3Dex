@@ -524,7 +524,15 @@ function ProfileContent() {
                 social_artstation: formData.socialLinks.artstation,
                 social_behance: formData.socialLinks.behance,
             };
-            const res = await api.patch(API_ENDPOINTS.USERS.UPDATE, payload);
+            let res;
+            try {
+                res = await api.patch(API_ENDPOINTS.USERS.UPDATE, payload);
+            } catch (patchError: any) {
+                const status = patchError?.response?.status;
+                const shouldFallback = !status || status === 403 || status === 405 || status === 501;
+                if (!shouldFallback) throw patchError;
+                res = await api.post('/users/profile/update', payload);
+            }
             setUser(res.data);
             showBannerNotif('success', 'Profile saved successfully!');
         } catch (error: any) {
@@ -576,7 +584,15 @@ function ProfileContent() {
             });
 
             const payload = type === 'avatar' ? { avatar_url: key } : { banner_url: key };
-            const res = await api.patch(API_ENDPOINTS.USERS.UPDATE, payload);
+            let res;
+            try {
+                res = await api.patch(API_ENDPOINTS.USERS.UPDATE, payload);
+            } catch (patchError: any) {
+                const status = patchError?.response?.status;
+                const shouldFallback = !status || status === 403 || status === 405 || status === 501;
+                if (!shouldFallback) throw patchError;
+                res = await api.post('/users/profile/update', payload);
+            }
             setUser(res.data);
             showBannerNotif('success', `${type.charAt(0).toUpperCase() + type.slice(1)} updated!`);
         } catch (error: any) {
@@ -912,26 +928,18 @@ function ProfileContent() {
                                         <div className="absolute inset-0 bg-black/40" />
                                     </div>
 
-                                    {/* Banner Upload Button */}
-                                    <button
-                                        onClick={() => bannerInputRef.current?.click()}
-                                        disabled={isUploadingBanner}
-                                        className="absolute top-4 right-4 z-20 px-3 py-1.5 bg-black/60 cursor-pointer hover:bg-black/80 backdrop-blur-md border border-white/10 text-white text-xs font-bold rounded-lg flex items-center gap-2 transition-all opacity-100 sm:opacity-0 sm:group-hover/banner:opacity-100"
-                                    >
-                                        {isUploadingBanner ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
-                                        Change Banner
-                                    </button>
 
                                     <div className="relative z-10 group/avatar">
                                         <UserAvatar user={user} size="xl" className="border-4 cursor-pointer border-gray-800 shadow-2xl transition-transform group-hover/avatar:scale-105" />
                                         <button
                                             onClick={() => fileInputRef.current?.click()}
                                             disabled={isUploadingAvatar}
-                                            className="absolute bottom-2 cursor-pointer right-2 w-10 h-10 bg-yellow-400 hover:bg-yellow-300 disabled:bg-gray-600 text-black rounded-full flex items-center justify-center shadow-lg transition-all transform scale-0 group-hover/avatar:scale-100"
+                                            aria-label="Change avatar"
+                                            className="absolute bottom-1 right-1 cursor-pointer w-7 h-7 bg-yellow-400 hover:bg-yellow-300 disabled:bg-gray-600 text-black rounded-full flex items-center justify-center shadow-md transition-all active:scale-95"
                                         >
                                             {isUploadingAvatar
-                                                ? <Loader2 className="w-5 h-5 animate-spin" />
-                                                : <Camera className="w-5 h-5" />}
+                                                ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                : <Camera className="w-3.5 h-3.5" />}
                                         </button>
                                     </div>
                                     <div className="relative z-10 flex-1 text-center md:text-left">

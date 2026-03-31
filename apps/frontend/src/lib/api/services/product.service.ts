@@ -20,10 +20,11 @@ export const productKeys = {
 
 /**
  * When true: catalog/cart use mocks (localStorage cart; checkout returns a fake Snap token).
- * For real purchases against the API and Midtrans, set to `false` and configure env below.
+ * Automatically disabled in production. Only active in development.
  * @see apps/frontend/.env.local.example
  */
-export const USE_MOCK_DATA = false;
+export const USE_MOCK_DATA = process.env.NODE_ENV !== 'production' && false;
+
 
 
 const mapModel = (item: any): Model => ({

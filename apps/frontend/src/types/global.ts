@@ -56,3 +56,32 @@ export interface ModelFilters {
     page?: number;
     limit?: number;
 }
+
+export interface PublicAnalyticsStats {
+    models: number;
+    customers: number;
+    artists: number;
+    providers: number;
+}
+
+export interface ArtistRecentSale {
+    id: string;
+    created_at: string;
+    price_paid: number;
+    model: { title: string };
+    user: { username: string };
+}
+
+export interface ArtistTopModel {
+    id: string;
+    title: string;
+    sales: number;
+}
+
+export interface ArtistAnalyticsStats {
+    total_sales: number;
+    total_earnings: number;
+    recent_sales: ArtistRecentSale[];
+    sales_by_month: Record<string, number>;
+    top_models: ArtistTopModel[];
+}

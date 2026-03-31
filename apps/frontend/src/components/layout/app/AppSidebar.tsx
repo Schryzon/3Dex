@@ -102,22 +102,25 @@ export default function AppSidebar({
         {/* Toggle Sidebar (Desktop) */}
         <button
           onClick={() => setSidebarOpen(!isSidebarOpen)}
+          aria-label={isSidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+          aria-expanded={isSidebarOpen}
           className={`hidden lg:flex items-center justify-center transition-colors cursor-pointer text-gray-500 hover:text-white hover:bg-white/[0.04] rounded-lg p-2 ${!isSidebarOpen ? 'absolute left-1/2 -translate-x-1/2' : ''}`}
         >
-          {isSidebarOpen ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeftOpen className="w-5 h-5" />}
+          {isSidebarOpen ? <PanelLeftClose className="w-5 h-5" aria-hidden="true" /> : <PanelLeftOpen className="w-5 h-5" aria-hidden="true" />}
         </button>
 
         {/* Close Sidebar (Mobile) */}
         <button
           className="lg:hidden text-gray-500 hover:text-white p-2"
           onClick={() => setMobileOpen(false)}
+          aria-label="Close sidebar"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5" aria-hidden="true" />
         </button>
       </div>
 
       {/* Navigation Areas */}
-      <nav className={`flex-1 overflow-y-auto py-4 space-y-6 scrollbar-hide ${isSidebarOpen ? 'px-3' : 'px-2'}`}>
+      <nav aria-label="App navigation" className={`flex-1 overflow-y-auto py-4 space-y-6 scrollbar-hide ${isSidebarOpen ? 'px-3' : 'px-2'}`}>
 
         {/* Main Menu */}
         <SidebarSection label="Main Menu" isVisible={isSidebarOpen}>
@@ -163,9 +166,10 @@ export default function AppSidebar({
               <button
                 onClick={handleLogout}
                 title={!isSidebarOpen ? "Log Out" : undefined}
+                aria-label="Log out"
                 className={`w-full flex items-center ${isSidebarOpen ? 'justify-start px-3' : 'justify-center px-2'} py-2.5 rounded-lg text-red-500/70 hover:bg-red-500/10 hover:text-red-500 transition-all overflow-hidden whitespace-nowrap cursor-pointer font-medium`}
               >
-                <LogOut className="w-5 h-5 shrink-0" />
+                <LogOut className="w-5 h-5 shrink-0" aria-hidden="true" />
                 <span className={`transition-all duration-300 ${!isSidebarOpen ? 'hidden w-0 opacity-0' : 'opacity-100 ml-3'}`}>
                   Log Out
                 </span>

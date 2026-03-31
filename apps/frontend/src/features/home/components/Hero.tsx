@@ -51,7 +51,7 @@ export default function Hero() {
         <p
           className="text-base md:text-lg text-white/70 max-w-lg leading-relaxed mb-10"
           style={fadeIn(visible, 0.22)}>
-          From game-ready models to studio-quality textures — discover, trade, and distribute
+          From game-ready models to studio-quality textures discover, trade, and distribute
           3D assets with the community that powers modern digital creation.
         </p>
 

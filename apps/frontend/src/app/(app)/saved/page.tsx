@@ -330,7 +330,7 @@ export default function SavedPage() {
                             {filteredWishlist.map((item: any) => {
                                 const model = item.model || {};
                                 const modelId = item.model_id || item.modelId;
-                                const thumb = model.preview_url || (model.thumbnails?.[0] || '/placeholder.jpg');
+                                const thumb = getStorageUrl(model.preview_url || model.thumbnails?.[0]) || '/placeholder.jpg';
                                 const price = model.price || 0;
                                 return (
                                     <div key={item.id || modelId} className="group relative bg-[#111111] rounded-2xl border border-gray-800/60 hover:border-yellow-400/40 overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-yellow-400/5">

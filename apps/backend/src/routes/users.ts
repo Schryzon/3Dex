@@ -44,6 +44,8 @@ router.get("/", require_auth, require_admin, list_users);
  *         description: Profile updated
  */
 router.patch("/profile", require_auth, update_profile);
+// Fallback for proxies/CDN rules that block PATCH preflight.
+router.post("/profile/update", require_auth, update_profile);
 
 /**
  * @openapi

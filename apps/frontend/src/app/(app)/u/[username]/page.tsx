@@ -139,11 +139,24 @@ export default function PublicProfilePage() {
                 throw new Error(`Upload failed with status: ${uploadRes.status}`);
             }
 
-            await api.patch('/users/profile', { banner_url: key });
+            try {
+                await api.patch('/users/profile', { banner_url: key });
+            } catch (patchError: any) {
+                const status = patchError?.response?.status;
+                const shouldFallback = !status || status === 403 || status === 405 || status === 501;
+                if (!shouldFallback) {
+                    throw patchError;
+                }
+                await api.post('/users/profile/update', { banner_url: key });
+            }
             await refetchUser();
         } catch (error: any) {
             console.error('Failed to upload banner:', error);
-            setUploadError(error.message || 'Failed to upload banner. Please try again.');
+            setUploadError(
+                error.response?.data?.message ||
+                error.message ||
+                'Failed to upload banner. Please verify API domain/CORS in production.'
+            );
         } finally {
             setIsUploadingBanner(false);
         }
@@ -192,16 +205,10 @@ export default function PublicProfilePage() {
             {/* Header / Navigation */}
             <div className="bg-[#0a0a0a]/80 backdrop-blur-md border-b border-white/5 sticky top-0 z-30">
                 <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-                    <button
-                        onClick={() => router.back()}
-                        className="flex items-center gap-2 text-gray-400 hover:text-yellow-400 transition-colors group text-sm font-medium"
-                    >
-                        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                        Back
-                    </button>
+                    
                     <Breadcrumbs
                         items={[
-                            { label: 'Users', href: '/catalog' },
+                            { label: 'Community', href: '/community' },
                             { label: `@${username}`, active: true }
                         ]}
                     />
@@ -237,7 +244,7 @@ export default function PublicProfilePage() {
                             <span>{isUploadingBanner ? 'Uploading...' : 'Change Banner'}</span>
                         </button>
 
-                        {/* Mobile Version: Pencil icon on the left */}
+                        {/* Change banner button for mobile */}
                         <button
                             onClick={() => bannerInputRef.current?.click()}
                             disabled={isUploadingBanner}
@@ -247,7 +254,7 @@ export default function PublicProfilePage() {
                         </button>
                     </>
                 )}
-                
+
                 {/* Error Banner */}
                 {uploadError && (
                     <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 px-4 py-2 bg-red-500 text-white text-sm font-bold rounded-xl shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-top-2">

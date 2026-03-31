@@ -1,4 +1,10 @@
 import prisma from "../prisma";
+import { get_download_url_s3, sign_user_urls } from "./storage.service";
+
+async function sign_preview(preview_url?: string | null) {
+    if (!preview_url || preview_url.startsWith("http")) return preview_url;
+    return get_download_url_s3(preview_url);
+}
 
 /**
  * Create a new collection
@@ -18,7 +24,7 @@ export async function create_collection(user_id: string, name: string, desc?: st
  * Get collections for a user
  */
 export async function get_user_collections(user_id: string){
-    return prisma.collection.findMany({
+    const collections = await prisma.collection.findMany({
         where: { user_id },
         include: {
             _count: {
@@ -36,13 +42,27 @@ export async function get_user_collections(user_id: string){
         },
         orderBy: { created_at: 'desc' }
     });
+    return Promise.all(
+        collections.map(async (collection) => ({
+            ...collection,
+            items: await Promise.all(
+                collection.items.map(async (item) => ({
+                    ...item,
+                    model: {
+                        ...item.model,
+                        preview_url: await sign_preview(item.model?.preview_url),
+                    },
+                }))
+            ),
+        }))
+    );
 }
 
 /**
  * Get public collections for a user
  */
 export async function get_public_collections(user_id: string){
-    return prisma.collection.findMany({
+    const collections = await prisma.collection.findMany({
         where: { user_id, is_public: true },
         include: {
             _count: {
@@ -60,13 +80,27 @@ export async function get_public_collections(user_id: string){
         },
         orderBy: { created_at: 'desc' }
     });
+    return Promise.all(
+        collections.map(async (collection) => ({
+            ...collection,
+            items: await Promise.all(
+                collection.items.map(async (item) => ({
+                    ...item,
+                    model: {
+                        ...item.model,
+                        preview_url: await sign_preview(item.model?.preview_url),
+                    },
+                }))
+            ),
+        }))
+    );
 }
 
 /**
  * Get detailed collection info
  */
 export async function get_collection_details(coll_id: string){
-    return prisma.collection.findUnique({
+    const collection = await prisma.collection.findUnique({
         where: { id: coll_id },
         include: {
             user: { select: { username: true, display_name: true, avatar_url: true } },
@@ -86,6 +120,20 @@ export async function get_collection_details(coll_id: string){
             }
         }
     });
+    if (!collection) return collection;
+    return {
+        ...collection,
+        user: await sign_user_urls(collection.user),
+        items: await Promise.all(
+            collection.items.map(async (item) => ({
+                ...item,
+                model: {
+                    ...item.model,
+                    preview_url: await sign_preview(item.model?.preview_url),
+                },
+            }))
+        ),
+    };
 }
 
 /**

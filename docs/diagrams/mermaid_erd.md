@@ -41,12 +41,15 @@ erDiagram
         String id PK
         String title
         String description
-        Int price
+        Int price "in IDR"
         String file_url
         String preview_url
         String array_gallery_urls
         Model_Status status
         Boolean is_nsfw
+        License_Type license
+        Boolean is_printable
+        String file_format
         String artist_id FK
         String category_id FK
         Float avg_rating
@@ -122,7 +125,8 @@ erDiagram
         String id PK
         String order_id FK
         String model_id FK
-        Int price
+        Int price "unit price in IDR"
+        Int quantity
         Json print_config
         Print_Status print_status
         DateTime created_at

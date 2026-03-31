@@ -84,16 +84,17 @@ export default function AppTopbar({
     };
   }, [isAvatarDropdownOpen, setAvatarDropdownOpen]);
   return (
-    <header className="sticky top-0 z-30 bg-[#111]/95 backdrop-blur-sm border-b border-white/[0.06]">
+    <header aria-label="App header" className="sticky top-0 z-30 bg-[#111]/95 backdrop-blur-sm border-b border-white/[0.06]">
       <div className="h-14 flex items-center justify-between px-4 md:px-6">
 
         {/* Mobile Logo & Menu Toggle */}
         <div className="flex items-center gap-3 lg:hidden">
           <button
             onClick={() => setMobileOpen(true)}
+            aria-label="Open navigation menu"
             className="p-2 -ml-2 text-gray-500 hover:text-white cursor-pointer"
           >
-            <Menu className="w-6 h-6" />
+            <Menu className="w-6 h-6" aria-hidden="true" />
           </button>
           <Link href={ROUTES.PUBLIC.LANDING} className="flex items-center gap-2">
             <div className="w-8 h-8 flex items-center justify-center">
@@ -103,9 +104,9 @@ export default function AppTopbar({
         </div>
 
         {/* Global Search — Desktop */}
-        <form onSubmit={handleSearch} className="flex-1 max-w-2xl mx-4 hidden md:block">
+        <form onSubmit={handleSearch} role="search" aria-label="Search assets" className="flex-1 max-w-2xl mx-4 hidden md:block">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" aria-hidden="true" />
             <input
               type="text"
               value={searchQuery}
@@ -141,8 +142,8 @@ export default function AppTopbar({
           </button>
 
           {/* Cart */}
-          <ProtectedLink href={ROUTES.USER.CART} className="p-2 text-gray-500 hover:text-white relative transition-colors">
-            <ShoppingCart className="w-5 h-5" />
+          <ProtectedLink href={ROUTES.USER.CART} aria-label={`Shopping cart${cartItemsCount > 0 ? `, ${cartItemsCount} items` : ''}`} className="p-2 text-gray-500 hover:text-white relative transition-colors">
+            <ShoppingCart className="w-5 h-5" aria-hidden="true" />
             {mounted && cartItemsCount > 0 && (
               <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-yellow-400 text-black text-[10px] font-bold rounded-full flex items-center justify-center">
                 {cartItemsCount}
@@ -154,6 +155,9 @@ export default function AppTopbar({
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setAvatarDropdownOpen(!isAvatarDropdownOpen)}
+                aria-label="User menu"
+                aria-expanded={isAvatarDropdownOpen}
+                aria-haspopup="true"
                 className="flex items-center gap-1.5 hover:opacity-80 transition-opacity cursor-pointer"
               >
                 <div className="relative">

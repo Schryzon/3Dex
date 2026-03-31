@@ -143,6 +143,12 @@ export default function CatalogDetailPage() {
     const artistAvatarUrl = product.artist?.avatar_url;
     const artistInitial = artistUsername?.[0]?.toUpperCase() || '?';
 
+    const statusLabelMap: Record<string, string> = {
+        APPROVED: 'Verified',
+        PENDING: 'Pending',
+        REJECTED: 'Rejected',
+    };
+
     return (
         <div className="min-h-screen bg-black text-white">
             <div className="border-b border-gray-900">
@@ -288,7 +294,7 @@ export default function CatalogDetailPage() {
                             <div>
                                 <div className="flex items-center gap-2 mb-3">
                                     <span className="px-2.5 py-1 bg-yellow-500/10 text-yellow-500 text-xs font-medium rounded border border-yellow-500/20">
-                                        {product.status === 'APPROVED' ? 'Verified' : 'Pending'}
+                                        {statusLabelMap[product.status] ?? 'Unknown'}
                                     </span>
                                     <span className="text-xs text-gray-500">{product.category}</span>
                                 </div>

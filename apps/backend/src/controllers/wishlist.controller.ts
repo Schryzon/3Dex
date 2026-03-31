@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import prisma from "../prisma";
 import { Auth_Request } from "../middlewares/auth.middleware";
+import { get_download_url_s3 } from "../services/storage.service";
 
 // POST /wishlist/:model_id
 export async function add_to_wishlist(req: Auth_Request, res: Response) {
@@ -58,7 +59,21 @@ export async function get_my_wishlist(req: Auth_Request, res: Response) {
                 }
             }
         });
-        res.json(items);
+        const signed_items = await Promise.all(
+            items.map(async (item) => {
+                if (!item.model?.preview_url || item.model.preview_url.startsWith("http")) {
+                    return item;
+                }
+                return {
+                    ...item,
+                    model: {
+                        ...item.model,
+                        preview_url: await get_download_url_s3(item.model.preview_url),
+                    },
+                };
+            })
+        );
+        res.json(signed_items);
     } catch (error: any) {
         res.status(500).json({ message: error.message });
     }

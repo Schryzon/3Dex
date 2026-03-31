@@ -1,5 +1,6 @@
 import prisma from "../prisma";
 import { create_snap_transaction, verify_signature } from "./midtrans.service";
+import { get_download_url_s3 } from "./storage.service";
 
 export type CheckoutLine = { model_id: string; quantity: number };
 
@@ -195,7 +196,7 @@ export async function handle_payment_webhook(notification: any) {
 }
 
 export async function get_user_orders(user_id: string) {
-    return prisma.order.findMany({
+    const orders = await prisma.order.findMany({
         where: { user_id },
         include: {
             items: {
@@ -220,4 +221,24 @@ export async function get_user_orders(user_id: string) {
             created_at: 'desc'
         }
     });
+
+    return Promise.all(
+        orders.map(async (order) => ({
+            ...order,
+            items: await Promise.all(
+                order.items.map(async (item) => {
+                    if (!item.model?.preview_url || item.model.preview_url.startsWith("http")) {
+                        return item;
+                    }
+                    return {
+                        ...item,
+                        model: {
+                            ...item.model,
+                            preview_url: await get_download_url_s3(item.model.preview_url),
+                        },
+                    };
+                })
+            ),
+        }))
+    );
 }

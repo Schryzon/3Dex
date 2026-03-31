@@ -1,4 +1,5 @@
 import prisma from "../prisma";
+import { get_download_url_s3 } from "./storage.service";
 
 export async function create_purchase(data: {
   user_id: string;
@@ -27,7 +28,7 @@ export async function get_purchase(user_id: string, model_id: string) {
 }
 
 export async function get_user_purchases(user_id: string) {
-  return prisma.purchase.findMany({
+  const purchases = await prisma.purchase.findMany({
     where: { user_id },
     orderBy: { created_at: "desc" },
     select: {
@@ -44,4 +45,15 @@ export async function get_user_purchases(user_id: string) {
       },
     },
   });
+  return Promise.all(
+    purchases.map(async (purchase) => ({
+      ...purchase,
+      model: purchase.model?.preview_url && !purchase.model.preview_url.startsWith("http")
+        ? {
+          ...purchase.model,
+          preview_url: await get_download_url_s3(purchase.model.preview_url),
+        }
+        : purchase.model,
+    }))
+  );
 }

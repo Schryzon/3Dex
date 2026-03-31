@@ -174,6 +174,9 @@ function CatalogContent() {
     return (
         <div className="max-w-[1800px] mx-auto px-4 md:px-6 py-4">
 
+
+            <h1 className="sr-only">3D Asset Catalog, Browse Models, Textures & More</h1>
+
             {/* Category Tabs */}
             <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide mb-4">
                 {CATEGORIES.map((category) => (

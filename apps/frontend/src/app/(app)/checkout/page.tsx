@@ -497,7 +497,7 @@ export default function CheckoutPage() {
                                             {formatPrice(total).idr}
                                         </p>
                                         <p className="text-[12px] font-mono text-white/30 mt-1.5">
-                                            ≈ ${formatPrice(total).usd}
+                                            ≈ {formatPrice(total).usd}
                                         </p>
                                     </div>
                                 </div>
