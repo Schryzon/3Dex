@@ -103,3 +103,98 @@ export async function get_artist_stats(req: Auth_Request, res: Response) {
         res.status(500).json({ message: error.message });
     }
 }
+
+export async function get_provider_stats(req: Auth_Request, res: Response) {
+    const user_id = req.user.id;
+
+    try {
+        // 1. Total print jobs (orders assigned to this provider)
+        const total_jobs = await prisma.order.count({
+            where: { provider_id: String(user_id) }
+        });
+
+        // 2. Completed jobs
+        const completed_jobs = await prisma.order.count({
+            where: {
+                provider_id: String(user_id),
+                status: 'PAID'
+            }
+        });
+
+        // 3. Total Earnings
+        const provider_orders = await prisma.order.findMany({
+            where: {
+                provider_id: String(user_id),
+                status: 'PAID'
+            },
+            select: { total_amount: true }
+        });
+        const total_earnings = provider_orders.reduce((sum, o) => sum + o.total_amount, 0);
+
+        // 4. Jobs by status
+        const pending_jobs = await prisma.order.count({
+            where: { provider_id: String(user_id), status: 'PENDING' }
+        });
+        const failed_jobs = await prisma.order.count({
+            where: { provider_id: String(user_id), status: 'FAILED' }
+        });
+
+        // 5. Recent Orders
+        const recent_orders = await prisma.order.findMany({
+            where: { provider_id: String(user_id) },
+            orderBy: { created_at: 'desc' },
+            take: 5,
+            include: {
+                user: { select: { username: true } },
+                items: {
+                    select: {
+                        price: true,
+                        print_status: true,
+                        model: { select: { title: true } }
+                    }
+                }
+            }
+        });
+
+        // 6. Monthly Earnings (Last 12 months)
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+        const lastYearOrders = await prisma.order.findMany({
+            where: {
+                provider_id: String(user_id),
+                status: 'PAID',
+                created_at: { gte: oneYearAgo }
+            },
+            select: { created_at: true, total_amount: true }
+        });
+
+        const earnings_by_month: Record<string, number> = {};
+        lastYearOrders.forEach(o => {
+            const month = o.created_at.toISOString().slice(0, 7);
+            earnings_by_month[month] = (earnings_by_month[month] || 0) + o.total_amount;
+        });
+
+        // 7. Average rating & review count
+        const user_data = await prisma.user.findUnique({
+            where: { id: String(user_id) },
+            select: { rating: true, review_count: true }
+        });
+
+        res.json({
+            total_jobs,
+            completed_jobs,
+            pending_jobs,
+            failed_jobs,
+            total_earnings,
+            completion_rate: total_jobs > 0 ? Math.round((completed_jobs / total_jobs) * 100) : 0,
+            recent_orders,
+            earnings_by_month,
+            rating: user_data?.rating || 0,
+            review_count: user_data?.review_count || 0,
+        });
+
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
+}

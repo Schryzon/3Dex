@@ -24,6 +24,13 @@ import Link from 'next/link';
 import { adminService } from '@/lib/api/services/admin.service';
 import { formatPrice } from '@/lib/utils';
 
+
+interface DashboardSummary {
+    counts: { models: number; users: number; reports: number };
+    recent: { models: any; users: any; reports: any };
+    stats: any;
+}
+
 export default function AdminDashboardPage() {
     const { user, isLoading } = useAuth();
     const router = useRouter();
@@ -34,9 +41,9 @@ export default function AdminDashboardPage() {
         }
     }, [user, isLoading, router]);
 
-    const { data: summary, isLoading: isLoadingSummary } = useQuery({
+    const { data: summary, isLoading: isLoadingSummary } = useQuery<DashboardSummary>({
         queryKey: ['admin-dashboard-summary'],
-        queryFn: () => adminService.getDashboardSummary(),
+        queryFn: () => adminService.getDashboardSummary() as Promise<DashboardSummary>,
         enabled: user?.role === 'ADMIN',
     });
 
@@ -48,10 +55,10 @@ export default function AdminDashboardPage() {
         );
     }
 
-    const stats = [
+    const stats: any[] = [
         {
             label: 'Pending Models',
-            value: summary?.counts?.models ?? '—',
+            value: summary?.counts?.models != null ? `${summary.counts.models}` : '—',
             icon: FileText,
             color: 'text-yellow-400',
             bg: 'bg-yellow-400/10',
@@ -60,7 +67,7 @@ export default function AdminDashboardPage() {
         },
         {
             label: 'Pending Users',
-            value: summary?.counts?.users ?? '—',
+            value: summary?.counts?.users != null ? `${summary.counts.users}` : '—',
             icon: Users,
             color: 'text-blue-400',
             bg: 'bg-blue-400/10',
@@ -69,7 +76,7 @@ export default function AdminDashboardPage() {
         },
         {
             label: 'Content Reports',
-            value: summary?.counts?.reports ?? '—',
+            value: summary?.counts?.reports != null ? `${summary.counts.reports}` : '—',
             icon: AlertCircle,
             color: 'text-red-400',
             bg: 'bg-red-400/10',
@@ -78,10 +85,10 @@ export default function AdminDashboardPage() {
         },
     ];
 
-    const platformStats = [
-        { label: 'Total Models', value: summary?.stats?.total_models ?? '0', icon: Package, color: 'text-emerald-400' },
-        { label: 'Total Users', value: summary?.stats?.total_users ?? '0', icon: Users, color: 'text-indigo-400' },
-        { label: 'Recent Sales', value: summary?.stats?.total_transactions ?? '0', icon: ShoppingCart, color: 'text-pink-400' },
+    const platformStats: any[] = [
+        { label: 'Total Models', value: summary?.stats?.total_models != null ? `${summary.stats.total_models}` : '0', icon: Package, color: 'text-emerald-400' },
+        { label: 'Total Users', value: summary?.stats?.total_users != null ? `${summary.stats.total_users}` : '0', icon: Users, color: 'text-indigo-400' },
+        { label: 'Total Sales', value: summary?.stats?.total_sales != null ? `${summary.stats.total_sales}` : '0', icon: ShoppingCart, color: 'text-sky-400' },
     ];
 
     return (
@@ -101,7 +108,7 @@ export default function AdminDashboardPage() {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                {stats.map((stat) => (
+                {(stats as any).map((stat: any) => (
                     <Link
                         key={stat.label}
                         href={stat.href}
@@ -122,7 +129,7 @@ export default function AdminDashboardPage() {
 
             {/* Platform Stats Row */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                {platformStats.map((stat) => (
+                {(platformStats as any).map((stat: any) => (
                     <div key={stat.label} className="bg-[#141414] border border-gray-800/50 p-6 rounded-2xl flex items-center gap-4">
                         <div className={`p-4 bg-white/2 rounded-2xl ${stat.color}`}>
                             <stat.icon className="w-6 h-6" />
@@ -251,20 +258,20 @@ export default function AdminDashboardPage() {
                     </div>
 
                     {/* Quick Stats Summary Widget */}
-                    <div className="bg-gradient-to-br from-indigo-600 to-purple-700 p-6 rounded-3xl shadow-xl shadow-indigo-500/10">
+                    <div className="bg-gradient-to-br from-[#1a1a2e] to-[#141414] p-6 rounded-3xl shadow-xl border border-gray-800">
                         <div className="flex items-center justify-between mb-6">
-                            <TrendingUp className="w-6 h-6 text-white" />
-                            <span className="px-2 py-1 bg-white/20 rounded-lg text-[10px] font-bold text-white uppercase tracking-widest">7 Day Stats</span>
+                            <TrendingUp className="w-6 h-6 text-yellow-400" />
+                            <span className="px-2 py-1 bg-yellow-400/10 border border-yellow-400/20 rounded-lg text-[10px] font-bold text-yellow-400 uppercase tracking-widest">7 Day Stats</span>
                         </div>
                         <div className="space-y-4">
                             <div className="flex justify-between items-end">
-                                <p className="text-white/60 text-xs font-bold font-mono">GROSS VOLUME</p>
+                                <p className="text-gray-400 text-xs font-bold font-mono">GROSS VOLUME</p>
                                 <p className="text-white text-xl font-black">Rp 12.4M</p>
                             </div>
-                            <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden">
-                                <div className="bg-white h-full w-[65%]" />
+                            <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+                                <div className="bg-yellow-400 h-full w-[65%]" />
                             </div>
-                            <p className="text-white/40 text-[9px] font-bold line-clamp-1">Simulated data for visual guide. Actual sync pending live sales stream.</p>
+                            <p className="text-gray-600 text-[9px] font-bold line-clamp-1">Simulated data for visual guide. Actual sync pending live sales stream.</p>
                         </div>
                     </div>
                 </div>

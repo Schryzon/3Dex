@@ -85,3 +85,29 @@ export interface ArtistAnalyticsStats {
     sales_by_month: Record<string, number>;
     top_models: ArtistTopModel[];
 }
+
+export interface ProviderRecentOrder {
+    id: string;
+    created_at: string;
+    total_amount: number;
+    status: string;
+    user: { username: string };
+    items: {
+        price: number;
+        print_status: string;
+        model: { title: string } | null;
+    }[];
+}
+
+export interface ProviderAnalyticsStats {
+    total_jobs: number;
+    completed_jobs: number;
+    pending_jobs: number;
+    failed_jobs: number;
+    total_earnings: number;
+    completion_rate: number;
+    recent_orders: ProviderRecentOrder[];
+    earnings_by_month: Record<string, number>;
+    rating: number;
+    review_count: number;
+}

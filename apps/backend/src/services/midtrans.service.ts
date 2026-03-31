@@ -36,6 +36,11 @@ export async function create_snap_transaction(order_id: string, gross_amount: nu
         credit_card: {
             secure: true,
         },
+        enabled_payments: [
+            "credit_card", "bca_va", "bni_va", "bri_va", "permata_va",
+            "other_va", "gopay", "shopeepay", "dana", "ovo", "linkaja",
+            "qris", "cstore", "akulaku",
+        ],
     };
 
     try {

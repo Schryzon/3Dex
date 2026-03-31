@@ -100,7 +100,7 @@ export default function RootLayout({
           data-client-key={process.env.NODE_ENV === 'production'
             ? process.env.NEXT_PUBLIC_PROD_MIDTRANS_CLIENT_KEY
             : process.env.NEXT_PUBLIC_SB_MIDTRANS_CLIENT_KEY}
-          strategy="lazyOnload"
+          strategy="afterInteractive"
         />
       </body>
     </html>

@@ -28,6 +28,7 @@ import {
     Package,
     FolderOpen,
     Pencil,
+    Check,
 } from 'lucide-react';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import ImageCropModal from '@/components/common/ImageCropModal';
@@ -49,6 +50,7 @@ export default function PublicProfilePage() {
         aspect: number;
     }>({ isOpen: false, image: '', aspect: 16 / 5 });
     const [activeTab, setActiveTab] = useState<'models' | 'posts' | 'collections'>('models');
+    const [shareSuccess, setShareSuccess] = useState(false);
 
     const { data: user, isLoading, error, refetch: refetchUser } = useQuery({
         queryKey: ['user', username],
@@ -99,6 +101,27 @@ export default function PublicProfilePage() {
             unfollowMutation.mutate();
         } else {
             followMutation.mutate();
+        }
+    };
+
+    const handleShare = async () => {
+        const url = window.location.href;
+        const title = `${user?.display_name || user?.username} on 3Dēx`;
+        try {
+            if (navigator.share) {
+                await navigator.share({ title, url });
+            } else {
+                await navigator.clipboard.writeText(url);
+                setShareSuccess(true);
+                setTimeout(() => setShareSuccess(false), 2000);
+            }
+        } catch (err) {
+            // User cancelled share or clipboard failed — try fallback
+            try {
+                await navigator.clipboard.writeText(url);
+                setShareSuccess(true);
+                setTimeout(() => setShareSuccess(false), 2000);
+            } catch {}
         }
     };
 
@@ -346,8 +369,16 @@ export default function PublicProfilePage() {
                                 Request Print
                             </Link>
                         )}
-                        <button className="p-2 md:p-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-xl border border-gray-700 transition-all shrink-0">
-                            <Share2 className="w-4 h-4 md:w-5 md:h-5" />
+                        <button
+                            onClick={handleShare}
+                            title={shareSuccess ? 'Link copied!' : 'Share profile'}
+                            className={`p-2 md:p-2.5 ${shareSuccess ? 'bg-green-600 border-green-500' : 'bg-gray-800 hover:bg-gray-700 border-gray-700'} text-white rounded-xl border transition-all shrink-0`}
+                        >
+                            {shareSuccess ? (
+                                <Check className="w-4 h-4 md:w-5 md:h-5" />
+                            ) : (
+                                <Share2 className="w-4 h-4 md:w-5 md:h-5" />
+                            )}
                         </button>
                     </div>
                 </div>
