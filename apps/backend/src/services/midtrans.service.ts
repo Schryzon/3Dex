@@ -52,7 +52,7 @@ export async function create_snap_transaction(order_id: string, gross_amount: nu
             console.error("Midtrans Axios Error:", error.message);
             console.error("Midtrans Data:", JSON.stringify(error.response?.data, null, 2));
         } else {
-            console.error("Midtrans Error:", JSON.stringify(error, null, 2));
+            console.error("Midtrans Error:", error);
             console.error("Midtrans Message:", (error as any).message);
         }
         throw new Error("Failed to create Snap transaction");

@@ -27,38 +27,7 @@ async function waitForMidtransSnap(maxMs = 20000): Promise<void> {
     }
 }
 
-const PAYMENT_METHODS = [
-    {
-        id: 'qris',
-        label: 'QRIS',
-        desc: 'GoPay · OVO · ShopeePay · Dana',
-        icon: QrCode,
-        badge: 'Instant',
-    },
-    {
-        id: 'va',
-        label: 'Virtual Account',
-        desc: 'BCA · Mandiri · BNI · BRI',
-        icon: Building2,
-        badge: null,
-    },
-    {
-        id: 'wallet',
-        label: 'E-Wallet',
-        desc: 'Dana · LinkAja · OVO',
-        icon: Wallet,
-        badge: null,
-    },
-    {
-        id: 'cc',
-        label: 'Credit / Debit Card',
-        desc: 'Visa · Mastercard · JCB',
-        icon: CreditCard,
-        badge: null,
-    },
-] as const;
 
-type PaymentId = typeof PAYMENT_METHODS[number]['id'];
 
 /* ─── Small reusable pieces ─── */
 
@@ -119,7 +88,7 @@ export default function CheckoutPage() {
     const [checkoutStatus, setCheckoutStatus] = useState<'idle' | 'success' | 'failed' | 'pending'>('idle');
     const [serverOrderId, setServerOrderId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [method, setMethod] = useState<PaymentId>('qris');
+
     const [coupon, setCoupon] = useState('');
     const [couponOpen, setCouponOpen] = useState(false);
     const [billing, setBilling] = useState({
@@ -190,7 +159,7 @@ export default function CheckoutPage() {
         }
     };
 
-    const activeMethod = PAYMENT_METHODS.find(m => m.id === method)!;
+
 
     return (
         <div className="min-h-screen bg-[#080808] text-white pb-24">
@@ -286,83 +255,7 @@ export default function CheckoutPage() {
                             </div>
                         </SectionCard>
 
-                        {/* 2. Payment method */}
-                        <div id="payment-methods" className="scroll-mt-24">
-                            <SectionCard>
-                                <CardHeader title="Payment Method" />
-                                <p className="px-6 pt-2 pb-0 text-[11px] text-white/35 leading-relaxed">
-                                    Actual payment channel (QRIS, VA, card, e-wallet) is selected inside the secure Midtrans window after you place the order — the options below are a quick reference only.
-                                </p>
-                                <div className="px-6 py-6 flex flex-col gap-3">
-                                    {PAYMENT_METHODS.map(m => {
-                                        const active = method === m.id;
-                                        return (
-                                            <button
-                                                key={m.id}
-                                                onClick={() => setMethod(m.id)}
-                                                className={`
-                                                w-full flex items-center gap-4 px-4 py-3.5 rounded-xl
-                                                border text-left transition-all duration-150 cursor-pointer
-                                                ${active
-                                                        ? 'border-yellow-400/60 bg-yellow-400/[0.04]'
-                                                        : 'border-white/[0.07] bg-[#0a0a0a] hover:border-white/[0.14]'
-                                                    }
-                                            `}
-                                            >
-                                                {/* Radio */}
-                                                <span className={`
-                                                w-4 h-4 rounded-full border-[1.5px] flex-shrink-0
-                                                flex items-center justify-center transition-all
-                                                ${active ? 'border-yellow-400' : 'border-white/20'}
-                                            `}>
-                                                    {active && (
-                                                        <span className="w-2 h-2 rounded-full bg-yellow-400" />
-                                                    )}
-                                                </span>
 
-                                                {/* Icon */}
-                                                <span className={`
-                                                w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0
-                                                transition-all
-                                                ${active
-                                                        ? 'bg-yellow-400/10 text-yellow-400'
-                                                        : 'bg-white/[0.04] text-white/35'
-                                                    }
-                                            `}>
-                                                    <m.icon size={16} strokeWidth={1.5} />
-                                                </span>
-
-                                                {/* Label */}
-                                                <div className="flex-1 min-w-0">
-                                                    <p className={`text-[14px] font-semibold tracking-tight transition-colors ${active ? 'text-white' : 'text-white/70'
-                                                        }`}>
-                                                        {m.label}
-                                                    </p>
-                                                    <p className="text-[12px] text-white/30 mt-0.5">{m.desc}</p>
-                                                </div>
-
-                                                {/* Badge */}
-                                                {m.badge && (
-                                                    <span className="text-[10px] font-bold uppercase tracking-[0.1em] px-2.5 py-1 rounded-full border border-emerald-500/25 text-emerald-400 bg-emerald-500/[0.08] flex-shrink-0">
-                                                        {m.badge}
-                                                    </span>
-                                                )}
-                                            </button>
-                                        );
-                                    })}
-
-                                    {/* Secure note */}
-                                    <div className="flex items-center gap-3 mt-1 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
-                                        <ShieldCheck size={14} strokeWidth={1.5} className="text-white/25 flex-shrink-0" />
-                                        <p className="text-[11px] text-white/25 leading-relaxed">
-                                            Payments are securely processed by{' '}
-                                            <strong className="text-white/40">Midtrans</strong>.
-                                            Card data is not stored on our servers.
-                                        </p>
-                                    </div>
-                                </div>
-                            </SectionCard>
-                        </div>
 
                         {/* 3. Order review */}
                         <SectionCard>
@@ -454,24 +347,7 @@ export default function CheckoutPage() {
                                     )}
                                 </div>
 
-                                {/* Active payment method preview */}
-                                <div className="flex items-center gap-3 py-3.5 border-y border-white/[0.06]">
-                                    <span className="w-8 h-8 rounded-lg bg-yellow-400/10 text-yellow-400 flex items-center justify-center flex-shrink-0">
-                                        <activeMethod.icon size={14} strokeWidth={1.5} />
-                                    </span>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-[10px] text-white/30 uppercase tracking-[0.07em] font-semibold">
-                                            Payment via
-                                        </p>
-                                        <p className="text-[13px] font-semibold">{activeMethod.label}</p>
-                                    </div>
-                                    <button
-                                        onClick={() => document.querySelector('#payment-methods')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-                                        className="text-[11px] text-yellow-400/80 hover:text-yellow-400 font-semibold transition-colors cursor-pointer"
-                                    >
-                                        Change
-                                    </button>
-                                </div>
+
 
                                 {/* Line items */}
                                 <div className="flex flex-col gap-3">
