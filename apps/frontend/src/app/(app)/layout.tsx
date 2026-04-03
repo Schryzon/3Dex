@@ -79,7 +79,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       {/* Mobile Sidebar Overlay */}
       {isMobileOpen && (
         <div
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm animate-in fade-in duration-300"
+          className="fixed inset-0 bg-black/60 z-[70] lg:hidden backdrop-blur-sm animate-in fade-in duration-300"
           onClick={() => setMobileOpen(false)}
         />
       )}
