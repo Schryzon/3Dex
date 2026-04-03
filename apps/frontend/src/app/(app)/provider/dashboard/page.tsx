@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { printService } from '@/lib/api/services';
 import { formatPrice, formatDate } from '@/lib/utils';
+import { getStorageUrl } from '@/lib/utils/storage';
 import { LayoutDashboard, Package, Clock, CheckCircle, Truck, XCircle, AlertCircle, Info } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 import { useRouter } from 'next/navigation';
@@ -100,7 +101,7 @@ export default function ProviderDashboardPage() {
                                         <div className="flex items-center gap-4">
                                             <div className="w-12 h-12 rounded-full bg-gray-800 overflow-hidden border border-gray-700">
                                                 {job.user.avatar_url ? (
-                                                    <img src={job.user.avatar_url} alt="" className="w-full h-full object-cover" />
+                                                    <img src={getStorageUrl(job.user.avatar_url)} alt="" className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-xs font-bold">{job.user.username[0].toUpperCase()}</div>
                                                 )}
@@ -139,7 +140,7 @@ export default function ProviderDashboardPage() {
                                             {job.items.map((item) => (
                                                 <div key={item.id} className="flex gap-4 p-3 bg-black/40 rounded-xl border border-gray-800">
                                                     <div className="w-16 h-16 bg-gray-900 rounded-lg overflow-hidden flex-shrink-0">
-                                                        <img src={item.model.preview_url} alt="" className="w-full h-full object-cover" />
+                                                        <img src={getStorageUrl(item.model.preview_url)} alt="" className="w-full h-full object-cover" />
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <p className="font-semibold text-white truncate">{item.model.title}</p>

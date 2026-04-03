@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { collectionKeys, collectionService } from '@/lib/api/services/collection.service';
+import { getStorageUrl } from '@/lib/utils/storage';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '@/features/auth';
 
@@ -264,7 +265,7 @@ export default function CollectionDetailsPage() {
                     <Link href={`/u/${collection.user.username}`} className="flex items-center gap-2 group">
                         <div className="w-6 h-6 rounded-full bg-gray-800 overflow-hidden border border-gray-700 group-hover:border-yellow-400 transition-colors shrink-0">
                             {collection.user.avatar_url ? (
-                                <img src={collection.user.avatar_url} alt={collection.user.username} className="w-full h-full object-cover" />
+                                <img src={getStorageUrl(collection.user.avatar_url)} alt={collection.user.username} className="w-full h-full object-cover" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center">
                                     <User className="w-3 h-3 text-gray-500" />
@@ -326,7 +327,7 @@ export default function CollectionDetailsPage() {
                                 }`}>
                                     {model.preview_url ? (
                                         <img
-                                            src={model.preview_url}
+                                            src={getStorageUrl(model.preview_url)}
                                             alt={model.title}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                         />

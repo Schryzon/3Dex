@@ -13,6 +13,7 @@ import Link from 'next/link';
 import PostComments from './PostComments'; // Adapted/Reused
 
 import { motion, AnimatePresence } from 'framer-motion';
+import { getStorageUrl } from '@/lib/utils/storage';
 
 interface PostDetailModalProps {
     postId: string;
@@ -141,7 +142,7 @@ export default function PostDetailModal({ postId, isOpen, onClose }: PostDetailM
                         {post.media_urls.length > 0 && (
                             <div className="relative w-full h-full flex items-center justify-center">
                                 <img
-                                    src={post.media_urls[0]}
+                                    src={getStorageUrl(post.media_urls[0])}
                                     alt="Post content"
                                     className={`max-w-full max-h-full object-contain ${post.is_nsfw && !user?.show_nsfw ? 'blur-3xl scale-125' : ''}`}
                                 />
@@ -179,7 +180,7 @@ export default function PostDetailModal({ postId, isOpen, onClose }: PostDetailM
                         <div className="p-3 md:p-4 border-b border-gray-800 flex items-center gap-3">
                             <Link href={`/u/${post.user.username}`} onClick={onClose} className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-800 overflow-hidden shrink-0 ring-2 ring-gray-900 group">
                                 {post.user.avatar_url ? (
-                                    <img src={post.user.avatar_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                    <img src={getStorageUrl(post.user.avatar_url)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center font-bold text-gray-400 uppercase text-xs">
                                         {post.user.username[0]}
@@ -252,7 +253,7 @@ export default function PostDetailModal({ postId, isOpen, onClose }: PostDetailM
                             {/* Post Content Info */}
                             <div className="p-4 flex gap-3">
                                 <Link href={`/u/${post.user.username}`} onClick={onClose} className="w-8 h-8 rounded-full bg-gray-800 overflow-hidden shrink-0">
-                                    <img src={post.user.avatar_url} className="w-full h-full object-cover" />
+                                    <img src={getStorageUrl(post.user.avatar_url)} className="w-full h-full object-cover" />
                                 </Link>
                                 <div className="flex-1">
                                     <div className="text-[13px] md:text-sm text-white leading-relaxed">

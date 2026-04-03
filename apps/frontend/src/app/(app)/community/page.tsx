@@ -9,7 +9,7 @@ import {
     Loader2, Heart, MessageSquare, Send, Image as ImageIcon, 
     AlertTriangle, MoreVertical, Trash2, Flag, Sparkles, Users, X,
     Mail, ShieldAlert, EyeOff, Scale, HelpCircle,
-    Plus, PlusCircle, CheckCircle2
+    Plus, PlusCircle, CheckCircle2, ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
@@ -560,7 +560,7 @@ export default function CommunityPage() {
                     </div>
 
                     {/* Integrated Search Module */}
-                    <div className="bg-[#111]/40 border border-gray-800/50 rounded-3xl p-6 shadow-2xl relative overflow-hidden group">
+                    <div className="bg-[#111]/40 border border-gray-800/50 rounded-3xl p-6 shadow-2xl relative group transition-all">
                         <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-400/5 blur-3xl -mr-12 -mt-12 group-hover:bg-yellow-400/10 transition-colors duration-500" />
                         <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                             <Users className="w-3 h-3" /> Quick discovery
@@ -568,22 +568,31 @@ export default function CommunityPage() {
                         <UserSearch />
                     </div>
 
-                    {/* Trending Tags (Resilient UI) */}
-                    <div className="bg-[#0f0f0f] border border-gray-800 rounded-3xl p-6 shadow-xl">
-                        <div className="flex items-center justify-between mb-5">
-                            <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                                <AlertTriangle className="w-3.5 h-3.5 text-yellow-500" /> Trending subjects
-                            </h3>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                            <div className="w-full py-8 border border-dashed border-gray-800 rounded-2xl flex flex-col items-center justify-center gap-2 text-center px-4">
-                                <div className="p-2 bg-gray-900 rounded-xl text-gray-600">
-                                    <Flag className="w-4 h-4" />
+                    {/* Community Guidelines (Useful Content) */}
+                    <div className="bg-[#0f0f0f] border border-gray-800 rounded-3xl p-6 shadow-xl relative overflow-hidden group">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-amber-600 to-yellow-400 opacity-20" />
+                        <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-5 flex items-center gap-2">
+                            <ShieldAlert className="w-3.5 h-3.5 text-yellow-500" /> Community Rules
+                        </h3>
+                        <div className="space-y-4">
+                            {[
+                                { text: 'Be respectful to other creators', icon: '✨' },
+                                { text: 'Cite other artists in your remixes', icon: '📝' },
+                                { text: 'Mark explicit (NSFW) content correctly', icon: '🔞' },
+                                { text: 'No spam or misleading subjects', icon: '🚫' }
+                            ].map((rule, idx) => (
+                                <div key={idx} className="flex items-start gap-3 group/rule">
+                                    <span className="text-sm grayscale group-hover/rule:grayscale-0 transition-all">{rule.icon}</span>
+                                    <p className="text-[11px] text-gray-400 font-bold leading-relaxed group-hover/rule:text-gray-200 transition-colors">
+                                        {rule.text}
+                                    </p>
                                 </div>
-                                <p className="text-[10px] text-gray-600 font-bold leading-relaxed">
-                                    Subjects emerge as the <br /> community grows.
-                                </p>
-                            </div>
+                            ))}
+                        </div>
+                        <div className="mt-6 pt-4 border-t border-white/5">
+                            <Link href="/community-rules" className="text-[10px] font-black text-yellow-400 hover:text-white transition-colors flex items-center gap-1 uppercase tracking-widest">
+                                Read Full Guidelines <ChevronRight className="w-3 h-3" />
+                            </Link>
                         </div>
                     </div>
 

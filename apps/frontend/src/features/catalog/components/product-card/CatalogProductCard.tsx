@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Heart, Star, ShoppingCart, Check } from 'lucide-react';
 import { useCart } from '@/features/cart';
 import { formatPrice } from '@/lib/utils';
+import { getStorageUrl } from '@/lib/utils/storage';
 
 const FORMAT_COLORS: Record<string, string> = {
     blend: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
@@ -71,7 +72,7 @@ export default function CatalogProductCard({
                     {/* Thumbnail */}
                     <div className="relative w-28 h-24 md:w-40 md:h-32 shrink-0 overflow-hidden">
                         <img
-                            src={image}
+                            src={getStorageUrl(image)}
                             alt={title}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />
@@ -106,7 +107,7 @@ export default function CatalogProductCard({
                                     >
                                         {authorAvatar ? (
                                             <img
-                                                src={authorAvatar}
+                                                src={getStorageUrl(authorAvatar)}
                                                 alt=""
                                                 className="w-4 h-4 md:w-5 md:h-5 rounded-full border border-white/10 shrink-0 object-cover"
                                             />
@@ -199,7 +200,7 @@ export default function CatalogProductCard({
                     )}
 
                     <img
-                        src={image}
+                        src={getStorageUrl(image)}
                         alt={title}
                         className={`absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-102 ${imageLoaded ? 'block' : 'hidden'
                             }`}
@@ -292,7 +293,7 @@ export default function CatalogProductCard({
                                     >
                                         {authorAvatar ? (
                                             <img
-                                                src={authorAvatar}
+                                                src={getStorageUrl(authorAvatar)}
                                                 alt=""
                                                 className="h-5 w-5 shrink-0 rounded-full border border-white/10 object-cover ring-1 ring-white/5"
                                             />

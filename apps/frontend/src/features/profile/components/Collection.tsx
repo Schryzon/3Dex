@@ -5,6 +5,7 @@ import { purchaseService, purchaseKeys, Purchase } from '@/lib/api/services/purc
 import { FolderOpen, Download, Eye, Calendar, Filter, Search, Grid3x3, List, ChevronDown, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/features/auth';
+import { getStorageUrl } from '@/lib/utils/storage';
 import { useState } from 'react';
 
 export default function Collection() {
@@ -186,7 +187,7 @@ export default function Collection() {
                 {/* Thumbnail */}
                 <div className="aspect-square bg-gray-800 relative overflow-hidden">
                   <img
-                    src={item.model.preview_url}
+                    src={getStorageUrl(item.model.preview_url)}
                     alt={item.model.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -258,7 +259,7 @@ export default function Collection() {
 
                   {/* Thumbnail */}
                   <img
-                    src={item.model.preview_url}
+                    src={getStorageUrl(item.model.preview_url)}
                     alt={item.model.title}
                     className="w-16 h-16 object-cover rounded flex-shrink-0"
                   />

@@ -23,6 +23,7 @@ import {
 import Link from 'next/link';
 import { adminService } from '@/lib/api/services/admin.service';
 import { formatPrice } from '@/lib/utils';
+import { getStorageUrl } from '@/lib/utils/storage';
 
 
 interface DashboardSummary {
@@ -163,7 +164,7 @@ export default function AdminDashboardPage() {
                                     <div key={model.id} className="p-4 flex items-center gap-4 hover:bg-white/[0.02] transition-colors group">
                                         <div className="w-12 h-12 rounded-xl bg-gray-800 overflow-hidden ring-1 ring-white/5">
                                             {model.preview_url ? (
-                                                <img src={model.preview_url} alt="" className="w-full h-full object-cover" />
+                                                <img src={getStorageUrl(model.preview_url)} alt="" className="w-full h-full object-cover" />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center text-gray-600"><FileText className="w-5 h-5" /></div>
                                             )}
@@ -243,7 +244,7 @@ export default function AdminDashboardPage() {
                                             <div className="flex gap-1">
                                                 {u.portfolio.slice(0, 3).map((item: any, idx: number) => (
                                                     <div key={idx} className="w-full aspect-square rounded-lg bg-black/40 overflow-hidden ring-1 ring-white/5">
-                                                        {item.media_url ? <img src={item.media_url} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center opacity-10"><FileText className="w-4 h-4" /></div>}
+                                                        {item.media_url ? <img src={getStorageUrl(item.media_url)} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center opacity-10"><FileText className="w-4 h-4" /></div>}
                                                     </div>
                                                 ))}
                                             </div>

@@ -13,6 +13,8 @@ import { useRouter } from 'next/navigation';
 import { useOrders } from '@/features/cart/hooks/useOrders';
 import type { CartItem, Order } from '@/types';
 import { formatPrice } from '@/lib/utils/price';
+import { purchaseService } from '@/lib/api/services';
+import toast from 'react-hot-toast';
 
 const STATUS_STYLE: Record<string, string> = {
   PAID: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
@@ -25,6 +27,7 @@ export default function ShoppingCartPage() {
   const [activeTab, setActiveTab] = useState<'cart' | 'orders'>('cart');
   const [mounted, setMounted] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const { items, removeItem, total, clearCart } = useCart();
   const searchParams = useSearchParams();
@@ -40,6 +43,26 @@ export default function ShoppingCartPage() {
   if (!mounted) return <div className="min-h-screen bg-[#080808]" />;
 
   const isEmpty = items.length === 0;
+
+  const handleDownload = async (modelId: string, title: string) => {
+    if (downloadingId) return;
+    setDownloadingId(modelId);
+    try {
+      const { download_url } = await purchaseService.getDownloadUrl(modelId);
+      const link = document.createElement('a');
+      link.href = download_url;
+      link.setAttribute('download', `${title}.glb`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success('Download started');
+    } catch (error: any) {
+      console.error('Download failed:', error);
+      toast.error('Failed to get download link. Please try again.');
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#080808] text-white pb-24">
@@ -348,9 +371,19 @@ export default function ShoppingCartPage() {
                             <p className="text-[10px] font-mono text-white/25">~{lineFmt.usd}</p>
                           </div>
                           {isPaid && (
-                            <button className="w-full sm:w-auto flex items-center justify-center sm:justify-start gap-2 px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.08em] rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/50 hover:text-white hover:border-white/20 hover:bg-white/[0.06] transition-all cursor-pointer shrink-0">
-                              <ExternalLink size={13} strokeWidth={2} />
-                              Download
+                            <button
+                              disabled={downloadingId === item.model_id}
+                              onClick={() => handleDownload(item.model_id, item.model?.title || 'model')}
+                              className={`
+                                w-full sm:w-auto flex items-center justify-center sm:justify-start gap-2 px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.08em] rounded-xl transition-all cursor-pointer shrink-0
+                                ${downloadingId === item.model_id
+                                  ? 'bg-yellow-400/20 text-yellow-400 border-yellow-400/30'
+                                  : 'bg-white/[0.04] border border-white/[0.08] text-white/50 hover:text-white hover:border-white/20 hover:bg-white/[0.06]'
+                                }
+                              `}
+                            >
+                              <ExternalLink size={13} strokeWidth={2} className={downloadingId === item.model_id ? 'animate-pulse' : ''} />
+                              {downloadingId === item.model_id ? 'Downloading...' : 'Download'}
                             </button>
                           )}
                         </div>

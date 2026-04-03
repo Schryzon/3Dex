@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { getStorageUrl } from '@/lib/utils/storage';
 
 interface UserAvatarProps {
     user: {
@@ -32,7 +33,7 @@ export default function UserAvatar({ user, size = 'md', className = '', linkToPr
     const content = avatarSrc ? (
         <div className={`${sizeClasses[size]} rounded-full overflow-hidden relative flex-shrink-0 ${className}`}>
             <img
-                src={avatarSrc}
+                src={getStorageUrl(avatarSrc)}
                 alt={user?.username || 'User avatar'}
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"

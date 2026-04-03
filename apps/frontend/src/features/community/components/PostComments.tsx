@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { postService, postKeys } from '@/lib/api/services/post.service';
+import { getStorageUrl } from '@/lib/utils/storage';
 import { useAuth } from '@/features/auth';
 import { Loader2, Send } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -50,7 +51,7 @@ export default function PostComments({ postId, hideInput, noMaxHeight }: PostCom
                         <div key={comment.id} className="flex gap-3">
                             <div className="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0">
                                 {comment.user.avatar_url ? (
-                                    <img src={comment.user.avatar_url} className="w-full h-full rounded-full object-cover" />
+                                    <img src={getStorageUrl(comment.user.avatar_url)} className="w-full h-full rounded-full object-cover" />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-[10px] font-black text-gray-500 uppercase">
                                         {comment.user.username[0]}
@@ -81,7 +82,7 @@ export default function PostComments({ postId, hideInput, noMaxHeight }: PostCom
                 <div className="flex gap-3 pt-2">
                     <div className="w-8 h-8 rounded-full bg-gray-800 flex-shrink-0 mt-1">
                         {user.avatar_url ? (
-                            <img src={user.avatar_url} className="w-full h-full rounded-full object-cover" />
+                            <img src={getStorageUrl(user.avatar_url)} className="w-full h-full rounded-full object-cover" />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-[10px] font-black text-gray-500 uppercase">
                                 {user.username[0]}

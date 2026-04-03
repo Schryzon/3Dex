@@ -58,18 +58,20 @@ const STEPS = [
     },
 ];
 
-// Stats
-const PLATFORM_STATS = [
-    { value: '500+', label: 'Providers', icon: Printer },
-    { value: '10K+', label: 'Orders Done', icon: Package },
-    { value: '4.8', label: 'Avg Rating', icon: Star },
-    { value: '24h', label: 'Avg Response', icon: Clock },
-];
+// Stats type
+type Stats = {
+    provider_count: string;
+    orders_count: string;
+    avg_rating: string;
+    avg_response: string;
+};
 
 export default function PrintServicesPage() {
     const { user } = useAuth();
     const [providers, setProviders] = useState<User[]>([]);
+    const [stats, setStats] = useState<Stats | null>(null);
     const [loading, setLoading] = useState(true);
+    const [statsLoading, setStatsLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [filters, setFilters] = useState<ProviderFilters>({
@@ -100,9 +102,26 @@ export default function PrintServicesPage() {
         }
     };
 
+    // Fetch stats
+    const fetchStats = async () => {
+        setStatsLoading(true);
+        try {
+            const data = await printService.getPrintStats();
+            setStats(data);
+        } catch (error) {
+            console.error('Failed to fetch stats', error);
+        } finally {
+            setStatsLoading(false);
+        }
+    };
+
     useEffect(() => {
         fetchProviders();
     }, [filters]);
+
+    useEffect(() => {
+        fetchStats();
+    }, []);
 
     const handleFilterChange = (key: keyof ProviderFilters, value: string) => {
         setFilters(prev => ({ ...prev, [key]: value }));
@@ -177,10 +196,15 @@ export default function PrintServicesPage() {
 
                         {/* Right — Stats Cards */}
                         <div className="grid grid-cols-2 gap-3 w-full max-w-xs shrink-0">
-                            {PLATFORM_STATS.map((stat) => (
+                            {[
+                                { value: stats?.provider_count || '-', label: 'Providers', icon: Printer },
+                                { value: stats?.orders_count || '-', label: 'Orders Done', icon: Package },
+                                { value: stats?.avg_rating || '-', label: 'Avg Rating', icon: Star },
+                                { value: stats?.avg_response || '-', label: 'Avg Response', icon: Clock },
+                            ].map((stat) => (
                                 <div
                                     key={stat.label}
-                                    className="bg-[#141414]/80 backdrop-blur-sm border border-gray-800 rounded-xl p-4 text-center hover:border-gray-700 transition-all group"
+                                    className={`bg-[#141414]/80 backdrop-blur-sm border border-gray-800 rounded-xl p-4 text-center hover:border-gray-700 transition-all group ${statsLoading ? 'animate-pulse' : ''}`}
                                 >
                                     <stat.icon className="w-5 h-5 text-yellow-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
                                     <p className="text-xl font-bold text-white">{stat.value}</p>

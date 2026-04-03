@@ -218,7 +218,10 @@ export async function get_dashboard_summary(req: Request, res: Response) {
                 orderBy: { created_at: 'desc' },
                 include: { reporter: { select: { username: true } } }
             }),
-            prisma.stats.findFirst({ orderBy: { created_at: 'desc' } })
+            prisma.stats.findMany({ 
+                take: 5, 
+                orderBy: { created_at: 'desc' } 
+            })
         ]);
 
         res.json({
@@ -232,7 +235,11 @@ export async function get_dashboard_summary(req: Request, res: Response) {
                 users: latestUsers,
                 reports: latestReports
             },
-            stats: latestStats?.data || null
+            stats: latestStats?.[0]?.data || null,
+            history: latestStats.map((s: any) => ({
+                date: s.created_at,
+                transactions: s.data.total_transactions || 0
+            })).reverse()
         });
     } catch (error: any) {
         res.status(500).json({ message: error.message });

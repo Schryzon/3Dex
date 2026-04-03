@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useAuth } from '@/features/auth';
 import { useRouter } from 'next/navigation';
 import { formatFileSize, formatDate } from '@/lib/utils';
+import { getStorageUrl } from '@/lib/utils/storage';
 import { useState } from 'react';
 
 export default function DownloadsPage() {
@@ -109,7 +110,7 @@ export default function DownloadsPage() {
                             <div key={purchase.id} className="bg-[#141414] rounded-2xl border border-gray-800 overflow-hidden group hover:border-yellow-500/30 transition-all duration-300 shadow-lg">
                                 <div className="aspect-square relative overflow-hidden bg-gray-900 border-b border-gray-800">
                                     <img
-                                        src={purchase.model.preview_url}
+                                        src={getStorageUrl(purchase.model.preview_url)}
                                         alt={purchase.model.title}
                                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                     />

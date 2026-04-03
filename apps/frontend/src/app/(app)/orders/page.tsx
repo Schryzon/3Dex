@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { orderService } from '@/lib/api/services';
 import { formatPrice, formatDate } from '@/lib/utils';
+import { getStorageUrl } from '@/lib/utils/storage';
 import { ShoppingBag, ChevronRight, Clock, CheckCircle, XCircle, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/features/auth';
@@ -87,7 +88,7 @@ export default function OrdersPage() {
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-12 h-12 bg-gray-800 rounded-lg overflow-hidden flex-shrink-0">
                                                         {item.model.preview_url ? (
-                                                            <img src={item.model.preview_url} alt="" className="w-full h-full object-cover" />
+                                                            <img src={getStorageUrl(item.model.preview_url)} alt="" className="w-full h-full object-cover" />
                                                         ) : (
                                                             <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-600">3D</div>
                                                         )}

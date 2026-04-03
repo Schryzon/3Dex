@@ -4,6 +4,7 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 import { Heart, ShoppingCart, Eye } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
+import { getStorageUrl } from '@/lib/utils/storage';
 
 interface Product {
   id: string;
@@ -63,7 +64,7 @@ export default function ProductCard({ product, onAddToCart, onToggleFavorite, is
         {/* Image Container */}
         <div className="relative aspect-[3/4] overflow-hidden bg-white/5">
           <img
-            src={product.thumbnails[imageIndex]}
+            src={getStorageUrl(product.thumbnails[imageIndex])}
             alt={product.title}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
@@ -115,7 +116,7 @@ export default function ProductCard({ product, onAddToCart, onToggleFavorite, is
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0 flex-1">
                   <img
-                    src={product.seller.avatar}
+                    src={getStorageUrl(product.seller.avatar)}
                     alt={product.seller.name}
                     className="w-4 h-4 rounded-full border border-white/10 shrink-0"
                   />

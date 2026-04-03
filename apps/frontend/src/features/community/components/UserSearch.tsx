@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { userService } from '@/lib/api/services/user.service';
+import { getStorageUrl } from '@/lib/utils/storage';
 import { Search, User, UserCheck, X, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useDebounce } from '@/hooks/useDebounce'; // Assuming this exists or I'll create it
@@ -76,7 +77,7 @@ export default function UserSearch() {
                                         <div className="relative">
                                             <div className="w-10 h-10 rounded-full bg-gray-800 border border-gray-700 overflow-hidden group-hover:border-yellow-400/50 transition-colors">
                                                 {user.avatar_url ? (
-                                                    <img src={user.avatar_url} className="w-full h-full object-cover" />
+                                                    <img src={getStorageUrl(user.avatar_url)} className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center font-bold text-gray-500">
                                                         {user.username[0].toUpperCase()}

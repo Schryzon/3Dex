@@ -48,6 +48,10 @@ export const printService = {
         return apiClient.get<any[]>('/print/providers', { params: filters });
     },
 
+    async getPrintStats(): Promise<{ provider_count: string; orders_count: string; avg_rating: string; avg_response: string }> {
+        return apiClient.get('/print/stats');
+    },
+
     async manageOrder(orderId: string, action: 'ACCEPT' | 'REJECT' | 'SHIP' | 'COMPLETE', trackingNumber?: string): Promise<{ message: string }> {
         return apiClient.patch(`/print/jobs/${orderId}`, { action, tracking_number: trackingNumber });
     },
