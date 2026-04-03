@@ -162,19 +162,27 @@ export async function handle_payment_webhook(notification: any) {
         where: { id: order_id },
         data: {
             status: new_status,
-            payments: {
-                create: {
-                    transaction_id,
-                    payment_type,
-                    gross_amount: Number(gross_amount),
-                    transaction_status,
-                    fraud_status,
-                    raw_response: notification,
-                },
-            },
         },
         include: {
             items: true,
+        },
+    });
+
+    await prisma.payment.upsert({
+        where: { transaction_id },
+        update: {
+            transaction_status,
+            fraud_status,
+            raw_response: notification,
+        },
+        create: {
+            order_id,
+            transaction_id,
+            payment_type,
+            gross_amount: Number(gross_amount),
+            transaction_status,
+            fraud_status,
+            raw_response: notification,
         },
     });
 
