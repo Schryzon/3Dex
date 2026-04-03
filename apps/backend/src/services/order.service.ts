@@ -149,6 +149,15 @@ export async function handle_payment_webhook(notification: any) {
         new_status = "PENDING";
     }
 
+    const existingOrder = await prisma.order.findUnique({
+        where: { id: order_id }
+    });
+
+    if (!existingOrder) {
+        console.warn(`Order ${order_id} not found. Likely a Midtrans test webhook.`);
+        return { status: "OK", message: "Order not found, skipping update" };
+    }
+
     const order = await prisma.order.update({
         where: { id: order_id },
         data: {

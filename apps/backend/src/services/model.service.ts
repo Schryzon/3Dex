@@ -63,6 +63,7 @@ export function get_model_by_id(model_id: string) {
       gallery_urls: true,
       created_at: true,
       is_nsfw: true,
+      status: true,
       license: true,
       is_printable: true,
       file_format: true,
