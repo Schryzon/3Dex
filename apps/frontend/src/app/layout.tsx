@@ -44,7 +44,7 @@ export const metadata: Metadata = {
       'The premier marketplace for high-quality 3D assets. Discover, buy, and sell game-ready models, textures, and HDRI maps or commission on-demand 3D printing from verified local providers.',
     images: [
       {
-        url: '/og-image.jpg',
+        url: '/og-image.png',
         width: 1200,
         height: 630,
         alt: '3Dex - The 3D Asset Marketplace',
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     title: '3Dēx | The 3D Asset Marketplace',
     description:
       'Discover, buy, and sell premium 3D assets. Access game-ready models, studio-quality textures, and on-demand 3D printing all in one place.',
-    images: ['/og-image.jpg'],
+    images: ['/og-image.png'],
   },
   robots: {
     index: true,
