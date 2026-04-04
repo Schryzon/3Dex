@@ -20,6 +20,7 @@ const team = [
         short: 'Architects the engine that powers 3Dēx — from API design and database modeling to cloud infrastructure and deployment pipelines.',
         gradient: 'from-violet-500 to-purple-700',
         linkedin: 'https://www.linkedin.com/in/schryzon/',
+        github: 'https://github.com/Schryzon',
         githubUser: 'Schryzon',
     },
     {
@@ -31,6 +32,7 @@ const team = [
         short: 'Crafts the visual identity and user experience of 3Dēx — every pixel, interaction, and interface component.',
         gradient: 'from-amber-400 to-orange-500',
         linkedin: 'https://www.linkedin.com/in/i-kadek-mahesa-permana-putra-655184320/',
+        github: 'https://github.com/Vuxyn',
         githubUser: 'Vuxyn',
     },
     {
@@ -42,6 +44,7 @@ const team = [
         short: 'Bridges the gap between frontend and backend — implementing integrations, payment flows, and real-world feature delivery.',
         gradient: 'from-teal-400 to-cyan-600',
         linkedin: 'https://www.linkedin.com/in/thoriq-abdillah-falian-kusuma-433615289/',
+        github: 'https://github.com/ganijack',
         githubUser: 'ganijack',
     },
 ];
@@ -227,32 +230,48 @@ export default function AboutUsPage() {
                 <section id="team">
                     <SectionLabel icon={Users} label="The Team" />
                     <h2 className="text-3xl font-bold tracking-tight mb-2">The People Behind 3Dēx</h2>
-                    <p className="text-white/50 mb-10 text-[15px]">A team of three computer science students from Bali, Indonesia.</p>
+                    <p className="text-white/50 mb-10 text-[15px]">A team of three computer science students from Mataram, Lombok.</p>
 
                     <div className="grid md:grid-cols-3 gap-6">
                         {team.map(member => (
-                            <a
+                            <div
                                 key={member.slug}
-                                href={member.linkedin}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="group block p-6 bg-[#111] border border-white/10 rounded-2xl hover:border-white/20 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/50"
+                                className="group relative p-6 bg-[#111] border border-white/10 rounded-2xl hover:border-white/20 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/50"
                             >
+                                <Link href={`/about-us/${member.slug}`} className="absolute inset-0 z-0" />
+                                
                                 {/* Avatar */}
-                                <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${member.gradient} overflow-hidden text-white mb-5 group-hover:scale-105 transition-transform relative`}>
+                                <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${member.gradient} overflow-hidden text-white mb-5 group-hover:scale-105 transition-transform relative z-10`}>
                                     <div className="absolute inset-0 bg-black/5" />
                                     <img src={`https://github.com/${member.githubUser}.png`} alt={member.name} className="w-full h-full object-cover" />
                                 </div>
 
-                                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">@{member.handle}</p>
-                                <p className="font-bold text-lg leading-tight mb-1">{member.nickname}</p>
-                                <p className="text-xs text-yellow-400 font-medium mb-3">{member.role}</p>
-                                <p className="text-white/50 text-sm leading-relaxed mb-5">{member.short}</p>
+                                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1 relative z-10">@{member.handle}</p>
+                                <p className="font-bold text-lg leading-tight mb-1 relative z-10">{member.nickname}</p>
+                                <p className="text-xs text-yellow-400 font-medium mb-3 relative z-10">{member.role}</p>
+                                <p className="text-white/50 text-sm leading-relaxed mb-6 relative z-10">{member.short}</p>
 
-                                <div className="flex items-center gap-1 text-xs text-gray-500 group-hover:text-blue-400 transition-colors font-medium">
-                                    View LinkedIn <ExternalLink className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                                <div className="flex items-center gap-3 relative z-20">
+                                    <a
+                                        href={member.linkedin}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0077b5]/10 border border-[#0077b5]/20 text-[#0077b5] text-[10px] font-bold uppercase tracking-widest rounded-lg hover:bg-[#0077b5] hover:text-white transition-all"
+                                    >
+                                        LinkedIn
+                                        <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                    <a
+                                        href={member.github}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-white/10 text-white/50 text-[10px] font-bold uppercase tracking-widest rounded-lg hover:bg-white/10 hover:text-white transition-all"
+                                    >
+                                        GitHub
+                                        <Github className="w-3 h-3" />
+                                    </a>
                                 </div>
-                            </a>
+                            </div>
                         ))}
                     </div>
                 </section>
