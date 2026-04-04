@@ -6,7 +6,7 @@ import { Download, Search, Package, FileArchive, Clock, ExternalLink, ChevronLef
 import Link from 'next/link';
 import { useAuth } from '@/features/auth';
 import { useRouter } from 'next/navigation';
-import { formatFileSize, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 import { getStorageUrl } from '@/lib/utils/storage';
 import { useState } from 'react';
 
@@ -129,9 +129,9 @@ export default function DownloadsPage() {
                                         {purchase.model.title}
                                     </h3>
                                     <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
-                                        <span>{formatFileSize(purchase.model.file_size || 0)}</span>
+                                        <span>3D Model</span>
                                         <span>•</span>
-                                        <span>{purchase.model.file_format?.[0] || 'GLB'}</span>
+                                        <span>{(purchase.model.file_format || 'GLB').toUpperCase()}</span>
                                     </div>
                                     <button
                                         onClick={() => handleDownload(purchase.model_id, purchase.model.title)}
@@ -142,7 +142,7 @@ export default function DownloadsPage() {
                                     </button>
                                     <p className="text-[10px] text-gray-600 text-center mt-3 flex items-center justify-center gap-1">
                                         <Clock className="w-3 h-3" />
-                                        Purchased on {formatDate(purchase.purchase_date)}
+                                        Purchased on {formatDate(purchase.created_at)}
                                     </p>
                                 </div>
                             </div>
