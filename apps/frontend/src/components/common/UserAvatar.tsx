@@ -25,13 +25,13 @@ export default function UserAvatar({ user, size = 'md', className = '', linkToPr
     const avatarSrc = user?.avatar_url || user?.avatar || null;
 
     const fallbackDiv = (
-        <div className={`${sizeClasses[size]} rounded-full bg-gradient-to-br from-yellow-400 to-orange-400 flex items-center justify-center text-black font-bold flex-shrink-0 ${className}`}>
+        <div className={`${sizeClasses[size]} aspect-square rounded-full bg-gradient-to-br from-yellow-400 to-orange-400 flex items-center justify-center text-black font-bold flex-shrink-0 ${className}`}>
             {initials}
         </div>
     );
 
     const content = avatarSrc ? (
-        <div className={`${sizeClasses[size]} rounded-full overflow-hidden relative flex-shrink-0 ${className}`}>
+        <div className={`${sizeClasses[size]} aspect-square rounded-full overflow-hidden relative flex-shrink-0 ${className}`}>
             <img
                 src={getStorageUrl(avatarSrc)}
                 alt={user?.username || 'User avatar'}

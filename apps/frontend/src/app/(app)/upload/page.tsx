@@ -8,6 +8,7 @@ import MultiFileUploader from '@/features/upload/components/MultiFileUploader';
 import { api } from '@/lib/api';
 import axios from 'axios';
 import { USD_TO_IDR } from '@/lib/utils/price';
+import toast from 'react-hot-toast';
 
 type Step = 'files' | 'details' | 'pricing';
 
@@ -115,11 +116,12 @@ export default function UploadPage() {
             });
 
             // Success
+            toast.success('Model uploaded! It will be reviewed by our team before going live.', { duration: 5000 });
             router.push('/profile');
 
         } catch (error: any) {
             console.error(error);
-            alert(`Upload failed: ${error.response?.data?.message || error.message}`);
+            toast.error(`Upload failed: ${error.response?.data?.message || error.message}`);
         } finally {
             setIsLoading(false);
             setUploadProgress(0);

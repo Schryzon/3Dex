@@ -72,14 +72,14 @@ export default function AdminAnalytics() {
                         <Package size={80} />
                     </div>
                     <div className="flex items-center gap-4 mb-4">
-                        <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center border border-blue-500/20">
-                            <Package className="w-6 h-6 text-blue-400" />
+                        <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center border border-white/10">
+                            <Package className="w-6 h-6 text-gray-400" />
                         </div>
                         <span className="text-sm font-bold text-gray-500 uppercase tracking-wider">Pending Models</span>
                     </div>
                     <div className="flex items-end justify-between">
                         <h2 className="text-4xl font-black">{counts.models}</h2>
-                        <Link href="/admin/models" className="text-xs text-blue-400 hover:underline flex items-center gap-1">
+                        <Link href="/admin/models" className="text-xs text-gray-400 hover:text-white hover:underline flex items-center gap-1">
                             Review <ChevronRight className="w-3 h-3" />
                         </Link>
                     </div>
@@ -176,7 +176,7 @@ export default function AdminAnalytics() {
                 <div className="bg-[#111] border border-white/10 rounded-2xl overflow-hidden">
                     <div className="p-6 border-b border-white/10 flex items-center justify-between">
                         <h3 className="text-lg font-bold flex items-center gap-2">
-                            <TrendingUp className="w-5 h-5 text-blue-400" /> Top Performing Artists
+                            <TrendingUp className="w-5 h-5 text-gray-400" /> Top Performing Artists
                         </h3>
                         <div className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold text-gray-500 uppercase tracking-widest border border-white/5">
                             By Volume
@@ -200,7 +200,7 @@ export default function AdminAnalytics() {
                                                     <img src={artist.avatar_url || '/placeholder.jpg'} alt="" className="w-full h-full object-cover" />
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className="text-sm font-bold truncate group-hover:text-blue-400 transition-colors">@{artist.username}</p>
+                                                    <p className="text-sm font-bold truncate group-hover:text-gray-200 transition-colors">@{artist.username}</p>
                                                     <p className="text-[10px] text-gray-500 transition-colors">{artist.display_name || 'Creator'}</p>
                                                 </div>
                                             </div>

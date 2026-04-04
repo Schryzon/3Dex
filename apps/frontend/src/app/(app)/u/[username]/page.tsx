@@ -29,6 +29,8 @@ import {
     FolderOpen,
     Pencil,
     Check,
+    Star,
+    MessageSquare,
 } from 'lucide-react';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import ImageCropModal from '@/components/common/ImageCropModal';
@@ -36,6 +38,9 @@ import { useRouter } from 'next/navigation';
 import { getStorageUrl } from '@/lib/utils/storage';
 import Link from 'next/link';
 import { useAuth } from '@/features/auth';
+import { reviewService } from '@/lib/api/services/review.service';
+import UserReviewsTab from '@/features/profile/components/UserReviewsTab';
+import WriteUserReviewModal from '@/features/profile/components/WriteUserReviewModal';
 
 
 export default function PublicProfilePage() {
@@ -49,8 +54,9 @@ export default function PublicProfilePage() {
         image: string;
         aspect: number;
     }>({ isOpen: false, image: '', aspect: 16 / 5 });
-    const [activeTab, setActiveTab] = useState<'models' | 'posts' | 'collections'>('models');
+    const [activeTab, setActiveTab] = useState<'models' | 'posts' | 'collections' | 'reviews'>('models');
     const [shareSuccess, setShareSuccess] = useState(false);
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
     const { data: user, isLoading, error, refetch: refetchUser } = useQuery({
         queryKey: ['user', username],
@@ -62,6 +68,13 @@ export default function PublicProfilePage() {
     });
 
     const { user: currentUser } = useAuth();
+
+    // Check review eligibility
+    const { data: eligibility } = useQuery({
+        queryKey: ['review-eligibility', user?.id],
+        queryFn: () => reviewService.checkReviewEligibility(user?.id!),
+        enabled: !!user?.id && !!currentUser && currentUser.id !== user.id
+    });
 
     // Check follow status
     const { data: followStatus, refetch: refetchFollowStatus } = useQuery({
@@ -224,6 +237,12 @@ export default function PublicProfilePage() {
                     onCropComplete={handleCropComplete}
                 />
             )}
+            <WriteUserReviewModal
+                isOpen={isReviewModalOpen}
+                onClose={() => setIsReviewModalOpen(false)}
+                targetUserId={user.id}
+                targetUsername={user.username}
+            />
 
             {/* Header / Navigation */}
             <div className="bg-[#0a0a0a]/80 backdrop-blur-md border-b border-white/5 sticky top-0 z-30">
@@ -405,20 +424,50 @@ export default function PublicProfilePage() {
                                 >
                                     Collections
                                 </button>
+                                <button
+                                    onClick={() => setActiveTab('reviews')}
+                                    className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'reviews' ? 'border-yellow-400 text-white' : 'border-transparent text-gray-500 hover:text-gray-300'}`}
+                                >
+                                    Reviews
+                                </button>
                             </div>
                         </div>
 
-                        {activeTab === 'models' && (
-                            <ModelGrid artistId={user.id} />
-                        )}
-
-                        {activeTab === 'collections' && (
-                            <PublicCollectionsTab userId={user.id} />
-                        )}
+                        {activeTab === 'models' && <ModelGrid artistId={user.id} />}
+                        {activeTab === 'collections' && <PublicCollectionsTab userId={user.id} />}
+                        {activeTab === 'reviews' && <UserReviewsTab userId={user.id} />}
                     </div>
 
                     {/* Sidebar Right */}
                     <div className="hidden lg:block space-y-6">
+                        {/* Write Review Button (Conditional) */}
+                        {currentUser && !isOwner && eligibility?.eligible && (
+                            <button
+                                onClick={() => setIsReviewModalOpen(true)}
+                                className="w-full py-4 bg-yellow-400 hover:bg-yellow-300 text-black font-black rounded-3xl transition-all shadow-xl shadow-yellow-400/10 flex items-center justify-center gap-3 group"
+                            >
+                                <Star className="w-5 h-5 fill-black group-hover:scale-110 transition-transform" />
+                                Write a Review
+                            </button>
+                        )}
+
+                        {/* Already Reviewed Message */}
+                        {currentUser && !isOwner && eligibility?.reason === 'ALREADY_REVIEWED' && (
+                            <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl flex items-center gap-3">
+                                <Check className="w-5 h-5 text-emerald-500" />
+                                <span className="text-xs font-bold text-emerald-500/80">You've already reviewed this user</span>
+                            </div>
+                        )}
+
+                        {/* Restricted Message */}
+                        {currentUser && !isOwner && !eligibility?.eligible && eligibility?.reason === 'NO_TRANSACTION' && (
+                            <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-start gap-3">
+                                <Lock className="w-4 h-4 text-gray-500 mt-0.5" />
+                                <p className="text-[11px] text-gray-500 leading-normal">
+                                    Reviews are restricted to verified customers and partners. Order services or buy models to leave feedback.
+                                </p>
+                            </div>
+                        )}
                         <div className="bg-gray-900/40 border border-gray-800 rounded-3xl p-6">
                             <h3 className="font-bold text-white mb-4 uppercase text-xs tracking-widest text-gray-500">Stats</h3>
                             <div className="space-y-4">

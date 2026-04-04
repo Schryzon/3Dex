@@ -24,6 +24,7 @@ const PUBLIC_PREFIXES = [
   '/become-provider',
   '/providers',
   '/apply',
+  '/about-us',
   '/_next',
   '/favicon',
   '/icons',
