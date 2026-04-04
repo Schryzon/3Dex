@@ -226,7 +226,8 @@ export async function get_user_orders(user_id: string) {
                             price: true,
                             artist: {
                                 select: {
-                                    username: true
+                                    username: true,
+                                    avatar_url: true
                                 }
                             }
                         }
