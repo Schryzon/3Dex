@@ -32,6 +32,7 @@ export async function list_users(req: Auth_Request, res: Response): Promise<void
 export async function update_profile(req: Auth_Request, res: Response): Promise<void> {
     const { id } = req.user;
     const {
+        username,
         display_name,
         bio,
         location,
@@ -47,28 +48,35 @@ export async function update_profile(req: Auth_Request, res: Response): Promise<
         show_nsfw
     } = req.body;
 
-    // Validate addresses if provided? (Basic structure check logic could be here)
+    try {
+        const user = await prisma.user.update({
+            where: { id },
+            data: {
+                username: username || undefined,
+                display_name,
+                bio,
+                location,
+                website,
+                social_twitter,
+                social_instagram,
+                social_artstation,
+                social_behance,
+                addresses: addresses ? addresses : undefined,
+                provider_config: provider_config ? provider_config : undefined,
+                avatar_url,
+                banner_url,
+                show_nsfw: show_nsfw !== undefined ? !!show_nsfw : undefined
+            }
+        });
 
-    const user = await prisma.user.update({
-        where: { id },
-        data: {
-            display_name,
-            bio,
-            location,
-            website,
-            social_twitter,
-            social_instagram,
-            social_artstation,
-            social_behance,
-            addresses: addresses ? addresses : undefined,
-            provider_config: provider_config ? provider_config : undefined,
-            avatar_url,
-            banner_url,
-            show_nsfw: show_nsfw !== undefined ? !!show_nsfw : undefined
+        res.json(await sign_user_urls(user));
+    } catch (error: any) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+            res.status(400).json({ message: "Username already taken." });
+            return;
         }
-    });
-
-    res.json(await sign_user_urls(user));
+        res.status(500).json({ message: error.message || "Failed to update profile." });
+    }
 }
 
 /**

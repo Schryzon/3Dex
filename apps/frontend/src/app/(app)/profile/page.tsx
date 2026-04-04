@@ -479,6 +479,7 @@ function ProfileContent() {
     const [emailNotifs, setEmailNotifs] = useState(true);
     const [marketNotifs, setMarketNotifs] = useState(false);
     const [autoAccept, setAutoAccept] = useState(false);
+    const [showUsernameConfirm, setShowUsernameConfirm] = useState(false);
 
     const [formData, setFormData] = useState({
         username: user?.username || '',
@@ -509,11 +510,12 @@ function ProfileContent() {
         setTimeout(() => setSaveBanner(null), 4000);
     };
 
-    const handleSaveSettings = async () => {
+    const executeSave = async () => {
         setIsSaving(true);
         setSaveBanner(null);
         try {
             const payload = {
+                username: formData.username,
                 display_name: formData.displayName,
                 bio: formData.bio,
                 location: formData.location,
@@ -535,11 +537,20 @@ function ProfileContent() {
             }
             setUser(res.data);
             showBannerNotif('success', 'Profile saved successfully!');
+            setShowUsernameConfirm(false);
         } catch (error: any) {
             console.error('Failed to save settings:', error);
             showBannerNotif('error', error.response?.data?.message || 'Failed to save settings.');
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const handleSaveSettings = async () => {
+        if (formData.username !== user?.username) {
+            setShowUsernameConfirm(true);
+        } else {
+            await executeSave();
         }
     };
 
@@ -733,6 +744,28 @@ function ProfileContent() {
                 cancelLabel="Not Yet"
                 variant="default"
                 isLoading={isApplyingProvider}
+            />
+
+            {/* Username Change Confirmation Modal */}
+            <ConfirmModal
+                isOpen={showUsernameConfirm}
+                onClose={() => setShowUsernameConfirm(false)}
+                onConfirm={executeSave}
+                title="Change Username?"
+                message={
+                    <div className="space-y-4">
+                        <p>
+                            You are changing your username to <strong className="text-white">@{formData.username}</strong>.
+                        </p>
+                        <p className="text-xs text-orange-400 font-medium bg-orange-400/10 p-3 rounded-lg border border-orange-400/20">
+                            <AlertTriangle className="w-4 h-4 inline mr-2 text-orange-400" />
+                            Warning: This will change your profile URL. Existing links to your old profile will no longer work.
+                        </p>
+                    </div>
+                }
+                confirmLabel="Confirm Change"
+                variant="default"
+                isLoading={isSaving}
             />
 
             {/* Revert Role First Confirmation */}
