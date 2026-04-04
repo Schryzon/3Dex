@@ -48,11 +48,14 @@ jobs:
             nvm use --lts
 
             cd ~/3Dex
-            # Only install production dependencies to save RAM
+            # Install production dependencies for all workspaces
             npm install --omit=dev
+
+            # Generate Prisma client on the VPS
             cd apps/backend
-            # Generate Prisma client on the VPS to match its OS/architecture
             npx prisma generate
             npx prisma migrate deploy
-            cd ../..
-            pm2 reload ecosystem.config.js
+            
+            # Restart the API and Frontend via PM2
+            cd ~/3Dex
+            pm2 reload ecosystem.config.js --update-env

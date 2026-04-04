@@ -17,7 +17,13 @@ export async function list_users(req: Auth_Request, res: Response): Promise<void
             id: true,
             email: true,
             username: true,
+            display_name: true,
+            avatar_url: true,
+            location: true,
             role: true,
+            provider_config: true,
+            rating: true,
+            review_count: true,
             created_at: true,
             updated_at: true
         }
@@ -240,7 +246,9 @@ export async function search_users(req: Auth_Request, res: Response): Promise<vo
             display_name: true,
             avatar_url: true,
             bio: true,
+            location: true,
             role: true,
+            provider_config: true,
             rating: true,
             review_count: true
         }
