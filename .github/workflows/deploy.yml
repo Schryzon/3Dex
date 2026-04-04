@@ -24,6 +24,13 @@ jobs:
           npm install
           npx prisma generate --schema=apps/backend/prisma/schema.prisma
           npm run build --workspaces
+        env:
+          NEXT_PUBLIC_API_URL: https://api.3dex.studio
+          NEXT_PUBLIC_SITE_URL: https://3dex.studio
+          NEXT_PUBLIC_MINIO_URL: https://s3.3dex.studio
+          NEXT_PUBLIC_PROD_MIDTRANS_CLIENT_KEY: ${{ secrets.NEXT_PUBLIC_PROD_MIDTRANS_CLIENT_KEY }}
+          NEXT_PUBLIC_SB_MIDTRANS_CLIENT_KEY: ${{ secrets.NEXT_PUBLIC_SB_MIDTRANS_CLIENT_KEY }}
+          NODE_ENV: production
 
       - name: Rsync Build Files to VPS
         uses: appleboy/scp-action@v0.1.7
