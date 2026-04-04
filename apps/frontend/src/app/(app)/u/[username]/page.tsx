@@ -23,13 +23,24 @@ import {
     Loader2,
     AlertTriangle,
     X,
+    Globe,
+    Lock,
+    Package,
+    FolderOpen,
+    Pencil,
+    Check,
+    Star,
+    MessageSquare,
 } from 'lucide-react';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import ImageCropModal from '@/components/common/ImageCropModal';
 import { useRouter } from 'next/navigation';
-import { MINIO_BASE_URL } from '@/lib/constants/endpoints';
+import { getStorageUrl } from '@/lib/utils/storage';
 import Link from 'next/link';
 import { useAuth } from '@/features/auth';
+import { reviewService } from '@/lib/api/services/review.service';
+import UserReviewsTab from '@/features/profile/components/UserReviewsTab';
+import WriteUserReviewModal from '@/features/profile/components/WriteUserReviewModal';
 
 
 export default function PublicProfilePage() {
@@ -43,7 +54,9 @@ export default function PublicProfilePage() {
         image: string;
         aspect: number;
     }>({ isOpen: false, image: '', aspect: 16 / 5 });
-    const [activeTab, setActiveTab] = useState<'models' | 'posts' | 'about'>('models');
+    const [activeTab, setActiveTab] = useState<'models' | 'posts' | 'collections' | 'reviews'>('models');
+    const [shareSuccess, setShareSuccess] = useState(false);
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
     const { data: user, isLoading, error, refetch: refetchUser } = useQuery({
         queryKey: ['user', username],
@@ -55,6 +68,13 @@ export default function PublicProfilePage() {
     });
 
     const { user: currentUser } = useAuth();
+
+    // Check review eligibility
+    const { data: eligibility } = useQuery({
+        queryKey: ['review-eligibility', user?.id],
+        queryFn: () => reviewService.checkReviewEligibility(user?.id!),
+        enabled: !!user?.id && !!currentUser && currentUser.id !== user.id
+    });
 
     // Check follow status
     const { data: followStatus, refetch: refetchFollowStatus } = useQuery({
@@ -97,6 +117,27 @@ export default function PublicProfilePage() {
         }
     };
 
+    const handleShare = async () => {
+        const url = window.location.href;
+        const title = `${user?.display_name || user?.username} on 3Dēx`;
+        try {
+            if (navigator.share) {
+                await navigator.share({ title, url });
+            } else {
+                await navigator.clipboard.writeText(url);
+                setShareSuccess(true);
+                setTimeout(() => setShareSuccess(false), 2000);
+            }
+        } catch (err) {
+            // User cancelled share or clipboard failed — try fallback
+            try {
+                await navigator.clipboard.writeText(url);
+                setShareSuccess(true);
+                setTimeout(() => setShareSuccess(false), 2000);
+            } catch {}
+        }
+    };
+
     const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -134,11 +175,24 @@ export default function PublicProfilePage() {
                 throw new Error(`Upload failed with status: ${uploadRes.status}`);
             }
 
-            await api.patch('/users/profile', { banner_url: key });
+            try {
+                await api.patch('/users/profile', { banner_url: key });
+            } catch (patchError: any) {
+                const status = patchError?.response?.status;
+                const shouldFallback = !status || status === 403 || status === 405 || status === 501;
+                if (!shouldFallback) {
+                    throw patchError;
+                }
+                await api.post('/users/profile/update', { banner_url: key });
+            }
             await refetchUser();
         } catch (error: any) {
             console.error('Failed to upload banner:', error);
-            setUploadError(error.message || 'Failed to upload banner. Please try again.');
+            setUploadError(
+                error.response?.data?.message ||
+                error.message ||
+                'Failed to upload banner. Please verify API domain/CORS in production.'
+            );
         } finally {
             setIsUploadingBanner(false);
         }
@@ -162,11 +216,7 @@ export default function PublicProfilePage() {
     }
 
     const isOwner = currentUser?.id === user.id;
-    const bannerSrc = user.banner_url
-        ? user.banner_url.startsWith('http')
-            ? user.banner_url
-            : `${MINIO_BASE_URL}/3dex-models/${user.banner_url}`
-        : null;
+    const bannerSrc = getStorageUrl(user.banner_url);
 
     return (
         <div className="min-h-screen bg-[#0a0a0a]">
@@ -187,20 +237,20 @@ export default function PublicProfilePage() {
                     onCropComplete={handleCropComplete}
                 />
             )}
+            <WriteUserReviewModal
+                isOpen={isReviewModalOpen}
+                onClose={() => setIsReviewModalOpen(false)}
+                targetUserId={user.id}
+                targetUsername={user.username}
+            />
 
             {/* Header / Navigation */}
             <div className="bg-[#0a0a0a]/80 backdrop-blur-md border-b border-white/5 sticky top-0 z-30">
                 <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-                    <button
-                        onClick={() => router.back()}
-                        className="flex items-center gap-2 text-gray-400 hover:text-yellow-400 transition-colors group text-sm font-medium"
-                    >
-                        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                        Back
-                    </button>
+                    
                     <Breadcrumbs
                         items={[
-                            { label: 'Users', href: '/catalog' },
+                            { label: 'Community', href: '/community' },
                             { label: `@${username}`, active: true }
                         ]}
                     />
@@ -223,17 +273,30 @@ export default function PublicProfilePage() {
                 </div>
 
                 {/* Button layer outside overflow-hidden */}
+                {/* Change Banner Button */}
                 {isOwner && (
-                    <button
-                        onClick={() => bannerInputRef.current?.click()}
-                        disabled={isUploadingBanner}
-                        className="absolute bottom-4 right-4 z-10 px-4 py-2 bg-black/60 backdrop-blur-md border border-white/10 text-white text-sm font-bold rounded-xl flex items-center gap-2 hover:bg-black/80 transition-opacity duration-200 opacity-0 group-hover:opacity-100 disabled:opacity-50 cursor-pointer"
-                    >
-                        {isUploadingBanner ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
-                        {isUploadingBanner ? 'Uploading...' : 'Change Banner'}
-                    </button>
+                    <>
+                        {/* Desktop Version */}
+                        <button
+                            onClick={() => bannerInputRef.current?.click()}
+                            disabled={isUploadingBanner}
+                            className="hidden md:flex absolute bottom-4 right-4 z-10 px-4 py-2 bg-black/60 backdrop-blur-md border border-white/10 text-white text-sm font-bold rounded-xl items-center gap-2 hover:bg-black/80 transition-opacity duration-200 opacity-0 group-hover:opacity-100 disabled:opacity-50 cursor-pointer"
+                        >
+                            {isUploadingBanner ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+                            <span>{isUploadingBanner ? 'Uploading...' : 'Change Banner'}</span>
+                        </button>
+
+                        {/* Change banner button for mobile */}
+                        <button
+                            onClick={() => bannerInputRef.current?.click()}
+                            disabled={isUploadingBanner}
+                            className="md:hidden absolute bottom-4 left-4 z-20 p-2.5 bg-black/60 backdrop-blur-md border border-white/10 text-white rounded-xl flex items-center justify-center disabled:opacity-50 cursor-pointer shadow-lg active:scale-95"
+                        >
+                            {isUploadingBanner ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4" />}
+                        </button>
+                    </>
                 )}
-                
+
                 {/* Error Banner */}
                 {uploadError && (
                     <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 px-4 py-2 bg-red-500 text-white text-sm font-bold rounded-xl shadow-lg flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
@@ -296,7 +359,7 @@ export default function PublicProfilePage() {
                             <button
                                 onClick={handleFollowToggle}
                                 disabled={followMutation.isPending || unfollowMutation.isPending}
-                                className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 font-bold rounded-xl transition-all ${followStatus?.is_following
+                                className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 md:px-6 md:py-2.5 text-sm md:text-base font-bold rounded-xl transition-all ${followStatus?.is_following
                                     ? 'bg-gray-800 text-white hover:bg-gray-700 border border-gray-700'
                                     : 'bg-yellow-400 text-black hover:bg-yellow-300'
                                     }`}
@@ -319,14 +382,22 @@ export default function PublicProfilePage() {
                         {user.role === 'PROVIDER' && (
                             <Link
                                 href={`/print-services/${user.username}/order`}
-                                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all"
+                                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 md:px-6 md:py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm md:text-base font-bold rounded-xl transition-all"
                             >
                                 <Printer className="w-4 h-4" />
                                 Request Print
                             </Link>
                         )}
-                        <button className="p-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-xl border border-gray-700 transition-all">
-                            <Share2 className="w-5 h-5" />
+                        <button
+                            onClick={handleShare}
+                            title={shareSuccess ? 'Link copied!' : 'Share profile'}
+                            className={`p-2 md:p-2.5 ${shareSuccess ? 'bg-green-600 border-green-500' : 'bg-gray-800 hover:bg-gray-700 border-gray-700'} text-white rounded-xl border transition-all shrink-0`}
+                        >
+                            {shareSuccess ? (
+                                <Check className="w-4 h-4 md:w-5 md:h-5" />
+                            ) : (
+                                <Share2 className="w-4 h-4 md:w-5 md:h-5" />
+                            )}
                         </button>
                     </div>
                 </div>
@@ -343,76 +414,62 @@ export default function PublicProfilePage() {
                             <div className="flex gap-6">
                                 <button
                                     onClick={() => setActiveTab('models')}
-                                    className={`pb-4 text-sm font-bold border-b-2 transition-colors ${activeTab === 'models' ? 'border-yellow-400 text-white' : 'border-transparent text-gray-500 hover:text-gray-300'}`}
+                                    className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'models' ? 'border-yellow-400 text-white' : 'border-transparent text-gray-500 hover:text-gray-300'}`}
                                 >
                                     Models
                                 </button>
                                 <button
-                                    onClick={() => setActiveTab('about')}
-                                    className={`pb-4 text-sm font-bold border-b-2 transition-colors ${activeTab === 'about' ? 'border-yellow-400 text-white' : 'border-transparent text-gray-500 hover:text-gray-300'}`}
+                                    onClick={() => setActiveTab('collections')}
+                                    className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'collections' ? 'border-yellow-400 text-white' : 'border-transparent text-gray-500 hover:text-gray-300'}`}
                                 >
-                                    About
+                                    Collections
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('reviews')}
+                                    className={`pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'reviews' ? 'border-yellow-400 text-white' : 'border-transparent text-gray-500 hover:text-gray-300'}`}
+                                >
+                                    Reviews
                                 </button>
                             </div>
                         </div>
 
-                        {activeTab === 'models' && (
-                            <ModelGrid artistId={user.id} />
-                        )}
-
-                        {activeTab === 'about' && (
-                            <div className="bg-gray-900/40 border border-gray-800 rounded-2xl p-6">
-                                <h3 className="text-lg font-bold text-white mb-4">About {user.display_name || user.username}</h3>
-                                {user.role === 'PROVIDER' && user.provider_config && (
-                                    <div className="mb-6">
-                                        <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Service Capabilities</h4>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <span className="text-gray-500 text-sm block mb-1">Materials</span>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {user.provider_config.materials.map((m: string) => (
-                                                        <span key={m} className="px-2 py-1 bg-gray-800 text-gray-300 text-xs rounded">{m}</span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <span className="text-gray-500 text-sm block mb-1">Printer Types</span>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {user.provider_config.printerTypes.map((p: string) => (
-                                                        <span key={p} className="px-2 py-1 bg-gray-800 text-gray-300 text-xs rounded">{p}</span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Socials</h4>
-                                <div className="flex gap-4">
-                                    {user.social_twitter && (
-                                        <Link href={`https://twitter.com/${user.social_twitter}`} target="_blank" className="p-2 bg-gray-800 rounded-lg text-blue-400 hover:bg-gray-700 transition-colors">
-                                            <Twitter className="w-5 h-5" />
-                                        </Link>
-                                    )}
-                                    {user.social_instagram && (
-                                        <Link href={`https://instagram.com/${user.social_instagram}`} target="_blank" className="p-2 bg-gray-800 rounded-lg text-pink-500 hover:bg-gray-700 transition-colors">
-                                            <Instagram className="w-5 h-5" />
-                                        </Link>
-                                    )}
-                                    {user.social_artstation && (
-                                        <Link href={`https://artstation.com/${user.social_artstation}`} target="_blank" className="p-2 bg-gray-800 rounded-lg text-blue-300 hover:bg-gray-700 transition-colors">
-                                            <LinkIcon className="w-5 h-5" />
-                                        </Link>
-                                    )}
-                                </div>
-                            </div>
-                        )}
+                        {activeTab === 'models' && <ModelGrid artistId={user.id} />}
+                        {activeTab === 'collections' && <PublicCollectionsTab userId={user.id} />}
+                        {activeTab === 'reviews' && <UserReviewsTab userId={user.id} />}
                     </div>
 
                     {/* Sidebar Right */}
                     <div className="hidden lg:block space-y-6">
-                        <div className="bg-gray-900/40 border border-gray-800 rounded-2xl p-6">
-                            <h3 className="font-bold text-white mb-4">Stats</h3>
+                        {/* Write Review Button (Conditional) */}
+                        {currentUser && !isOwner && eligibility?.eligible && (
+                            <button
+                                onClick={() => setIsReviewModalOpen(true)}
+                                className="w-full py-4 bg-yellow-400 hover:bg-yellow-300 text-black font-black rounded-3xl transition-all shadow-xl shadow-yellow-400/10 flex items-center justify-center gap-3 group"
+                            >
+                                <Star className="w-5 h-5 fill-black group-hover:scale-110 transition-transform" />
+                                Write a Review
+                            </button>
+                        )}
+
+                        {/* Already Reviewed Message */}
+                        {currentUser && !isOwner && eligibility?.reason === 'ALREADY_REVIEWED' && (
+                            <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl flex items-center gap-3">
+                                <Check className="w-5 h-5 text-emerald-500" />
+                                <span className="text-xs font-bold text-emerald-500/80">You've already reviewed this user</span>
+                            </div>
+                        )}
+
+                        {/* Restricted Message */}
+                        {currentUser && !isOwner && !eligibility?.eligible && eligibility?.reason === 'NO_TRANSACTION' && (
+                            <div className="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-start gap-3">
+                                <Lock className="w-4 h-4 text-gray-500 mt-0.5" />
+                                <p className="text-[11px] text-gray-500 leading-normal">
+                                    Reviews are restricted to verified customers and partners. Order services or buy models to leave feedback.
+                                </p>
+                            </div>
+                        )}
+                        <div className="bg-gray-900/40 border border-gray-800 rounded-3xl p-6">
+                            <h3 className="font-bold text-white mb-4 uppercase text-xs tracking-widest text-gray-500">Stats</h3>
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center text-sm">
                                     <span className="text-gray-400">Rating</span>
@@ -426,9 +483,133 @@ export default function PublicProfilePage() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Socials moved to sidebar */}
+                        <div className="bg-gray-900/40 border border-gray-800 rounded-3xl p-6">
+                            <h3 className="font-bold text-white mb-4 uppercase text-xs tracking-widest text-gray-500">Socials</h3>
+                            <div className="flex flex-wrap gap-3">
+                                {user.social_twitter && (
+                                    <Link href={`https://twitter.com/${user.social_twitter}`} target="_blank" className="p-3 bg-gray-800 rounded-xl text-blue-400 hover:bg-gray-700 transition-colors">
+                                        <Twitter className="w-5 h-5" />
+                                    </Link>
+                                )}
+                                {user.social_instagram && (
+                                    <Link href={`https://instagram.com/${user.social_instagram}`} target="_blank" className="p-3 bg-gray-800 rounded-xl text-pink-500 hover:bg-gray-700 transition-colors">
+                                        <Instagram className="w-5 h-5" />
+                                    </Link>
+                                )}
+                                {user.website && (
+                                    <Link href={user.website} target="_blank" className="p-3 bg-gray-800 rounded-xl text-yellow-400 hover:bg-gray-700 transition-colors">
+                                        <LinkIcon className="w-5 h-5" />
+                                    </Link>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
+    );
+}
+
+function PublicCollectionsTab({ userId }: { userId: string }) {
+    const { data: collections, isLoading } = useQuery({
+        queryKey: ['public-collections', userId],
+        queryFn: async () => {
+            const res = await api.get<{ data: any[] }>(`/collections/user/${userId}`);
+            return res.data.data;
+        },
+        enabled: !!userId
+    });
+
+    if (isLoading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-yellow-400 animate-spin" /></div>;
+
+    if (!collections || collections.length === 0) {
+        return (
+            <div className="text-center py-20 bg-[#111111]/20 rounded-[2.5rem] border border-gray-800/40 border-dashed">
+                <FolderOpen className="w-16 h-16 text-gray-800 mx-auto mb-4" />
+                <p className="text-gray-500 font-medium">No public collections yet.</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-8">
+            {collections.map((collection: any) => {
+                const items = collection.items || [];
+                const hasItems = items.length > 0;
+
+                return (
+                    <Link key={collection.id} href={`/collections/${collection.id}`} className="group block">
+                        <div className="aspect-[4/3] w-full bg-gray-900/40 relative overflow-hidden rounded-[2.2rem] ring-1 ring-white/5 group-hover:ring-yellow-400/30 transition-all duration-500">
+                            <div className="w-full h-full flex gap-1 p-1">
+                                {hasItems ? (
+                                    <>
+                                        {/* Main Image */}
+                                        <div className="flex-[2] h-full rounded-2xl overflow-hidden bg-gray-800/20">
+                                            <img
+                                                src={getStorageUrl(items[0]?.model?.preview_url)}
+                                                alt=""
+                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                            />
+                                        </div>
+                                        {/* Side Previews */}
+                                        <div className="flex-1 flex flex-col gap-1">
+                                            <div className="flex-1 rounded-xl overflow-hidden bg-gray-800/20">
+                                                {items[1] && (
+                                                    <img
+                                                        src={getStorageUrl(items[1]?.model?.preview_url)}
+                                                        alt=""
+                                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                                    />
+                                                )}
+                                            </div>
+                                            <div className="flex-1 rounded-xl overflow-hidden bg-gray-800/20 flex items-center justify-center">
+                                                {items[2] ? (
+                                                    <img
+                                                        src={getStorageUrl(items[2]?.model?.preview_url)}
+                                                        alt=""
+                                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                                    />
+                                                ) : (
+                                                    <div className="w-8 h-8 bg-white/5 rounded-xl flex items-center justify-center">
+                                                        <FolderOpen className="w-4 h-4 text-white/10" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div >
+                                    </>
+                                ) : (
+                                    /* Empty State Visual */
+                                    <div className="w-full h-full flex flex-col items-center justify-center relative">
+                                        <FolderOpen className="absolute -right-6 -bottom-6 w-32 h-32 text-white/[0.03] -rotate-12" />
+                                        <div className="w-14 h-14 bg-gray-800/40 backdrop-blur-md rounded-2xl flex items-center justify-center group-hover:bg-yellow-400 group-hover:text-black transition-all duration-500 shadow-inner group-hover:rotate-6">
+                                            <FolderOpen className="w-6 h-6" />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Details Info */}
+                        <div className="mt-4 px-2">
+                            <div className="flex items-center justify-between gap-3 mb-1.5">
+                                <h3 className="font-bold text-white text-sm md:text-base truncate group-hover:text-yellow-400 transition-colors">
+                                    {collection.name}
+                                </h3>
+                                <span className={`shrink-0 flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-tighter bg-emerald-500/10 text-emerald-500 border border-emerald-500/20`}>
+                                    <Globe className="w-2.5 h-2.5" />
+                                    Public
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2 text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-widest opacity-60">
+                                <Package className="w-3.5 h-3.5" />
+                                {collection._count?.items ?? 0} Assets
+                            </div>
+                        </div>
+                    </Link>
+                );
+            })}
         </div>
     );
 }

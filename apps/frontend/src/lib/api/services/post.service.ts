@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { apiClient } from '../client';
 
 export const postKeys = {
@@ -16,6 +17,7 @@ export interface Post {
         display_name?: string;
         avatar_url?: string;
         role: string;
+        is_followed?: boolean;
     };
     like_count: number;
     comment_count: number;
@@ -60,4 +62,22 @@ export const postService = {
             reason
         });
     },
+
+    async getPostById(postId: string): Promise<Post> {
+        return apiClient.get<Post>(`/posts/${postId}`);
+    },
+    async getUploadUrl(filename: string, contentType: string): Promise<{ url: string; key: string }> {
+        return apiClient.post<{ url: string; key: string }>('/storage/upload-url', { filename, content_type: contentType });
+    },
+    async uploadToPresignedUrl(url: string, file: File, onProgress?: (progress: number) => void): Promise<void> {
+        await axios.put(url, file, {
+            headers: { 'Content-Type': file.type },
+            onUploadProgress: (progressEvent) => {
+                if (onProgress && progressEvent.total) {
+                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    onProgress(progress);
+                }
+            }
+        });
+    }
 };

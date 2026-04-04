@@ -4,7 +4,8 @@ import {
     list_reviews,
     add_user_review,
     get_user_reviews,
-    get_review_stats
+    get_review_stats,
+    check_review_eligibility
 } from "../controllers/review.controller";
 import { require_auth } from "../middlewares/auth.middleware";
 
@@ -72,5 +73,6 @@ router.post("/user", require_auth, add_user_review);
  *         description: List of reviews
  */
 router.get("/user/:user_id", get_user_reviews);
+router.get("/user/:target_user_id/eligible", require_auth, check_review_eligibility);
 
 export default router;

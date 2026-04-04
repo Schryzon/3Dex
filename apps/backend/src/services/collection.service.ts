@@ -1,43 +1,107 @@
 import prisma from "../prisma";
+import { get_download_url_s3, sign_user_urls } from "./storage.service";
 
-export async function create_collection(userId: string, name: string, description?: string, isPublic: boolean = true) {
+async function sign_preview(preview_url?: string | null) {
+    if (!preview_url || preview_url.startsWith("http")) return preview_url;
+    return get_download_url_s3(preview_url);
+}
+
+/**
+ * Create a new collection
+ */
+export async function create_collection(user_id: string, name: string, desc?: string, is_public: boolean = true){
     return prisma.collection.create({
         data: {
-            user_id: userId,
+            user_id,
             name,
-            description,
-            is_public: isPublic
+            description: desc,
+            is_public
         }
     });
 }
 
-export async function get_user_collections(userId: string) {
-    return prisma.collection.findMany({
-        where: { user_id: userId },
+/**
+ * Get collections for a user
+ */
+export async function get_user_collections(user_id: string){
+    const collections = await prisma.collection.findMany({
+        where: { user_id },
         include: {
             _count: {
                 select: { items: true }
+            },
+            items: {
+                take: 3,
+                orderBy: { added_at: 'desc' },
+                include: {
+                    model: {
+                        select: { preview_url: true }
+                    }
+                }
             }
         },
         orderBy: { created_at: 'desc' }
     });
+    return Promise.all(
+        collections.map(async (collection) => ({
+            ...collection,
+            items: await Promise.all(
+                collection.items.map(async (item) => ({
+                    ...item,
+                    model: {
+                        ...item.model,
+                        preview_url: await sign_preview(item.model?.preview_url),
+                    },
+                }))
+            ),
+        }))
+    );
 }
 
-export async function get_public_collections(userId: string) {
-    return prisma.collection.findMany({
-        where: { user_id: userId, is_public: true },
+/**
+ * Get public collections for a user
+ */
+export async function get_public_collections(user_id: string){
+    const collections = await prisma.collection.findMany({
+        where: { user_id, is_public: true },
         include: {
             _count: {
                 select: { items: true }
+            },
+            items: {
+                take: 3,
+                orderBy: { added_at: 'desc' },
+                include: {
+                    model: {
+                        select: { preview_url: true }
+                    }
+                }
             }
         },
         orderBy: { created_at: 'desc' }
     });
+    return Promise.all(
+        collections.map(async (collection) => ({
+            ...collection,
+            items: await Promise.all(
+                collection.items.map(async (item) => ({
+                    ...item,
+                    model: {
+                        ...item.model,
+                        preview_url: await sign_preview(item.model?.preview_url),
+                    },
+                }))
+            ),
+        }))
+    );
 }
 
-export async function get_collection_details(collectionId: string) {
-    return prisma.collection.findUnique({
-        where: { id: collectionId },
+/**
+ * Get detailed collection info
+ */
+export async function get_collection_details(coll_id: string){
+    const collection = await prisma.collection.findUnique({
+        where: { id: coll_id },
         include: {
             user: { select: { username: true, display_name: true, avatar_url: true } },
             items: {
@@ -56,58 +120,107 @@ export async function get_collection_details(collectionId: string) {
             }
         }
     });
+    if (!collection) return collection;
+    return {
+        ...collection,
+        user: await sign_user_urls(collection.user),
+        items: await Promise.all(
+            collection.items.map(async (item) => ({
+                ...item,
+                model: {
+                    ...item.model,
+                    preview_url: await sign_preview(item.model?.preview_url),
+                },
+            }))
+        ),
+    };
 }
 
-export async function update_collection(collectionId: string, userId: string, data: { name?: string, description?: string, isPublic?: boolean }) {
-    const collection = await prisma.collection.findUnique({ where: { id: collectionId } });
-    if (!collection || collection.user_id !== userId) throw new Error("Collection not found or unauthorized");
+/**
+ * Update collection metadata
+ */
+export async function update_collection(coll_id: string, user_id: string, data: { name?: string, desc?: string, is_public?: boolean }){
+    const coll = await prisma.collection.findUnique({ where: { id: coll_id } });
+    if(!coll || coll.user_id !== user_id){
+        throw new Error("Collection not found or unauthorized");
+    }
 
     return prisma.collection.update({
-        where: { id: collectionId },
+        where: { id: coll_id },
         data: {
             name: data.name,
-            description: data.description,
-            is_public: data.isPublic
+            description: data.desc,
+            is_public: data.is_public
         }
     });
 }
 
-export async function delete_collection(collectionId: string, userId: string) {
-    const collection = await prisma.collection.findUnique({ where: { id: collectionId } });
-    if (!collection || collection.user_id !== userId) throw new Error("Collection not found or unauthorized");
+/**
+ * Delete a collection
+ */
+export async function delete_collection(coll_id: string, user_id: string){
+    const coll = await prisma.collection.findUnique({ where: { id: coll_id } });
+    if(!coll || coll.user_id !== user_id){
+        throw new Error("Collection not found or unauthorized");
+    }
 
-    return prisma.collection.delete({ where: { id: collectionId } });
+    return prisma.collection.delete({ where: { id: coll_id } });
 }
 
-export async function add_to_collection(collectionId: string, modelId: string, userId: string) {
-    const collection = await prisma.collection.findUnique({ where: { id: collectionId } });
-    if (!collection || collection.user_id !== userId) throw new Error("Collection not found or unauthorized");
+/**
+ * Add model to collection
+ */
+export async function add_to_collection(coll_id: string, mod_id: string, user_id: string){
+    const coll = await prisma.collection.findUnique({ where: { id: coll_id } });
+    if(!coll || coll.user_id !== user_id){
+        throw new Error("Collection not found or unauthorized");
+    }
 
-    // Check if model exists
-    const model = await prisma.model.findUnique({ where: { id: modelId } });
-    if (!model) throw new Error("Model not found");
+    const model = await prisma.model.findUnique({ where: { id: mod_id } });
+    if(!model){
+        throw new Error("Model not found");
+    }
 
-    return prisma.collectionItem.create({
-        data: {
-            collection_id: collectionId,
-            model_id: modelId
-        }
-    });
-}
-
-export async function remove_from_collection(collectionId: string, modelId: string, userId: string) {
-    const collection = await prisma.collection.findUnique({ where: { id: collectionId } });
-    if (!collection || collection.user_id !== userId) throw new Error("Collection not found or unauthorized");
-
-    const item = await prisma.collectionItem.findUnique({
+    const exist = await prisma.collection_Item.findFirst({
         where: {
-            collection_id_model_id: { collection_id: collectionId, model_id: modelId }
+            collection_id: coll_id,
+            model_id: mod_id
         }
     });
 
-    if (!item) throw new Error("Item not found in collection");
+    if(exist){
+        return exist;
+    }
 
-    return prisma.collectionItem.delete({
+    return prisma.collection_Item.create({
+        data: {
+            collection_id: coll_id,
+            model_id: mod_id
+        }
+    });
+}
+
+/**
+ * Remove model from collection
+ */
+export async function remove_from_collection(coll_id: string, mod_id: string, user_id: string){
+    const coll = await prisma.collection.findUnique({ where: { id: coll_id } });
+    if(!coll || coll.user_id !== user_id){
+        throw new Error("Collection not found or unauthorized");
+    }
+
+    const item = await prisma.collection_Item.findFirst({
+        where: {
+            collection_id: coll_id,
+            model_id: mod_id
+        }
+    });
+
+    if(!item){
+        throw new Error("Item not found in collection");
+    }
+
+    return prisma.collection_Item.delete({
         where: { id: item.id }
     });
 }

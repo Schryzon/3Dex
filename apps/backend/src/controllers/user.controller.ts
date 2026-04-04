@@ -32,6 +32,7 @@ export async function list_users(req: Auth_Request, res: Response): Promise<void
 export async function update_profile(req: Auth_Request, res: Response): Promise<void> {
     const { id } = req.user;
     const {
+        username,
         display_name,
         bio,
         location,
@@ -47,28 +48,35 @@ export async function update_profile(req: Auth_Request, res: Response): Promise<
         show_nsfw
     } = req.body;
 
-    // Validate addresses if provided? (Basic structure check logic could be here)
+    try {
+        const user = await prisma.user.update({
+            where: { id },
+            data: {
+                username: username || undefined,
+                display_name,
+                bio,
+                location,
+                website,
+                social_twitter,
+                social_instagram,
+                social_artstation,
+                social_behance,
+                addresses: addresses ? addresses : undefined,
+                provider_config: provider_config ? provider_config : undefined,
+                avatar_url,
+                banner_url,
+                show_nsfw: show_nsfw !== undefined ? !!show_nsfw : undefined
+            }
+        });
 
-    const user = await prisma.user.update({
-        where: { id },
-        data: {
-            display_name,
-            bio,
-            location,
-            website,
-            social_twitter,
-            social_instagram,
-            social_artstation,
-            social_behance,
-            addresses: addresses ? addresses : undefined,
-            provider_config: provider_config ? provider_config : undefined,
-            avatar_url,
-            banner_url,
-            show_nsfw: show_nsfw !== undefined ? !!show_nsfw : undefined
+        res.json(await sign_user_urls(user));
+    } catch (error: any) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+            res.status(400).json({ message: "Username already taken." });
+            return;
         }
-    });
-
-    res.json(await sign_user_urls(user));
+        res.status(500).json({ message: error.message || "Failed to update profile." });
+    }
 }
 
 /**
@@ -92,6 +100,17 @@ export async function apply_for_role(req: Auth_Request, res: Response): Promise<
 
     if (!['ARTIST', 'PROVIDER'].includes(role)) {
         res.status(400).json({ message: "Invalid role! Must be ARTIST or PROVIDER." });
+        return;
+    }
+
+    // Role Constraints: Artists cannot apply for Provider, and vice versa.
+    const current_role = req.user.role;
+    if (current_role === 'ARTIST' && role === 'PROVIDER') {
+        res.status(400).json({ message: "Existing Artists cannot apply for Provider role. Please revert to a regular user first." });
+        return;
+    }
+    if (current_role === 'PROVIDER' && role === 'ARTIST') {
+        res.status(400).json({ message: "Existing Providers cannot apply for Artist role. Please revert to a regular user first." });
         return;
     }
 
@@ -187,6 +206,54 @@ export async function get_public_profile(req: Auth_Request, res: Response): Prom
 }
 
 /**
+ * Search/Discovery for users (Publicly accessible)
+ */
+export async function search_users(req: Auth_Request, res: Response): Promise<void> {
+    const { q, role } = req.query;
+
+    if (!q && !role) {
+        res.status(400).json({ message: "Search query or role is required!" });
+        return;
+    }
+
+    const where: Prisma.UserWhereInput = {
+        account_status: 'APPROVED'
+    };
+
+    if (q) {
+        where.OR = [
+            { username: { contains: q as string, mode: 'insensitive' } },
+            { display_name: { contains: q as string, mode: 'insensitive' } }
+        ];
+    }
+
+    if (role && ['ARTIST', 'PROVIDER'].includes(role as string)) {
+        where.role = role as any;
+    }
+
+    const users = await prisma.user.findMany({
+        where,
+        take: 10,
+        select: {
+            id: true,
+            username: true,
+            display_name: true,
+            avatar_url: true,
+            bio: true,
+            role: true,
+            rating: true,
+            review_count: true
+        }
+    });
+
+    const signed_users = await Promise.all(
+        users.map(u => sign_user_urls(u))
+    );
+
+    res.json(signed_users);
+}
+
+/**
  * Change user password
  */
 export async function change_password(req: Auth_Request, res: Response): Promise<void> {
@@ -256,4 +323,46 @@ export async function delete_account(req: Auth_Request, res: Response): Promise<
     // Clear auth cookie
     res.clearCookie('token', { httpOnly: true, sameSite: 'lax' });
     res.json({ message: "Account deleted successfully." });
+}
+/**
+ * Revert Artist or Provider back to Customer
+ */
+export async function revert_to_customer(req: Auth_Request, res: Response): Promise<void> {
+    const { id, role } = req.user;
+
+    // Security check: ADMINs cannot use this
+    if (role === 'ADMIN') {
+        res.status(403).json({ message: "Administrators cannot revert their role." });
+        return;
+    }
+
+    // Check if already customer
+    if (role === 'CUSTOMER') {
+        res.status(400).json({ message: "You are already a regular user." });
+        return;
+    }
+
+    try {
+        const user = await prisma.user.update({
+            where: { id },
+            data: {
+                role: 'CUSTOMER',
+                account_status: 'APPROVED',
+                status_history: {
+                    push: {
+                        status: 'CUSTOMER',
+                        timestamp: new Date().toISOString(),
+                        reason: `User manually reverted from ${role} to CUSTOMER`
+                    }
+                }
+            }
+        });
+
+        res.json({ 
+            message: "Successfully reverted to regular user.", 
+            user: await sign_user_urls(user) 
+        });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
 }

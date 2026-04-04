@@ -5,7 +5,9 @@ import {
     change_password,
     toggle_2fa,
     apply_for_role,
+    revert_to_customer,
     get_public_profile,
+    search_users,
     delete_account
 } from "../controllers/user.controller";
 import { require_auth } from "../middlewares/auth.middleware";
@@ -42,6 +44,8 @@ router.get("/", require_auth, require_admin, list_users);
  *         description: Profile updated
  */
 router.patch("/profile", require_auth, update_profile);
+// Fallback for proxies/CDN rules that block PATCH preflight.
+router.post("/profile/update", require_auth, update_profile);
 
 /**
  * @openapi
@@ -90,6 +94,21 @@ router.post("/apply-role", require_auth, apply_for_role);
 
 /**
  * @openapi
+ * /users/revert-role:
+ *   post:
+ *     summary: Revert Artist or Provider back to regular user
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Reverted successfully
+ */
+router.post("/revert-role", require_auth, revert_to_customer);
+
+/**
+ * @openapi
  * /users/me:
  *   delete:
  *     summary: Permanently delete own account
@@ -102,6 +121,31 @@ router.post("/apply-role", require_auth, apply_for_role);
  *         description: Account deleted
  */
 router.delete("/me", require_auth, delete_account);
+
+/**
+ * @openapi
+ * /users/search:
+ *   get:
+ *     summary: Search for users
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Search query (username or display name)
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *           enum: [ARTIST, PROVIDER]
+ *         description: Filter by role
+ *     responses:
+ *       200:
+ *         description: List of matching users
+ */
+router.get("/search", search_users);
 
 /**
  * @openapi

@@ -35,7 +35,10 @@ app.use(helmet({
     contentSecurityPolicy: false, // Disable CSP for now to avoid breaking 3D viewers/images
 }));
 
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000').split(',');
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 
 app.use(cors({
     origin: (origin, callback) => {
@@ -47,8 +50,9 @@ app.use(cors({
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
+app.options(/(.*)/, cors());
 
 app.use(express.json());
 // Parse cookies — required for HTTP-only cookie auth

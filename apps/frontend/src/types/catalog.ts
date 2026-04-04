@@ -6,8 +6,7 @@ export interface Model {
     thumbnails: string[];
     images: string[];
     modelFileUrl: string;
-    fileFormat: string[];
-    polyCount?: number;
+    fileFormat: string;
     category: string;
     tags: string[];
     isPrintable: boolean;
@@ -19,6 +18,7 @@ export interface Model {
         avatar_url?: string;
     };
     is_nsfw?: boolean;
+    license: 'PERSONAL_USE' | 'COMMERCIAL_USE';
     createdAt: string;
     updatedAt: string;
     rating?: number;

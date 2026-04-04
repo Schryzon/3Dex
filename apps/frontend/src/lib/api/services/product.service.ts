@@ -18,8 +18,13 @@ export const productKeys = {
     infinite: (filters?: ModelFilters) => [...productKeys.all, 'infinite', filters] as const,
 } as const;
 
-// Set this to true to use mock data, or false to use the real database
-export const USE_MOCK_DATA = false;
+/**
+ * When true: catalog/cart use mocks (localStorage cart; checkout returns a fake Snap token).
+ * Automatically disabled in production. Only active in development.
+ * @see apps/frontend/.env.local.example
+ */
+export const USE_MOCK_DATA = process.env.NODE_ENV !== 'production' && false;
+
 
 
 const mapModel = (item: any): Model => ({
@@ -30,10 +35,11 @@ const mapModel = (item: any): Model => ({
     thumbnails: item.preview_url ? [item.preview_url] : [],
     images: item.preview_url ? [item.preview_url] : [], // Fallback for components using 'images'
     modelFileUrl: item.file_url,
-    fileFormat: Array.isArray(item.fileFormat) ? item.fileFormat : (item.fileFormat ? [item.fileFormat] : []),
+    fileFormat: item.file_format || 'glb',
     category: item.category?.name || item.category || 'General',
     tags: Array.isArray(item.tags) ? item.tags.map((t: any) => typeof t === 'string' ? t : t.name) : [],
-    isPrintable: false,
+    isPrintable: item.is_printable !== undefined ? item.is_printable : true,
+    license: item.license || 'PERSONAL_USE',
     isPurchased: item.isPurchased,
     status: item.status,
     artistId: item.artist_id,
@@ -44,7 +50,6 @@ const mapModel = (item: any): Model => ({
     },
     createdAt: item.created_at,
     updatedAt: item.updated_at,
-    polyCount: item.poly_count || 0,
     rating: item.avg_rating || item.rating || 0,
     reviewCount: item.review_count || 0
 });

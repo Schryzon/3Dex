@@ -104,6 +104,33 @@ export async function add_user_review(req: Auth_Request, res: Response): Promise
     }
 
     try {
+        // 1. Transaction Check (Restriction)
+        // Check for Purchased models from this artist
+        const purchase = await prisma.purchase.findFirst({
+            where: {
+                user_id: reviewer_id,
+                model: { artist_id: target_user_id }
+            }
+        });
+
+        // Check for Completed print orders from this provider
+        const printOrder = await prisma.order.findFirst({
+            where: {
+                user_id: reviewer_id,
+                provider_id: target_user_id,
+                status: 'PAID', // In this system, PAID means transactional success
+                type: 'PRINT_JOB'
+            }
+        });
+
+        if (!purchase && !printOrder) {
+            res.status(403).json({ 
+                message: "Restriction: You must have a transaction (purchase/print order) with this user before leaving a review." 
+            });
+            return;
+        }
+
+        // 2. Create Review
         const review = await prisma.user_Review.create({
             data: {
                 reviewer_id,
@@ -142,7 +169,7 @@ export async function add_user_review(req: Auth_Request, res: Response): Promise
  * Get reviews for a user
  */
 export async function get_user_reviews(req: Auth_Request, res: Response): Promise<void> {
-    const user_id = req.params.user_id as string;
+    const user_id = String(req.params.user_id);
     const page = Number(req.query.page as string) || 1;
     const limit = Number(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
@@ -189,6 +216,56 @@ export async function get_review_stats(req: Request, res: Response) {
             averageRating: aggregations._avg.rating || 0,
             totalReviews: aggregations._count.rating || 0,
             ratingDistribution
+        });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
+}
+/**
+ * Check if the current user is eligible to review another user
+ */
+export async function check_review_eligibility(req: Auth_Request, res: Response): Promise<void> {
+    const { id: reviewer_id } = req.user;
+    const target_user_id = String(req.params.target_user_id);
+
+    if (reviewer_id === target_user_id) {
+        res.json({ eligible: false, reason: "SELF" });
+        return;
+    }
+
+    try {
+        // Check if already reviewed
+        const existingReview = await prisma.user_Review.findUnique({
+            where: { reviewer_id_target_user_id: { reviewer_id, target_user_id } }
+        });
+
+        if (existingReview) {
+            res.json({ eligible: false, reason: "ALREADY_REVIEWED" });
+            return;
+        }
+
+        // Check for Purchase (Artist)
+        const purchase = await prisma.purchase.findFirst({
+            where: {
+                user_id: reviewer_id,
+                model: { artist_id: target_user_id }
+            }
+        });
+
+        // Check for Print Order (Provider)
+        const printOrder = await prisma.order.findFirst({
+            where: {
+                user_id: reviewer_id,
+                provider_id: target_user_id,
+                status: 'PAID'
+            }
+        });
+
+        const isEligible = !!purchase || !!printOrder;
+        
+        res.json({ 
+            eligible: isEligible, 
+            reason: isEligible ? null : "NO_TRANSACTION"
         });
     } catch (error: any) {
         res.status(500).json({ message: error.message });

@@ -1,0 +1,82 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle hollow
+
+actor "Guest" as guest
+actor "Customer" as customer
+actor "Artist" as artist
+actor "Provider (Print)" as provider
+actor "Admin" as admin
+
+customer --|> guest : " inherits"
+artist --|> customer : " inherits"
+provider --|> customer : " inherits"
+admin --|> customer : " inherits"
+
+rectangle "3Dex Platform" {
+  
+  usecase "Register/Login" as UC_Auth
+  usecase "Search Models" as UC_Search
+  usecase "View Model Details" as UC_View
+  
+  UC_View .> UC_Search : <<extend>>
+
+  usecase "Manage User Profile" as UC_Profile
+  usecase "Add to Wishlist/Cart" as UC_Cart
+  usecase "Checkout Cart" as UC_Checkout
+  usecase "Process Payment (Midtrans)" as UC_Pay
+  usecase "Download 3D Model" as UC_Download
+  usecase "Request 3D Print Job" as UC_PrintJob
+  usecase "Review Model/Provider" as UC_Review
+  usecase "Social: Follow User" as UC_Follow
+  usecase "Social: Create Post" as UC_Post
+  usecase "Social: Like/Comment" as UC_Interact
+  usecase "Manage Collections" as UC_Collection
+
+  UC_Checkout ..> UC_Pay : <<include>>
+  UC_PrintJob ..> UC_Checkout : <<include>>
+
+  UC_Cart .> UC_View : <<extend>>
+  UC_Interact .> UC_Post : <<extend>>
+
+  usecase "Upload & Sell Models" as UC_Upload
+  usecase "Manage Portfolio" as UC_Portfolio
+  UC_Portfolio .> UC_Upload : <<extend>>
+
+  usecase "Accept/Manage Print Jobs" as UC_AcceptPrint
+  usecase "Configure Print Materials" as UC_ConfigPrint
+
+  usecase "Approve/Reject Content" as UC_Approve
+  usecase "Manage Platform Stats" as UC_Stats
+  usecase "Manage Users" as UC_ManageUsers
+  usecase "Review Reports" as UC_Reports
+}
+
+guest --> UC_Auth
+guest --> UC_Search
+guest --> UC_View
+
+customer --> UC_Profile
+customer --> UC_Cart
+customer --> UC_Checkout
+customer --> UC_Download
+customer --> UC_PrintJob
+customer --> UC_Review
+customer --> UC_Follow
+customer --> UC_Post
+customer --> UC_Interact
+customer --> UC_Collection
+
+artist --> UC_Upload
+artist --> UC_Portfolio
+
+provider --> UC_AcceptPrint
+provider --> UC_ConfigPrint
+
+admin --> UC_Approve
+admin --> UC_Stats
+admin --> UC_ManageUsers
+admin --> UC_Reports
+
+@enduml

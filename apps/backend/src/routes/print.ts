@@ -3,7 +3,8 @@ import {
     get_providers,
     create_print_order,
     manage_print_order,
-    get_provider_jobs
+    get_provider_jobs,
+    get_print_stats
 } from "../controllers/print.controller";
 import { require_auth } from "../middlewares/auth.middleware";
 
@@ -42,6 +43,20 @@ const router = Router();
  *         description: List of providers
  */
 router.get("/providers", require_auth, get_providers);
+
+// Public: Get Statistics
+/**
+ * @openapi
+ * /print/stats:
+ *   get:
+ *     summary: Get printing service platform statistics
+ *     tags:
+ *       - Print Service
+ *     responses:
+ *       200:
+ *         description: Platform statistics
+ */
+router.get("/stats", get_print_stats);
 
 // Customer: Place Order
 /**

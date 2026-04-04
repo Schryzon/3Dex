@@ -45,13 +45,13 @@ type MegaMenuType = '3d-models' | 'cg-models' | 'textures';
 
 const NAV_LABELS: Record<MegaMenuType, string> = {
   '3d-models': '3D Models',
-  'cg-models': '3D Printer',
+  'cg-models': '3D Printers',
   'textures': 'Textures',
 };
 
 const MOBILE_NAV = [
   { label: '3D Models', href: ROUTES.PUBLIC.CATALOG },
-  { label: '3D Printer', href: ROUTES.PUBLIC.PRINT_SERVICES },
+  { label: '3D Printers', href: ROUTES.PUBLIC.PRINT_SERVICES },
   { label: 'Textures', href: ROUTES.PUBLIC.TEXTURES },
 ];
 
@@ -100,7 +100,7 @@ export default function LandingNavbar() {
         <div className="flex items-center justify-between gap-4">
 
           {/* Logo */}
-          <Link href={isAuthenticated ? ROUTES.USER.DASHBOARD : ROUTES.PUBLIC.HOME} className="flex items-center gap-2 flex-shrink-0">
+          <Link href={ROUTES.PUBLIC.LANDING} className="flex items-center gap-2 flex-shrink-0">
             <div className="w-7 h-7 flex items-center justify-center">
               <Image src="/3Dex.svg" alt="3Dex" width={32} height={32} />
             </div>
@@ -185,10 +185,9 @@ export default function LandingNavbar() {
               /* User Menu */
               <div
                 className="relative user-menu-container"
-                onMouseLeave={() => setUserMenuOpen(false)}
               >
                 <button
-                  onMouseEnter={() => setUserMenuOpen(true)}
+                  onClick={() => setUserMenuOpen(prev => !prev)}
                   className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors cursor-pointer z-50 relative outline-none"
                 >
                   <UserAvatar user={user} size="sm" />
@@ -322,6 +321,14 @@ export default function LandingNavbar() {
                   <Heart className="w-5 h-5 text-red-500" />
                   Saved
                 </Link>
+                <button
+                  onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-gray-800 hover:text-red-300 rounded-lg transition-colors cursor-pointer"
+                  style={{ touchAction: 'manipulation' }}
+                >
+                  <LogOut className="w-5 h-5" />
+                  <span className="text-sm font-semibold">Logout</span>
+                </button>
               </div>
             )}
 

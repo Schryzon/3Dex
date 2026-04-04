@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useCart } from '@/features/cart';
 import {
   ShoppingCart, Trash2, CheckCircle, Package,
@@ -11,16 +12,9 @@ import {
 import { useRouter } from 'next/navigation';
 import { useOrders } from '@/features/cart/hooks/useOrders';
 import type { CartItem, Order } from '@/types';
-import { USD_TO_IDR as EXCHANGE_RATE } from '@/lib/utils/price';
-
-function formatPrice(amount: number) {
-  const idr = new Intl.NumberFormat('id-ID', {
-    style: 'currency', currency: 'IDR',
-    minimumFractionDigits: 0, maximumFractionDigits: 0,
-  }).format(amount);
-  const usd = (amount / EXCHANGE_RATE).toFixed(2);
-  return { idr, usd };
-}
+import { formatPrice } from '@/lib/utils/price';
+import { purchaseService } from '@/lib/api/services';
+import toast from 'react-hot-toast';
 
 const STATUS_STYLE: Record<string, string> = {
   PAID: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
@@ -33,15 +27,42 @@ export default function ShoppingCartPage() {
   const [activeTab, setActiveTab] = useState<'cart' | 'orders'>('cart');
   const [mounted, setMounted] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const { items, removeItem, total, clearCart } = useCart();
+  const searchParams = useSearchParams();
   const { orders } = useOrders();
 
   useEffect(() => { setMounted(true); }, []);
 
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'orders') setActiveTab('orders');
+  }, [searchParams]);
+
   if (!mounted) return <div className="min-h-screen bg-[#080808]" />;
 
   const isEmpty = items.length === 0;
+
+  const handleDownload = async (modelId: string, title: string) => {
+    if (downloadingId) return;
+    setDownloadingId(modelId);
+    try {
+      const { download_url } = await purchaseService.getDownloadUrl(modelId);
+      const link = document.createElement('a');
+      link.href = download_url;
+      link.setAttribute('download', `${title}.glb`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success('Download started');
+    } catch (error: any) {
+      console.error('Download failed:', error);
+      toast.error('Failed to get download link. Please try again.');
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#080808] text-white pb-24">
@@ -51,8 +72,8 @@ export default function ShoppingCartPage() {
         <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
 
           {/* Title */}
-          <h1 className="font-bold text-[20px] tracking-tight flex items-center gap-3">
-            <ShoppingBag size={20} strokeWidth={1.5} className="text-yellow-400" />
+          <h1 className="font-bold text-base md:text-[20px] tracking-tight flex items-center gap-2 md:gap-3">
+            <ShoppingBag size={18} strokeWidth={1.5} className="text-yellow-400 hidden md:block" />
             Shopping Cart
           </h1>
 
@@ -66,12 +87,12 @@ export default function ShoppingCartPage() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`
-                                    px-5 py-2 rounded-lg text-[13px] font-semibold transition-all cursor-pointer
-                                    ${activeTab === tab.id
+                  px-3 md:px-5 py-1.5 md:py-2 rounded-lg text-[12px] md:text-[13px] font-semibold transition-all cursor-pointer
+                  ${activeTab === tab.id
                     ? 'bg-white text-black shadow-sm'
                     : 'text-white/35 hover:text-white/70'
                   }
-                                `}
+                `}
               >
                 {tab.label}
                 <span className={`ml-1.5 text-[11px] ${activeTab === tab.id ? 'text-black/40' : 'text-white/20'}`}>
@@ -106,28 +127,32 @@ export default function ShoppingCartPage() {
 
                   <div className="flex flex-col gap-3 lg:gap-3.5">
                     {items.map((item: CartItem) => {
-                      const price = formatPrice(item.model?.price ?? 0);
+                      const unitIdr = item.model?.price ?? 0;
+                      const lineIdr = unitIdr * item.quantity;
+                      const price = formatPrice(lineIdr);
                       return (
                         <div
                           key={item.id}
                           className="group flex gap-4 lg:gap-5 p-4 lg:p-5 rounded-2xl bg-[#111111] border border-white/[0.07] hover:border-white/[0.12] transition-all"
                         >
                           {/* Thumb */}
-                          <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-xl overflow-hidden flex-shrink-0 bg-white/[0.04] border border-white/[0.06]">
+                          <Link href={`/catalog/${item.model_id}`} className="w-20 h-20 sm:w-28 sm:h-28 rounded-xl overflow-hidden flex-shrink-0 bg-white/[0.04] border border-white/[0.06] block">
                             <img
                               src={item.model?.thumbnails?.[0] || '/placeholder.jpg'}
-                              alt=""
+                              alt={item.model?.title || 'Model thumbnail'}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             />
-                          </div>
+                          </Link>
 
                           {/* Info */}
                           <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 lg:py-1">
                             <div className="flex items-start justify-between gap-3 lg:gap-4">
                               <div className="min-w-0">
-                                <h3 className="text-[14px] lg:text-[16px] font-bold tracking-tight truncate leading-tight lg:leading-snug group-hover:text-yellow-400 transition-colors">
-                                  {item.model.title}
-                                </h3>
+                                <Link href={`/catalog/${item.model_id}`} className="block">
+                                  <h3 className="text-[14px] lg:text-[16px] font-bold tracking-tight truncate leading-tight lg:leading-snug group-hover:text-yellow-400 transition-colors">
+                                    {item.model.title}
+                                  </h3>
+                                </Link>
                                 <p className="text-[12px] lg:text-[13px] text-white/30 mt-0.5 lg:mt-1">
                                   @{item.model?.artist?.username || 'Unknown'}
                                 </p>
@@ -140,18 +165,18 @@ export default function ShoppingCartPage() {
                               </button>
                             </div>
 
-                            <div className="flex items-end justify-between mt-3 lg:mt-4">
-                              <div className="flex gap-1.5 lg:gap-2">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mt-3 lg:mt-4">
+                              <div className="flex flex-wrap gap-1.5 lg:gap-2 min-w-0">
                                 <span className="px-2 py-0.5 lg:px-2.5 lg:py-1 bg-white/[0.05] border border-white/[0.08] rounded text-[9px] lg:text-[10px] font-bold uppercase tracking-[0.08em] text-white/35">
                                   {item.model?.fileFormat?.[0] || 'GLB'}
                                 </span>
                                 <span className="px-2 py-0.5 lg:px-2.5 lg:py-1 bg-yellow-400/[0.08] border border-yellow-400/[0.15] rounded text-[9px] lg:text-[10px] font-bold uppercase tracking-[0.08em] text-yellow-400/70 hidden sm:inline-block">
-                                  Pro License
+                                  License ×1
                                 </span>
                               </div>
-                              <div className="text-right">
+                              <div className="text-right sm:pl-4 shrink-0">
                                 <p className="text-[15px] lg:text-[18px] font-bold font-mono leading-none">{price.idr}</p>
-                                <p className="text-[11px] lg:text-[12px] font-mono text-white/25 mt-0.5 lg:mt-1">~${price.usd}</p>
+                                <p className="text-[11px] lg:text-[12px] font-mono text-white/25 mt-0.5 lg:mt-1">~{price.usd}</p>
                               </div>
                             </div>
                           </div>
@@ -212,7 +237,7 @@ export default function ShoppingCartPage() {
                             {formatPrice(total).idr}
                           </p>
                           <p className="text-[12px] font-mono text-white/30 mt-1.5">
-                            ≈ ${formatPrice(total).usd}
+                            ≈ {formatPrice(total).usd}
                           </p>
                         </div>
                       </div>
@@ -318,31 +343,52 @@ export default function ShoppingCartPage() {
 
                     {/* Order items */}
                     <div className="px-5 py-5 sm:px-7 flex flex-col gap-4">
-                      {order.items.map(item => (
+                      {order.items.map(item => {
+                        const qty = item.quantity ?? 1;
+                        const lineIdr = (item.price ?? 0) * qty;
+                        const lineFmt = formatPrice(lineIdr);
+                        return (
                         <div key={item.id} className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 py-2 border-b border-white/[0.04] last:border-0">
-                          <div className="w-full h-40 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-white/[0.04] border border-white/[0.06] shrink-0 relative">
+                          <Link href={`/catalog/${item.model_id}`} className="w-full h-40 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-white/[0.04] border border-white/[0.06] shrink-0 relative block">
                             <img
                               src={item.model?.thumbnails?.[0] || '/placeholder.jpg'}
                               className="absolute inset-0 w-full h-full object-cover"
                               alt={item.model?.title || 'Deleted Product'}
                             />
-                          </div>
+                          </Link>
                           <div className="flex-1 min-w-0">
-                            <p className="text-[14px] font-bold truncate tracking-tight text-white group-hover:text-yellow-400 transition-colors">
-                              {item.model?.title || 'Deleted Product'}
-                            </p>
+                            <Link href={`/catalog/${item.model_id}`} className="block">
+                              <p className="text-[14px] font-bold truncate tracking-tight text-white group-hover:text-yellow-400 transition-colors">
+                                {item.model?.title || 'Deleted Product'}
+                              </p>
+                            </Link>
                             <p className="text-[12px] text-white/40 uppercase tracking-widest font-medium mt-1">
                               @{item.model?.artist?.username || 'Unknown Artist'}
                             </p>
                           </div>
+                          <div className="text-right sm:text-left shrink-0">
+                            <p className="text-[13px] font-mono font-semibold text-white/90">{lineFmt.idr}</p>
+                            <p className="text-[10px] font-mono text-white/25">~{lineFmt.usd}</p>
+                          </div>
                           {isPaid && (
-                            <button className="w-full sm:w-auto flex items-center justify-center sm:justify-start gap-2 px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.08em] rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/50 hover:text-white hover:border-white/20 hover:bg-white/[0.06] transition-all cursor-pointer shrink-0">
-                              <ExternalLink size={13} strokeWidth={2} />
-                              Download
+                            <button
+                              disabled={downloadingId === item.model_id}
+                              onClick={() => handleDownload(item.model_id, item.model?.title || 'model')}
+                              className={`
+                                w-full sm:w-auto flex items-center justify-center sm:justify-start gap-2 px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.08em] rounded-xl transition-all cursor-pointer shrink-0
+                                ${downloadingId === item.model_id
+                                  ? 'bg-yellow-400/20 text-yellow-400 border-yellow-400/30'
+                                  : 'bg-white/[0.04] border border-white/[0.08] text-white/50 hover:text-white hover:border-white/20 hover:bg-white/[0.06]'
+                                }
+                              `}
+                            >
+                              <ExternalLink size={13} strokeWidth={2} className={downloadingId === item.model_id ? 'animate-pulse' : ''} />
+                              {downloadingId === item.model_id ? 'Downloading...' : 'Download'}
                             </button>
                           )}
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 );

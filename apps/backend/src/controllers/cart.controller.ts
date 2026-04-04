@@ -8,7 +8,13 @@ export async function list_cart(req: Auth_Request, res: Response) {
     const user_id = req.user.id;
 
     try {
-        const items = await (prisma as any).cartItem.findMany({
+        // Digital goods: one license per model — normalize legacy rows
+        await prisma.cart_Item.updateMany({
+            where: { user_id, quantity: { not: 1 } },
+            data: { quantity: 1 },
+        });
+
+        const items = await prisma.cart_Item.findMany({
             where: { user_id },
             include: {
                 model: {
@@ -41,7 +47,7 @@ export async function list_cart(req: Auth_Request, res: Response) {
 // POST /cart/add — Add item to cart
 export async function add_to_cart(req: Auth_Request, res: Response) {
     const user_id = req.user.id;
-    const { modelId, quantity = 1 } = req.body;
+    const { modelId } = req.body;
 
     if (!modelId) {
         return res.status(400).json({ message: "modelId is required" });
@@ -59,18 +65,18 @@ export async function add_to_cart(req: Auth_Request, res: Response) {
             return res.status(400).json({ message: "Free models cannot be added to the cart. Please download them directly." });
         }
 
-        // Upsert: add or update quantity
-        const item = await (prisma as any).cartItem.upsert({
+        // One license per model — quantity is always 1 (re-add keeps a single line)
+        const item = await prisma.cart_Item.upsert({
             where: {
                 user_id_model_id: { user_id, model_id: modelId },
             },
             update: {
-                quantity: { increment: quantity },
+                quantity: 1,
             },
             create: {
                 user_id,
                 model_id: modelId,
-                quantity,
+                quantity: 1,
             },
             include: {
                 model: {
@@ -97,15 +103,17 @@ export async function add_to_cart(req: Auth_Request, res: Response) {
 // PATCH /cart/:id — Update cart item quantity
 export async function update_cart_item(req: Auth_Request, res: Response) {
     const user_id = req.user.id;
-    const item_id = req.params.id;
+    const item_id = req.params.id as string;
     const { quantity } = req.body;
 
-    if (!quantity || quantity < 1) {
-        return res.status(400).json({ message: "quantity must be >= 1" });
+    if (quantity !== 1) {
+        return res.status(400).json({
+            message: "Digital licenses are one per model. Remove the item if you no longer want it.",
+        });
     }
 
     try {
-        const item = await (prisma as any).cartItem.findFirst({
+        const item = await prisma.cart_Item.findFirst({
             where: { id: item_id, user_id },
         });
 
@@ -113,9 +121,9 @@ export async function update_cart_item(req: Auth_Request, res: Response) {
             return res.status(404).json({ message: "Cart item not found" });
         }
 
-        const updated = await (prisma as any).cartItem.update({
+        const updated = await prisma.cart_Item.update({
             where: { id: item_id },
-            data: { quantity },
+            data: { quantity: 1 },
             include: {
                 model: {
                     include: {
@@ -135,10 +143,10 @@ export async function update_cart_item(req: Auth_Request, res: Response) {
 // DELETE /cart/:id — Remove item from cart
 export async function remove_from_cart(req: Auth_Request, res: Response) {
     const user_id = req.user.id;
-    const item_id = req.params.id;
+    const item_id = req.params.id as string;
 
     try {
-        const item = await (prisma as any).cartItem.findFirst({
+        const item = await prisma.cart_Item.findFirst({
             where: { id: item_id, user_id },
         });
 
@@ -146,7 +154,7 @@ export async function remove_from_cart(req: Auth_Request, res: Response) {
             return res.status(404).json({ message: "Cart item not found" });
         }
 
-        await (prisma as any).cartItem.delete({ where: { id: item_id } });
+        await prisma.cart_Item.delete({ where: { id: item_id } });
         res.json({ message: "Item removed from cart" });
     } catch (error: any) {
         res.status(500).json({ message: error.message });
@@ -158,7 +166,7 @@ export async function clear_cart(req: Auth_Request, res: Response) {
     const user_id = req.user.id;
 
     try {
-        await (prisma as any).cartItem.deleteMany({ where: { user_id } });
+        await prisma.cart_Item.deleteMany({ where: { user_id } });
         res.json({ message: "Cart cleared" });
     } catch (error: any) {
         res.status(500).json({ message: error.message });

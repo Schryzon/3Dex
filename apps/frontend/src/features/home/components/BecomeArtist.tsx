@@ -7,7 +7,7 @@ import { useInView } from '@/lib/hooks/useInView';
 const PERKS = [
     'Keep up to 80% of every sale',
     'Instant payout after purchase',
-    'Free uploads — no listing fees',
+    'Free uploads no listing fees',
     'Commercial license built-in',
     'Analytics & download tracking',
     'Join a community of 500+ artists',
@@ -36,7 +36,7 @@ export default function BecomeArtist() {
                         <em className="not-italic text-yellow-400">into income.</em>
                     </h2>
                     <p className="text-gray-500 leading-relaxed mb-8 max-w-md">
-                        Upload your 3D models, textures, and assets once — earn every time someone downloads. Your work, your price, your terms.
+                        Upload your 3D models, textures, and assets once,earn every time someone downloads. Your work, your price, your terms.
                     </p>
 
                     {/* Perks list */}

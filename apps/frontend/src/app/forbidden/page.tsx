@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ShieldAlert, ArrowLeft } from 'lucide-react';
+import {  ArrowLeft } from 'lucide-react';
 
 export default function ForbiddenPage() {
     return (
@@ -8,16 +8,8 @@ export default function ForbiddenPage() {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-red-500/5 rounded-full blur-[150px] pointer-events-none" />
 
             <div className="relative z-10 text-center max-w-lg w-full">
-                {/* Icon Container */}
-                <div className="relative mx-auto w-32 h-32 mb-8">
-                    <div className="absolute inset-0 bg-red-500/20 rounded-full animate-pulse blur-xl" />
-                    <div className="relative bg-[#111] border-2 border-red-500/50 rounded-full w-full h-full flex items-center justify-center shadow-2xl overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent" />
-                        <ShieldAlert className="w-16 h-16 text-red-500" />
-                    </div>
-                </div>
 
-                <h1 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-600 mb-4 tracking-tighter">
+                <h1 className="text-7xl font-black text-transparent bg-clip-text bg-white mb-4 tracking-tighter">
                     403
                 </h1>
 

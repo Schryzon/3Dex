@@ -1,6 +1,8 @@
 export const ROUTES = {
     PUBLIC: {
         HOME: '/',
+        /** Marketing landing (same sections as HOME) use for logo / explicit navigation when logged in */
+        LANDING: '/landing',
         CATALOG: '/catalog',
         TEXTURES: '/catalog?category=Textures',
         PRINT_SERVICES: '/print-services',
@@ -16,6 +18,7 @@ export const ROUTES = {
         DOWNLOADS: '/downloads',
         ORDERS: '/orders',
         SAVED: '/saved',
+        LIBRARY: '/saved',
         CART: '/cart',
         PROFILE_UPLOADS: '/profile?tab=uploads',
         PROFILE_COLLECTIONS: '/profile?tab=collections',

@@ -72,11 +72,11 @@ export default function BecomeProviderPage() {
             // Upload Documents to MinIO
             const documentKeys: string[] = [];
             for (const file of documents) {
-                const { data } = await api.post('/models/upload-url', {
+                const { data } = await api.post('/storage/upload-url', {
                     filename: `provider_doc_${Date.now()}_${file.name}`,
                     content_type: file.type || 'application/pdf'
                 });
-                await axios.put(data.upload_url, file, { headers: { 'Content-Type': file.type || 'application/pdf' } });
+                await axios.put(data.url, file, { headers: { 'Content-Type': file.type || 'application/pdf' } });
                 documentKeys.push(data.key);
             }
 

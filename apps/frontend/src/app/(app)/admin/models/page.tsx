@@ -2,6 +2,8 @@
 
 import { useAuth } from '@/features/auth';
 import { api } from '@/lib/api';
+import { productKeys } from '@/lib/api/services/product.service';
+import { getStorageUrl } from '@/lib/utils/storage';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -77,7 +79,7 @@ function ModelDetailModal({
                 <div className="relative aspect-video w-full bg-gray-900 overflow-hidden border-b border-gray-800">
                     {model.preview_url && !imgError ? (
                         <img
-                            src={model.preview_url}
+                            src={getStorageUrl(model.preview_url)}
                             alt={model.title}
                             className="w-full h-full object-contain bg-black"
                             onError={() => setImgError(true)}
@@ -103,7 +105,7 @@ function ModelDetailModal({
                     <div className="flex items-center gap-3 p-3 bg-gray-900/50 rounded-xl border border-gray-800">
                         <div className="w-10 h-10 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center overflow-hidden shrink-0">
                             {model.artist.avatar_url ? (
-                                <img src={model.artist.avatar_url} alt="" className="w-full h-full object-cover" />
+                                <img src={getStorageUrl(model.artist.avatar_url)} alt="" className="w-full h-full object-cover" />
                             ) : (
                                 <User className="w-5 h-5 text-gray-500" />
                             )}
@@ -304,6 +306,7 @@ export default function AdminModelsPage() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['admin-pending-models'] });
+            queryClient.invalidateQueries({ queryKey: productKeys.all });
             setActionId(null);
             setSelectedModel(null);
         },
@@ -317,6 +320,7 @@ export default function AdminModelsPage() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['admin-pending-models'] });
+            queryClient.invalidateQueries({ queryKey: productKeys.all });
             setActionId(null);
             setSelectedModel(null);
         },
@@ -398,7 +402,7 @@ export default function AdminModelsPage() {
                                             <div className="flex items-center gap-3 min-w-0">
                                                 {model.preview_url ? (
                                                     <img
-                                                        src={model.preview_url}
+                                                        src={getStorageUrl(model.preview_url)}
                                                         alt={model.title}
                                                         className="w-12 h-12 rounded-lg object-cover border border-gray-700 shrink-0 group-hover:border-gray-600 transition-colors"
                                                     />
@@ -478,7 +482,7 @@ export default function AdminModelsPage() {
                                                 {/* Thumbnail */}
                                                 {model.preview_url ? (
                                                     <img
-                                                        src={model.preview_url}
+                                                        src={getStorageUrl(model.preview_url)}
                                                         alt={model.title}
                                                         className="w-16 h-16 rounded-xl object-cover border border-gray-700 shrink-0"
                                                     />

@@ -74,7 +74,10 @@ export const API_ENDPOINTS = {
         UPDATE: '/users/profile',
         DELETE_ME: '/users/me',
         APPLY_ROLE: '/users/apply-role',
+        SEARCH: '/users/search',
         PUBLIC_PROFILE: (username: string) => `/users/${username}`,
+        FOLLOW: (userId: string) => `/users/${userId}/follow`,
+        UNFOLLOW: (userId: string) => `/users/${userId}/follow`,
     },
 
     // Admin

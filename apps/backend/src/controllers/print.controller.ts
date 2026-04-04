@@ -224,3 +224,46 @@ export async function get_provider_jobs(req: Auth_Request, res: Response): Promi
 
     res.json(jobs);
 }
+
+/**
+ * Get Print Service Platform Statistics
+ */
+export async function get_print_stats(req: Auth_Request, res: Response): Promise<void> {
+    try {
+        const provider_count = await prisma.user.count({
+            where: {
+                role: 'PROVIDER',
+                account_status: 'APPROVED'
+            }
+        });
+
+        const orders_count = await prisma.order.count({
+            where: {
+                type: 'PRINT_JOB'
+            }
+        });
+
+        const providers = await prisma.user.findMany({
+            where: {
+                role: 'PROVIDER',
+                account_status: 'APPROVED'
+            },
+            select: {
+                rating: true
+            }
+        });
+
+        const avg_rating = providers.length > 0 
+            ? providers.reduce((acc, p) => acc + (p.rating || 0), 0) / providers.length 
+            : 0;
+
+        res.json({
+            provider_count: provider_count > 500 ? `${Math.floor(provider_count / 100) * 100}+` : String(provider_count),
+            orders_count: orders_count > 1000 ? `${Math.floor(orders_count / 1000)}K+` : String(orders_count),
+            avg_rating: avg_rating.toFixed(1),
+            avg_response: "24h" // Placeholder for now
+        });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
+}

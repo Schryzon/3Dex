@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef, Suspense } from 'react';
-import { ChevronDown, LayoutGrid, List, ShoppingCart } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import { ChevronDown, LayoutGrid, List, ShoppingCart, Search, X } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CatalogProductCard } from '@/features/catalog/components/product-card';
 import { CatalogFilters, FilterState } from '@/features/catalog/components/filters';
@@ -40,11 +40,50 @@ function CatalogContent() {
     const [showSortDropdown, setShowSortDropdown] = useState(false);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [isFilterExpanded, setFilterExpanded] = useState(false);
+    const [localSearch, setLocalSearch] = useState(searchQuery);
     const [filters, setFilters] = useState<FilterState>({
         formats: [],
         price: 'all',
         types: [],
     });
+
+    // Keep local input in sync when URL search param changes externally
+    useEffect(() => {
+        setLocalSearch(searchQuery);
+    }, [searchQuery]);
+
+    const handleSearchSubmit = useCallback(
+        (e?: React.FormEvent) => {
+            e?.preventDefault();
+            const q = localSearch.trim();
+            const params = new URLSearchParams(window.location.search);
+            if (q) {
+                params.set('search', q);
+            } else {
+                params.delete('search');
+            }
+            router.push(`/catalog?${params.toString()}`);
+        },
+        [localSearch, router]
+    );
+
+    // Debounce: auto-search 500ms after user stops typing
+    useEffect(() => {
+        const t = setTimeout(() => {
+            const q = localSearch.trim();
+            if (q !== searchQuery) {
+                const params = new URLSearchParams(window.location.search);
+                if (q) {
+                    params.set('search', q);
+                } else {
+                    params.delete('search');
+                }
+                router.push(`/catalog?${params.toString()}`);
+            }
+        }, 500);
+        return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [localSearch]);
     // Build API filters (without page, as it's managed by useInfiniteQuery)
     const apiFilters: ModelFilters = {
         category: activeCategory !== 'all' ? activeCategory : undefined,
@@ -134,6 +173,10 @@ function CatalogContent() {
 
     return (
         <div className="max-w-[1800px] mx-auto px-4 md:px-6 py-4">
+
+
+            <h1 className="sr-only">3D Asset Catalog, Browse Models, Textures & More</h1>
+
             {/* Category Tabs */}
             <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide mb-4">
                 {CATEGORIES.map((category) => (
@@ -249,15 +292,15 @@ function CatalogContent() {
                             isFree={product.price === 0}
                             discount={undefined}
                             author={product.artist.username}
+                            authorAvatar={product.artist.avatar_url}
                             isSaved={isInWishlist(product.id)}
                             onSave={() => handleSave(product.id)}
                             onClick={() => handleProductClick(product.id)}
                             price={product.price}
                             originalPrice={undefined}
-                            formats={product.fileFormat}
+                            formats={[product.fileFormat]}
                             rating={product.rating || 0}
                             reviewCount={product.reviewCount || 0}
-                            polyCount={product.polyCount?.toString() || 'N/A'}
                             viewMode={viewMode}
                         />
                     ))}
@@ -298,7 +341,7 @@ function CatalogContent() {
             {!isLoading && !error && products.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-15 px-4 animate-in fade-in zoom-in-95 duration-700">
                     <div className="relative mb-8">
-                        <div className="absolute inset-0 bg-blue-500/20 rounded-full" />
+                        <div className="absolute inset-0 bg-gray-700/50 rounded-full" />
                         <div className="relative w-28 h-28 bg-[#0a0a0a] border border-white/10 rounded-2xl flex items-center justify-center shadow-2xl overflow-hidden group">
                             <ShoppingCart className="w-12 h-12 text-gray-500 group-hover:scale-110 transition-transform duration-500" />
                         </div>
@@ -316,6 +359,7 @@ function CatalogContent() {
                             onClick={() => {
                                 setFilters({ formats: [], price: 'all', types: [] });
                                 setActiveCategory('all');
+                                setLocalSearch('');
                                 if (searchQuery) router.push('/catalog');
                             }}
                             className="group relative px-8 py-3.5 bg-white text-black font-black rounded-xl hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer overflow-hidden shadow-[0_0_30px_rgba(255,255,255,0.1)]"

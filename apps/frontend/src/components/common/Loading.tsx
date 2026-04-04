@@ -9,7 +9,7 @@ export function Spinner({ size = 'md', className = '' }: { size?: 'sm' | 'md' | 
     return (
         <div className={`flex items-center justify-center ${className}`}>
             <svg
-                className={`animate-spin ${sizeStyles[size]} text-blue-500`}
+                className={`animate-spin ${sizeStyles[size]} text-gray-400`}
                 fill="none"
                 viewBox="0 0 24 24"
             >
@@ -35,7 +35,7 @@ export function Spinner({ size = 'md', className = '' }: { size?: 'sm' | 'md' | 
 export function Skeleton({ className = '', width, height }: { className?: string; width?: string; height?: string }) {
     return (
         <div
-            className={`animate-pulse bg-gray-800 rounded ${className}`}
+            className={`animate-pulse bg-gray-800/40 border border-gray-700/50 backdrop-blur-sm rounded ${className}`}
             style={{ width, height }}
         />
     );

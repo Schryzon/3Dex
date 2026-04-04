@@ -7,7 +7,8 @@ import {
     add_comment,
     get_comments,
     delete_post,
-    get_post_stats
+    get_post_stats,
+    get_post_by_id
 } from "../controllers/post.controller";
 import { require_auth } from "../middlewares/auth.middleware";
 
@@ -177,5 +178,28 @@ router.get("/:post_id/comments", get_comments);
  *         description: Post deleted
  */
 router.delete("/:post_id", require_auth, delete_post);
+
+/**
+ * @openapi
+ * /posts/{post_id}:
+ *   get:
+ *     summary: Get a single post by ID
+ *     tags:
+ *       - Posts
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: post_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Post data
+ *       404:
+ *         description: Post not found
+ */
+router.get("/:post_id", require_auth, get_post_by_id);
 
 export default router;

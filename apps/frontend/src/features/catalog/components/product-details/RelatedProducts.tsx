@@ -15,7 +15,6 @@ interface RelatedProduct {
     username: string;
     avatar_url?: string;
   };
-  polyCount?: number;
 }
 
 interface Props {
@@ -57,7 +56,6 @@ export default function RelatedProducts({ productId, categories }: Props) {
           avatar: m.artist?.avatar_url || '/placeholder-avatar.jpg'
         },
         specifications: {
-          polygons: m.poly_count || 0,
           version: '1.0'
         }
       }));

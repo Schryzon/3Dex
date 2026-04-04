@@ -96,8 +96,11 @@ export async function list_users_by_status(req: Request, res: Response) {
                 username: true,
                 email: true,
                 role: true,
-                portfolio: true,
-                created_at: true
+                portfolio: true, // This is Json[]
+                provider_config: true, // For Providers
+                created_at: true,
+                avatar_url: true,
+                display_name: true
             }
         });
         res.json(users);
@@ -169,15 +172,76 @@ export async function reject_user(req: Auth_Request, res: Response) {
     }
 }
 
-/**
- * Trigger stats aggregation manually
- */
 export async function trigger_stats_aggregation(req: Request, res: Response) {
     try {
+        const { aggregate_stats } = require("../services/cron.service");
         const stats = await aggregate_stats();
         res.json({ message: "Stats aggregation triggered successfully", data: stats });
     } catch (error: any) {
         console.error("Stats aggregation failed:", error);
         res.status(500).json({ message: "Failed to aggregate stats", error: error.message });
+    }
+}
+
+/**
+ * Dashboard Summary for Admin
+ */
+export async function get_dashboard_summary(req: Request, res: Response) {
+    try {
+        const [
+            pendingModelsCount,
+            pendingUsersCount,
+            pendingReportsCount,
+            latestModels,
+            latestUsers,
+            latestReports,
+            latestStats
+        ] = await Promise.all([
+            prisma.model.count({ where: { status: 'PENDING' } }),
+            prisma.user.count({ where: { account_status: 'PENDING', role: { in: ['ARTIST', 'PROVIDER'] } } }),
+            prisma.report.count({ where: { status: 'PENDING' } }),
+            prisma.model.findMany({
+                where: { status: 'PENDING' },
+                take: 3,
+                orderBy: { created_at: 'desc' },
+                include: { artist: { select: { username: true } } }
+            }),
+            prisma.user.findMany({
+                where: { account_status: 'PENDING', role: { in: ['ARTIST', 'PROVIDER'] } },
+                take: 3,
+                orderBy: { created_at: 'desc' },
+                select: { id: true, username: true, role: true, portfolio: true, created_at: true }
+            }),
+            prisma.report.findMany({
+                where: { status: 'PENDING' },
+                take: 3,
+                orderBy: { created_at: 'desc' },
+                include: { reporter: { select: { username: true } } }
+            }),
+            prisma.stats.findMany({ 
+                take: 5, 
+                orderBy: { created_at: 'desc' } 
+            })
+        ]);
+
+        res.json({
+            counts: {
+                models: pendingModelsCount,
+                users: pendingUsersCount,
+                reports: pendingReportsCount
+            },
+            recent: {
+                models: latestModels,
+                users: latestUsers,
+                reports: latestReports
+            },
+            stats: latestStats?.[0]?.data || null,
+            history: latestStats.map((s: any) => ({
+                date: s.created_at,
+                transactions: s.data.total_transactions || 0
+            })).reverse()
+        });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
     }
 }

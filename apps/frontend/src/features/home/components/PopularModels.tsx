@@ -122,12 +122,12 @@ export default function PopularModels() {
                                 title={model.title}
                                 image={model.thumbnails?.[0] || '/placeholder-model.jpg'}
                                 author={model.artist?.username || 'Unknown'}
+                                authorAvatar={model.artist?.avatar_url}
                                 price={model.price}
                                 isFree={model.price === 0}
                                 rating={model.rating}
                                 reviewCount={model.reviewCount}
                                 formats={model.specifications?.formats || []}
-                                polyCount={model.specifications?.polygons?.toLocaleString()}
                             />
                         </div>
                     ))}

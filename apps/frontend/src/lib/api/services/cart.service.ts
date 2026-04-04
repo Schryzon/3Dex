@@ -26,9 +26,10 @@ function mapCartItem(raw: any): CartItem {
             images: model.preview_url ? [model.preview_url] : [],
             modelFileUrl: model.file_url || '',
             fileFormat: model.file_url
-                ? [model.file_url.split('.').pop()?.toUpperCase() || 'GLB']
-                : ['GLB'],
+                ? (model.file_url.split('.').pop()?.toUpperCase() || 'GLB')
+                : 'GLB',
             category: model.category?.name || 'General',
+            license: model.license || 'PERSONAL_USE',
             tags: [],
             isPrintable: false,
             status: model.status || 'APPROVED',
@@ -61,13 +62,13 @@ export const cartService = {
         }
     },
 
-    async addToCart(modelId: string, quantity: number = 1): Promise<CartItem> {
+    async addToCart(modelId: string, _quantity: number = 1): Promise<CartItem> {
         if (USE_MOCK_DATA) {
             const items = await this.getCart();
             const existing = items.find(i => i.model_id === modelId);
 
             if (existing) {
-                existing.quantity += quantity;
+                existing.quantity = 1;
                 localStorage.setItem(MOCK_CART_KEY, JSON.stringify(items));
                 return existing;
             }
@@ -78,7 +79,7 @@ export const cartService = {
             const newItem: CartItem = {
                 id: `mock-cart-${Date.now()}`,
                 model_id: modelId,
-                quantity,
+                quantity: 1,
                 model: product
             };
 
@@ -87,7 +88,7 @@ export const cartService = {
             return newItem;
         }
 
-        const raw = await apiClient.post<any>(API_ENDPOINTS.CART.ADD, { modelId, quantity });
+        const raw = await apiClient.post<any>(API_ENDPOINTS.CART.ADD, { modelId });
         return mapCartItem(raw);
     },
 

@@ -32,7 +32,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           # List the folders/files you actually need to run the app
-          source: "apps/backend/dist/,apps/backend/package.json,apps/backend/prisma/,apps/frontend/.next/,apps/frontend/package.json,apps/frontend/public/,apps/frontend/next.config.ts,package.json,package-lock.json,ecosystem.config.js"
+          source: "apps/backend/dist,apps/backend/package.json,apps/backend/prisma,apps/frontend/.next,apps/frontend/package.json,apps/frontend/public,apps/frontend/next.config.ts,package.json,package-lock.json,ecosystem.config.js"
           target: "~/3Dex"
 
       - name: Finalize on VPS
@@ -51,6 +51,8 @@ jobs:
             # Only install production dependencies to save RAM
             npm install --omit=dev
             cd apps/backend
+            # Generate Prisma client on the VPS to match its OS/architecture
+            npx prisma generate
             npx prisma migrate deploy
             cd ../..
             pm2 reload ecosystem.config.js

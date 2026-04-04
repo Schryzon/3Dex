@@ -26,3 +26,16 @@ export function require_admin(
     }
     next();
 }
+
+export function require_provider(
+    req: Auth_Request,
+    res: Response,
+    next: NextFunction
+) {
+    if (req.user.role !== "PROVIDER" && req.user.role !== "ADMIN") {
+        return res.status(403).json({
+            message: "Provider only!"
+        });
+    }
+    next();
+}

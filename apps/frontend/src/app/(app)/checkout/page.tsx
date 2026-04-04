@@ -1,11 +1,14 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { useCart } from '@/features/cart';
 import { useAuth } from '@/features/auth';
 import { useState } from 'react';
 import { formatPrice } from '@/lib/utils';
 import { orderService } from '@/lib/api/services';
+import { orderKeys } from '@/lib/api/services/order.service';
+import { cartKeys } from '@/lib/api/services/cart.service';
 import {
     ArrowLeft, Lock, ChevronRight, Loader2,
     QrCode, Building2, Wallet, CreditCard,
@@ -14,38 +17,17 @@ import {
 
 declare global { interface Window { snap: any; } }
 
-const PAYMENT_METHODS = [
-    {
-        id: 'qris',
-        label: 'QRIS',
-        desc: 'GoPay · OVO · ShopeePay · Dana',
-        icon: QrCode,
-        badge: 'Instant',
-    },
-    {
-        id: 'va',
-        label: 'Virtual Account',
-        desc: 'BCA · Mandiri · BNI · BRI',
-        icon: Building2,
-        badge: null,
-    },
-    {
-        id: 'wallet',
-        label: 'E-Wallet',
-        desc: 'Dana · LinkAja · OVO',
-        icon: Wallet,
-        badge: null,
-    },
-    {
-        id: 'cc',
-        label: 'Credit / Debit Card',
-        desc: 'Visa · Mastercard · JCB',
-        icon: CreditCard,
-        badge: null,
-    },
-] as const;
+async function waitForMidtransSnap(maxMs = 20000): Promise<void> {
+    const start = Date.now();
+    while (typeof window !== 'undefined' && !(window as any).snap) {
+        if (Date.now() - start > maxMs) {
+            throw new Error('Payment gateway not loaded. Please refresh and try again.');
+        }
+        await new Promise((r) => setTimeout(r, 120));
+    }
+}
 
-type PaymentId = typeof PAYMENT_METHODS[number]['id'];
+
 
 /* ─── Small reusable pieces ─── */
 
@@ -98,6 +80,7 @@ function Field({
 
 export default function CheckoutPage() {
     const router = useRouter();
+    const queryClient = useQueryClient();
     const { user, isLoading: authLoading } = useAuth();
     const { items, total, clearCart } = useCart();
 
@@ -105,7 +88,7 @@ export default function CheckoutPage() {
     const [checkoutStatus, setCheckoutStatus] = useState<'idle' | 'success' | 'failed' | 'pending'>('idle');
     const [serverOrderId, setServerOrderId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [method, setMethod] = useState<PaymentId>('qris');
+
     const [coupon, setCoupon] = useState('');
     const [couponOpen, setCouponOpen] = useState(false);
     const [billing, setBilling] = useState({
@@ -132,45 +115,51 @@ export default function CheckoutPage() {
         setIsProcessing(true);
         setError(null);
         try {
-            const modelIds = items.map(i => i.model.id);
-            const { orderId, token } = await orderService.checkout(modelIds);
+            const lines = items.map((i) => ({
+                model_id: i.model_id,
+                quantity: i.quantity,
+            }));
+            const { orderId, token } = await orderService.checkout(lines);
             setServerOrderId(orderId);
 
-            // Bypass Midtrans for mock tokens
             if (token === 'mock-snap-token') {
-                setTimeout(() => {
-                    clearCart();
+                setTimeout(async () => {
+                    await clearCart();
+                    queryClient.invalidateQueries({ queryKey: cartKeys.all });
+                    queryClient.invalidateQueries({ queryKey: orderKeys.all });
                     setCheckoutStatus('success');
                     setIsProcessing(false);
                 }, 1000);
                 return;
             }
 
-            if (window.snap) {
-                window.snap.pay(token, {
-                    onSuccess: () => {
-                        clearCart();
-                        setCheckoutStatus('success');
-                        setIsProcessing(false);
-                    },
-                    onPending: () => {
-                        setCheckoutStatus('pending');
-                        setIsProcessing(false);
-                    },
-                    onError: () => {
-                        setCheckoutStatus('failed');
-                        setIsProcessing(false);
-                    },
-                    onClose: () => setIsProcessing(false),
-                });
-            } else throw new Error('Payment gateway not loaded');
+            await waitForMidtransSnap();
+            window.snap.pay(token, {
+                onSuccess: async () => {
+                    await clearCart();
+                    queryClient.invalidateQueries({ queryKey: cartKeys.all });
+                    queryClient.invalidateQueries({ queryKey: orderKeys.all });
+                    setCheckoutStatus('success');
+                    setIsProcessing(false);
+                },
+                onPending: () => {
+                    queryClient.invalidateQueries({ queryKey: orderKeys.all });
+                    setCheckoutStatus('pending');
+                    setIsProcessing(false);
+                },
+                onError: () => {
+                    setCheckoutStatus('failed');
+                    setIsProcessing(false);
+                },
+                onClose: () => setIsProcessing(false),
+            });
         } catch (err: any) {
             setError(err.response?.data?.message || err.message || 'Checkout failed. Please try again.');
             setIsProcessing(false);
         }
     };
 
-    const activeMethod = PAYMENT_METHODS.find(m => m.id === method)!;
+
 
     return (
         <div className="min-h-screen bg-[#080808] text-white pb-24">
@@ -266,80 +255,7 @@ export default function CheckoutPage() {
                             </div>
                         </SectionCard>
 
-                        {/* 2. Payment method */}
-                        <div id="payment-methods" className="scroll-mt-24">
-                            <SectionCard>
-                                <CardHeader title="Payment Method" />
-                                <div className="px-6 py-6 flex flex-col gap-3">
-                                    {PAYMENT_METHODS.map(m => {
-                                        const active = method === m.id;
-                                        return (
-                                            <button
-                                                key={m.id}
-                                                onClick={() => setMethod(m.id)}
-                                                className={`
-                                                w-full flex items-center gap-4 px-4 py-3.5 rounded-xl
-                                                border text-left transition-all duration-150 cursor-pointer
-                                                ${active
-                                                        ? 'border-yellow-400/60 bg-yellow-400/[0.04]'
-                                                        : 'border-white/[0.07] bg-[#0a0a0a] hover:border-white/[0.14]'
-                                                    }
-                                            `}
-                                            >
-                                                {/* Radio */}
-                                                <span className={`
-                                                w-4 h-4 rounded-full border-[1.5px] flex-shrink-0
-                                                flex items-center justify-center transition-all
-                                                ${active ? 'border-yellow-400' : 'border-white/20'}
-                                            `}>
-                                                    {active && (
-                                                        <span className="w-2 h-2 rounded-full bg-yellow-400" />
-                                                    )}
-                                                </span>
 
-                                                {/* Icon */}
-                                                <span className={`
-                                                w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0
-                                                transition-all
-                                                ${active
-                                                        ? 'bg-yellow-400/10 text-yellow-400'
-                                                        : 'bg-white/[0.04] text-white/35'
-                                                    }
-                                            `}>
-                                                    <m.icon size={16} strokeWidth={1.5} />
-                                                </span>
-
-                                                {/* Label */}
-                                                <div className="flex-1 min-w-0">
-                                                    <p className={`text-[14px] font-semibold tracking-tight transition-colors ${active ? 'text-white' : 'text-white/70'
-                                                        }`}>
-                                                        {m.label}
-                                                    </p>
-                                                    <p className="text-[12px] text-white/30 mt-0.5">{m.desc}</p>
-                                                </div>
-
-                                                {/* Badge */}
-                                                {m.badge && (
-                                                    <span className="text-[10px] font-bold uppercase tracking-[0.1em] px-2.5 py-1 rounded-full border border-emerald-500/25 text-emerald-400 bg-emerald-500/[0.08] flex-shrink-0">
-                                                        {m.badge}
-                                                    </span>
-                                                )}
-                                            </button>
-                                        );
-                                    })}
-
-                                    {/* Secure note */}
-                                    <div className="flex items-center gap-3 mt-1 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
-                                        <ShieldCheck size={14} strokeWidth={1.5} className="text-white/25 flex-shrink-0" />
-                                        <p className="text-[11px] text-white/25 leading-relaxed">
-                                            Payments are securely processed by{' '}
-                                            <strong className="text-white/40">Midtrans</strong>.
-                                            Card data is not stored on our servers.
-                                        </p>
-                                    </div>
-                                </div>
-                            </SectionCard>
-                        </div>
 
                         {/* 3. Order review */}
                         <SectionCard>
@@ -371,17 +287,17 @@ export default function CheckoutPage() {
                                                 @{item.model.artist?.username || 'Unknown'}
                                             </p>
                                             <span className="inline-block mt-2 text-[10px] font-bold uppercase tracking-[0.1em] px-2 py-0.5 rounded bg-white/[0.06] text-white/35">
-                                                3D Model
+                                                3D Model · License
                                             </span>
                                         </div>
 
-                                        {/* Price */}
+                                        {/* Price (one license per line) */}
                                         <div className="text-right flex-shrink-0">
                                             <p className="text-[14px] font-mono font-medium">
                                                 {formatPrice(item.model.price).idr}
                                             </p>
                                             <p className="text-[11px] font-mono text-white/30 mt-0.5">
-                                                ~${formatPrice(item.model.price).usd}
+                                                {formatPrice(item.model.price).usd}
                                             </p>
                                         </div>
                                     </div>
@@ -431,24 +347,7 @@ export default function CheckoutPage() {
                                     )}
                                 </div>
 
-                                {/* Active payment method preview */}
-                                <div className="flex items-center gap-3 py-3.5 border-y border-white/[0.06]">
-                                    <span className="w-8 h-8 rounded-lg bg-yellow-400/10 text-yellow-400 flex items-center justify-center flex-shrink-0">
-                                        <activeMethod.icon size={14} strokeWidth={1.5} />
-                                    </span>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-[10px] text-white/30 uppercase tracking-[0.07em] font-semibold">
-                                            Payment via
-                                        </p>
-                                        <p className="text-[13px] font-semibold">{activeMethod.label}</p>
-                                    </div>
-                                    <button
-                                        onClick={() => document.querySelector('#payment-methods')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-                                        className="text-[11px] text-yellow-400/80 hover:text-yellow-400 font-semibold transition-colors cursor-pointer"
-                                    >
-                                        Change
-                                    </button>
-                                </div>
+
 
                                 {/* Line items */}
                                 <div className="flex flex-col gap-3">
@@ -474,7 +373,7 @@ export default function CheckoutPage() {
                                             {formatPrice(total).idr}
                                         </p>
                                         <p className="text-[12px] font-mono text-white/30 mt-1.5">
-                                            ≈ ${formatPrice(total).usd}
+                                            ≈ {formatPrice(total).usd}
                                         </p>
                                     </div>
                                 </div>
@@ -577,10 +476,10 @@ export default function CheckoutPage() {
                                 </p>
                                 <div className="flex flex-col gap-3">
                                     <button
-                                        onClick={() => router.push('/cart')}
+                                        onClick={() => router.push('/cart?tab=orders')}
                                         className="w-full py-4 bg-yellow-400 text-black text-[15px] font-bold rounded-2xl hover:bg-yellow-300 transition-colors cursor-pointer shadow-lg active:scale-[0.98]"
                                     >
-                                        View Assets
+                                        View invoices
                                     </button>
                                     <button
                                         onClick={() => router.push('/catalog')}

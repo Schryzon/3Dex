@@ -72,8 +72,7 @@ export default function ProductDetails({ product }: Props) {
               <h3 className="text-lg font-semibold text-white mb-4">Specifications</h3>
               <div className="space-y-3">
                 <SpecRow label="Software Version" value="v1.0.0+" />
-                <SpecRow label="Polygon Count" value={product.polyCount?.toLocaleString() || 'N/A'} />
-                <SpecRow label="Architecture" value={product.fileFormat[0] || 'Standard'} />
+                <SpecRow label="Architecture" value={product.fileFormat || 'Standard'} />
                 <SpecRow label="Resource Size" value="Optimized" />
                 <SpecRow label="Plug-ins" value="None Required" />
               </div>

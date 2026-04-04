@@ -10,6 +10,7 @@ const COOKIE_OPTIONS = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax" as const,
+    domain: process.env.NODE_ENV === "production" ? ".3dex.studio" : undefined,
     // 7 days in milliseconds
     maxAge: 7 * 24 * 60 * 60 * 1000,
 };
@@ -35,7 +36,7 @@ export async function login(req: Request, res: Response) {
     });
 
     // Set the JWT as an HTTP-only cookie — JS cannot read this
-    res.cookie("token", token, COOKIE_OPTIONS);
+    res.cookie("3dex_session", token, COOKIE_OPTIONS);
 
     // Return only the user object; the token travels via cookie, not body
     res.json({
@@ -85,7 +86,7 @@ export async function google_auth(req: Request, res: Response) {
         });
 
         // Set the JWT as an HTTP-only cookie
-        res.cookie("token", token, COOKIE_OPTIONS);
+        res.cookie("3dex_session", token, COOKIE_OPTIONS);
 
         // Return the user object and whether this is a new account
         res.json({
@@ -147,6 +148,17 @@ export async function complete_profile(req: any, res: Response) {
             },
         });
 
+        // Reissue the token with the fresh username
+        const token = sign_token({
+            id: updated.id,
+            email: updated.email,
+            username: updated.username,
+            role: updated.role,
+        });
+
+        // Update the session cookie
+        res.cookie("3dex_session", token, COOKIE_OPTIONS);
+
         res.json(await sign_user_urls(updated));
     } catch (error: any) {
         res.status(500).json({ message: error.message });
@@ -156,10 +168,18 @@ export async function complete_profile(req: any, res: Response) {
 
 // Clear the auth cookie — effectively logs the user out
 export async function logout(req: Request, res: Response) {
+    res.clearCookie("3dex_session", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        domain: process.env.NODE_ENV === "production" ? ".3dex.studio" : undefined,
+    });
+    // Also try to clear any legacy domain-less ghost cookie
     res.clearCookie("token", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
+        domain: undefined,
     });
     res.json({ message: "Logged out successfully" });
 }
@@ -186,6 +206,17 @@ export async function get_me(req: any, res: Response) {
         if (!db_user) {
             return res.status(404).json({ message: "User not found" });
         }
+
+        // Reissue the token with the freshest user data
+        const token = sign_token({
+            id: db_user.id,
+            email: db_user.email,
+            username: db_user.username,
+            role: db_user.role,
+        });
+
+        // Update the session cookie
+        res.cookie("3dex_session", token, COOKIE_OPTIONS);
 
         res.json(await sign_user_urls(db_user));
     } catch (error: any) {

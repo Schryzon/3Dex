@@ -54,5 +54,14 @@ export const adminService = {
     deleteReportedContent: async (targetType: string, targetId: string) => {
         const response = await api.delete(`/admin/reports/${targetType}/${targetId}/delete`);
         return response.data;
+    },
+    // Dashboard Summary
+    getDashboardSummary: async () => {
+        const response = await api.get<{
+            counts: { models: number; users: number; reports: number };
+            recent: { models: any[]; users: any[]; reports: any[] };
+            stats: any;
+        }>('/admin/summary');
+        return response.data;
     }
 };

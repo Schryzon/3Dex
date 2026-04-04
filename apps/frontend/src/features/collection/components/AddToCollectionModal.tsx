@@ -123,7 +123,8 @@ export default function AddToCollectionModal({ modelId, isOpen, onClose }: AddTo
                     ) : (
                         <button
                             onClick={() => setIsCreating(true)}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-gray-600 text-white font-medium rounded-xl transition-all"
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-800
+                            hover:bg-gray-700 border border-gray-700 hover:border-gray-600 text-white font-medium rounded-xl transition-all"
                         >
                             <Plus className="w-5 h-5" /> Create New Collection
                         </button>

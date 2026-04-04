@@ -115,8 +115,12 @@ function FallbackBox() {
 export default function ModelViewer3D({ modelUrl }: { modelUrl?: string }) {
     const [isMounted, setIsMounted] = useState(false);
 
+    const [isTouch, setIsTouch] = useState(false);
+
     useEffect(() => {
-        setIsMounted(true);
+        const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const isSmallScreen = window.innerWidth < 768;
+        setIsTouch(hasTouch && isSmallScreen);
     }, []);
 
     if (!isMounted) {
@@ -184,13 +188,39 @@ export default function ModelViewer3D({ modelUrl }: { modelUrl?: string }) {
                 </span>
             </div>
 
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                <div className="px-3 py-1.5 bg-black/60 backdrop-blur-md rounded-full border border-white/10 flex items-center gap-3 text-[10px] text-gray-300">
-                    <span>Left: Rotate</span>
-                    <div className="w-px h-2 bg-gray-700" />
-                    <span>Right: Pan</span>
-                    <div className="w-px h-2 bg-gray-700" />
-                    <span>Scroll: Zoom</span>
+            {/* Responsive Controls Guide */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0 pointer-events-none w-max">
+                <div className="px-4 py-2 bg-black/80 backdrop-blur-xl rounded-2xl border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.5)] flex items-center gap-4 text-[10px] font-bold tracking-wider text-gray-400 uppercase">
+                    {isTouch ? (
+                        <>
+                            <div className="flex items-center gap-2">
+                                <span className="w-5 h-5 flex items-center justify-center bg-white/5 rounded-lg text-xs">👆</span>
+                                <span>Rotate</span>
+                            </div>
+                            <div className="w-px h-3 bg-white/10" />
+                            <div className="flex items-center gap-2">
+                                <span className="w-5 h-5 flex items-center justify-center bg-white/5 rounded-lg text-xs">✌️</span>
+                                <span>Zoom / Pan</span>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="flex items-center gap-2">
+                                <span className="w-5 h-5 flex items-center justify-center bg-white/5 rounded-lg text-xs">🖱️</span>
+                                <span>Left: Rotate</span>
+                            </div>
+                            <div className="w-px h-3 bg-white/10" />
+                            <div className="flex items-center gap-2">
+                                <span className="w-5 h-5 flex items-center justify-center bg-white/5 rounded-lg text-xs">🖱️</span>
+                                <span>Right: Pan</span>
+                            </div>
+                            <div className="w-px h-3 bg-white/10" />
+                            <div className="flex items-center gap-2">
+                                <span className="w-5 h-5 flex items-center justify-center bg-white/5 rounded-lg text-xs">⚙️</span>
+                                <span>Scroll: Zoom</span>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </div>

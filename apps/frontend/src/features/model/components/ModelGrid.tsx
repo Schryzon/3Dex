@@ -7,6 +7,7 @@ import { useAuth } from '@/features/auth';
 import EditModelModal from './EditModelModal';
 import ConfirmModal from '@/components/common/ConfirmModal';
 import type { Model } from '@/types';
+import { formatPrice } from '@/lib/utils';
 
 interface ModelGridProps {
     artistId?: string;
@@ -193,7 +194,7 @@ export default function ModelGrid({ artistId, showUpload = false }: ModelGridPro
 
                                 {/* Price badge */}
                                 <span className="inline-flex items-center px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-lg text-xs font-bold text-white border border-white/10">
-                                    {model.price === 0 ? 'Free' : `$${model.price}`}
+                                    {model.price === 0 ? 'Free' : formatPrice(model.price).idr}
                                 </span>
                             </div>
                         </div>

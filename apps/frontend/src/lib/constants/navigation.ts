@@ -30,7 +30,7 @@ export interface NavItem {
 }
 
 export const SIDEBAR_MENU: NavItem[] = [
-    { id: 'home', label: 'Home', icon: Home, href: ROUTES.PUBLIC.HOME },
+    { id: 'home', label: 'Home', icon: Home, href: ROUTES.USER.DASHBOARD, requiresAuth: true },
     { id: 'browse', label: 'Catalog', icon: Grid3x3, href: ROUTES.PUBLIC.CATALOG },
     { id: 'print', label: 'Print Services', icon: Boxes, href: ROUTES.PUBLIC.PRINT_SERVICES },
     { id: 'community', label: 'Community', icon: Users, href: ROUTES.PUBLIC.COMMUNITY, requiresAuth: true },
@@ -40,13 +40,12 @@ export const SIDEBAR_MY_STUFF: NavItem[] = [
     { id: 'notifications', label: 'Notifications', icon: Bell, href: ROUTES.USER.NOTIFICATIONS },
     { id: 'downloads', label: 'Downloads', icon: Download, href: ROUTES.USER.DOWNLOADS },
     { id: 'orders', label: 'My Orders', icon: Package, href: ROUTES.USER.ORDERS },
-    { id: 'saved', label: 'Saved', icon: Heart, href: ROUTES.USER.SAVED },
+    { id: 'library', label: 'My Library', icon: FolderOpen, href: ROUTES.USER.LIBRARY },
 ];
 
 export const SIDEBAR_ARTIST: NavItem[] = [
     { id: 'upload', label: 'Upload Asset', icon: Upload, href: ROUTES.ARTIST.UPLOAD },
     { id: 'my-uploads', label: 'My Uploads', icon: LayoutDashboard, href: ROUTES.USER.PROFILE_UPLOADS },
-    { id: 'collections', label: 'Collections', icon: FolderOpen, href: ROUTES.USER.PROFILE_COLLECTIONS },
     { id: 'analytics', label: 'Analytics', icon: BarChart3, href: ROUTES.ARTIST.ANALYTICS },
 ];
 

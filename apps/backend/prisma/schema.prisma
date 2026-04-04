@@ -20,7 +20,7 @@ enum Role {
   ADMIN
 }
 
-enum ModelStatus {
+enum Model_Status {
   PENDING
   APPROVED
   REJECTED
@@ -36,7 +36,7 @@ model User {
   role     Role   @default(CUSTOMER)
 
   // Account Status
-  account_status AccountStatus @default(PENDING) // Default pending for checks? Or APPROVED for Customer?
+  account_status Account_Status @default(PENDING) // Default pending for checks? Or APPROVED for Customer?
   // Logic: Service will handle defaults. Schema default can be PENDING.
   
   status_history Json[] // [{ status, timestamp, reason, admin_id }]
@@ -78,7 +78,7 @@ model User {
   orders        Order[]        // Orders placed as Customer
   provider_orders Order[]      @relation("provider_orders") // Orders received as Provider
 
-  cart_items    CartItem[]
+  cart_items    Cart_Item[]
 
   posts         Post[]
   post_likes    Post_Like[]
@@ -106,8 +106,11 @@ model Model {
   preview_url String?
   gallery_urls String[]
   
-  status      ModelStatus @default(PENDING)
+  status      Model_Status @default(PENDING)
   is_nsfw     Boolean     @default(false)
+  license     License_Type @default(PERSONAL_USE)
+  is_printable Boolean     @default(true)
+  file_format String       @default("glb")
 
   artist_id String
   artist    User   @relation("artist_models", fields: [artist_id], references: [id])
@@ -118,10 +121,10 @@ model Model {
   purchases  Purchase[]
   reviews    Review[]
   wishlist   Wishlist[]
-  cart_items CartItem[]
+  cart_items Cart_Item[]
   tags       Tag[]
   order_items Order_Item[]
-  collection_items CollectionItem[]
+  collection_items Collection_Item[]
 
   avg_rating   Float @default(0)
   review_count Int   @default(0)
@@ -203,7 +206,7 @@ model Wishlist {
   @@unique([user_id, model_id])
 }
 
-model CartItem {
+model Cart_Item {
   id String @id @default(uuid())
 
   user_id  String
@@ -232,13 +235,13 @@ enum Order_Status {
   CANCELLED
 }
 
-enum AccountStatus {
+enum Account_Status {
   PENDING
   APPROVED
   REJECTED
 }
 
-enum PrintStatus {
+enum Print_Status {
   PENDING
   ACCEPTED
   PROCESSING
@@ -285,11 +288,14 @@ model Order_Item {
   model_id String?
   model    Model? @relation(fields: [model_id], references: [id])
 
-  price Int // IDR at time of purchase
-  
+  /// Unit price in IDR at time of purchase
+  price Int
+  /// Line quantity (digital goods; total line = price * quantity)
+  quantity Int @default(1)
+
   // Print Config
   print_config Json? // { material, color, scale, ... }
-  print_status PrintStatus @default(PENDING)
+  print_status Print_Status @default(PENDING)
 
   created_at DateTime @default(now())
 }
@@ -421,12 +427,12 @@ model Collection {
   name        String
   description String?
   is_public   Boolean          @default(true)
-  items       CollectionItem[]
+  items       Collection_Item[]
   created_at  DateTime         @default(now())
   updated_at  DateTime         @updatedAt
 }
 
-model CollectionItem {
+model Collection_Item {
   id            String     @id @default(uuid())
   collection_id String
   collection    Collection @relation(fields: [collection_id], references: [id], onDelete: Cascade)

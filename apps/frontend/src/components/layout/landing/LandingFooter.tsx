@@ -23,71 +23,73 @@ export default function LandingFooter() {
             <h3 className="text-white font-bold text-lg mb-4">Contents</h3>
             <ul className="space-y-3">
               <li>
-                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/3d-models" className="text-gray-400 hover:text-white transition-colors">
                   3D Models
                 </Link>
               </li>
               <li>
-                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/textures" className="text-gray-400 hover:text-white transition-colors">
                   Textures
                 </Link>
               </li>
               <li>
-                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/hdri" className="text-gray-400 hover:text-white transition-colors">
                   HDRI
                 </Link>
               </li>
               <li>
-                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/free-models" className="text-gray-400 hover:text-white transition-colors">
                   Free 3D models
                 </Link>
               </li>
             </ul>
           </div>
 
+
           {/* Agreements */}
           <div>
             <h3 className="text-white font-bold text-lg mb-4">Agreements</h3>
             <ul className="space-y-3">
               <li>
-                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/terms-of-use" className="text-gray-400 hover:text-white transition-colors">
                   Terms of Use
                 </Link>
               </li>
               <li>
-                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/privacy-policy" className="text-gray-400 hover:text-white transition-colors">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/cookie-policy" className="text-gray-400 hover:text-white transition-colors">
                   Cookie Policy
                 </Link>
               </li>
               <li>
-                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/license" className="text-gray-400 hover:text-white transition-colors">
                   License
                 </Link>
               </li>
             </ul>
           </div>
 
+
           {/* Support */}
           <div>
             <h3 className="text-white font-bold text-lg mb-4">Support</h3>
             <ul className="space-y-3">
               <li>
-                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/faq" className="text-gray-400 hover:text-white transition-colors">
                   FAQ
                 </Link>
               </li>
               <li>
-                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/contact-us" className="text-gray-400 hover:text-white transition-colors">
                   Contact us
                 </Link>
               </li>
               <li>
-                <Link href="/coming-soon" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/about-us" className="text-gray-400 hover:text-white transition-colors">
                   About us
                 </Link>
               </li>

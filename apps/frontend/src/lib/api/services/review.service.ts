@@ -26,7 +26,7 @@ export const reviewService = {
     /**
      * Get reviews for a specific user (Artist/Provider)
      */
-    getUserReviews: async (userId: string, page: number = 1, limit: number = 10): Promise<Review[]> => {
+    getUserReviews: (userId: string, page: number = 1, limit: number = 10) => {
         return apiClient.get<Review[]>(API_ENDPOINTS.REVIEWS.USER_LIST(userId), {
             params: { page, limit }
         });
@@ -40,6 +40,15 @@ export const reviewService = {
             target_user_id: targetUserId,
             ...data
         });
+    },
+
+    /**
+     * Check if current user can review target user
+     */
+    checkReviewEligibility: async (targetUserId: string): Promise<{ eligible: boolean; reason: string | null }> => {
+        return apiClient.get<{ eligible: boolean; reason: string | null }>(
+            `${API_ENDPOINTS.REVIEWS.USER_LIST(targetUserId)}/eligible`
+        );
     }
 };
 

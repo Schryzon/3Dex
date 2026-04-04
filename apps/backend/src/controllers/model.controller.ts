@@ -51,6 +51,13 @@ export async function list_models(req: Request, res: Response) {
     }
   }
 
+  // Double check: if NOT admin and NOT self, only show models from active Artists
+  if (!is_admin && !is_self) {
+    where.artist = {
+      role: 'ARTIST'
+    };
+  }
+
   // 2. Search (Title, Description, Tags, or Category)
   if (search) {
     const searchStr = String(search);
@@ -228,7 +235,7 @@ export async function get_model_detail(req: Request, res: Response) {
       isPurchased = !!purchase;
 
       // Also treat artist as owner
-      if (raw_model.artist.id === user_id) {
+      if (raw_model.artist_id === user_id) {
         isPurchased = true;
       }
     }
@@ -261,12 +268,20 @@ export async function get_model_detail(req: Request, res: Response) {
 
 
 export async function upload_model(req: Request, res: Response) {
-  const { title, description, price, file_url, preview_url, gallery_urls, artist_id, category, tags, is_nsfw } =
+  const { title, description, price, file_url, preview_url, gallery_urls, artist_id, category, tags, is_nsfw, license, is_printable } =
     req.body;
 
   if (!title || price === undefined || !file_url || !artist_id) {
     return res.status(400).json({
       message: "Missing fields!",
+    });
+  }
+
+  // Auto-determine file format from extension
+  const file_format = file_url.split('.').pop()?.toLowerCase();
+  if (file_format !== 'glb' && file_format !== 'gltf') {
+    return res.status(400).json({
+      message: "Invalid file format! Only .glb and .gltf are allowed.",
     });
   }
 
@@ -288,7 +303,10 @@ export async function upload_model(req: Request, res: Response) {
       artist_id,
       category_id,
       tags: Array.isArray(tags) ? tags : undefined,
-      is_nsfw: !!is_nsfw
+      is_nsfw: !!is_nsfw,
+      license: license,
+      is_printable: is_printable !== undefined ? !!is_printable : true,
+      file_format: file_format
     });
 
     res.status(201).json(model);
@@ -321,7 +339,7 @@ export async function download_model(req: Request, res: Response) {
     // 2. User is the artist (owner)
     // 3. User is an ADMIN
     // 4. Model is FREE (price === 0)
-    if (!purchase && model.artist.id !== user_id && user.role !== "ADMIN" && model.price > 0) {
+    if (!purchase && model.artist_id !== user_id && user.role !== "ADMIN" && model.price > 0) {
       return res.status(403).json({
         message: "You have not purchased this model!"
       });
@@ -360,7 +378,7 @@ export async function delete_model(req: Request, res: Response) {
       });
     }
 
-    if (model.artist.id !== user_id && user_role !== "ADMIN") {
+    if (model.artist_id !== user_id && user_role !== "ADMIN") {
       return res.status(403).json({
         message: "You are not authorized to delete this model!",
       });
@@ -391,17 +409,19 @@ export async function update_model(req: Request, res: Response) {
       return res.status(404).json({ message: "Model not found!" });
     }
 
-    if (model.artist.id !== user_id && user_role !== "ADMIN") {
+    if (model.artist_id !== user_id && user_role !== "ADMIN") {
       return res.status(403).json({ message: "You are not authorized to edit this model!" });
     }
 
-    const { title, description, price, category } = req.body;
+    const { title, description, price, category, license, is_printable } = req.body;
 
     const updated = await update_model_by_id(model_id, {
       ...(title !== undefined && { title }),
       ...(description !== undefined && { description }),
       ...(price !== undefined && { price: Number(price) }),
       ...(category !== undefined && { category }),
+      ...(license !== undefined && { license }),
+      ...(is_printable !== undefined && { is_printable: !!is_printable }),
     });
 
     res.json(updated);

@@ -5,7 +5,7 @@ import { useProduct } from '@/features/catalog/hooks/useProducts';
 import { useCart } from '@/features/cart';
 import { useWishlist } from '@/features/catalog/hooks/useWishlist';
 import { useAuth } from '@/features/auth';
-import { Share2, Heart, Plus, Check, Download, Eye, ShoppingCart, FolderPlus, AlertTriangle, ChevronLeft } from 'lucide-react';
+import { Share2, Heart, Plus, Check, Download, Eye, ShoppingCart, FolderPlus, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
 import { Suspense, lazy, useState } from 'react';
 import Link from 'next/link';
@@ -138,6 +138,16 @@ export default function CatalogDetailPage() {
             </div>
         );
     }
+
+    const artistUsername = product.artist?.username?.trim();
+    const artistAvatarUrl = product.artist?.avatar_url;
+    const artistInitial = artistUsername?.[0]?.toUpperCase() || '?';
+
+    const statusLabelMap: Record<string, string> = {
+        APPROVED: 'Verified',
+        PENDING: 'Pending',
+        REJECTED: 'Rejected',
+    };
 
     return (
         <div className="min-h-screen bg-black text-white">
@@ -284,7 +294,7 @@ export default function CatalogDetailPage() {
                             <div>
                                 <div className="flex items-center gap-2 mb-3">
                                     <span className="px-2.5 py-1 bg-yellow-500/10 text-yellow-500 text-xs font-medium rounded border border-yellow-500/20">
-                                        {product.status === 'APPROVED' ? 'Verified' : 'Pending'}
+                                        {statusLabelMap[product.status] ?? 'Unknown'}
                                     </span>
                                     <span className="text-xs text-gray-500">{product.category}</span>
                                 </div>
@@ -297,7 +307,7 @@ export default function CatalogDetailPage() {
                             {/* Price */}
                             <div className="border-y border-gray-900 py-4">
                                 <div className="flex items-end justify-between mb-2">
-                                    <div className="text-3xl font-bold text-white">
+                                    <div className="text-xl lg:text-3xl font-bold text-white">
                                         {currency === 'idr' ? formatPrice(product.price).idr : formatPrice(product.price).usd}
                                     </div>
                                     <div className="flex gap-1 bg-gray-900 rounded-lg p-0.5">
@@ -387,42 +397,65 @@ export default function CatalogDetailPage() {
                                         </button>
                                     </>
                                 )}
-                            </div>
 
-                            {/* Artist Info */}
-                            <Link
-                                href={`/u/${product.artist?.username || ''}`}
-                                className="flex items-center gap-3 p-4 rounded-lg bg-gray-900 border border-gray-900 hover:border-gray-800 transition-all duration-300 group hover:shadow-lg hover:shadow-yellow-500/5"
-                            >
-                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-gray-800 to-black flex items-center justify-center text-sm font-bold uppercase flex-shrink-0 border border-gray-800 group-hover:border-yellow-500/50 transition-all duration-300">
-                                    {product.artist?.username?.[0] || 'A'}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-xs text-gray-500">Created by</p>
-                                    <p className="text-sm font-semibold text-white group-hover:text-yellow-500 transition-colors duration-300 truncate">
-                                        {product.artist?.username || 'Anonymous'}
-                                    </p>
-                                </div>
-                                <svg className="w-4 h-4 text-gray-600 group-hover:text-yellow-500 group-hover:translate-x-1 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                            </Link>
+                                {/* Creator — compact row directly under CTA */}
+                                {artistUsername ? (
+                                    <Link
+                                        href={`/u/${artistUsername}`}
+                                        className="group flex w-full items-center gap-2.5 rounded-xl border border-white/[0.07] bg-gradient-to-r from-white/[0.03] to-transparent px-3 py-2 outline-none transition-all hover:border-yellow-500/30 hover:from-yellow-500/[0.06] hover:to-transparent"
+                                    >
+                                        <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full border border-white/10 bg-[#141414] shadow-inner">
+                                            {artistAvatarUrl ? (
+                                                <img
+                                                    src={artistAvatarUrl}
+                                                    alt=""
+                                                    className="h-full w-full object-cover"
+                                                    referrerPolicy="no-referrer"
+                                                />
+                                            ) : (
+                                                <span className="flex h-full w-full items-center justify-center text-[11px] font-bold text-gray-400">
+                                                    {artistInitial}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="min-w-0 flex-1 text-left">
+                                            <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-gray-500">
+                                                Creator
+                                            </p>
+                                            <p className="truncate text-[13px] font-semibold text-white transition-colors group-hover:text-yellow-400">
+                                                @{artistUsername}
+                                            </p>
+                                        </div>
+                                        <ChevronRight className="h-4 w-4 shrink-0 text-gray-600 transition-transform group-hover:translate-x-0.5 group-hover:text-yellow-500/90" aria-hidden />
+                                    </Link>
+                                ) : (
+                                    <div className="flex w-full items-center gap-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2 opacity-80">
+                                        <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full border border-white/10 bg-[#141414]">
+                                            <span className="flex h-full w-full items-center justify-center text-[11px] font-bold text-gray-500">
+                                                {artistInitial}
+                                            </span>
+                                        </div>
+                                        <div className="min-w-0 flex-1 text-left">
+                                            <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-gray-600">Creator</p>
+                                            <p className="truncate text-[13px] font-medium text-gray-500">Unknown</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
 
                             {/* Specs */}
                             <div className="space-y-3">
                                 <h3 className="text-sm font-semibold text-white">Specifications</h3>
                                 <div className="space-y-2 text-sm">
                                     <div className="flex justify-between py-2 border-b border-gray-900 hover:border-yellow-500/20 transition-colors duration-300 group">
-                                        <span className="text-gray-400 group-hover:text-gray-300">Polygons</span>
-                                        <span className="text-white font-medium">{product.polyCount?.toLocaleString() || 'N/A'}</span>
-                                    </div>
-                                    <div className="flex justify-between py-2 border-b border-gray-900 hover:border-yellow-500/20 transition-colors duration-300 group">
                                         <span className="text-gray-400 group-hover:text-gray-300">Format</span>
-                                        <span className="text-white font-medium">{product.fileFormat?.join(', ') || 'OBJ'}</span>
+                                        <span className="text-white font-medium uppercase">{product.fileFormat || 'GLB'}</span>
                                     </div>
                                     <div className="flex justify-between py-2 border-b border-gray-900 hover:border-yellow-500/20 transition-colors duration-300 group">
                                         <span className="text-gray-400 group-hover:text-gray-300">License</span>
-                                        <span className="text-yellow-500 font-medium">Standard</span>
+                                        <span className="text-yellow-500 font-medium">
+                                            {product.license === 'COMMERCIAL_USE' ? 'Commercial' : 'Personal'}
+                                        </span>
                                     </div>
                                     <div className="flex justify-between py-2 hover:border-yellow-500/20 transition-colors duration-300 group">
                                         <span className="text-gray-400 group-hover:text-gray-300">3D Printable</span>
@@ -443,10 +476,14 @@ export default function CatalogDetailPage() {
                                 </div>
                                 <ul className="space-y-2 text-xs text-gray-300">
                                     <li className="flex items-start gap-2 hover:text-white transition-colors duration-300">
-                                        <svg className="w-3.5 h-3.5 text-yellow-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        <svg className={`w-3.5 h-3.5 ${product.license === 'COMMERCIAL_USE' ? 'text-yellow-500' : 'text-red-500'} mt-0.5 flex-shrink-0`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            {product.license === 'COMMERCIAL_USE' ? (
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            ) : (
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            )}
                                         </svg>
-                                        <span>Commercial use</span>
+                                        <span>{product.license === 'COMMERCIAL_USE' ? 'Commercial use' : 'Personal use only'}</span>
                                     </li>
                                     <li className="flex items-start gap-2 hover:text-white transition-colors duration-300">
                                         <svg className="w-3.5 h-3.5 text-yellow-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -8,6 +8,7 @@ import MultiFileUploader from '@/features/upload/components/MultiFileUploader';
 import { api } from '@/lib/api';
 import axios from 'axios';
 import { USD_TO_IDR } from '@/lib/utils/price';
+import toast from 'react-hot-toast';
 
 type Step = 'files' | 'details' | 'pricing';
 
@@ -28,7 +29,8 @@ export default function UploadPage() {
         tags: '',
         price: '0',
         isFree: true,
-        license: 'royalty-free',
+        license: 'PERSONAL_USE',
+        isPrintable: true,
         isNsfw: false
     });
 
@@ -109,15 +111,17 @@ export default function UploadPage() {
                 category: formData.category,
                 tags: formData.tags.split(',').map(t => t.trim()),
                 license: formData.license,
+                is_printable: formData.isPrintable,
                 is_nsfw: formData.isNsfw
             });
 
             // Success
+            toast.success('Model uploaded! It will be reviewed by our team before going live.', { duration: 5000 });
             router.push('/profile');
 
         } catch (error: any) {
             console.error(error);
-            alert(`Upload failed: ${error.response?.data?.message || error.message}`);
+            toast.error(`Upload failed: ${error.response?.data?.message || error.message}`);
         } finally {
             setIsLoading(false);
             setUploadProgress(0);
@@ -259,6 +263,35 @@ export default function UploadPage() {
                                             value={formData.tags}
                                             onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
                                         />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-bold text-gray-300">License</label>
+                                        <select
+                                            className="w-full bg-gray-900/50 border border-gray-800 rounded-xl px-4 py-3 outline-none focus:border-yellow-400 transition-colors appearance-none"
+                                            value={formData.license}
+                                            onChange={(e) => setFormData({ ...formData, license: e.target.value })}
+                                        >
+                                            <option value="PERSONAL_USE">Personal Use</option>
+                                            <option value="COMMERCIAL_USE">Commercial Use</option>
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-bold text-gray-300">Specifications</label>
+                                        <div className="flex items-center gap-3 p-3.5 bg-gray-900/50 border border-gray-800 rounded-xl">
+                                            <input
+                                                type="checkbox"
+                                                id="printable-checkbox"
+                                                checked={formData.isPrintable}
+                                                onChange={(e) => setFormData({ ...formData, isPrintable: e.target.checked })}
+                                                className="w-5 h-5 rounded border-gray-700 bg-black text-yellow-500 focus:ring-yellow-500 focus:ring-offset-gray-900 cursor-pointer"
+                                            />
+                                            <label htmlFor="printable-checkbox" className="text-sm font-medium text-gray-300 cursor-pointer">
+                                                Ready for 3D Printing
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
 
