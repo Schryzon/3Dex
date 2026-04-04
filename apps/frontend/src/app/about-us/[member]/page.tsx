@@ -15,6 +15,7 @@ const memberData: Record<MemberSlug, {
     initials: string;
     github: string;
     githubUser: string;
+    linkedin: string;
     bio: string[];
     responsibilities: string[];
     techStack: string[];
@@ -30,6 +31,7 @@ const memberData: Record<MemberSlug, {
         initials: 'JY',
         github: 'https://github.com/Schryzon',
         githubUser: 'Schryzon',
+        linkedin: 'https://www.linkedin.com/in/schryzon/',
         roleIcon: Server,
         bio: [
             'Jay is the backbone of 3Dēx. As the primary backend engineer and system administrator, he designed and built the entire API layer — from authentication and role-based access control, to model management, payment integration with Midtrans, and the admin moderation system.',
@@ -57,6 +59,7 @@ const memberData: Record<MemberSlug, {
         initials: 'MP',
         github: 'https://github.com/Vuxyn',
         githubUser: 'Vuxyn',
+        linkedin: 'https://www.linkedin.com/in/i-kadek-mahesa-permana-putra-655184320/',
         roleIcon: Palette,
         bio: [
             'Mahesa is responsible for the look, feel, and usability of 3Dēx. He designed and implemented the full frontend architecture using Next.js and Tailwind CSS — including the design system, component library, and every page you interact with on the platform.',
@@ -85,6 +88,7 @@ const memberData: Record<MemberSlug, {
         initials: 'TF',
         github: 'https://github.com/ganijack',
         githubUser: 'ganijack',
+        linkedin: 'https://www.linkedin.com/in/thoriq-abdillah-falian-kusuma-433615289/',
         roleIcon: Plug,
         bio: [
             'Thoriq bridges the frontend and backend of 3Dēx. He focuses on implementing feature integrations — ensuring that UI components correctly communicate with the API layer, handling real data flows and user-facing logic across the application.',
@@ -152,8 +156,9 @@ export default async function MemberPage({ params }: { params: Promise<{ member:
                 {/* Profile Header */}
                 <div className="flex flex-col md:flex-row gap-8 md:items-end">
                     {/* Avatar */}
-                    <div className={`w-32 h-32 rounded-3xl bg-gradient-to-br ${data.gradient} flex items-center justify-center text-4xl font-black text-white shrink-0 shadow-2xl`}>
-                        {data.initials}
+                    <div className={`w-32 h-32 rounded-3xl bg-gradient-to-br ${data.gradient} overflow-hidden flex items-center justify-center text-4xl font-black text-white shrink-0 shadow-2xl relative`}>
+                        <div className="absolute inset-0 bg-black/5" />
+                        <img src={`https://github.com/${data.githubUser}.png`} alt={data.name} className="w-full h-full object-cover" />
                     </div>
 
                     <div className="flex-1">
@@ -167,6 +172,15 @@ export default async function MemberPage({ params }: { params: Promise<{ member:
                             "{data.tagline}"
                         </p>
                         <div className="flex flex-wrap items-center gap-3">
+                            <a
+                                href={data.linkedin}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-[#0077b5] text-white rounded-xl text-sm font-medium hover:bg-[#005582] transition-all"
+                            >
+                                View LinkedIn
+                                <ExternalLink className="w-3 h-3 text-white/50" />
+                            </a>
                             <a
                                 href={data.github}
                                 target="_blank"
@@ -243,8 +257,9 @@ export default async function MemberPage({ params }: { params: Promise<{ member:
                                     href={`/about-us/${slug}`}
                                     className="flex items-center gap-4 p-4 bg-[#111] border border-white/10 rounded-2xl hover:border-white/20 transition-all group"
                                 >
-                                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${m.gradient} flex items-center justify-center text-sm font-black text-white shrink-0`}>
-                                        {m.initials}
+                                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${m.gradient} overflow-hidden shrink-0 relative`}>
+                                        <div className="absolute inset-0 bg-black/5" />
+                                        <img src={`https://github.com/${m.githubUser}.png`} alt={m.nickname} className="w-full h-full object-cover" />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="font-bold">{m.nickname}</p>

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
     Box, Target, TrendingUp, Scale, Github,
-    ArrowRight, Layers, Users, Printer, ShoppingCart, Star, ChevronRight
+    ArrowRight, Layers, Users, Printer, ShoppingCart, Star, ChevronRight, ExternalLink
 } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -19,8 +19,8 @@ const team = [
         role: 'Backend Engineer & SysAdmin',
         short: 'Architects the engine that powers 3Dēx — from API design and database modeling to cloud infrastructure and deployment pipelines.',
         gradient: 'from-violet-500 to-purple-700',
-        github: 'https://github.com/Schryzon',
-        initials: 'JY',
+        linkedin: 'https://www.linkedin.com/in/schryzon/',
+        githubUser: 'Schryzon',
     },
     {
         slug: 'mahesa',
@@ -30,8 +30,8 @@ const team = [
         role: 'Frontend Engineer & UI/UX',
         short: 'Crafts the visual identity and user experience of 3Dēx — every pixel, interaction, and interface component.',
         gradient: 'from-amber-400 to-orange-500',
-        github: 'https://github.com/Vuxyn',
-        initials: 'MP',
+        linkedin: 'https://www.linkedin.com/in/i-kadek-mahesa-permana-putra-655184320/',
+        githubUser: 'Vuxyn',
     },
     {
         slug: 'thoriq',
@@ -41,8 +41,8 @@ const team = [
         role: 'Frontend Engineer & Integration',
         short: 'Bridges the gap between frontend and backend — implementing integrations, payment flows, and real-world feature delivery.',
         gradient: 'from-teal-400 to-cyan-600',
-        github: 'https://github.com/ganijack',
-        initials: 'TF',
+        linkedin: 'https://www.linkedin.com/in/thoriq-abdillah-falian-kusuma-433615289/',
+        githubUser: 'ganijack',
     },
 ];
 
@@ -231,14 +231,17 @@ export default function AboutUsPage() {
 
                     <div className="grid md:grid-cols-3 gap-6">
                         {team.map(member => (
-                            <Link
+                            <a
                                 key={member.slug}
-                                href={`/about-us/${member.slug}`}
+                                href={member.linkedin}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="group block p-6 bg-[#111] border border-white/10 rounded-2xl hover:border-white/20 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/50"
                             >
                                 {/* Avatar */}
-                                <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${member.gradient} flex items-center justify-center text-2xl font-black text-white mb-5 group-hover:scale-105 transition-transform`}>
-                                    {member.initials}
+                                <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${member.gradient} overflow-hidden text-white mb-5 group-hover:scale-105 transition-transform relative`}>
+                                    <div className="absolute inset-0 bg-black/5" />
+                                    <img src={`https://github.com/${member.githubUser}.png`} alt={member.name} className="w-full h-full object-cover" />
                                 </div>
 
                                 <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">@{member.handle}</p>
@@ -246,10 +249,10 @@ export default function AboutUsPage() {
                                 <p className="text-xs text-yellow-400 font-medium mb-3">{member.role}</p>
                                 <p className="text-white/50 text-sm leading-relaxed mb-5">{member.short}</p>
 
-                                <div className="flex items-center gap-1 text-xs text-gray-500 group-hover:text-white transition-colors font-medium">
-                                    View profile <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                                <div className="flex items-center gap-1 text-xs text-gray-500 group-hover:text-blue-400 transition-colors font-medium">
+                                    View LinkedIn <ExternalLink className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                                 </div>
-                            </Link>
+                            </a>
                         ))}
                     </div>
                 </section>
