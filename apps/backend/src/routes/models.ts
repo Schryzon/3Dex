@@ -176,6 +176,6 @@ router.patch("/:id", require_auth, update_model);
  *       400:
  *         description: Invalid file type or missing fields
  */
-router.post("/upload-url", require_auth, require_artist, get_upload_signed_url);
+router.post("/upload-url", require_auth, get_upload_signed_url);
 
 export default router;

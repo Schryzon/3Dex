@@ -14,6 +14,16 @@ const nextConfig: NextConfig = {
         destination: '/collections',
         permanent: true,
       },
+      {
+        source: '/downloads',
+        destination: '/library?tab=purchases',
+        permanent: true,
+      },
+      {
+        source: '/saved',
+        destination: '/library?tab=wishlist',
+        permanent: true,
+      },
     ];
   },
 

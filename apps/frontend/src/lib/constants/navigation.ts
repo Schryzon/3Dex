@@ -38,9 +38,8 @@ export const SIDEBAR_MENU: NavItem[] = [
 
 export const SIDEBAR_MY_STUFF: NavItem[] = [
     { id: 'notifications', label: 'Notifications', icon: Bell, href: ROUTES.USER.NOTIFICATIONS },
-    { id: 'downloads', label: 'Downloads', icon: Download, href: ROUTES.USER.DOWNLOADS },
-    { id: 'orders', label: 'My Orders', icon: Package, href: ROUTES.USER.ORDERS },
     { id: 'library', label: 'My Library', icon: FolderOpen, href: ROUTES.USER.LIBRARY },
+    { id: 'orders', label: 'My Orders', icon: Package, href: ROUTES.USER.ORDERS },
 ];
 
 export const SIDEBAR_ARTIST: NavItem[] = [

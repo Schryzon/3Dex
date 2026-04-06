@@ -8,7 +8,8 @@ import {
     revert_to_customer,
     get_public_profile,
     search_users,
-    delete_account
+    delete_account,
+    get_user_library
 } from "../controllers/user.controller";
 import { require_auth } from "../middlewares/auth.middleware";
 import { require_admin } from "../middlewares/role.middleware";
@@ -146,6 +147,21 @@ router.delete("/me", require_auth, delete_account);
  *         description: List of matching users
  */
 router.get("/search", search_users);
+
+/**
+ * @openapi
+ * /users/library:
+ *   get:
+ *     summary: Get current user model library (Uploaded + Purchased)
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of models in user library
+ */
+router.get("/library", require_auth, get_user_library);
 
 /**
  * @openapi

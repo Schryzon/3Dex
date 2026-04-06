@@ -18,7 +18,7 @@ export const ROUTES = {
         DOWNLOADS: '/downloads',
         ORDERS: '/orders',
         SAVED: '/saved',
-        LIBRARY: '/saved',
+        LIBRARY: '/library',
         CART: '/cart',
         PROFILE_UPLOADS: '/profile?tab=uploads',
         PROFILE_COLLECTIONS: '/profile?tab=collections',

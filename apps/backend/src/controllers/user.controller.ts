@@ -3,7 +3,7 @@ import { Response } from "express";
 import { Auth_Request } from "../middlewares/auth.middleware";
 import prisma from "../prisma";
 import { Prisma } from "@prisma/client";
-import { sign_user_urls } from "../services/storage.service";
+import { sign_user_urls, get_download_url_s3 } from "../services/storage.service";
 
 /**
  * List all users (Admin only)
@@ -372,5 +372,83 @@ export async function revert_to_customer(req: Auth_Request, res: Response): Prom
         });
     } catch (error: any) {
         res.status(500).json({ message: error.message });
+    }
+}
+
+/**
+ * Get user model library (Uploaded + Purchased)
+ */
+export async function get_user_library(req: Auth_Request, res: Response): Promise<void> {
+    const { id } = req.user;
+
+    try {
+        // 1. Fetch own uploads (as Artist)
+        const uploads = await prisma.model.findMany({
+            where: { artist_id: id },
+            include: {
+                artist: {
+                    select: { username: true, id: true, avatar_url: true }
+                }
+            },
+            orderBy: { created_at: 'desc' }
+        });
+
+        // 2. Fetch purchases (as Customer)
+        const purchases = await prisma.purchase.findMany({
+            where: { user_id: id },
+            include: {
+                model: {
+                    include: {
+                        artist: {
+                            select: { username: true, id: true, avatar_url: true }
+                        }
+                    }
+                }
+            },
+            orderBy: { created_at: 'desc' }
+        });
+
+        // 3. Combine and Differentiate
+        const mappedUploads = uploads.map(m => ({
+            ...m,
+            source: 'uploaded'
+        }));
+
+        const mappedPurchases = purchases.map(p => ({
+            ...p.model,
+            purchased_at: p.created_at,
+            license: p.license,
+            source: 'purchased'
+        }));
+
+        const combined = [...mappedUploads];
+        const uploadIds = new Set(uploads.map(m => m.id));
+
+        for (const pm of mappedPurchases) {
+            if (pm && !uploadIds.has(pm.id)) {
+                combined.push(pm as any);
+            }
+        }
+
+        // 4. Sign URLs for preview and thumbnails
+        const sign_model = async (m: any) => {
+            const model = { ...m };
+            if (model.preview_url && !model.preview_url.startsWith("http")) {
+                model.preview_url = await get_download_url_s3(model.preview_url);
+            }
+            if (model.file_url && !model.file_url.startsWith("http")) {
+                model.file_url = await get_download_url_s3(model.file_url);
+            }
+            if (model.artist) {
+                model.artist = await sign_user_urls(model.artist);
+            }
+            return model;
+        };
+
+        const signed_library = await Promise.all(combined.map(sign_model));
+
+        res.json(signed_library);
+    } catch (error: any) {
+        res.status(500).json({ message: error.message || "Failed to fetch library." });
     }
 }

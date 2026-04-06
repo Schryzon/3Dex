@@ -173,4 +173,9 @@ export const productService = {
     async downloadProduct(id: string): Promise<{ downloadUrl: string; expiresAt: string; remainingDownloads: number }> {
         return apiClient.get(API_ENDPOINTS.MODELS.DOWNLOAD(id));
     },
+    
+    async getUserLibrary(): Promise<Model[]> {
+        const response = await apiClient.get<any[]>(API_ENDPOINTS.USERS.LIBRARY);
+        return response.map(mapModel);
+    },
 };
