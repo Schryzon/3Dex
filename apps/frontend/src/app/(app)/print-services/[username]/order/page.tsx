@@ -214,7 +214,7 @@ export default function PlaceOrderPage() {
                                                     <div className="flex-1 space-y-4">
                                                         <div className="flex justify-between items-start">
                                                             <div>
-                                                                <h4 className="font-bold text-white text-lg uppercase tracking-tight">{item.model.title}</h4>
+                                                                <h4 className="font-bold text-white text-lg">{item.model.title}</h4>
                                                                 <span className="text-[10px] text-gray-500 font-mono uppercase">
                                                                     {item.is_custom ? 'Custom Upload (GLB)' : `ID: ${item.model_id}`}
                                                                 </span>

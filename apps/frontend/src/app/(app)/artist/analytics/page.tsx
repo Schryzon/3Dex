@@ -153,7 +153,7 @@ export default function ArtistAnalyticsPage() {
                             >
                                 <div className="flex items-center justify-between mb-12">
                                     <div>
-                                        <h2 className="text-xl font-black uppercase tracking-tight italic">Earnings <span className="text-yellow-400">Trend</span></h2>
+                                        <h2 className="text-xl font-black">Earnings <span className="text-yellow-400">Trend</span></h2>
                                         <p className="text-xs text-gray-600 font-medium mt-1">Revenue distribution over the last 12 months</p>
                                     </div>
                                     <div className="w-3 h-3 rounded-full bg-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]" />
@@ -220,7 +220,7 @@ export default function ArtistAnalyticsPage() {
                                 className="lg:col-span-4 bg-[#0c0c0c] border border-white/5 rounded-[3rem] p-8 shadow-2xl flex flex-col"
                             >
                                 <div className="flex items-center justify-between mb-8">
-                                    <h2 className="text-xl font-black uppercase tracking-tight italic">Top <span className="text-yellow-400">Performers</span></h2>
+                                    <h2 className="text-xl font-black">Top <span className="text-yellow-400">Performers</span></h2>
                                     <div className="p-2 bg-white/5 rounded-xl">
                                         <Award className="w-4 h-4 text-gray-500" />
                                     </div>
@@ -240,7 +240,7 @@ export default function ArtistAnalyticsPage() {
                                                         {i + 1}
                                                     </div>
                                                     <div className="min-w-0 flex-1">
-                                                        <h4 className="font-bold text-sm truncate uppercase tracking-tight italic">{model.title}</h4>
+                                                        <h4 className="font-bold text-sm truncate">{model.title}</h4>
                                                         <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">{model.sales} Units Sold</p>
                                                     </div>
                                                     <div className="text-right">
@@ -265,7 +265,7 @@ export default function ArtistAnalyticsPage() {
                             className="bg-[#0c0c0c] border border-white/5 rounded-[3rem] overflow-hidden shadow-2xl"
                         >
                             <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
-                                <h2 className="text-xl font-black uppercase tracking-tight italic">Live <span className="text-yellow-400">Sales Feed</span></h2>
+                                <h2 className="text-xl font-black">Live <span className="text-yellow-400">Sales Feed</span></h2>
                                 <div className="flex items-center gap-2">
                                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                                     <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Real-time Activity</span>
@@ -295,7 +295,7 @@ export default function ArtistAnalyticsPage() {
                                                 <tr key={sale.id} className="group hover:bg-white/[0.02] transition-colors">
                                                     <td className="px-8 py-5 text-gray-600 font-mono text-[10px]">#{sale.id.slice(0, 8).toUpperCase()}</td>
                                                     <td className="px-8 py-5">
-                                                        <p className="text-sm font-bold uppercase tracking-tight italic text-white group-hover:text-yellow-400 transition-colors">
+                                                        <p className="text-sm font-bold text-white group-hover:text-yellow-400 transition-colors">
                                                             {sale.model.title}
                                                         </p>
                                                     </td>

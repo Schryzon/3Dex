@@ -205,7 +205,7 @@ function LibraryContent() {
                                 <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-8">
                                     <Package className="w-10 h-10 text-gray-800" />
                                 </div>
-                                <h3 className="text-2xl font-bold text-white mb-2 uppercase tracking-tight">Empty Workspace</h3>
+                                <h3 className="text-2xl font-bold text-white mb-2">Empty Workspace</h3>
                                 <p className="text-gray-600 max-w-sm mx-auto text-sm font-medium">
                                     No items found in your {activeTab}. Start browsing the catalog to build your professional library.
                                 </p>
@@ -294,7 +294,7 @@ function AssetCard({ item, type, onDownload, onRemoveFromWishlist }: any) {
                     </div>
                 </div>
                 <div className="mt-4 px-2">
-                    <h4 className="font-bold text-white group-hover:text-yellow-400 transition-colors uppercase tracking-tight italic">{item.name}</h4>
+                    <h4 className="font-bold text-white group-hover:text-yellow-400 transition-colors">{item.name}</h4>
                     <span className="text-[9px] font-black text-gray-600 uppercase tracking-widest">{item._count?.items ?? 0} Assets</span>
                 </div>
             </Link>
@@ -332,7 +332,7 @@ function AssetCard({ item, type, onDownload, onRemoveFromWishlist }: any) {
             <div className="p-5">
                 <div className="flex justify-between items-start gap-3 mb-4">
                     <div className="min-w-0">
-                        <h4 className="font-bold text-white text-sm truncate uppercase tracking-tight italic" title={model.title}>{model.title}</h4>
+                        <h4 className="font-bold text-white text-sm truncate" title={model.title}>{model.title}</h4>
                         <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mt-1">
                             {model.artist?.username ? `@${model.artist.username}` : '3DEX PRIME'}
                         </p>

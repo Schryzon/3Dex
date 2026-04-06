@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { apiClient } from '@/lib/api/client';
 import { CatalogProductCard } from '../product-card';
@@ -64,7 +66,7 @@ export default function RelatedProducts({ productId, categories }: Props) {
   if (loading) {
     return (
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-white tracking-tight uppercase italic">Related <span className="text-yellow-400">Products</span></h2>
+        <h2 className="text-2xl font-bold text-white">Related <span className="text-yellow-400">Products</span></h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="bg-gray-900 rounded-xl overflow-hidden animate-pulse border border-white/5">
@@ -86,9 +88,9 @@ export default function RelatedProducts({ productId, categories }: Props) {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white tracking-tight uppercase italic">Related <span className="text-yellow-400">Products</span></h2>
-        <Link 
-          href={`/catalog?category=${categories?.[0] || ''}`} 
+        <h2 className="text-2xl font-bold text-white">Related <span className="text-yellow-400">Products</span></h2>
+        <Link
+          href={`/catalog?category=${categories?.[0] || ''}`}
           className="text-yellow-500 hover:text-yellow-400 text-xs font-black uppercase tracking-widest flex items-center gap-2 group transition-all"
         >
           View Full Catalog
@@ -98,8 +100,8 @@ export default function RelatedProducts({ productId, categories }: Props) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {products.map((product) => (
-          <CatalogProductCard 
-            key={product.id} 
+          <CatalogProductCard
+            key={product.id}
             id={product.id}
             title={product.title}
             image={product.preview_url || '/placeholder.jpg'}
@@ -118,4 +120,4 @@ export default function RelatedProducts({ productId, categories }: Props) {
       </div>
     </div>
   );
-}
+}
