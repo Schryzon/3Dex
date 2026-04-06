@@ -21,7 +21,7 @@ import { toast } from 'react-hot-toast';
 const ProductViewer3D = lazy(() => import('@/features/catalog/components/viewer').then(mod => ({ default: mod.ProductViewer3D })));
 
 export default function CatalogDetailPage() {
-const params = useParams();
+    const params = useParams();
     const router = useRouter();
     const productId = params.id as string;
 
@@ -42,6 +42,20 @@ const params = useParams();
     const [currency, setCurrency] = useState<'idr' | 'usd'>('idr');
     const [isClaiming, setIsClaiming] = useState(false);
     const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
+    const [isRevealed, setIsRevealed] = useState(false);
+
+    // NSFW Access Control & Auto-redirect
+    useState(() => {
+        if (!isLoading && product?.is_nsfw && user && !user.show_nsfw) {
+            toast.error('Mature content is hidden in your settings. Please enable it in your profile to view NSFW content.');
+            router.push('/catalog');
+        }
+    });
+
+    // Handle case where user object loads late or settings change
+    if (!isLoading && product?.is_nsfw && user && !user.show_nsfw) {
+        return null; // Will be redirected by the effect
+    }
 
     const handleAddToCart = async () => {
         if (!isAuthenticated) { showLogin?.(); return; }
@@ -251,14 +265,35 @@ const params = useParams();
 
                             {/* Content */}
                             <div className="w-full h-full relative overflow-hidden">
-                                {product.is_nsfw && <NSFWRibbon />}
+                                {product.is_nsfw && (
+                                    <>
+                                        <NSFWRibbon />
+                                        {!isRevealed && (
+                                            <div className="absolute inset-0 flex items-center justify-center z-10 bg-black/20 backdrop-blur-[2px]">
+                                                <div className="flex flex-col items-center gap-4">
+                                                    <div className="px-4 py-2 bg-black/60 rounded-2xl border border-white/10 flex flex-col items-center gap-2 shadow-2xl backdrop-blur-md">
+                                                        <span className="text-xs md:text-sm font-black text-white uppercase tracking-[0.2em]">
+                                                            Mature Content
+                                                        </span>
+                                                        <button
+                                                            onClick={() => setIsRevealed(true)}
+                                                            className="px-4 py-1.5 bg-white text-black text-[10px] font-bold rounded-lg hover:bg-yellow-400 transition-colors uppercase tracking-wider"
+                                                        >
+                                                            Show Content
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
                                 {selectedImage === -1 ? (
                                     <Suspense fallback={
                                         <div className="w-full h-full flex items-center justify-center">
                                             <div className="w-8 h-8 border-2 border-yellow-500/20 border-t-yellow-500 rounded-full animate-spin" />
                                         </div>
                                     }>
-                                        <div className="w-full h-full">
+                                        <div className={`w-full h-full transition-all duration-700 ${product.is_nsfw && !isRevealed ? 'blur-3xl scale-110 pointer-events-none' : ''}`}>
                                             <ProductViewer3D modelUrl={product.modelFileUrl} />
                                         </div>
                                     </Suspense>
@@ -266,7 +301,7 @@ const params = useParams();
                                     <img
                                         src={product.thumbnails?.[selectedImage] || product.thumbnails?.[0]}
                                         alt={product.title}
-                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                        className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${product.is_nsfw && !isRevealed ? 'blur-3xl scale-110' : ''}`}
                                     />
                                 )}
                             </div>
@@ -283,7 +318,11 @@ const params = useParams();
                                         : 'border-gray-900 hover:border-yellow-500/50'
                                         }`}
                                 >
-                                    <img src={thumb} alt="" className="w-full h-full object-cover" />
+                                    <img
+                                        src={thumb}
+                                        alt=""
+                                        className={`w-full h-full object-cover transition-all duration-500 ${product.is_nsfw && !isRevealed ? 'blur-md scale-110' : ''}`}
+                                    />
                                 </button>
                             ))}
                         </div>

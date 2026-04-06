@@ -116,8 +116,16 @@ export default function UploadPage() {
             });
 
             // Success
-            toast.success('Model uploaded! It will be reviewed by our team before going live.', { duration: 5000 });
-            router.push('/profile');
+            toast.success(
+                <div className="flex flex-col gap-1">
+                    <span className="font-bold text-sm">Model Upload Successful</span>
+                    <span className="text-xs text-gray-500 leading-relaxed">
+                        Your model is now under review by our administrators, you can check the progress in your "My Uploads" page.
+                    </span>
+                </div>,
+                { duration: 6000 }
+            );
+            router.push('/library?tab=uploads');
 
         } catch (error: any) {
             console.error(error);
