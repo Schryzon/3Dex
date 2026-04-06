@@ -163,7 +163,7 @@ export default function PlaceOrderPage() {
                             </div>
                             <div className="flex flex-wrap justify-center gap-2">
                                 {provider.provider_config?.materials?.slice(0, 3).map(m => (
-                                    <span key={m} className="text-[9px] font-medium text-zinc-500 bg-white/5 px-2 py-1 rounded-md border border-white/5">{m}</span>
+                                    <span key={m} className="text-[10px] font-medium text-zinc-500 bg-white/5 px-2 py-1 rounded-md border border-white/5">{m}</span>
                                 ))}
                             </div>
                         </div>
@@ -219,7 +219,7 @@ export default function PlaceOrderPage() {
                                                         <div className="flex justify-between items-start">
                                                             <div>
                                                                 <h4 className="font-semibold text-white text-base">{item.model.title}</h4>
-                                                                <span className="text-[9px] text-zinc-600 font-mono">
+                                                                <span className="text-[10px] text-zinc-600 font-mono">
                                                                     {item.is_custom ? 'Custom Upload (GLB)' : `ID: ${item.model_id}`}
                                                                 </span>
                                                             </div>
@@ -234,7 +234,7 @@ export default function PlaceOrderPage() {
                                                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                                             {/* Material Select */}
                                                             <div className="space-y-1.5">
-                                                                <label className="text-[10px] font-medium text-zinc-500 tracking-wide ml-1">Material</label>
+                                                                <label className="text-[11px] font-medium text-zinc-500 tracking-wide ml-1">Material</label>
                                                                 <div className="relative">
                                                                     <Layers className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
                                                                     <select
@@ -251,7 +251,7 @@ export default function PlaceOrderPage() {
 
                                                             {/* Color Select */}
                                                             <div className="space-y-1.5">
-                                                                <label className="text-[10px] font-medium text-zinc-500 tracking-wide ml-1">Color</label>
+                                                                <label className="text-[11px] font-medium text-zinc-500 tracking-wide ml-1">Color</label>
                                                                 <div className="relative">
                                                                     <Palette className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
                                                                     <select
@@ -268,7 +268,7 @@ export default function PlaceOrderPage() {
 
                                                             {/* Scale Input */}
                                                             <div className="space-y-1.5">
-                                                                <label className="text-[10px] font-medium text-zinc-500 tracking-wide ml-1">Scale</label>
+                                                                <label className="text-[11px] font-medium text-zinc-500 tracking-wide ml-1">Scale</label>
                                                                 <div className="relative">
                                                                     <Maximize className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
                                                                     <input
@@ -282,7 +282,7 @@ export default function PlaceOrderPage() {
 
                                                             {/* Quantity Input */}
                                                             <div className="space-y-1.5">
-                                                                <label className="text-[10px] font-medium text-zinc-500 tracking-wide ml-1">Quantity</label>
+                                                                <label className="text-[11px] font-medium text-zinc-500 tracking-wide ml-1">Quantity</label>
                                                                 <input
                                                                     type="number" min="1" max="100"
                                                                     className="w-full bg-[#151515] border border-white/10 rounded-xl px-4 py-2 text-[11px] font-bold text-white focus:border-yellow-400/50 outline-none transition-all text-center"
@@ -304,42 +304,42 @@ export default function PlaceOrderPage() {
                     {/* Right Split: Shipping & Summary */}
                     <div className="lg:col-span-4 space-y-6">
                         <div className="bg-[#111] border border-white/5 rounded-3xl p-6 sticky top-24">
-                            <h3 className="text-sm font-semibold text-white mb-6">Order Logistics</h3>
+                            <h3 className="text-base font-semibold text-white mb-6">Order Logistics</h3>
 
                              <div className="space-y-4 mb-8">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-medium text-zinc-500 tracking-wide mb-2 block">Delivery Location</label>
+                                    <label className="text-[11px] font-medium text-zinc-500 tracking-wide mb-2 block">Delivery Location</label>
                                     <textarea
                                         value={shippingLocation}
                                         onChange={(e) => setShippingLocation(e.target.value)}
                                         placeholder="City, Province, and specific delivery point..."
                                         rows={3}
-                                        className="w-full bg-[#0a0a0a] border border-white/5 rounded-xl px-4 py-3 text-xs text-white focus:border-yellow-400/50 outline-none transition-all resize-none placeholder:text-zinc-700 font-medium"
+                                        className="w-full bg-[#0a0a0a] border border-white/5 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400/50 outline-none transition-all resize-none placeholder:text-zinc-700 font-medium"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-medium text-zinc-500 tracking-wide mb-2 block">Provider Note (Optional)</label>
+                                    <label className="text-[11px] font-medium text-zinc-500 tracking-wide mb-2 block">Provider Note (Optional)</label>
                                     <input
                                         type="text"
                                         value={shippingNotes}
                                         onChange={(e) => setShippingNotes(e.target.value)}
                                         placeholder="Special handling or notes..."
-                                        className="w-full bg-[#0a0a0a] border border-white/5 rounded-xl px-4 py-3 text-xs text-white focus:border-yellow-400/50 outline-none transition-all placeholder:text-zinc-700 font-medium"
+                                        className="w-full bg-[#0a0a0a] border border-white/5 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400/50 outline-none transition-all placeholder:text-zinc-700 font-medium"
                                     />
                                 </div>
                             </div>
 
                             {/* Summary Detail */}
                             <div className="bg-[#0a0a0a] rounded-2xl p-5 border border-white/5 space-y-4 mb-6">
-                                <div className="flex justify-between text-[11px] font-medium text-zinc-500 tracking-wide">
+                                <div className="flex justify-between text-xs font-medium text-zinc-500 tracking-wide">
                                     <span>Total Mesh Volume</span>
                                     <span className="text-white font-semibold">{selectedModels.reduce((acc, curr) => acc + curr.quantity, 0)} Units</span>
                                 </div>
                                 <div className="flex justify-between items-baseline">
-                                    <span className="text-[11px] font-medium text-zinc-500 tracking-wide">Estimated Cost</span>
+                                    <span className="text-xs font-medium text-zinc-500 tracking-wide">Estimated Cost</span>
                                     <div className="text-right">
                                         <span className="text-lg font-semibold text-white">Quote Pending</span>
-                                        <p className="text-[9px] text-gray-600 font-medium mt-1">Subject to provider review</p>
+                                        <p className="text-[10px] text-gray-600 font-medium mt-1">Subject to provider review</p>
                                     </div>
                                 </div>
                             </div>

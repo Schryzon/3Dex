@@ -125,7 +125,7 @@ export default function UploadPage() {
                 </div>,
                 { duration: 6000 }
             );
-            router.push('/library?tab=uploads');
+            router.push('/profile?tab=uploads');
 
         } catch (error: any) {
             console.error(error);

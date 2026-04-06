@@ -17,7 +17,7 @@ import { purchaseService } from '@/lib/api/services/purchase.service';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
-type LibraryTab = 'purchases' | 'uploads' | 'wishlist' | 'collections';
+type LibraryTab = 'purchases' | 'wishlist' | 'collections';
 
 export default function LibraryPage() {
     return (
@@ -107,7 +107,6 @@ function LibraryContent() {
         const q = searchQuery.toLowerCase();
         switch (activeTab) {
             case 'purchases': return purchases.filter(m => m.title.toLowerCase().includes(q));
-            case 'uploads': return uploads.filter(m => m.title.toLowerCase().includes(q));
             case 'wishlist': return wishlistItems.filter((item: any) => (item.model?.title || '').toLowerCase().includes(q));
             case 'collections': return collections.filter((c: any) => c.name.toLowerCase().includes(q));
             default: return [];
@@ -152,7 +151,6 @@ function LibraryContent() {
                     <div className="flex p-2 bg-[#121212] rounded-3xl border border-white/5 w-full lg:w-fit overflow-x-auto no-scrollbar">
                         {[
                             { id: 'purchases', label: 'Purchases', icon: Package, count: purchases.length },
-                            ...(isArtist ? [{ id: 'uploads', label: 'My Uploads', icon: LayoutDashboard, count: uploads.length }] : []),
                             { id: 'wishlist', label: 'Wishlist', icon: Heart, count: wishlistItems.length },
                             { id: 'collections', label: 'Collections', icon: FolderOpen, count: collections.length },
                         ].map((tab) => (
@@ -346,15 +344,6 @@ function AssetCard({ item, type, onDownload, onRemoveFromWishlist }: any) {
                    </div>
                 )}
                 
-                {type === 'uploads' && (
-                   <div className="flex items-center justify-between">
-                       <div className="flex items-center gap-2 text-[9px] font-medium text-blue-400/80 uppercase tracking-wider">
-                           <LayoutDashboard className="w-3 h-3" />
-                           Creator Asset
-                       </div>
-                       <Link href={`/catalog/${model.id}/edit`} className="text-[9px] font-medium text-zinc-500 hover:text-white transition-colors uppercase tracking-wider">Edit Mesh</Link>
-                   </div>
-                )}
             </div>
         </div>
     );
