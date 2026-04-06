@@ -81,7 +81,7 @@ export default function ArtistAnalyticsPage() {
                         <h2 className="text-2xl font-bold text-white mb-2">Platform Connection Error</h2>
                         <p className="text-gray-500 max-w-sm mx-auto text-sm">We couldn't synchronize your business data. Please ensure you have artist permissions active.</p>
                     </div>
-                ) : (
+                ) : !data ? null : (
                     <>
                         {/* Main Metrics Cards */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
