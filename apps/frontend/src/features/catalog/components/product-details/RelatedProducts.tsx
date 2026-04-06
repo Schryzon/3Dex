@@ -66,13 +66,13 @@ export default function RelatedProducts({ productId, categories }: Props) {
   if (loading) {
     return (
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-white">Related <span className="text-yellow-400">Products</span></h2>
+        <h2 className="text-xl font-semibold text-white">Related Products</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="bg-gray-900 rounded-xl overflow-hidden animate-pulse border border-white/5">
               <div className="aspect-[3/4] bg-gray-800"></div>
-              <div className="p-4 space-y-3 font-black uppercase text-[10px] tracking-widest text-gray-500">
-                Loading...
+              <div className="p-4 space-y-3 font-medium uppercase text-[10px] tracking-wider text-zinc-500">
+                Loading Assets...
               </div>
             </div>
           ))}
@@ -91,7 +91,7 @@ export default function RelatedProducts({ productId, categories }: Props) {
         <h2 className="text-2xl font-bold text-white">Related <span className="text-yellow-400">Products</span></h2>
         <Link
           href={`/catalog?category=${categories?.[0] || ''}`}
-          className="text-yellow-500 hover:text-yellow-400 text-xs font-black uppercase tracking-widest flex items-center gap-2 group transition-all"
+          className="text-zinc-500 hover:text-white text-[11px] font-medium uppercase tracking-wider flex items-center gap-2 group transition-all"
         >
           View Full Catalog
           <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

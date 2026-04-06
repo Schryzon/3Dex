@@ -57,16 +57,16 @@ export default function ArtistAnalyticsPage() {
                             <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                         </button>
                         <div>
-                            <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tighter italic flex items-center gap-3">
-                                <BarChart3 className="w-8 h-8 text-yellow-400" /> Professional <span className="text-yellow-400">Analytics</span>
+                            <h1 className="text-2xl md:text-3xl font-semibold text-white tracking-tight flex items-center gap-3">
+                                <BarChart3 className="w-6 h-6 text-yellow-400" /> Platform Insights
                             </h1>
-                            <p className="text-gray-500 text-sm font-medium mt-1">Real-time performance metrics for your creative business.</p>
+                            <p className="text-zinc-500 text-sm mt-1">Monitor your creative business performance and reach.</p>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3 p-1.5 bg-[#111] rounded-2xl border border-white/5">
-                        <button className="px-6 py-2.5 bg-yellow-400 text-black text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-yellow-400/10">Last 12 Months</button>
-                        <button className="px-6 py-2.5 text-gray-500 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-colors">Lifetime</button>
+                    <div className="flex items-center gap-1 p-1 bg-zinc-900/50 rounded-xl border border-white/5">
+                        <button className="px-4 py-1.5 bg-white text-black text-[11px] font-medium rounded-lg shadow-sm">Last 12 Months</button>
+                        <button className="px-4 py-1.5 text-zinc-500 hover:text-white text-[11px] font-medium rounded-lg transition-colors">Lifetime Access</button>
                     </div>
                 </div>
 
@@ -130,14 +130,14 @@ export default function ArtistAnalyticsPage() {
                                             <stat.icon className="w-5 h-5" />
                                         </div>
                                         {stat.growth !== undefined && (
-                                            <div className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-widest ${stat.trend === 'up' ? 'text-emerald-400' : 'text-red-400'}`}>
+                                            <div className={`flex items-center gap-1 text-[10px] font-medium ${stat.trend === 'up' ? 'text-emerald-400' : 'text-rose-400'}`}>
                                                 {stat.trend === 'up' ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                                                 {Math.abs(stat.growth)}%
                                             </div>
                                         )}
                                     </div>
-                                    <h3 className="text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1">{stat.label}</h3>
-                                    <p className="text-3xl font-black tracking-tighter">{stat.value}</p>
+                                    <h3 className="text-zinc-500 text-[10px] uppercase tracking-wider mb-2">{stat.label}</h3>
+                                    <p className="text-2xl font-semibold tracking-tight">{stat.value}</p>
                                 </motion.div>
                             ))}
                         </div>
@@ -153,8 +153,8 @@ export default function ArtistAnalyticsPage() {
                             >
                                 <div className="flex items-center justify-between mb-12">
                                     <div>
-                                        <h2 className="text-xl font-black">Earnings <span className="text-yellow-400">Trend</span></h2>
-                                        <p className="text-xs text-gray-600 font-medium mt-1">Revenue distribution over the last 12 months</p>
+                                        <h2 className="text-lg font-semibold text-white">Earnings Trend</h2>
+                                        <p className="text-[11px] text-zinc-500 mt-1">Revenue distribution over the last 12 months</p>
                                     </div>
                                     <div className="w-3 h-3 rounded-full bg-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]" />
                                 </div>
@@ -230,7 +230,7 @@ export default function ArtistAnalyticsPage() {
                                     {data.top_models.length === 0 ? (
                                         <div className="h-full flex flex-col items-center justify-center text-center py-10 opacity-30">
                                             <Package className="w-10 h-10 mb-4" />
-                                            <p className="text-[10px] font-black uppercase tracking-widest">No Sales Data</p>
+                                            <p className="text-[10px] font-bold uppercase tracking-wider">No Sales Data</p>
                                         </div>
                                     ) : (
                                         data.top_models.map((model, i) => (
@@ -240,8 +240,8 @@ export default function ArtistAnalyticsPage() {
                                                         {i + 1}
                                                     </div>
                                                     <div className="min-w-0 flex-1">
-                                                        <h4 className="font-bold text-sm truncate">{model.title}</h4>
-                                                        <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">{model.sales} Units Sold</p>
+                                                        <h4 className="font-medium text-sm text-white truncate">{model.title}</h4>
+                                                        <p className="text-[10px] text-zinc-500 tracking-wide mt-0.5">{model.sales} Units Sold</p>
                                                     </div>
                                                     <div className="text-right">
                                                         <p className="text-xs font-black text-yellow-400">{formatPrice(model.revenue).idr}</p>
@@ -252,8 +252,8 @@ export default function ArtistAnalyticsPage() {
                                     )}
                                 </div>
 
-                                <button className="mt-8 w-full py-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-[10px] font-extrabold uppercase tracking-widest transition-all">
-                                    Full Asset Report
+                                <button className="mt-8 w-full py-3 bg-zinc-900 hover:bg-zinc-800 border border-white/5 rounded-xl text-[11px] font-medium text-zinc-400 transition-all">
+                                    Download Complete Report
                                 </button>
                             </motion.div>
                         </div>
@@ -265,28 +265,28 @@ export default function ArtistAnalyticsPage() {
                             className="bg-[#0c0c0c] border border-white/5 rounded-[3rem] overflow-hidden shadow-2xl"
                         >
                             <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
-                                <h2 className="text-xl font-black">Live <span className="text-yellow-400">Sales Feed</span></h2>
+                                <h2 className="text-lg font-semibold text-white">Live Sales Feed</h2>
                                 <div className="flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                    <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Real-time Activity</span>
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    <span className="text-[11px] font-medium text-zinc-400">Live Sales Feed</span>
                                 </div>
                             </div>
                             
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left">
-                                    <thead className="bg-[#111]/50 text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] italic">
+                                    <thead className="bg-zinc-900/30 text-[11px] font-medium text-zinc-500">
                                         <tr>
-                                            <th className="px-8 py-5">Transaction ID</th>
-                                            <th className="px-8 py-5">Asset</th>
-                                            <th className="px-8 py-5">Customer</th>
-                                            <th className="px-8 py-5">Date</th>
-                                            <th className="px-8 py-5 text-right">Revenue</th>
+                                            <th className="px-8 py-4">Ref ID</th>
+                                            <th className="px-8 py-4">Asset</th>
+                                            <th className="px-8 py-4">Client</th>
+                                            <th className="px-8 py-4">Date</th>
+                                            <th className="px-8 py-4 text-right">Revenue</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-white/5 font-medium">
                                         {data.recent_sales.length === 0 ? (
                                             <tr>
-                                                <td colSpan={5} className="px-8 py-16 text-center text-gray-600 uppercase tracking-widest font-black text-xs italic opacity-30">
+                                                <td colSpan={5} className="px-8 py-16 text-center text-gray-600 uppercase tracking-widest font-bold text-xs opacity-30">
                                                     Establishing Marketplace Presence...
                                                 </td>
                                             </tr>
@@ -295,7 +295,7 @@ export default function ArtistAnalyticsPage() {
                                                 <tr key={sale.id} className="group hover:bg-white/[0.02] transition-colors">
                                                     <td className="px-8 py-5 text-gray-600 font-mono text-[10px]">#{sale.id.slice(0, 8).toUpperCase()}</td>
                                                     <td className="px-8 py-5">
-                                                        <p className="text-sm font-bold text-white group-hover:text-yellow-400 transition-colors">
+                                                        <p className="text-sm font-medium text-white group-hover:text-yellow-400 transition-colors">
                                                             {sale.model.title}
                                                         </p>
                                                     </td>
@@ -311,7 +311,7 @@ export default function ArtistAnalyticsPage() {
                                                         {new Date(sale.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                                                     </td>
                                                     <td className="px-8 py-5 text-right">
-                                                        <span className="text-sm font-black text-emerald-400">+{formatPrice(sale.price_paid).idr}</span>
+                                                        <span className="text-sm font-semibold text-emerald-400">+{formatPrice(sale.price_paid).idr}</span>
                                                     </td>
                                                 </tr>
                                             ))

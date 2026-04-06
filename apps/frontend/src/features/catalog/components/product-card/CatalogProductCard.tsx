@@ -94,7 +94,7 @@ export default function CatalogProductCard({
                             <>
                                 <NSFWRibbon />
                                 <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-[2px]">
-                                    <span className="text-[10px] md:text-xs font-black text-white/90 uppercase tracking-widest px-2 py-1 bg-black/40 rounded-lg border border-white/10">
+                                    <span className="text-[10px] md:text-xs font-semibold text-white/90 uppercase tracking-wider px-2 py-1 bg-black/40 rounded-lg border border-white/10">
                                         Mature
                                     </span>
                                 </div>
@@ -109,7 +109,7 @@ export default function CatalogProductCard({
                                 </span>
                             )}
                             {isPremium && (
-                                <span className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-[9px] font-black px-1.5 py-0.5 rounded-md shadow-lg shadow-yellow-500/20">
+                                <span className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-lg shadow-yellow-500/20">
                                     PRO
                                 </span>
                             )}
@@ -120,7 +120,7 @@ export default function CatalogProductCard({
                     <div className="flex-1 p-3 md:p-4 flex flex-col justify-between min-w-0">
                         <div>
                             <div className="flex flex-col gap-0.5">
-                                <h3 className="text-white text-sm md:text-base font-bold line-clamp-1 group-hover:text-yellow-400 transition-colors">
+                                <h3 className="text-white text-sm md:text-base font-semibold line-clamp-1 group-hover:text-yellow-400 transition-colors">
                                     {title}
                                 </h3>
                                 {author && (
@@ -169,15 +169,15 @@ export default function CatalogProductCard({
                                     </div>
                                 )}
                                 {isFree ? (
-                                    <span className="text-xs md:text-base font-black text-blue-400">
+                                    <span className="text-xs md:text-base font-semibold text-blue-400">
                                         Free
                                     </span>
                                 ) : formatted ? (
                                     <div className="flex flex-col items-end">
-                                        <span className="text-xs md:text-base font-black text-white leading-none whitespace-nowrap">
+                                        <span className="text-xs md:text-base font-semibold text-white leading-none whitespace-nowrap">
                                             {formatted.idr}
                                         </span>
-                                        <span className="text-[9px] md:text-[10px] font-medium text-gray-400 mt-0.5 whitespace-nowrap">
+                                        <span className="text-[9px] md:text-[10px] font-medium text-gray-500 mt-0.5 whitespace-nowrap">
                                             {formatted.usd}
                                         </span>
                                     </div>
@@ -235,7 +235,7 @@ export default function CatalogProductCard({
                             <NSFWRibbon />
                             <div className="absolute inset-0 flex items-center justify-center z-10 bg-black/20 backdrop-blur-[2px]">
                                 <div className="flex flex-col items-center gap-2">
-                                    <span className="text-[10px] md:text-xs font-black text-white px-3 py-1.5 bg-black/60 rounded-xl border border-white/10 uppercase tracking-widest shadow-2xl">
+                                    <span className="text-[10px] md:text-xs font-semibold text-white px-3 py-1.5 bg-black/60 rounded-xl border border-white/10 uppercase tracking-widest shadow-2xl">
                                         Mature Content
                                     </span>
                                 </div>
@@ -318,7 +318,7 @@ export default function CatalogProductCard({
                     {/* Info Overlay Panel (Bottom) */}
                     <div className="absolute bottom-0 left-0 right-0 p-4 pt-10 bg-gradient-to-t from-[#0c0c0c] to-transparent">
                         <div className="flex flex-col gap-1.5">
-                            <h3 className="text-white font-bold text-sm md:text-base line-clamp-1 group-hover:text-yellow-400 transition-colors">
+                            <h3 className="text-white font-semibold text-sm md:text-base line-clamp-1 group-hover:text-yellow-400 transition-colors">
                                 {title}
                             </h3>
                             <div className="flex items-center justify-between gap-2">
@@ -344,15 +344,15 @@ export default function CatalogProductCard({
                                     <span className="min-w-0 flex-1" />
                                 )}
                                 {isFree ? (
-                                    <span className="font-black text-xs md:text-sm tracking-tight text-blue-400 shrink-0">
+                                    <span className="font-semibold text-xs md:text-sm tracking-tight text-blue-400 shrink-0">
                                         Free
                                     </span>
                                 ) : formatted ? (
                                     <div className="flex flex-col items-end shrink-0 text-right">
-                                        <span className="font-black text-[10px] sm:text-xs md:text-sm tracking-tight text-white leading-none whitespace-nowrap">
+                                        <span className="font-semibold text-[10px] sm:text-xs md:text-sm tracking-tight text-white leading-none whitespace-nowrap">
                                             {formatted.idr}
                                         </span>
-                                        <span className="text-[8px] sm:text-[9px] md:text-[10px] font-medium text-gray-400 mt-0.5 whitespace-nowrap">
+                                        <span className="text-[8px] sm:text-[9px] md:text-[10px] font-medium text-gray-500 mt-0.5 whitespace-nowrap">
                                             {formatted.usd}
                                         </span>
                                     </div>
