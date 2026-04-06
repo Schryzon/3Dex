@@ -6,6 +6,7 @@ import {
     ShoppingCart, FileCode, CheckCircle2, AlertCircle
 } from 'lucide-react';
 import { productService } from '@/lib/api/services/product.service';
+import { apiClient } from '@/lib/api/client';
 import { Model } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -68,14 +69,10 @@ export default function ModelLibrarySelector({ isOpen, onClose, onSelect }: Mode
             // We use the same signed upload logic as models but don't create a Catalog entry
             
             // Getting signed URL from backend
-            const response = await fetch('/api/models/upload-url', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ filename: file.name, content_type: 'model/gltf-binary' })
+            const { upload_url, key } = await apiClient.post<{ upload_url: string; key: string }>('/models/upload-url', {
+                filename: file.name, 
+                content_type: 'model/gltf-binary'
             });
-
-            if (!response.ok) throw new Error('Failed to get upload URL');
-            const { upload_url, key } = await response.json();
 
             // Direct upload to S3
             const uploadRes = await fetch(upload_url, {
@@ -184,7 +181,10 @@ export default function ModelLibrarySelector({ isOpen, onClose, onSelect }: Mode
                                         {filteredLibrary.map(model => (
                                             <div 
                                                 key={model.id}
-                                                onClick={() => onSelect(model)}
+                                                onClick={() => {
+                                                    onSelect(model);
+                                                    onClose();
+                                                }}
                                                 className="group relative bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden cursor-pointer hover:border-yellow-400/50 transition-all"
                                             >
                                                 <div className="aspect-square bg-gray-900 overflow-hidden relative">

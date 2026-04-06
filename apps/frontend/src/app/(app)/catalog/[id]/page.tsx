@@ -277,7 +277,7 @@ export default function CatalogDetailPage() {
                                                         </span>
                                                         <button
                                                             onClick={() => setIsRevealed(true)}
-                                                            className="px-4 py-1.5 bg-white text-black text-[10px] font-bold rounded-lg hover:bg-yellow-400 transition-colors uppercase tracking-wider"
+                                                            className="px-4 py-1.5 bg-white text-black text-[10px] font-semibold rounded-lg hover:bg-yellow-400 transition-colors"
                                                         >
                                                             Show Content
                                                         </button>
@@ -339,7 +339,7 @@ export default function CatalogDetailPage() {
                                     </span>
                                     <span className="text-xs text-gray-500">{product.category}</span>
                                 </div>
-                                <h1 className="text-2xl font-bold text-white mb-2">
+                                <h1 className="text-2xl font-semibold text-white mb-2">
                                     {product.title}
                                 </h1>
                                 <p className="text-xs text-gray-500">SKU: {product.id.slice(0, 8)}</p>
@@ -460,7 +460,7 @@ export default function CatalogDetailPage() {
                                             )}
                                         </div>
                                         <div className="min-w-0 flex-1 text-left">
-                                            <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-gray-500">
+                                            <p className="text-[9px] font-medium text-zinc-500 tracking-wide">
                                                 Creator
                                             </p>
                                             <p className="truncate text-[13px] font-semibold text-white transition-colors group-hover:text-yellow-400">
@@ -477,7 +477,7 @@ export default function CatalogDetailPage() {
                                             </span>
                                         </div>
                                         <div className="min-w-0 flex-1 text-left">
-                                            <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-gray-600">Creator</p>
+                                            <p className="text-[9px] font-medium text-zinc-600 tracking-wide">Creator</p>
                                             <p className="truncate text-[13px] font-medium text-gray-500">Unknown</p>
                                         </div>
                                     </div>
@@ -490,7 +490,7 @@ export default function CatalogDetailPage() {
                                 <div className="space-y-2 text-sm">
                                     <div className="flex justify-between py-2 border-b border-gray-900 hover:border-yellow-500/20 transition-colors duration-300 group">
                                         <span className="text-gray-400 group-hover:text-gray-300">Format</span>
-                                        <span className="text-white font-medium uppercase">{product.fileFormat || 'GLB'}</span>
+                                        <span className="text-white font-medium">{product.fileFormat || 'GLB'}</span>
                                     </div>
                                     <div className="flex justify-between py-2 border-b border-gray-900 hover:border-yellow-500/20 transition-colors duration-300 group">
                                         <span className="text-gray-400 group-hover:text-gray-300">License</span>
