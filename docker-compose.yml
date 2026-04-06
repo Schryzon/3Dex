@@ -20,9 +20,25 @@ services:
       - .env.docker
     depends_on:
       - db
+      - minio
     ports:
       - "4000:4000"
     command: sh -c "npx prisma migrate deploy && node dist/server.js"
 
+  minio:
+    image: minio/minio
+    container_name: 3dex-minio
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - miniodata:/data
+
 volumes:
   pgdata:
+  miniodata:

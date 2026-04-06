@@ -19,8 +19,9 @@ It handles:
 - Core Business Logic (Orders, Model Uploads, Print Services)
 - Database Queries (Prisma aggregations & indexing)
 - Advanced Search & Filtering (Catalog sorting strategies)
-- Social & Community Features (Posts, Likes, Comments, NSFW flags)
-- Analytics Engine (Stats aggregation for Artists/Providers)
+- Social & Community Features (Posts, Likes, Comments)
+- Content Moderation (NSFW flagging, auto-filtering, user preferences)
+- Analytics Engine (Stats aggregation for Artists/Providers dashboards)
 - File Storage Integrations (MinIO/S3 Presigned Uploads & Downloads)
 - Admin & Moderation Operations (Approve/Reject Content, Reports)
 
@@ -68,9 +69,11 @@ cp .env.example .env
 
 ## Database Setup
 
-Ensure PostgreSQL is running, then execute:
+Ensure PostgreSQL is running on the correct port and your `.env` is properly configured, then execute:
 ```bash
+npm install
 npx prisma migrate dev
+npx prisma generate
 ```
 
 ---
