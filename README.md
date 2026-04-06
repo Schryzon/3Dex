@@ -31,22 +31,22 @@ This repository contains both the frontend and backend for the platform.
 
 ---
 
-## Features (Phase 1 - Implementation Complete)
+## Features
 - Authentication & Authorization (Secure JWT + Role-based Access)
 - Interactive 3D Services Marketplace (Providers & Print Services)
 - Digital Asset Marketplace (Models, Textures, HDRIs) with Advanced Search
-- Community Feed & Interactions (Posts, Likes, Comments, NSFW Filters)
-- User Profiles & Collections (Wishlists, Libraries, Order History)
+- Community Feed & Interactions (Posts, Likes, Comments)
+- Content Moderation & NSFW Filtering (Blurring, Content Flags, Admin Approvals)
+- Unified Library Hub (Consolidated Saved, Downloads, and My Uploads)
 - Artist & Provider Analytics Dashboards
 - Secure File Storage (MinIO/S3 Presigned URLs)
-- Client-Side 3D Previews (Interactive canvas)
-- Order Management & Payment Integration (Midtrans Simulation)
-- Admin Moderation Interface (User approvals, Model approvals, Content Flags)
+- Client-Side 3D Previews (Optimized interactive canvas)
+- Order Management & Payment Integration (Midtrans Sandbox / Production)
 
 ---
 
 ## Tech Stack
-- Frontend: Next.js, React, Tailwind CSS
+- Frontend: Next.js, React, React Query, Tailwind CSS
 - Backend: Node.js, Express
 - Database: PostgreSQL
 - ORM: Prisma

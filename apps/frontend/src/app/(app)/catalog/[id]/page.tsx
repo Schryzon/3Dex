@@ -25,6 +25,14 @@ export default function CatalogDetailPage() {
     const router = useRouter();
     const productId = params.id as string;
 
+    const NSFWRibbon = () => (
+        <div className="absolute top-0 right-0 z-20 overflow-hidden w-20 h-20 pointer-events-none">
+            <div className="absolute top-0 right-0 w-[141%] h-7 bg-red-600 text-white text-[11px] font-black flex items-center justify-center uppercase tracking-widest shadow-xl transform rotate-45 translate-x-[30%] translate-y-[25%] border-b border-white/20">
+                NSFW
+            </div>
+        </div>
+    );
+
     const { data: product, isLoading, error } = useProduct(productId);
     const { addToCart, isAddingToCart } = useCart();
     const { isAuthenticated, showLogin, user } = useAuth();
@@ -34,6 +42,20 @@ export default function CatalogDetailPage() {
     const [currency, setCurrency] = useState<'idr' | 'usd'>('idr');
     const [isClaiming, setIsClaiming] = useState(false);
     const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
+    const [isRevealed, setIsRevealed] = useState(false);
+
+    // NSFW Access Control & Auto-redirect
+    useState(() => {
+        if (!isLoading && product?.is_nsfw && user && !user.show_nsfw) {
+            toast.error('Mature content is hidden in your settings. Please enable it in your profile to view NSFW content.');
+            router.push('/catalog');
+        }
+    });
+
+    // Handle case where user object loads late or settings change
+    if (!isLoading && product?.is_nsfw && user && !user.show_nsfw) {
+        return null; // Will be redirected by the effect
+    }
 
     const handleAddToCart = async () => {
         if (!isAuthenticated) { showLogin?.(); return; }
@@ -243,13 +265,35 @@ export default function CatalogDetailPage() {
 
                             {/* Content */}
                             <div className="w-full h-full relative overflow-hidden">
+                                {product.is_nsfw && (
+                                    <>
+                                        <NSFWRibbon />
+                                        {!isRevealed && (
+                                            <div className="absolute inset-0 flex items-center justify-center z-10 bg-black/20 backdrop-blur-[2px]">
+                                                <div className="flex flex-col items-center gap-4">
+                                                    <div className="px-4 py-2 bg-black/60 rounded-2xl border border-white/10 flex flex-col items-center gap-2 shadow-2xl backdrop-blur-md">
+                                                        <span className="text-xs md:text-sm font-black text-white uppercase tracking-[0.2em]">
+                                                            Mature Content
+                                                        </span>
+                                                        <button
+                                                            onClick={() => setIsRevealed(true)}
+                                                            className="px-4 py-1.5 bg-white text-black text-[10px] font-semibold rounded-lg hover:bg-yellow-400 transition-colors"
+                                                        >
+                                                            Show Content
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
                                 {selectedImage === -1 ? (
                                     <Suspense fallback={
                                         <div className="w-full h-full flex items-center justify-center">
                                             <div className="w-8 h-8 border-2 border-yellow-500/20 border-t-yellow-500 rounded-full animate-spin" />
                                         </div>
                                     }>
-                                        <div className={`w-full h-full ${product.is_nsfw && !user?.show_nsfw ? 'blur-2xl pointer-events-none' : ''}`}>
+                                        <div className={`w-full h-full transition-all duration-700 ${product.is_nsfw && !isRevealed ? 'blur-3xl scale-110 pointer-events-none' : ''}`}>
                                             <ProductViewer3D modelUrl={product.modelFileUrl} />
                                         </div>
                                     </Suspense>
@@ -257,15 +301,8 @@ export default function CatalogDetailPage() {
                                     <img
                                         src={product.thumbnails?.[selectedImage] || product.thumbnails?.[0]}
                                         alt={product.title}
-                                        className={`w-full h-full object-cover transition-transform duration-700 ${product.is_nsfw && !user?.show_nsfw ? 'blur-2xl scale-110' : 'group-hover:scale-105'}`}
+                                        className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${product.is_nsfw && !isRevealed ? 'blur-3xl scale-110' : ''}`}
                                     />
-                                )}
-                                {product.is_nsfw && !user?.show_nsfw && (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 text-white z-10 pointer-events-none backdrop-blur-sm">
-                                        <AlertTriangle className="w-12 h-12 text-red-500 mb-2 opacity-80 shadow-black drop-shadow-lg" />
-                                        <p className="font-bold tracking-wide shadow-black drop-shadow-md pb-1 text-lg">Mature Content</p>
-                                        <p className="text-sm font-semibold text-gray-300 shadow-black drop-shadow-md">Show NSFW content in settings to view</p>
-                                    </div>
                                 )}
                             </div>
                         </div>
@@ -281,7 +318,11 @@ export default function CatalogDetailPage() {
                                         : 'border-gray-900 hover:border-yellow-500/50'
                                         }`}
                                 >
-                                    <img src={thumb} alt="" className="w-full h-full object-cover" />
+                                    <img
+                                        src={thumb}
+                                        alt=""
+                                        className={`w-full h-full object-cover transition-all duration-500 ${product.is_nsfw && !isRevealed ? 'blur-md scale-110' : ''}`}
+                                    />
                                 </button>
                             ))}
                         </div>
@@ -298,7 +339,7 @@ export default function CatalogDetailPage() {
                                     </span>
                                     <span className="text-xs text-gray-500">{product.category}</span>
                                 </div>
-                                <h1 className="text-2xl font-bold text-white mb-2">
+                                <h1 className="text-2xl font-semibold text-white mb-2">
                                     {product.title}
                                 </h1>
                                 <p className="text-xs text-gray-500">SKU: {product.id.slice(0, 8)}</p>
@@ -419,7 +460,7 @@ export default function CatalogDetailPage() {
                                             )}
                                         </div>
                                         <div className="min-w-0 flex-1 text-left">
-                                            <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-gray-500">
+                                            <p className="text-[9px] font-medium text-zinc-500 tracking-wide">
                                                 Creator
                                             </p>
                                             <p className="truncate text-[13px] font-semibold text-white transition-colors group-hover:text-yellow-400">
@@ -436,7 +477,7 @@ export default function CatalogDetailPage() {
                                             </span>
                                         </div>
                                         <div className="min-w-0 flex-1 text-left">
-                                            <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-gray-600">Creator</p>
+                                            <p className="text-[9px] font-medium text-zinc-600 tracking-wide">Creator</p>
                                             <p className="truncate text-[13px] font-medium text-gray-500">Unknown</p>
                                         </div>
                                     </div>
@@ -449,7 +490,7 @@ export default function CatalogDetailPage() {
                                 <div className="space-y-2 text-sm">
                                     <div className="flex justify-between py-2 border-b border-gray-900 hover:border-yellow-500/20 transition-colors duration-300 group">
                                         <span className="text-gray-400 group-hover:text-gray-300">Format</span>
-                                        <span className="text-white font-medium uppercase">{product.fileFormat || 'GLB'}</span>
+                                        <span className="text-white font-medium">{product.fileFormat || 'GLB'}</span>
                                     </div>
                                     <div className="flex justify-between py-2 border-b border-gray-900 hover:border-yellow-500/20 transition-colors duration-300 group">
                                         <span className="text-gray-400 group-hover:text-gray-300">License</span>

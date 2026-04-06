@@ -195,10 +195,6 @@ export default function AppTopbar({
                         <span className="px-1.5 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full">{notificationsCount}</span>
                       )}
                     </Link>
-                    <Link href={ROUTES.USER.DOWNLOADS} className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
-                      <Download className="w-4 h-4" />
-                      <span className="text-sm">My Downloads</span>
-                    </Link>
                     <Link href={ROUTES.USER.ORDERS} className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
                       <Package className="w-4 h-4" />
                       <span className="text-sm">My Orders</span>

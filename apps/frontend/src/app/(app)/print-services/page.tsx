@@ -358,7 +358,7 @@ export default function PrintServicesPage() {
                                 Become a Provider <ArrowRight className="w-4 h-4" />
                             </Link>
                             <Link
-                                href="/printers"
+                                href="/become-provider"
                                 className="flex items-center justify-center gap-2 bg-[#1a1a1a] hover:bg-[#252525] text-white font-medium px-6 py-3 rounded-xl border border-gray-700 transition-all"
                             >
                                 Learn More

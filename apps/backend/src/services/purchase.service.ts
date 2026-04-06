@@ -33,6 +33,7 @@ export async function get_user_purchases(user_id: string) {
     orderBy: { created_at: "desc" },
     select: {
       id: true,
+      model_id: true,
       price_paid: true,
       license: true,
       created_at: true,
@@ -41,6 +42,7 @@ export async function get_user_purchases(user_id: string) {
           id: true,
           title: true,
           preview_url: true,
+          file_format: true,
         },
       },
     },

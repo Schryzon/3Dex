@@ -15,12 +15,14 @@ This is the frontend application for 3Dēx, built with Next.js and Tailwind CSS.
 ---
 
 It handles:
-- Responsive UI & Modern UX (Tailwind CSS, Radix UI)
+- Responsive UI & modern UX (Tailwind CSS, Radix UI, Modern Typography)
 - Protected Routes & Role-based authentication
 - Advanced API integration & State Management (React Query)
-- 3D Previews (Built-in canvas integrations)
-- Payment processing (Midtrans Sandbox integration)
-- Content Moderation interfaces (Admin Dashboards)
+- Unified Library Hub (Tabbed interface for Saved, Downloads, Uploads)
+- Content Moderation & User Preferences (NSFW Filtering toggles & persistent state)
+- 3D Previews (Optimized built-in interactive canvas)
+- Payment processing (Midtrans Sandbox & Production integration)
+- Admin Dashboards (User & Content moderation)
 
 ---
 

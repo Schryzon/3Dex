@@ -27,6 +27,9 @@ export default function ModelGrid({ artistId, showUpload = false }: ModelGridPro
     const isOwner = currentUser?.id === artistId;
     const canManage = isAdmin || (showUpload && isOwner);
 
+    // Filter NSFW models - always show if owner/admin, else follow show_nsfw setting
+    const filteredModels = (data?.data || []).filter(m => (isOwner || isAdmin) || !m.is_nsfw || !!currentUser?.show_nsfw);
+
     const handleDelete = (e: React.MouseEvent, id: string, title: string) => {
         e.preventDefault();
         e.stopPropagation();
@@ -70,7 +73,7 @@ export default function ModelGrid({ artistId, showUpload = false }: ModelGridPro
         );
     }
 
-    if (!data?.data || data.data.length === 0) {
+    if (!data?.data || filteredModels.length === 0) {
         return (
             <div className="text-center py-20 bg-gray-900/20 rounded-2xl border border-gray-800 border-dashed">
                 <Box className="w-16 h-16 text-gray-700 mx-auto mb-4" />
@@ -91,7 +94,7 @@ export default function ModelGrid({ artistId, showUpload = false }: ModelGridPro
     return (
         <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {data.data.map((model) => (
+                {filteredModels.map((model) => (
                     <div
                         key={model.id}
                         className="group relative bg-[#111] border border-gray-800 rounded-2xl overflow-hidden hover:border-gray-600 transition-all duration-300 flex flex-col"
@@ -103,16 +106,26 @@ export default function ModelGrid({ artistId, showUpload = false }: ModelGridPro
                                     <img
                                         src={model.thumbnails[0]}
                                         alt={model.title}
-                                        className={`w-full h-full object-cover transition-transform duration-500 ${model.is_nsfw && !currentUser?.show_nsfw
-                                            ? 'blur-2xl scale-125'
+                                        className={`w-full h-full object-cover transition-all duration-500 ${model.is_nsfw
+                                            ? 'blur-2xl scale-110'
                                             : 'group-hover:scale-105'
                                             }`}
                                     />
-                                    {model.is_nsfw && !currentUser?.show_nsfw && (
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 text-white z-10 pointer-events-none">
-                                            <AlertTriangle className="w-10 h-10 text-red-500 mb-2 opacity-80 drop-shadow-lg" />
-                                            <p className="font-bold text-sm tracking-wide drop-shadow-md">NSFW</p>
-                                        </div>
+                                    {model.is_nsfw && (
+                                        <>
+                                            {/* Ribbon */}
+                                            <div className="absolute top-0 right-0 z-20 overflow-hidden w-16 h-16 pointer-events-none">
+                                                <div className="absolute top-0 right-0 w-[141%] h-6 bg-red-600 text-white text-[10px] font-black flex items-center justify-center uppercase tracking-widest shadow-lg transform rotate-45 translate-x-[30%] translate-y-[20%] border-b border-white/20">
+                                                    NSFW
+                                                </div>
+                                            </div>
+                                            {/* Blur Overlay */}
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-[2px] z-10 transition-opacity">
+                                                <span className="text-[10px] font-black text-white px-3 py-1.5 bg-black/60 rounded-xl border border-white/10 uppercase tracking-widest shadow-2xl">
+                                                    Mature Content
+                                                </span>
+                                            </div>
+                                        </>
                                     )}
                                 </>
                             ) : (

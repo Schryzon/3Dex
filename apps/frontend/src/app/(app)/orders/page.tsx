@@ -8,6 +8,7 @@ import { ShoppingBag, ChevronRight, Clock, CheckCircle, XCircle, ChevronLeft } f
 import Link from 'next/link';
 import { useAuth } from '@/features/auth';
 import { useRouter } from 'next/navigation';
+import { Order, OrderItem } from '@/types';
 
 export default function OrdersPage() {
     const { user, isLoading: authLoading } = useAuth();
@@ -57,7 +58,7 @@ export default function OrdersPage() {
                     </div>
                 ) : orders && orders.length > 0 ? (
                     <div className="space-y-4">
-                        {orders.map((order: any) => (
+                        {orders.map((order: Order) => (
                             <div key={order.id} className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden hover:border-gray-700 transition-colors">
                                 <div className="p-4 sm:p-6">
                                     <div className="flex flex-wrap items-center justify-between gap-4 mb-4 pb-4 border-b border-gray-800">
@@ -67,7 +68,7 @@ export default function OrdersPage() {
                                         </div>
                                         <div className="space-y-1">
                                             <p className="text-xs text-gray-500 uppercase font-semibold">Date</p>
-                                            <p className="text-sm">{formatDate(order.created_at)}</p>
+                                            <p className="text-sm text-gray-300">{formatDate(order.created_at)}</p>
                                         </div>
                                         <div className="space-y-1">
                                             <p className="text-xs text-gray-500 uppercase font-semibold">Status</p>
@@ -82,20 +83,33 @@ export default function OrdersPage() {
                                         </div>
                                     </div>
 
-                                    <div className="space-y-3">
-                                        {order.items.map((item: any) => (
+                                    <div className="space-y-4">
+                                        {order.items.map((item: OrderItem) => (
                                             <div key={item.id} className="flex items-center justify-between gap-4">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-12 h-12 bg-gray-800 rounded-lg overflow-hidden flex-shrink-0">
-                                                        {item.model.preview_url ? (
+                                                        {item.model?.preview_url ? (
                                                             <img src={getStorageUrl(item.model.preview_url)} alt="" className="w-full h-full object-cover" />
                                                         ) : (
                                                             <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-600">3D</div>
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-semibold text-white truncate max-w-[200px]">{item.model.title}</p>
-                                                        <p className="text-xs text-gray-500">by {item.model.artist.username}</p>
+                                                        <p className="text-sm font-semibold text-white truncate max-w-[200px]">{item.model?.title || 'Unknown Model'}</p>
+                                                        <div className="flex items-center gap-1.5 mt-0.5">
+                                                            {item.model?.artist.avatar_url ? (
+                                                                <img
+                                                                    src={getStorageUrl(item.model.artist.avatar_url)}
+                                                                    alt=""
+                                                                    className="w-4 h-4 rounded-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-4 h-4 rounded-full bg-gray-800 flex items-center justify-center">
+                                                                    <ShoppingBag className="w-2.5 h-2.5 text-gray-600" />
+                                                                </div>
+                                                            )}
+                                                            <p className="text-xs text-gray-500">by {item.model?.artist.username || 'System'}</p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div className="text-sm font-medium text-gray-300">
@@ -109,7 +123,7 @@ export default function OrdersPage() {
                                         <div className="mt-6">
                                             <Link
                                                 href="/downloads"
-                                                className="inline-flex items-center gap-2 text-sm font-semibold text-black bg-yellow-500 hover:bg-yellow-400 px-4 py-2 rounded-lg transition-colors"
+                                                className="inline-flex items-center gap-2 text-sm font-semibold text-black bg-yellow-500 hover:bg-yellow-400 px-4 py-3 rounded-lg transition-colors"
                                             >
                                                 Download Files
                                                 <ChevronRight className="w-4 h-4" />

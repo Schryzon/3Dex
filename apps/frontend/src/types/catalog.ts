@@ -3,6 +3,7 @@ export interface Model {
     title: string;
     description: string;
     price: number;
+    preview_url?: string;
     thumbnails: string[];
     images: string[];
     modelFileUrl: string;

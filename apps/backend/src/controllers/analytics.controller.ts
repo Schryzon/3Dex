@@ -38,7 +38,14 @@ export async function get_artist_stats(req: Auth_Request, res: Response) {
         });
         const total_earnings = purchases.reduce((sum, p) => sum + p.price_paid, 0);
 
-        // 3. Recent Sales
+        // 3. Total Customers (Unique buyers)
+        const unique_customers = await prisma.purchase.groupBy({
+            by: ['user_id'],
+            where: { model: { artist_id: String(user_id) } }
+        });
+        const total_customers = unique_customers.length;
+
+        // 4. Recent Sales
         const recent_sales = await prisma.purchase.findMany({
             where: { model: { artist_id: String(user_id) } },
             orderBy: { created_at: 'desc' },
@@ -49,12 +56,17 @@ export async function get_artist_stats(req: Auth_Request, res: Response) {
             }
         });
 
-        // 4. Sales by Month (Last 12 Months)
-        // Grouping by date in Prisma/SQL can be complex. 
-        // We'll fetch last 12 months data and aggregate in JS for simplicity/portability.
-        const oneYearAgo = new Date();
-        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+        // 5. Sales by Month (Last 12 Months) - Full Timeline
+        const months: { month: string; earnings: number }[] = [];
+        const now = new Date();
+        
+        for (let i = 11; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const monthStr = d.toISOString().slice(0, 7); // YYYY-MM
+            months.push({ month: monthStr, earnings: 0 });
+        }
 
+        const oneYearAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
         const lastYearSales = await prisma.purchase.findMany({
             where: {
                 model: { artist_id: String(user_id) },
@@ -63,21 +75,36 @@ export async function get_artist_stats(req: Auth_Request, res: Response) {
             select: { created_at: true, price_paid: true }
         });
 
-        const sales_by_month: Record<string, number> = {};
         lastYearSales.forEach(p => {
-            const month = p.created_at.toISOString().slice(0, 7); // YYYY-MM
-            sales_by_month[month] = (sales_by_month[month] || 0) + p.price_paid;
+            const m = p.created_at.toISOString().slice(0, 7);
+            const entry = months.find(x => x.month === m);
+            if (entry) entry.earnings += p.price_paid;
         });
 
-        // 5. Top Models
-        // Prisma doesn't support easy "groupBy relation count" with include details nicely yet
-        // Accessing raw query might be better, or fetching models and their purchase counts.
-        // Let's query models with their purchase count.
+        // 6. Earnings Growth (This month vs Last month)
+        const currentMonth = now.toISOString().slice(0, 7);
+        const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const lastMonth = lastMonthDate.toISOString().slice(0, 7);
+
+        const currentEarnings = months.find(m => m.month === currentMonth)?.earnings || 0;
+        const previousEarnings = months.find(m => m.month === lastMonth)?.earnings || 0;
+        
+        let earnings_growth = 0;
+        if (previousEarnings > 0) {
+            earnings_growth = ((currentEarnings - previousEarnings) / previousEarnings) * 100;
+        } else if (currentEarnings > 0) {
+            earnings_growth = 100; // 100% growth if starting from zero
+        }
+
+        // 7. Top Models (With Revenue)
         const models = await prisma.model.findMany({
             where: { artist_id: String(user_id) },
             include: {
                 _count: {
                     select: { purchases: true }
+                },
+                purchases: {
+                    select: { price_paid: true }
                 }
             }
         });
@@ -88,14 +115,17 @@ export async function get_artist_stats(req: Auth_Request, res: Response) {
             .map(m => ({
                 id: m.id,
                 title: m.title,
-                sales: m._count.purchases
+                sales: m._count.purchases,
+                revenue: m.purchases.reduce((acc, p) => acc + p.price_paid, 0)
             }));
 
         res.json({
             total_sales,
             total_earnings,
+            total_customers,
+            earnings_growth: Math.round(earnings_growth),
             recent_sales,
-            sales_by_month,
+            sales_by_month: months,
             top_models
         });
 

@@ -51,7 +51,8 @@ const mapModel = (item: any): Model => ({
     createdAt: item.created_at,
     updatedAt: item.updated_at,
     rating: item.avg_rating || item.rating || 0,
-    reviewCount: item.review_count || 0
+    reviewCount: item.review_count || 0,
+    is_nsfw: item.is_nsfw
 });
 
 export const productService = {
@@ -171,5 +172,10 @@ export const productService = {
 
     async downloadProduct(id: string): Promise<{ downloadUrl: string; expiresAt: string; remainingDownloads: number }> {
         return apiClient.get(API_ENDPOINTS.MODELS.DOWNLOAD(id));
+    },
+    
+    async getUserLibrary(): Promise<Model[]> {
+        const response = await apiClient.get<any[]>(API_ENDPOINTS.USERS.LIBRARY);
+        return response.map(mapModel);
     },
 };

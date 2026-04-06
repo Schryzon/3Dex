@@ -46,11 +46,16 @@ function ModelMiniCard({ model }: { model: Model }) {
   return (
     <Link
       href={`/catalog/${model.id}`}
-      className="group flex gap-3 rounded-xl border border-white/[0.06] bg-[#111] p-3 transition-colors hover:border-yellow-500/30"
+      className="group flex gap-3 rounded-xl border border-white/[0.06] bg-[#111] p-3 transition-colors hover:border-yellow-500/30 relative overflow-hidden"
     >
-      <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-white/5">
+      <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-white/5 relative">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={img} alt="" className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+        <img src={img} alt="" className={`h-full w-full object-cover transition-all group-hover:scale-105 ${model.is_nsfw ? 'blur-md' : ''}`} />
+        {model.is_nsfw && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+            <span className="text-[8px] font-black text-white px-1 bg-red-600 rounded-sm">NSFW</span>
+          </div>
+        )}
       </div>
       <div className="min-w-0 flex-1">
         <p className="line-clamp-2 text-sm font-medium text-white group-hover:text-yellow-400/90">{model.title}</p>
@@ -102,10 +107,12 @@ export default function DashboardOverview() {
 
   const wishlistModels = wishlist
     .map((w) => w.model)
-    .filter((m): m is Model => !!m)
+    .filter((m): m is Model => !!m && (!m.is_nsfw || !!user?.show_nsfw))
     .slice(0, 6);
 
-  const recommendedModels: Model[] = (recommended?.data || []).filter(Boolean).slice(0, 8);
+  const recommendedModels: Model[] = (recommended?.data || [])
+    .filter((m: any) => m && (!m.is_nsfw || !!user?.show_nsfw))
+    .slice(0, 8);
 
   return (
     <div className="mx-auto max-w-7xl space-y-10 p-6 md:p-8">
@@ -307,6 +314,7 @@ export default function DashboardOverview() {
                 isFree={model.price === 0}
                 rating={model.rating}
                 reviewCount={model.reviewCount}
+                isNsfw={model.is_nsfw}
                 formats={Array.isArray(model.fileFormat) ? model.fileFormat : []}
               />
             ))}

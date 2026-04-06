@@ -76,13 +76,16 @@ export interface ArtistTopModel {
     id: string;
     title: string;
     sales: number;
+    revenue: number;
 }
 
 export interface ArtistAnalyticsStats {
     total_sales: number;
     total_earnings: number;
+    total_customers: number;
+    earnings_growth: number;
     recent_sales: ArtistRecentSale[];
-    sales_by_month: Record<string, number>;
+    sales_by_month: { month: string; earnings: number }[];
     top_models: ArtistTopModel[];
 }
 

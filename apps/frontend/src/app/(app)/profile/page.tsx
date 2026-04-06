@@ -504,6 +504,36 @@ function ProfileContent() {
         },
     });
     const [isSaving, setIsSaving] = useState(false);
+    const [isInitialized, setIsInitialized] = useState(false);
+
+    // Synchronize user data into formData when user object is available
+    useEffect(() => {
+        if (user && !isInitialized) {
+            setFormData({
+                username: user.username || '',
+                email: user.email || '',
+                displayName: user.display_name || '',
+                bio: user.bio || '',
+                location: user.location || '',
+                receiverName: '',
+                phoneNumber: '',
+                postcode: '',
+                detailedAddress: '',
+                courierPreference: 'JNE',
+                ecoPackaging: true,
+                website: user.website || '',
+                skills: [],
+                showNsfw: !!user.show_nsfw,
+                socialLinks: {
+                    twitter: user.social_twitter || '',
+                    instagram: user.social_instagram || '',
+                    artstation: user.social_artstation || '',
+                    behance: user.social_behance || ''
+                },
+            });
+            setIsInitialized(true);
+        }
+    }, [user, isInitialized]);
 
     const showBannerNotif = (type: 'success' | 'error', msg: string) => {
         setSaveBanner({ type, msg });
@@ -535,7 +565,26 @@ function ProfileContent() {
                 if (!shouldFallback) throw patchError;
                 res = await api.post('/users/profile/update', payload);
             }
-            setUser(res.data);
+            const updatedUser = res.data;
+            setUser(updatedUser);
+            
+            // Re-sync formData with server response
+            setFormData(prev => ({
+                ...prev,
+                username: updatedUser.username || prev.username,
+                displayName: updatedUser.display_name || prev.displayName,
+                bio: updatedUser.bio || prev.bio,
+                location: updatedUser.location || prev.location,
+                website: updatedUser.website || prev.website,
+                showNsfw: updatedUser.show_nsfw !== undefined ? !!updatedUser.show_nsfw : prev.showNsfw,
+                socialLinks: {
+                    twitter: updatedUser.social_twitter || prev.socialLinks.twitter,
+                    instagram: updatedUser.social_instagram || prev.socialLinks.instagram,
+                    artstation: updatedUser.social_artstation || prev.socialLinks.artstation,
+                    behance: updatedUser.social_behance || prev.socialLinks.behance
+                }
+            }));
+
             showBannerNotif('success', 'Profile saved successfully!');
             setShowUsernameConfirm(false);
         } catch (error: any) {

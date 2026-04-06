@@ -68,7 +68,7 @@ export default function Collection() {
     .sort((a, b) => {
       if (sortBy === 'name') return a.model.title.localeCompare(b.model.title);
       if (sortBy === 'price') return b.price_paid - a.price_paid;
-      return new Date(b.purchase_date).getTime() - new Date(a.purchase_date).getTime();
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
 
   return (
@@ -225,7 +225,7 @@ export default function Collection() {
 
                   <div className="flex items-center gap-1 text-xs text-gray-400 mb-3">
                     <Calendar className="w-3 h-3" />
-                    <span>{new Date(item.purchase_date).toLocaleDateString()}</span>
+                    <span>{new Date(item.created_at).toLocaleDateString()}</span>
                   </div>
 
                   <button
@@ -273,7 +273,7 @@ export default function Collection() {
                     </Link>
                     <div className="flex items-center gap-1 mt-1 text-xs text-gray-400">
                       <Calendar className="w-3 h-3" />
-                      {new Date(item.purchase_date).toLocaleDateString()}
+                      {new Date(item.created_at).toLocaleDateString()}
                     </div>
                   </div>
 

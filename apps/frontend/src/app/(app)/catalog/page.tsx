@@ -107,7 +107,8 @@ function CatalogContent() {
         error
     } = useInfiniteProducts(apiFilters);
 
-    const products = data?.pages.flatMap((page) => page.data) || [];
+    const { user } = useAuth();
+    const products = (data?.pages.flatMap((page) => page.data) || []).filter(p => !p.is_nsfw || user?.show_nsfw);
     const totalResults = data?.pages[0]?.pagination?.total || 0;
     const hasMore = hasNextPage;
 
@@ -301,6 +302,7 @@ function CatalogContent() {
                             formats={[product.fileFormat]}
                             rating={product.rating || 0}
                             reviewCount={product.reviewCount || 0}
+                            isNsfw={product.is_nsfw}
                             viewMode={viewMode}
                         />
                     ))}

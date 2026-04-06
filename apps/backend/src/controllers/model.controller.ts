@@ -413,7 +413,7 @@ export async function update_model(req: Request, res: Response) {
       return res.status(403).json({ message: "You are not authorized to edit this model!" });
     }
 
-    const { title, description, price, category, license, is_printable } = req.body;
+    const { title, description, price, category, license, is_printable, is_nsfw, tags } = req.body;
 
     const updated = await update_model_by_id(model_id, {
       ...(title !== undefined && { title }),
@@ -422,6 +422,8 @@ export async function update_model(req: Request, res: Response) {
       ...(category !== undefined && { category }),
       ...(license !== undefined && { license }),
       ...(is_printable !== undefined && { is_printable: !!is_printable }),
+      ...(is_nsfw !== undefined && { is_nsfw: !!is_nsfw }),
+      ...(tags !== undefined && { tags: Array.isArray(tags) ? tags : undefined }),
     });
 
     res.json(updated);

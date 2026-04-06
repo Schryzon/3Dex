@@ -7,17 +7,15 @@ export const purchaseKeys = {
 
 export interface Purchase {
     id: string;
-    user_id: string;
     model_id: string;
     price_paid: number;
-    purchase_date: string;
-    license: string;
+    created_at: string;
+    license: 'PERSONAL_USE' | 'COMMERCIAL_USE';
     model: {
         id: string;
         title: string;
         preview_url: string;
-        file_size: number;
-        file_format: string[];
+        file_format: string;
     };
 }
 

@@ -1,34 +1,65 @@
 'use client';
 
-import { useRef, useEffect, Suspense, useState } from 'react';
-import { Canvas, useLoader } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { useRef, useEffect, Suspense, useState, useMemo } from 'react';
+import { Canvas, useThree } from '@react-three/fiber';
+import { OrbitControls, PerspectiveCamera, Environment, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
+import { KTX2Loader } from 'three-stdlib';
+import { MeshoptDecoder } from 'meshoptimizer';
 
 interface ModelProps {
   url: string;
 }
 
 function Model({ url }: ModelProps) {
-  const gltf = useLoader(GLTFLoader, url);
+  const gl = useThree((state) => state.gl);
 
-  // Center and scale the model
-  useEffect(() => {
-    if (gltf.scene) {
-      const box = new THREE.Box3().setFromObject(gltf.scene);
+  const { scene } = useGLTF(url, true, true, (loader) => {
+    // 1. DRACO
+    const dracoLoader = require('three-stdlib').DRACOLoader;
+    const draco = new dracoLoader();
+    draco.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+    loader.setDRACOLoader(draco);
+
+    // 2. KTX2
+    const ktx2Loader = new KTX2Loader();
+    ktx2Loader.setTranscoderPath('https://cdn.jsdelivr.net/gh/pmndrs/drei-assets@master/basis/');
+    ktx2Loader.detectSupport(gl);
+    loader.setKTX2Loader(ktx2Loader);
+
+    // 3. Meshopt
+    loader.setMeshoptDecoder(MeshoptDecoder);
+  });
+
+  // Center and scale the model + scene optimizations
+  useMemo(() => {
+    if (scene) {
+      const box = new THREE.Box3().setFromObject(scene);
       const center = box.getCenter(new THREE.Vector3());
       const size = box.getSize(new THREE.Vector3());
 
       const maxDim = Math.max(size.x, size.y, size.z);
       const scale = 2 / maxDim;
 
-      gltf.scene.scale.setScalar(scale);
-      gltf.scene.position.sub(center.multiplyScalar(scale));
-    }
-  }, [gltf]);
+      scene.scale.setScalar(scale);
+      scene.position.sub(center.multiplyScalar(scale));
 
-  return <primitive object={gltf.scene} />;
+      scene.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh) {
+          const m = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;
+          if (m) {
+            // Fix double-siding and white model issues
+            m.side = THREE.DoubleSide;
+            if (!m.map && m.color.r > 0.9 && m.color.g > 0.9 && m.color.b > 0.9) {
+              m.color.setHex(0xcccccc);
+            }
+          }
+        }
+      });
+    }
+  }, [scene]);
+
+  return <primitive object={scene} />;
 }
 
 interface ProductViewer3DProps {
@@ -73,13 +104,16 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
         gl={{
           antialias: true,
           alpha: true,
-          powerPreference: 'high-performance'
+          powerPreference: 'high-performance',
+          toneMapping: 4, // ACESFilmicToneMapping
+          toneMappingExposure: 1.0,
+          outputColorSpace: 'srgb',
         }}
       >
         <PerspectiveCamera makeDefault position={[0, 0, 5]} />
 
         {/* Lighting */}
-        <ambientLight intensity={0.5} />
+        <ambientLight intensity={0.4} />
         <directionalLight
           position={[10, 10, 5]}
           intensity={1}

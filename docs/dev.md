@@ -21,7 +21,8 @@ This document serves as the primary technical reference for the 3Dēx project.
 13. [Updating an Existing Local Copy](#updating-an-existing-local-copy)
 14. [Safe Merging Strategy](#safe-merging-strategy)
 15. [Troubleshooting](#troubleshooting)
-16. [Core Rules](#core-rules)
+16. [Roadmap: Full Dockerization](#roadmap-full-dockerization)
+17. [Core Rules](#core-rules)
 
 ---
 
@@ -127,16 +128,25 @@ Avoid adding redundant folders or storing databases within the repository.
 ## Environment Variables
 
 ### Backend (`apps/backend/.env`)
-Copy `apps/backend/.env.example` to `apps/backend/.env`.
+Copy `apps/backend/.env.example` to `apps/backend/.env`. Key variables to update:
 ```env
 DATABASE_URL="postgresql://YOUR_USERNAME:YOUR_PASSWORD@localhost:5432/threedex"
 PORT=4000
+JWT_SECRET="your_secure_random_string"
+STORAGE_ENDPOINT="http://localhost:9000"
+STORAGE_ACCESS_KEY="minioadmin"
+STORAGE_SECRET_KEY="minioadmin"
+STORAGE_BUCKET="3dex-models"
+SB_MIDTRANS_SERVER_KEY="sandbox-midtrans-server-key"
 ```
 
 ### Frontend (`apps/frontend/.env.local`)
-Copy `apps/frontend/.env.local.example` to `apps/frontend/.env.local`.
+Copy `apps/frontend/.env.local.example` to `apps/frontend/.env.local`. Key variables to update:
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:4000
+NEXT_PUBLIC_API_URL=http://localhost:4000/api
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_MINIO_URL=http://localhost:9000
+NEXT_PUBLIC_SB_MIDTRANS_CLIENT_KEY=your_sandbox_key_here
 ```
 
 ### Docker (`.env.docker`)
@@ -277,6 +287,43 @@ git push origin --delete feature/your-task
   ```sh
   pg_isready
   ```
+  If migrating fails with missing modules, verify package versions match or re-run `npm install`.
+
+- **"Missing Midtrans errors in Cart Checkout"**: Ensure that `USE_MOCK_DATA=false` inside `src/lib/api/services/product.service.ts` so the real Midtrans sandbox environment is utilized.
+
+---
+
+## Deployment Workflow
+
+The project uses GitHub Actions for CI/CD and PM2 for process management on the production server.
+
+1. **GitHub Actions**: Whenever designated branches (`dev`, `master`) are updated, GitHub Actions uses `deploy.yml` to trigger continuous deployment.
+2. **Server (PM2)**: The application is managed via `ecosystem.config.js`. 
+   ```sh
+   pm2 start ecosystem.config.js
+   ```
+   Ensure PM2 is installed globally on the target server.
+
+---
+
+## Roadmap: Full Dockerization
+
+The project is currently transitioning from a local-first development model to a fully containerized environment.
+
+### Status
+
+- [x] Backend Dockerfile (Production-ready)
+- [x] Shared PostgreSQL Container
+- [ ] Frontend Dockerfile (SSR/Next.js multi-stage)
+- [ ] MinIO Browser & Console Container
+- [ ] Centralized Docker Networking (Internal communication)
+- [ ] Unified `docker-compose.prod.yml`
+
+### Next Steps
+
+1. **Frontend Integration**: Develop an alpine-based image for the Next.js frontend that supports both development (`npm run dev`) and production (`npm run start`) modes.
+2. **MinIO Persistence**: Add a dedicated `minio` service to `docker-compose.yml` to eliminate the need for manual Docker run commands for storage.
+3. **Internal API Resolution**: Configure Docker's internal DNS so the frontend can resolve `api:4000` without exposing ports unnecessarily.
 
 ---
 

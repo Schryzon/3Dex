@@ -49,10 +49,8 @@ export interface Purchase {
     id: string;
     user_id: string;
     model_id: string;
-    model: Model;
-    amount: number;
-    download_count: number;
-    max_downloads: number;
-    expires_at: string;
+    price_paid: number;
+    license: 'PERSONAL_USE' | 'COMMERCIAL_USE';
     created_at: string;
+    model: Model;
 }

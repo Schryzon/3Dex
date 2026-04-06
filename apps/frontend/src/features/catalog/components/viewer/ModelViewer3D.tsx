@@ -1,8 +1,11 @@
 'use client';
 
-import React, { Suspense, useState, useEffect } from 'react';
-import { Canvas, ThreeElements } from '@react-three/fiber';
+import React, { Suspense, useState, useEffect, useMemo } from 'react';
+import { Canvas, ThreeElements, useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Center, Environment, ContactShadows, Html, useProgress } from '@react-three/drei';
+import * as THREE from 'three';
+import { KTX2Loader } from 'three-stdlib';
+import { MeshoptDecoder } from 'meshoptimizer';
 
 // Robust React 19 + R3F Type Declarations
 declare global {
@@ -80,19 +83,46 @@ function ErrorFallback() {
 }
 
 function Model({ url }: { url: string }) {
-
-    // Some AWS Presigned URLs have query parameters that block three.js from detecting the extension
-    // react-three-fiber's useGLTF accepts an array or passes the URL straight.
-    let parseUrl = url;
+    const gl = useThree((state) => state.gl);
 
     // Provide a Draco draco decoder path (use a public CDN for reliable decoding)
-    const { scene } = useGLTF(parseUrl, true, true, (loader) => {
-        // Standard DRACO config
+    const { scene } = useGLTF(url, true, true, (loader) => {
+        // 1. DRACO
         const dracoLoader = require('three-stdlib').DRACOLoader;
         const draco = new dracoLoader();
         draco.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
         loader.setDRACOLoader(draco);
+
+        // 2. KTX2 / Basis Universal
+        const ktx2Loader = new KTX2Loader();
+        ktx2Loader.setTranscoderPath('https://cdn.jsdelivr.net/gh/pmndrs/drei-assets@master/basis/');
+        ktx2Loader.detectSupport(gl);
+        loader.setKTX2Loader(ktx2Loader);
+
+        // 3. Meshopt
+        loader.setMeshoptDecoder(MeshoptDecoder);
     });
+
+    // Scene optimization traversal
+    useMemo(() => {
+        scene.traverse((child) => {
+            if ((child as THREE.Mesh).isMesh) {
+                const mesh = child as THREE.Mesh;
+                const material = mesh.material as THREE.MeshStandardMaterial;
+
+                if (material) {
+                    // Fix "Full White" issues common in untextured models
+                    if (!material.map && material.color.r > 0.9 && material.color.g > 0.9 && material.color.b > 0.9) {
+                        material.color.setHex(0xcccccc); // Set to light gray rather than pure white
+                    }
+                    
+                    // Enable double-sided for thin geometries (like belt pieces or car sheets)
+                    material.side = THREE.DoubleSide;
+                    material.needsUpdate = true;
+                }
+            }
+        });
+    }, [scene]);
 
     return <primitive object={scene} />;
 }
@@ -121,6 +151,7 @@ export default function ModelViewer3D({ modelUrl }: { modelUrl?: string }) {
         const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         const isSmallScreen = window.innerWidth < 768;
         setIsTouch(hasTouch && isSmallScreen);
+        setIsMounted(true);
     }, []);
 
     if (!isMounted) {
@@ -144,7 +175,16 @@ export default function ModelViewer3D({ modelUrl }: { modelUrl?: string }) {
 
             <div className="absolute inset-0">
                 <ErrorBoundary fallback={<ErrorFallback />}>
-                    <Canvas camera={{ position: [5, 5, 5], fov: 40 }} shadows>
+                    <Canvas 
+                        camera={{ position: [5, 5, 5], fov: 40 }} 
+                        shadows
+                        gl={{
+                            antialias: true,
+                            toneMapping: 4, // ACESFilmicToneMapping
+                            toneMappingExposure: 1.0,
+                            outputColorSpace: 'srgb',
+                        }}
+                    >
                         <Suspense fallback={<Loader />}>
                             <StageSetup />
 
@@ -165,7 +205,7 @@ export default function ModelViewer3D({ modelUrl }: { modelUrl?: string }) {
                                 maxDistance={25}
                             />
 
-                            <Environment preset="city" />
+                            <Environment preset="studio" />
 
                             <ContactShadows
                                 position={[0, -0.01, 0]}
@@ -230,10 +270,10 @@ export default function ModelViewer3D({ modelUrl }: { modelUrl?: string }) {
 function StageSetup() {
     return (
         <>
-            <ambientLight intensity={1.5} />
-            <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={10} castShadow />
-            <pointLight position={[-10, -10, -10]} intensity={5} color="#450a0a" />
-            <directionalLight position={[0, 5, 0]} intensity={2} />
+            <ambientLight intensity={0.4} />
+            <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={2} castShadow />
+            <pointLight position={[-10, -10, -10]} intensity={1} color="#450a0a" />
+            <directionalLight position={[0, 5, 0]} intensity={1} />
         </>
     );
 }
