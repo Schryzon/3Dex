@@ -27,6 +27,14 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
     agreeToTerms: false,
     receiveNewsletter: false
   });
+
+  // State untuk menampung pesan error dari proses input form
+  const [formErrors, setFormErrors] = useState({
+    username: '',
+    email: '',
+    password: '',
+    agreeToTerms: ''
+  });
   const googleBtnRef = useRef<HTMLDivElement>(null);
   const googleInitialized = useRef(false);
 
@@ -88,9 +96,61 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
     }
   }, [isOpen, googleLogin, onClose, router]);
 
+  // form validation
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = { username: '', email: '', password: '', agreeToTerms: '' };
+
+    // username validation
+    if (!formData.username) {
+      newErrors.username = 'Username cannot be empty';
+      isValid = false;
+    } else if (formData.username.length > 50) {
+      newErrors.username = 'Username must be less than 50 characters';
+      isValid = false;
+    } else if (formData.username.length < 3) {
+      newErrors.username = 'Username must be at least 3 characters';
+      isValid = false;
+    }
+
+    // email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email) {
+      newErrors.email = 'Email cannot be empty';
+      isValid = false;
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = 'Invalid email format';
+      isValid = false;
+    }
+
+    // password validation
+    if (!formData.password) {
+      newErrors.password = 'Password cannot be empty';
+      isValid = false;
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
+      isValid = false;
+    }
+
+    // Terms of Use validation
+    if (!formData.agreeToTerms) {
+      newErrors.agreeToTerms = 'You must agree to the Terms of Use and Privacy Policy';
+      isValid = false;
+    }
+
+    setFormErrors(newErrors);
+    return isValid;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Run frontend validation before calling API
+    if (!validateForm()) {
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -163,9 +223,11 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
               type="text"
               placeholder="50 characters or less"
               value={formData.username}
-              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-              required
-              maxLength={50}
+              onChange={(e) => {
+                setFormData({ ...formData, username: e.target.value });
+                if (formErrors.username) setFormErrors({ ...formErrors, username: '' });
+              }}
+              error={formErrors.username}
               disabled={isLoading}
               fullWidth
             />
@@ -176,9 +238,11 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
               type="email"
               placeholder="50 characters or less"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required
-              maxLength={50}
+              onChange={(e) => {
+                setFormData({ ...formData, email: e.target.value });
+                if (formErrors.email) setFormErrors({ ...formErrors, email: '' });
+              }}
+              error={formErrors.email}
               disabled={isLoading}
               fullWidth
             />
@@ -190,9 +254,11 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Minimum of 8 characters"
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                required
-                minLength={8}
+                onChange={(e) => {
+                  setFormData({ ...formData, password: e.target.value });
+                  if (formErrors.password) setFormErrors({ ...formErrors, password: '' });
+                }}
+                error={formErrors.password}
                 disabled={isLoading}
                 fullWidth
               />
@@ -239,25 +305,32 @@ export default function RegisterModal({ isOpen, onClose, onSwitchToLogin }: Regi
 
             {/* Checkboxes */}
             <div className="space-y-2 pt-1">
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={formData.agreeToTerms}
-                  onChange={(e) => setFormData({ ...formData, agreeToTerms: e.target.checked })}
-                  className="mt-1 w-4 h-4 rounded border-gray-600 bg-gray-800 text-yellow-400 cursor-pointer focus:ring-yellow-400"
-                  required
-                />
-                <span className="text-sm text-gray-400">
-                  I agree to the{' '}
-                  <Link href="/terms" className="text-white hover:text-yellow-400 cursor-pointer ">
-                    Terms of Use
-                  </Link>{' '}
-                  and{' '}
-                  <Link href="/privacy" className="text-white hover:text-yellow-400 cursor-pointer">
-                    Privacy Policy
-                  </Link>
-                </span>
-              </label>
+              <div>
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={formData.agreeToTerms}
+                    onChange={(e) => {
+                      setFormData({ ...formData, agreeToTerms: e.target.checked });
+                      if (formErrors.agreeToTerms) setFormErrors({ ...formErrors, agreeToTerms: '' });
+                    }}
+                    className={`mt-1 w-4 h-4 rounded bg-gray-800 text-yellow-400 cursor-pointer focus:ring-yellow-400 ${formErrors.agreeToTerms ? 'border-red-500' : 'border-gray-600'}`}
+                  />
+                  <span className="text-sm text-gray-400">
+                    I agree to the{' '}
+                    <Link href="/terms" className="text-white hover:text-yellow-400 cursor-pointer ">
+                      Terms of Use
+                    </Link>{' '}
+                    and{' '}
+                    <Link href="/privacy" className="text-white hover:text-yellow-400 cursor-pointer">
+                      Privacy Policy
+                    </Link>
+                  </span>
+                </label>
+                {formErrors.agreeToTerms && (
+                  <p className="mt-1 text-sm text-red-500 ml-7">{formErrors.agreeToTerms}</p>
+                )}
+              </div>
 
               <label className="flex items-start gap-3 cursor-pointer group">
                 <input

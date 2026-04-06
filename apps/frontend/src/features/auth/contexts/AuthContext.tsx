@@ -12,7 +12,13 @@ import { ROUTES } from '@/lib/constants/routes';
 function disableGoogleAutoSelect() {
   if (typeof window === 'undefined') return;
   try {
-    (window as unknown as { google?: { accounts?: { id?: { disableAutoSelect?: () => void } } } }).google?.accounts?.id?.disableAutoSelect?.();
+    (window as unknown as { 
+      google?: { 
+        accounts?: { 
+          id?: { disableAutoSelect?: () => void } 
+        } 
+      } 
+    }).google?.accounts?.id?.disableAutoSelect?.();
   } catch {
     /* ignore */
   }
@@ -33,7 +39,6 @@ interface AuthContextType {
   setUser: (user: User | null) => void;
   updateUser: (user: User) => void;
 }
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function useAuth() {

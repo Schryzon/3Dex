@@ -17,7 +17,7 @@ export const authService = {
     // POST /auth/login
     // Cookie is set by the server in the response; no token handling needed here
     async login(credentials: LoginRequest): Promise<AuthResponse> {
-        return apiClient.post<AuthResponse>(API_ENDPOINTS.AUTH.LOGIN, credentials);
+        return apiClient.post<AuthResponse>(API_ENDPOINTS.AUTH.LOGIN,  credentials);
     },
 
     // POST /auth/register
