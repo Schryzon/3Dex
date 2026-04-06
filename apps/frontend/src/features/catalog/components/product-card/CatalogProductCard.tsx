@@ -14,6 +14,16 @@ const FORMAT_COLORS: Record<string, string> = {
     max: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
 };
 
+function NSFWRibbon({ className = "" }: { className?: string }) {
+    return (
+        <div className={`absolute top-0 right-0 z-20 overflow-hidden w-12 h-12 md:w-16 md:h-16 pointer-events-none ${className}`}>
+            <div className="absolute top-0 right-0 w-[141%] h-5 md:h-6 bg-red-600 text-white text-[8px] md:text-[10px] font-black flex items-center justify-center uppercase tracking-tighter md:tracking-widest shadow-xl transform rotate-45 translate-x-[25%] translate-y-[20%] md:translate-x-[30%] md:translate-y-[25%] border-b border-white/20">
+                NSFW
+            </div>
+        </div>
+    );
+}
+
 interface CatalogProductCardProps {
     id: string;
     title: string;
@@ -31,6 +41,7 @@ interface CatalogProductCardProps {
     formats?: string[];
     rating?: number;
     reviewCount?: number;
+    isNsfw?: boolean;
     viewMode?: 'grid' | 'list';
 }
 
@@ -51,6 +62,7 @@ export default function CatalogProductCard({
     formats = [],
     rating,
     reviewCount,
+    isNsfw = false,
     viewMode = 'grid',
 }: CatalogProductCardProps) {
     const [isHovered, setIsHovered] = useState(false);
@@ -74,9 +86,20 @@ export default function CatalogProductCard({
                         <img
                             src={getStorageUrl(image)}
                             alt={title}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${isNsfw ? 'blur-xl scale-110' : ''}`}
                         />
                         <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
+                        
+                        {isNsfw && (
+                            <>
+                                <NSFWRibbon />
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-[2px]">
+                                    <span className="text-[10px] md:text-xs font-black text-white/90 uppercase tracking-widest px-2 py-1 bg-black/40 rounded-lg border border-white/10">
+                                        Mature
+                                    </span>
+                                </div>
+                            </>
+                        )}
 
                         {/* Badges overlay */}
                         <div className="absolute top-2 left-2 flex flex-col gap-1">
@@ -202,10 +225,23 @@ export default function CatalogProductCard({
                     <img
                         src={getStorageUrl(image)}
                         alt={title}
-                        className={`absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-102 ${imageLoaded ? 'block' : 'hidden'
-                            }`}
+                        className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-102 ${imageLoaded ? 'block' : 'hidden'
+                            } ${isNsfw ? 'blur-2xl scale-110' : ''}`}
                         onLoad={() => setImageLoaded(true)}
                     />
+
+                    {isNsfw && (
+                        <>
+                            <NSFWRibbon />
+                            <div className="absolute inset-0 flex items-center justify-center z-10 bg-black/20 backdrop-blur-[2px]">
+                                <div className="flex flex-col items-center gap-2">
+                                    <span className="text-[10px] md:text-xs font-black text-white px-3 py-1.5 bg-black/60 rounded-xl border border-white/10 uppercase tracking-widest shadow-2xl">
+                                        Mature Content
+                                    </span>
+                                </div>
+                            </div>
+                        </>
+                    )}
 
                     {/* Gradient Overlay - lightened for visibility */}
                     <div

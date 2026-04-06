@@ -87,6 +87,8 @@ export async function update_model_by_id(
     category?: string;
     license?: "PERSONAL_USE" | "COMMERCIAL_USE";
     is_printable?: boolean;
+    is_nsfw?: boolean;
+    tags?: string[];
     file_format?: string;
   }
 ) {
@@ -114,7 +116,17 @@ export async function update_model_by_id(
       ...(category_id !== undefined && { category_id }),
       ...(data.license !== undefined && { license: data.license }),
       ...(data.is_printable !== undefined && { is_printable: data.is_printable }),
+      ...(data.is_nsfw !== undefined && { is_nsfw: data.is_nsfw }),
       ...(data.file_format !== undefined && { file_format: data.file_format }),
+      ...(data.tags !== undefined && {
+        tags: {
+          set: [], // Clear existing
+          connectOrCreate: data.tags.map(tag => ({
+            where: { name: tag },
+            create: { name: tag }
+          }))
+        }
+      }),
     },
     include: {
       tags: true,

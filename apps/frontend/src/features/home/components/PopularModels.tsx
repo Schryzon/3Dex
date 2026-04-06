@@ -4,6 +4,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ShoppingCart } from 'lucide-react';
 import { useProducts } from '@/features/catalog/hooks/useProducts';
+import { useAuth } from '@/features/auth';
 import { formatPrice } from '@/lib/utils';
 import { useInView } from '@/lib/hooks/useInView';
 import { CatalogProductCard } from '@/features/catalog/components/product-card';
@@ -34,7 +35,8 @@ export default function PopularModels() {
         limit: 12,
     });
 
-    const models = data?.data || [];
+    const { user } = useAuth();
+    const models = (data?.data || []).filter((m: any) => !m.is_nsfw || user?.show_nsfw);
 
     // Auto-scroll functionality
     useEffect(() => {
@@ -127,6 +129,7 @@ export default function PopularModels() {
                                 isFree={model.price === 0}
                                 rating={model.rating}
                                 reviewCount={model.reviewCount}
+                                isNsfw={model.is_nsfw}
                                 formats={model.specifications?.formats || []}
                             />
                         </div>

@@ -73,13 +73,16 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
         gl={{
           antialias: true,
           alpha: true,
-          powerPreference: 'high-performance'
+          powerPreference: 'high-performance',
+          toneMapping: 4, // ACESFilmicToneMapping
+          toneMappingExposure: 1.0,
+          outputColorSpace: 'srgb',
         }}
       >
         <PerspectiveCamera makeDefault position={[0, 0, 5]} />
 
         {/* Lighting */}
-        <ambientLight intensity={0.5} />
+        <ambientLight intensity={0.4} />
         <directionalLight
           position={[10, 10, 5]}
           intensity={1}

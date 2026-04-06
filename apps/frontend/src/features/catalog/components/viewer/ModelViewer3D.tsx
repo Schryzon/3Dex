@@ -121,6 +121,7 @@ export default function ModelViewer3D({ modelUrl }: { modelUrl?: string }) {
         const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         const isSmallScreen = window.innerWidth < 768;
         setIsTouch(hasTouch && isSmallScreen);
+        setIsMounted(true);
     }, []);
 
     if (!isMounted) {
@@ -144,7 +145,16 @@ export default function ModelViewer3D({ modelUrl }: { modelUrl?: string }) {
 
             <div className="absolute inset-0">
                 <ErrorBoundary fallback={<ErrorFallback />}>
-                    <Canvas camera={{ position: [5, 5, 5], fov: 40 }} shadows>
+                    <Canvas 
+                        camera={{ position: [5, 5, 5], fov: 40 }} 
+                        shadows
+                        gl={{
+                            antialias: true,
+                            toneMapping: 4, // ACESFilmicToneMapping
+                            toneMappingExposure: 1.0,
+                            outputColorSpace: 'srgb',
+                        }}
+                    >
                         <Suspense fallback={<Loader />}>
                             <StageSetup />
 
@@ -165,7 +175,7 @@ export default function ModelViewer3D({ modelUrl }: { modelUrl?: string }) {
                                 maxDistance={25}
                             />
 
-                            <Environment preset="city" />
+                            <Environment preset="studio" />
 
                             <ContactShadows
                                 position={[0, -0.01, 0]}
@@ -230,10 +240,10 @@ export default function ModelViewer3D({ modelUrl }: { modelUrl?: string }) {
 function StageSetup() {
     return (
         <>
-            <ambientLight intensity={1.5} />
-            <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={10} castShadow />
-            <pointLight position={[-10, -10, -10]} intensity={5} color="#450a0a" />
-            <directionalLight position={[0, 5, 0]} intensity={2} />
+            <ambientLight intensity={0.4} />
+            <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={2} castShadow />
+            <pointLight position={[-10, -10, -10]} intensity={1} color="#450a0a" />
+            <directionalLight position={[0, 5, 0]} intensity={1} />
         </>
     );
 }

@@ -21,9 +21,17 @@ import { toast } from 'react-hot-toast';
 const ProductViewer3D = lazy(() => import('@/features/catalog/components/viewer').then(mod => ({ default: mod.ProductViewer3D })));
 
 export default function CatalogDetailPage() {
-    const params = useParams();
+const params = useParams();
     const router = useRouter();
     const productId = params.id as string;
+
+    const NSFWRibbon = () => (
+        <div className="absolute top-0 right-0 z-20 overflow-hidden w-20 h-20 pointer-events-none">
+            <div className="absolute top-0 right-0 w-[141%] h-7 bg-red-600 text-white text-[11px] font-black flex items-center justify-center uppercase tracking-widest shadow-xl transform rotate-45 translate-x-[30%] translate-y-[25%] border-b border-white/20">
+                NSFW
+            </div>
+        </div>
+    );
 
     const { data: product, isLoading, error } = useProduct(productId);
     const { addToCart, isAddingToCart } = useCart();
@@ -243,13 +251,14 @@ export default function CatalogDetailPage() {
 
                             {/* Content */}
                             <div className="w-full h-full relative overflow-hidden">
+                                {product.is_nsfw && <NSFWRibbon />}
                                 {selectedImage === -1 ? (
                                     <Suspense fallback={
                                         <div className="w-full h-full flex items-center justify-center">
                                             <div className="w-8 h-8 border-2 border-yellow-500/20 border-t-yellow-500 rounded-full animate-spin" />
                                         </div>
                                     }>
-                                        <div className={`w-full h-full ${product.is_nsfw && !user?.show_nsfw ? 'blur-2xl pointer-events-none' : ''}`}>
+                                        <div className="w-full h-full">
                                             <ProductViewer3D modelUrl={product.modelFileUrl} />
                                         </div>
                                     </Suspense>
@@ -257,15 +266,8 @@ export default function CatalogDetailPage() {
                                     <img
                                         src={product.thumbnails?.[selectedImage] || product.thumbnails?.[0]}
                                         alt={product.title}
-                                        className={`w-full h-full object-cover transition-transform duration-700 ${product.is_nsfw && !user?.show_nsfw ? 'blur-2xl scale-110' : 'group-hover:scale-105'}`}
+                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                     />
-                                )}
-                                {product.is_nsfw && !user?.show_nsfw && (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 text-white z-10 pointer-events-none backdrop-blur-sm">
-                                        <AlertTriangle className="w-12 h-12 text-red-500 mb-2 opacity-80 shadow-black drop-shadow-lg" />
-                                        <p className="font-bold tracking-wide shadow-black drop-shadow-md pb-1 text-lg">Mature Content</p>
-                                        <p className="text-sm font-semibold text-gray-300 shadow-black drop-shadow-md">Show NSFW content in settings to view</p>
-                                    </div>
                                 )}
                             </div>
                         </div>
