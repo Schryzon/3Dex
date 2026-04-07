@@ -41,7 +41,7 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000')
     .filter(Boolean);
 
 const corsOptions = {
-    origin: (origin: any, callback: any) => {
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
@@ -54,8 +54,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-// Use pre-flight CORS for all routes
-app.options('*', cors(corsOptions));
 
 app.use(express.json());
 // Parse cookies — required for HTTP-only cookie auth
