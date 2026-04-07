@@ -7,7 +7,7 @@ import { useWishlist } from '@/features/catalog/hooks/useWishlist';
 import { useAuth } from '@/features/auth';
 import { Share2, Heart, Plus, Check, Download, Eye, ShoppingCart, FolderPlus, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
-import { Suspense, lazy, useState } from 'react';
+import { Suspense, lazy, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProductDetails } from '@/features/catalog/components/product-details';
 import { RelatedProducts } from '@/features/catalog/components/product-details';
@@ -35,7 +35,7 @@ export default function CatalogDetailPage() {
 
     const { data: product, isLoading, error } = useProduct(productId);
     const { addToCart, isAddingToCart } = useCart();
-    const { isAuthenticated, showLogin, user } = useAuth();
+    const { isAuthenticated, showLogin, user, isLoading: isAuthLoading } = useAuth();
     const { isInWishlist, toggle: toggleWishlist, isToggling } = useWishlist();
     const [addedLocally, setAddedLocally] = useState(false);
     const [selectedImage, setSelectedImage] = useState(0);
@@ -45,16 +45,24 @@ export default function CatalogDetailPage() {
     const [isRevealed, setIsRevealed] = useState(false);
 
     // NSFW Access Control & Auto-redirect
-    useState(() => {
-        if (!isLoading && product?.is_nsfw && user && !user.show_nsfw) {
-            toast.error('Mature content is hidden in your settings. Please enable it in your profile to view NSFW content.');
-            router.push('/catalog');
-        }
-    });
+    useEffect(() => {
+        if (isLoading || isAuthLoading || !product) return;
 
-    // Handle case where user object loads late or settings change
-    if (!isLoading && product?.is_nsfw && user && !user.show_nsfw) {
-        return null; // Will be redirected by the effect
+        // Requirement: prevent guests and users with NSFW hidden from seeing NSFW models
+        if (product.is_nsfw) {
+            if (!user || !user.show_nsfw) {
+                toast.error(!user 
+                    ? 'Please log in to view mature content.' 
+                    : 'Mature content is hidden in your settings. Please enable it in your profile to view NSFW content.'
+                );
+                router.push('/catalog');
+            }
+        }
+    }, [isLoading, isAuthLoading, product, user, router]);
+
+    // Prevent rendering if the user is being redirected (to avoid flicker/leaks)
+    if (!isLoading && !isAuthLoading && product?.is_nsfw && (!user || !user.show_nsfw)) {
+        return null;
     }
 
     const handleAddToCart = async () => {

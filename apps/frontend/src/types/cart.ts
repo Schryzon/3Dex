@@ -41,6 +41,7 @@ export interface Order {
     shipping_address?: Address;
     courier_name?: string;
     tracking_number?: string;
+    proof_urls?: string[];
     created_at: string;
     updated_at: string;
 }

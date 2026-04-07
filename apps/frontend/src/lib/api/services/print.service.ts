@@ -30,6 +30,7 @@ export interface PrintJob {
     shipping_address?: any;
     courier_name?: string;
     tracking_number?: string;
+    proof_urls?: string[];
 }
 
 export const printService = {
@@ -52,13 +53,13 @@ export const printService = {
         return apiClient.get('/print/stats');
     },
 
-    async manageOrder(orderId: string, action: 'ACCEPT' | 'REJECT' | 'SHIP' | 'COMPLETE', trackingNumber?: string): Promise<{ message: string }> {
-        return apiClient.patch(`/print/jobs/${orderId}`, { action, tracking_number: trackingNumber });
+    async manageOrder(orderId: string, action: 'ACCEPT' | 'REJECT' | 'SHIP' | 'COMPLETE', trackingNumber?: string, proofUrls?: string[]): Promise<{ message: string }> {
+        return apiClient.patch(`/print/jobs/${orderId}`, { action, tracking_number: trackingNumber, proof_urls: proofUrls });
     },
 
     // Alias used by JobsTab.tsx (formerly from lib/services/print.service)
-    async manageJob(orderId: string, action: 'ACCEPT' | 'REJECT' | 'SHIP' | 'COMPLETE', trackingNumber?: string): Promise<{ message: string }> {
-        return this.manageOrder(orderId, action, trackingNumber);
+    async manageJob(orderId: string, action: 'ACCEPT' | 'REJECT' | 'SHIP' | 'COMPLETE', trackingNumber?: string, proofUrls?: string[]): Promise<{ message: string }> {
+        return this.manageOrder(orderId, action, trackingNumber, proofUrls);
     },
 
     // For the order placement page: submit a new print order to a provider

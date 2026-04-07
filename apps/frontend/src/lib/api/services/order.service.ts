@@ -69,6 +69,7 @@ function mapOrderItemFromApi(raw: any): OrderItem {
         quantity: raw.quantity ?? 1,
         price: raw.price ?? 0,
         model: raw.model ? mapModelFromOrderApi(raw.model) : undefined,
+        print_config: raw.print_config,
     };
 }
 
@@ -82,6 +83,7 @@ function mapOrderFromApi(raw: any): Order {
         type: raw.type === 'PRINT_JOB' ? 'PRINT_JOB' : 'PURCHASE',
         created_at: raw.created_at,
         updated_at: raw.updated_at,
+        proof_urls: raw.proof_urls || [],
     };
     return mapped as Order;
 }

@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { printService, PrintJob } from '@/lib/api/services/print.service';
-import { Loader2, Package, Check, X, Truck, Box } from 'lucide-react';
+import { Loader2, Package, Check, X, Truck, Box, Camera, Image as ImageIcon, Upload, Plus } from 'lucide-react';
+import { apiClient } from '@/lib/api/client';
 import Link from 'next/link';
 
 export default function JobsTab() {
     const [jobs, setJobs] = useState<PrintJob[]>([]);
     const [loading, setLoading] = useState(true);
+    const [uploadingForJob, setUploadingForJob] = useState<string | null>(null);
+    const [proofs, setProofs] = useState<Record<string, string[]>>({});
 
     const fetchJobs = async () => {
         setLoading(true);
@@ -33,10 +36,53 @@ export default function JobsTab() {
                 if (!tracking) return;
             }
 
-            await printService.manageJob(orderId, action, tracking);
+            const currentProofs = proofs[orderId] || [];
+            await printService.manageJob(orderId, action, tracking, currentProofs);
+            
+            // Clear proofs for this job after submission
+            setProofs(prev => {
+                const next = { ...prev };
+                delete next[orderId];
+                return next;
+            });
+            
             fetchJobs(); // Refresh
         } catch (error) {
             alert('Action failed');
+        }
+    };
+
+    const handleUploadProof = async (jobId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploadingForJob(jobId);
+        try {
+            // 1. Get Signed URL
+            const { upload_url, key } = await apiClient.post<{ upload_url: string; key: string }>('/models/upload-url', {
+                filename: `proof-${jobId}-${Date.now()}-${file.name}`,
+                content_type: file.type
+            });
+
+            // 2. Upload to S3
+            const res = await fetch(upload_url, {
+                method: 'PUT',
+                body: file,
+                headers: { 'Content-Type': file.type }
+            });
+
+            if (!res.ok) throw new Error('Upload failed');
+
+            // 3. Add to local state
+            setProofs(prev => ({
+                ...prev,
+                [jobId]: [...(prev[jobId] || []), key]
+            }));
+        } catch (error) {
+            console.error('Proof upload failed', error);
+            alert('Failed to upload proof photo');
+        } finally {
+            setUploadingForJob(null);
         }
     };
 
@@ -72,7 +118,7 @@ export default function JobsTab() {
                                         </span>
                                     </div>
                                     <p className="text-sm text-gray-400">
-                                        Requested by <span className="text-white">User #{job.user_id.slice(0, 6)}</span> • {new Date(job.created_at).toLocaleDateString()}
+                                        Requested by <span className="text-white">@{job.user?.username || job.user_id.slice(0, 6)}</span> • {new Date(job.created_at).toLocaleDateString()}
                                     </p>
                                 </div>
                                 <div className="flex gap-2">
@@ -116,15 +162,14 @@ export default function JobsTab() {
                                     <div key={i} className="flex gap-4 items-center">
                                         <div className="w-12 h-12 bg-gray-800 rounded shrink-0">
                                             {/* We might not have model details eager loaded depending on backend. 
-                                                If backend implementation of getJobs doesn't include 'model', we can't show image.
-                                                Assuming backend include: { model: true }
+                                                If backend implementation of getJobs doesn't include 'model', we fallback to print_config metadata.
                                             */}
-                                            {item.model?.thumbnails?.[0] && (
-                                                <img src={item.model.thumbnails[0]} alt="" className="w-full h-full object-cover rounded" />
+                                            {(item.model?.thumbnails?.[0] || item.print_config?.model_thumbnail) && (
+                                                <img src={item.model?.thumbnails?.[0] || item.print_config?.model_thumbnail} alt="" className="w-full h-full object-cover rounded" />
                                             )}
                                         </div>
                                         <div className="flex-1">
-                                            <p className="text-white text-sm font-medium">{item.model?.title || 'Unknown Model'}</p>
+                                            <p className="text-white text-sm font-medium">{item.model?.title || item.print_config?.model_title || 'Unknown Model'}</p>
                                             {item.print_config && (
                                                 <p className="text-xs text-gray-500">
                                                     {item.print_config.material} • {item.print_config.color} • x{item.quantity}
@@ -138,10 +183,73 @@ export default function JobsTab() {
                             {job.shipping_address && (
                                 <div className="mt-4 text-sm text-gray-400 border-t border-gray-800 pt-3">
                                     <p className="font-semibold text-gray-300 mb-1">Shipping to:</p>
-                                    <p>{job.shipping_address.label}</p>
-                                    <p>{job.shipping_address.city}, {job.shipping_address.country}</p>
+                                    <p>{job.shipping_address.label || job.shipping_address.location}</p>
+                                    {(job.shipping_address.city || job.shipping_address.country) && (
+                                        <p>
+                                            {job.shipping_address.city}{job.shipping_address.city && job.shipping_address.country ? ', ' : ''}{job.shipping_address.country}
+                                        </p>
+                                    )}
+                                    {job.shipping_address.notes && (
+                                        <p className="mt-1 italic text-xs text-gray-500">Note: {job.shipping_address.notes}</p>
+                                    )}
                                 </div>
                             )}
+
+                            {/* Photo Proof Section */}
+                            <div className="mt-6 border-t border-gray-800 pt-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h5 className="text-sm font-semibold text-gray-400 flex items-center gap-2">
+                                        <Camera className="w-3.5 h-3.5" /> Photo Proof
+                                    </h5>
+                                    
+                                    {(job.status === 'PROCESSING' || job.status === 'SHIPPED') && (
+                                        <label className="cursor-pointer group flex items-center gap-1.5 text-xs font-medium text-yellow-400 hover:text-yellow-300 transition-colors">
+                                            <Plus className="w-3.5 h-3.5" />
+                                            <span>Add Photo</span>
+                                            <input 
+                                                type="file" 
+                                                className="hidden" 
+                                                accept="image/*" 
+                                                onChange={(e) => handleUploadProof(job.id, e)}
+                                                disabled={uploadingForJob === job.id}
+                                            />
+                                        </label>
+                                    )}
+                                </div>
+
+                                <div className="flex flex-wrap gap-2">
+                                    {/* Existing Proofs */}
+                                    {job.proof_urls?.map((url, idx) => (
+                                        <div key={`existing-${idx}`} className="w-16 h-16 rounded-lg bg-gray-900 border border-white/5 overflow-hidden group relative">
+                                            <img src={url} alt="" className="w-full h-full object-cover" />
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                                <ImageIcon className="w-4 h-4 text-white" />
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {/* New (unsaved) Proofs */}
+                                    {proofs[job.id]?.map((url, idx) => (
+                                        <div key={`new-${idx}`} className="w-16 h-16 rounded-lg bg-yellow-400/10 border border-yellow-400/20 overflow-hidden relative group">
+                                            <img src={url} alt="" className="w-full h-full object-cover opacity-60" />
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <Upload className="w-4 h-4 text-yellow-400 animate-pulse" />
+                                            </div>
+                                            <div className="absolute top-0 right-0 p-1 bg-yellow-400 text-black text-[8px] font-bold">NEW</div>
+                                        </div>
+                                    ))}
+
+                                    {uploadingForJob === job.id && (
+                                        <div className="w-16 h-16 rounded-lg bg-gray-900 border border-dashed border-gray-700 flex items-center justify-center">
+                                            <Loader2 className="w-4 h-4 text-gray-600 animate-spin" />
+                                        </div>
+                                    )}
+
+                                    {(!job.proof_urls || job.proof_urls.length === 0) && (!proofs[job.id] || proofs[job.id].length === 0) && !uploadingForJob && (
+                                        <p className="text-[10px] text-gray-600 italic">No photos uploaded yet.</p>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     ))}
                 </div>
