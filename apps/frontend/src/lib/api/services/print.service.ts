@@ -54,7 +54,7 @@ export const printService = {
     },
 
     async manageOrder(orderId: string, action: 'ACCEPT' | 'REJECT' | 'SHIP' | 'COMPLETE', trackingNumber?: string, proofUrls?: string[]): Promise<{ message: string }> {
-        return apiClient.patch(`/print/jobs/${orderId}`, { action, tracking_number: trackingNumber, proof_urls: proofUrls });
+        return apiClient.put(`/print/jobs/${orderId}`, { action, tracking_number: trackingNumber, proof_urls: proofUrls });
     },
 
     // Alias used by JobsTab.tsx (formerly from lib/services/print.service)

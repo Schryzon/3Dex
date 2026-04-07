@@ -47,8 +47,10 @@ export default function JobsTab() {
             });
             
             fetchJobs(); // Refresh
-        } catch (error) {
-            alert('Action failed');
+        } catch (error: any) {
+            console.error('Action failed:', error);
+            const msg = error.response?.data?.message || 'Action failed';
+            alert(msg);
         }
     };
 

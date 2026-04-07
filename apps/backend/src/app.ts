@@ -40,8 +40,8 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000')
     .map((origin) => origin.trim())
     .filter(Boolean);
 
-app.use(cors({
-    origin: (origin, callback) => {
+const corsOptions = {
+    origin: (origin: any, callback: any) => {
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
@@ -51,8 +51,11 @@ app.use(cors({
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
-}));
-app.options(/(.*)/, cors());
+};
+
+app.use(cors(corsOptions));
+// Use pre-flight CORS for all routes
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 // Parse cookies — required for HTTP-only cookie auth
