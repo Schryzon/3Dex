@@ -8,7 +8,7 @@ export function useAuth() {
     const { data: user, isLoading, error } = useQuery({
         queryKey: authKeys.all,
         queryFn: () => authService.getCurrentUser(),
-        // Always run this query — with HTTP-only cookies there is no client-side
+        // Always run this query with HTTP-only cookies there is no client-side
         // way to know if a session exists. /auth/me returns null on 401.
         enabled: true,
         retry: false,

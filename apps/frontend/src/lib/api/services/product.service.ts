@@ -101,6 +101,7 @@ export const productService = {
                 if (filters.maxPrice) params.append('max_price', filters.maxPrice.toString());
                 if (filters.format) filters.format.forEach((f: string) => params.append('format', f));
                 if (filters.types) filters.types.forEach((t: string) => params.append('types', t));
+                if (filters.isNsfw !== undefined) params.append('is_nsfw', filters.isNsfw.toString());
                 if (filters.isPrintable !== undefined) params.append('isPrintable', filters.isPrintable.toString());
                 if (filters.sort) params.append('sort', filters.sort);
                 if (filters.artistId) params.append('artist_id', filters.artistId);

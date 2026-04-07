@@ -31,6 +31,7 @@ export interface FilterState {
     formats: string[];
     price: string;
     types: string[];
+    showNsfw: boolean;
 }
 
 interface CatalogFiltersProps {
@@ -47,7 +48,7 @@ export default function CatalogFilters({
     onToggleExpand,
 }: CatalogFiltersProps) {
     const [expandedSections, setExpandedSections] = useState<Set<string>>(
-        new Set(['format', 'price', 'type'])
+        new Set(['format', 'price', 'type', 'content'])
     );
 
     const toggleSection = (section: string) => {
@@ -81,13 +82,14 @@ export default function CatalogFilters({
     };
 
     const clearAllFilters = () => {
-        onFilterChange({ formats: [], price: 'all', types: [] });
+        onFilterChange({ formats: [], price: 'all', types: [], showNsfw: false });
     };
 
     const activeFilterCount =
         filters.formats.length +
         (filters.price !== 'all' ? 1 : 0) +
-        filters.types.length;
+        filters.types.length +
+        (filters.showNsfw ? 1 : 0);
 
     const hasActiveFilters = activeFilterCount > 0;
 
@@ -164,6 +166,17 @@ export default function CatalogFilters({
                                 </span>
                             );
                         })}
+                        {filters.showNsfw && (
+                            <span className="flex items-center gap-1 px-2 py-1 bg-red-900/30 text-red-400 border border-red-900/50 text-xs rounded-md font-medium">
+                                NSFW Included
+                                <button
+                                    onClick={() => onFilterChange({ ...filters, showNsfw: false })}
+                                    className="hover:text-red-300 cursor-pointer"
+                                >
+                                    <X className="w-3 h-3" />
+                                </button>
+                            </span>
+                        )}
                         <button
                             onClick={clearAllFilters}
                             className="text-xs text-gray-500 hover:text-white transition-colors cursor-pointer"
@@ -271,6 +284,36 @@ export default function CatalogFilters({
                                             {type.label}
                                         </button>
                                     ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Content Rating Section */}
+                        <div>
+                            <button
+                                onClick={() => toggleSection('content')}
+                                className="flex items-center justify-between w-full text-left mb-2 cursor-pointer"
+                            >
+                                <h4 className="text-sm font-semibold text-white">Content</h4>
+                                {expandedSections.has('content') ? (
+                                    <ChevronUp className="w-4 h-4 text-gray-500" />
+                                ) : (
+                                    <ChevronDown className="w-4 h-4 text-gray-500" />
+                                )}
+                            </button>
+                            {expandedSections.has('content') && (
+                                <div className="flex items-center gap-2 mt-2">
+                                    <label className="flex items-center gap-2 cursor-pointer group">
+                                        <input
+                                            type="checkbox"
+                                            checked={filters.showNsfw}
+                                            onChange={(e) => onFilterChange({ ...filters, showNsfw: e.target.checked })}
+                                            className="w-4 h-4 rounded border-gray-600 bg-transparent text-red-500 focus:ring-red-500 focus:ring-offset-0 cursor-pointer"
+                                        />
+                                        <span className="text-sm text-gray-400 group-hover:text-white transition-colors">
+                                            Show NSFW (18+)
+                                        </span>
+                                    </label>
                                 </div>
                             )}
                         </div>

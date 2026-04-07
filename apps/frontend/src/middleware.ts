@@ -4,7 +4,7 @@ import { jwtVerify } from 'jose';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// Routes that anyone can access (no auth required) — exact match
+// Routes that anyone can access (no auth required) exact match
 const PUBLIC_ROUTES = new Set([
   '/',
   '/landing',
