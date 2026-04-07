@@ -55,6 +55,7 @@ export interface ModelFilters {
     artistId?: string;
     page?: number;
     limit?: number;
+    isNsfw?: boolean;
 }
 
 export interface PublicAnalyticsStats {

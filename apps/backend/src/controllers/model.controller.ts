@@ -23,6 +23,7 @@ export async function list_models(req: Request, res: Response) {
     exclude_id,
     sort,
     status, // 'APPROVED' | 'PENDING' | 'REJECTED' | 'ALL'
+    is_nsfw,
     page = 1,
     limit = 20
   } = req.query;
@@ -56,6 +57,15 @@ export async function list_models(req: Request, res: Response) {
     where.artist = {
       role: 'ARTIST'
     };
+    // Secara default, Sembunyikan NSFW untuk user biasa/guest kecuali mereka request tampil
+    if (is_nsfw !== 'true') {
+      where.is_nsfw = false;
+    }
+  } else {
+    // Untuk admin / owner, sembunyikan jika secara eksplisit request false
+    if (is_nsfw === 'false') {
+      where.is_nsfw = false;
+    }
   }
 
   // 2. Search (Title, Description, Tags, or Category)

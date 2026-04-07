@@ -45,6 +45,7 @@ function CatalogContent() {
         formats: [],
         price: 'all',
         types: [],
+        showNsfw: false,
     });
 
     // Keep local input in sync when URL search param changes externally
@@ -67,7 +68,7 @@ function CatalogContent() {
         [localSearch, router]
     );
 
-    // Debounce: auto-search 500ms after user stops typing
+    // Debounce auto-search 500ms after user stops typing
     useEffect(() => {
         const t = setTimeout(() => {
             const q = localSearch.trim();
@@ -95,6 +96,7 @@ function CatalogContent() {
         maxPrice: filters.price === 'free' ? 0 : undefined,
         // Using 'tags' or 'types' - the backend list_models needs to support this
         types: filters.types.length > 0 ? filters.types : undefined,
+        isNsfw: filters.showNsfw ? true : undefined,
     };
 
     // Fetch products from API using Infinite Query
@@ -108,7 +110,7 @@ function CatalogContent() {
     } = useInfiniteProducts(apiFilters);
 
     const { user } = useAuth();
-    const products = (data?.pages.flatMap((page) => page.data) || []).filter(p => !p.is_nsfw || user?.show_nsfw);
+    const products = data?.pages.flatMap((page) => page.data) || [];
     const totalResults = data?.pages[0]?.pagination?.total || 0;
     const hasMore = hasNextPage;
 
@@ -359,7 +361,7 @@ function CatalogContent() {
                     {(filters.formats.length > 0 || filters.types.length > 0 || filters.price !== 'all' || activeCategory !== 'all' || searchQuery) && (
                         <button
                             onClick={() => {
-                                setFilters({ formats: [], price: 'all', types: [] });
+                                setFilters({ formats: [], price: 'all', types: [], showNsfw: false });
                                 setActiveCategory('all');
                                 setLocalSearch('');
                                 if (searchQuery) router.push('/catalog');

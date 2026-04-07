@@ -41,6 +41,12 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister, sessio
     password: '',
     rememberMe: false
   });
+  
+  // State untuk menampung pesan error dari proses input form
+  const [formErrors, setFormErrors] = useState({
+    email: '',
+    password: ''
+  });
   const googleBtnRef = useRef<HTMLDivElement>(null);
   const googleInitialized = useRef(false);
 
@@ -104,14 +110,48 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister, sessio
     }
   }, [isOpen, googleLogin, onClose, router]);
 
+  //form validation
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = { email: '', password: '' };
+
+    // email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email) {
+      newErrors.email = 'Email cannot be empty';
+      isValid = false;
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = 'Invalid email format';
+      isValid = false;
+    }
+
+    // password validation
+    if (!formData.password) {
+      newErrors.password = 'Password cannot be empty';
+      isValid = false;
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
+      isValid = false;
+    }
+
+    setFormErrors(newErrors);
+    return isValid;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setIsLoading(true);
 
+    // Run frontend validation before calling API
+    if (!validateForm()) {
+      return; 
+    }
+
+    setIsLoading(true);
     try {
       await login({ email: formData.email, password: formData.password });
       onClose();
+      // Reset form
       setFormData({ email: '', password: '', rememberMe: false });
       router.push('/dashboard');
     } catch (err: any) {
@@ -159,7 +199,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister, sessio
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-3">
-            {/* Error Message */}
+            {/* Error Message dari API Backend */}
             {error && (
               <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-lg text-sm">
                 {error}
@@ -172,8 +212,12 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister, sessio
               type="email"
               placeholder="Enter your email"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required
+              onChange={(e) => {
+                setFormData({ ...formData, email: e.target.value });
+                // Hapus error email ketika user mulai mengetik
+                if (formErrors.email) setFormErrors({ ...formErrors, email: '' });
+              }}
+              error={formErrors.email}
               disabled={isLoading}
               fullWidth
             />
@@ -185,15 +229,18 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegister, sessio
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Enter your password"
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                required
+                onChange={(e) => {
+                  setFormData({ ...formData, password: e.target.value });
+                  if (formErrors.password) setFormErrors({ ...formErrors, password: '' });
+                }}
+                error={formErrors.password}
                 disabled={isLoading}
                 fullWidth
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-[26px] bottom-0 my-auto h-fit text-gray-400 hover:text-white cursor-pointer"
+                className="absolute right-3 top-[36px] text-gray-400 hover:text-white cursor-pointer"
                 disabled={isLoading}
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
