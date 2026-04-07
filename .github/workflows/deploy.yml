@@ -11,38 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-
-      - name: Install & Build (On GitHub Runner)
-        run: |
-          npm install
-          npx prisma generate --schema=apps/backend/prisma/schema.prisma
-          npm run build --workspaces
-        env:
-          NEXT_PUBLIC_API_URL: https://api.3dex.studio
-          NEXT_PUBLIC_SITE_URL: https://3dex.studio
-          NEXT_PUBLIC_MINIO_URL: https://s3.3dex.studio
-          NEXT_PUBLIC_PROD_MIDTRANS_CLIENT_KEY: ${{ secrets.NEXT_PUBLIC_PROD_MIDTRANS_CLIENT_KEY }}
-          NEXT_PUBLIC_SB_MIDTRANS_CLIENT_KEY: ${{ secrets.NEXT_PUBLIC_SB_MIDTRANS_CLIENT_KEY }}
-          NODE_ENV: production
-
-      - name: Rsync Build Files to VPS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          # List the folders/files you actually need to run the app
-          source: "apps/backend/dist,apps/backend/package.json,apps/backend/prisma,apps/frontend/.next,apps/frontend/package.json,apps/frontend/public,apps/frontend/next.config.ts,package.json,package-lock.json,ecosystem.config.js"
-          target: "~/3Dex"
-
-      - name: Finalize on VPS
+      - name: SSH and Update
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -53,16 +22,4 @@ jobs:
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
             nvm use --lts
-
-            cd ~/3Dex
-            # Install production dependencies for all workspaces
-            npm install --omit=dev
-
-            # Generate Prisma client on the VPS
-            cd apps/backend
-            npx prisma generate
-            npx prisma migrate deploy
-            
-            # Restart the API and Frontend via PM2
-            cd ~/3Dex
-            pm2 reload ecosystem.config.js --update-env
+            update-3dex ${{ github.original_ref || github.ref_name }}
