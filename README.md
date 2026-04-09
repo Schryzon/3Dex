@@ -88,14 +88,14 @@ Refer to the following guide for initial setup and development:
 ---
 
 ## License
-This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.
+This project is licensed under the **GNU Affero General Public License v3.0 (GPL-3.0)**.
 
-You are free to use, study, modify, and distribute this software under the terms of the GPL-3.0.  
-Any distributed modifications must also be licensed under GPL-3.0.
+You are free to use, study, modify, and distribute this software under the terms of the AGPL-3.0.  
+Any distributed modifications must also be licensed under AGPL-3.0.
 
 See the [LICENSE](./LICENSE) file for full details.
 
 ## Primary Contributors
-- **I Nyoman Widiyasa Jayananda** "[Schryzon](https://github.com/Schryzon)" (Backend, SysAdmin)
-- **I Kadek Mahesa Permana Putra** "[Vuxyn](https://github.com/Vuxyn)" (Frontend, UI/UX)
-- **Thoriq Abdillah Falian Kusuma** "[ganijack](https://github.com/ganijack)" (Frontend, Integration)
+- **I Nyoman Widiyasa Jayananda** "[Schryzon](https://github.com/Schryzon)" (Backend, SysAdmin, Project Manager)
+- **I Kadek Mahesa Permana Putra** "[Vuxyn](https://github.com/Vuxyn)" (Frontend, UI/UX, QA)
+- **Thoriq Abdillah Falian Kusuma** "[ganijack](https://github.com/ganijack)" (Frontend, Integration, OAuth)
