@@ -137,7 +137,7 @@ export async function create_print_order(req: Auth_Request, res: Response): Prom
 export async function manage_print_order(req: Auth_Request, res: Response): Promise<void> {
     const { id: provider_id } = req.user;
     const order_id = req.params.order_id as string;
-    const { action, tracking_number } = req.body; // action: 'ACCEPT', 'REJECT', 'SHIP', 'COMPLETE'
+    const { action, tracking_number, proof_urls } = req.body; // action: 'ACCEPT', 'REJECT', 'SHIP', 'COMPLETE'
 
     const order = await prisma.order.findUnique({
         where: { id: order_id },
@@ -156,6 +156,10 @@ export async function manage_print_order(req: Auth_Request, res: Response): Prom
 
     let updateData: any = {};
     let itemStatus = '';
+
+    if (proof_urls && Array.isArray(proof_urls)) {
+        updateData.proof_urls = proof_urls;
+    }
 
     switch (action) {
         case 'ACCEPT':

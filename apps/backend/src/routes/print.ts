@@ -147,5 +147,6 @@ router.get("/jobs", require_auth, get_provider_jobs);
  *         description: Job updated
  */
 router.patch("/jobs/:order_id", require_auth, manage_print_order);
+router.put("/jobs/:order_id", require_auth, manage_print_order);
 
 export default router;

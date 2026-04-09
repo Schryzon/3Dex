@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { orderService } from '@/lib/api/services';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { getStorageUrl } from '@/lib/utils/storage';
-import { ShoppingBag, ChevronRight, Clock, CheckCircle, XCircle, ChevronLeft } from 'lucide-react';
+import { ShoppingBag, ChevronRight, Clock, CheckCircle, XCircle, ChevronLeft, Camera, Image as ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/features/auth';
 import { useRouter } from 'next/navigation';
@@ -88,14 +88,20 @@ export default function OrdersPage() {
                                             <div key={item.id} className="flex items-center justify-between gap-4">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-12 h-12 bg-gray-800 rounded-lg overflow-hidden flex-shrink-0">
-                                                        {item.model?.preview_url ? (
-                                                            <img src={getStorageUrl(item.model.preview_url)} alt="" className="w-full h-full object-cover" />
+                                                        {(item.model?.preview_url || (item.print_config as any)?.model_thumbnail) ? (
+                                                            <img 
+                                                                src={item.model?.preview_url ? getStorageUrl(item.model.preview_url) : (item.print_config as any)?.model_thumbnail} 
+                                                                alt="" 
+                                                                className="w-full h-full object-cover" 
+                                                            />
                                                         ) : (
                                                             <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-600">3D</div>
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-semibold text-white truncate max-w-[200px]">{item.model?.title || 'Unknown Model'}</p>
+                                                        <p className="text-sm font-semibold text-white truncate max-w-[200px]">
+                                                            {item.model?.title || (item.print_config as any)?.model_title || 'Unknown Model'}
+                                                        </p>
                                                         <div className="flex items-center gap-1.5 mt-0.5">
                                                             {item.model?.artist.avatar_url ? (
                                                                 <img
@@ -112,6 +118,31 @@ export default function OrdersPage() {
                                                         </div>
                                                     </div>
                                                 </div>
+
+                                    {/* Project Proofs (for Print Jobs) */}
+                                    {order.type === 'PRINT_JOB' && order.proof_urls && order.proof_urls.length > 0 && (
+                                        <div className="mt-10 pt-6 border-t border-gray-800/50">
+                                            <h4 className="text-sm font-semibold text-gray-400 mb-4 flex items-center gap-2">
+                                                <Camera className="w-4 h-4" /> Project Photos
+                                            </h4>
+                                            <div className="flex flex-wrap gap-3">
+                                                {order.proof_urls.map((url, idx) => (
+                                                    <a 
+                                                        key={idx} 
+                                                        href={url} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        className="w-24 h-24 rounded-xl overflow-hidden border border-white/5 hover:border-yellow-500/50 transition-all group relative cursor-zoom-in"
+                                                    >
+                                                        <img src={url} alt={`Proof ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                                            <ImageIcon className="w-5 h-5 text-white" />
+                                                        </div>
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                                 <div className="text-sm font-medium text-gray-300">
                                                     {formatPrice(item.price).idr}
                                                 </div>

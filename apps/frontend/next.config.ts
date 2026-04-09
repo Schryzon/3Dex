@@ -30,6 +30,16 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        // Cache static assets (images, fonts, 3d models, media, etc.)
+        source: "/(.*)\\.(ico|png|jpg|jpeg|svg|webp|avif|glb|gltf|woff|woff2|ttf|otf|mp4|webm|zip|rar)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
         source: "/(.*)",
         headers: [
           {

@@ -105,14 +105,20 @@ export default function PlaceOrderPage() {
             const finalItems = selectedModels.map(item => ({
                 model_id: item.model_id || undefined, // undefined for custom uploads
                 quantity: item.quantity,
-                print_config: item.print_config
+                print_config: {
+                    ...item.print_config,
+                    model_title: item.model.title,
+                    model_thumbnail: item.model.thumbnails?.[0]
+                }
             }));
 
             await printService.createOrder({
                 provider_id: provider.id,
                 items: finalItems,
                 shipping_address: {
-                    location: shippingLocation,
+                    label: shippingLocation,
+                    city: '', // Structured but blank for now as per plan
+                    country: '',
                     notes: shippingNotes
                 }
             });

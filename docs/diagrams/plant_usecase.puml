@@ -1,82 +1,161 @@
 @startuml
 left to right direction
 skinparam packageStyle rectangle
-skinparam actorStyle hollow
-
-actor "Guest" as guest
-actor "Customer" as customer
-actor "Artist" as artist
-actor "Provider (Print)" as provider
-actor "Admin" as admin
-
-customer --|> guest : " inherits"
-artist --|> customer : " inherits"
-provider --|> customer : " inherits"
-admin --|> customer : " inherits"
-
-rectangle "3Dex Platform" {
-  
-  usecase "Register/Login" as UC_Auth
-  usecase "Search Models" as UC_Search
-  usecase "View Model Details" as UC_View
-  
-  UC_View .> UC_Search : <<extend>>
-
-  usecase "Manage User Profile" as UC_Profile
-  usecase "Add to Wishlist/Cart" as UC_Cart
-  usecase "Checkout Cart" as UC_Checkout
-  usecase "Process Payment (Midtrans)" as UC_Pay
-  usecase "Download 3D Model" as UC_Download
-  usecase "Request 3D Print Job" as UC_PrintJob
-  usecase "Review Model/Provider" as UC_Review
-  usecase "Social: Follow User" as UC_Follow
-  usecase "Social: Create Post" as UC_Post
-  usecase "Social: Like/Comment" as UC_Interact
-  usecase "Manage Collections" as UC_Collection
-
-  UC_Checkout ..> UC_Pay : <<include>>
-  UC_PrintJob ..> UC_Checkout : <<include>>
-
-  UC_Cart .> UC_View : <<extend>>
-  UC_Interact .> UC_Post : <<extend>>
-
-  usecase "Upload & Sell Models" as UC_Upload
-  usecase "Manage Portfolio" as UC_Portfolio
-  UC_Portfolio .> UC_Upload : <<extend>>
-
-  usecase "Accept/Manage Print Jobs" as UC_AcceptPrint
-  usecase "Configure Print Materials" as UC_ConfigPrint
-
-  usecase "Approve/Reject Content" as UC_Approve
-  usecase "Manage Platform Stats" as UC_Stats
-  usecase "Manage Users" as UC_ManageUsers
-  usecase "Review Reports" as UC_Reports
+skinparam usecase {
+    BackgroundColor White
+    BorderColor DarkCyan
+    ArrowColor Teal
+    ActorBorderColor MidnightBlue
 }
 
-guest --> UC_Auth
-guest --> UC_Search
-guest --> UC_View
+' ======================= Actors =======================
+actor "Guest" as Guest
+actor "Customer" as Customer
+actor "Artist" as Artist
+actor "Provider" as Provider
+actor "Admin" as Admin
 
-customer --> UC_Profile
-customer --> UC_Cart
-customer --> UC_Checkout
-customer --> UC_Download
-customer --> UC_PrintJob
-customer --> UC_Review
-customer --> UC_Follow
-customer --> UC_Post
-customer --> UC_Interact
-customer --> UC_Collection
+' Non-Human Actors
+actor "System: Midtrans" as Gateway <<System>>
+actor "System: Notif Engine" as Notif <<System>>
+actor "Time / Cron Scheduler" as Time <<Time>>
 
-artist --> UC_Upload
-artist --> UC_Portfolio
+' Inheritance
+Customer -|> Guest
+Artist -|> Customer
+Provider -|> Customer
+Admin -|> Customer
 
-provider --> UC_AcceptPrint
-provider --> UC_ConfigPrint
+' ======================= Platform =======================
+package "3Dex Platform Mastery Map" {
+    
+    ' ======= Auth Phase =======
+    usecase "Register & Authenticate" as UC_Auth
+    usecase "Login via OAuth/Local" as UC_Login
+    usecase "Enable 2FA Security" as UC_2FA
 
-admin --> UC_Approve
-admin --> UC_Stats
-admin --> UC_ManageUsers
-admin --> UC_Reports
+    ' ======= Profile Phase =======
+    usecase "Manage User Profile & Bio" as UC_Profile
+    usecase "Update Shipping Addresses" as UC_Address
+    usecase "Toggle Content Visibility (NSFW)" as UC_NSFW
+    usecase "Sync Social Portfolios" as UC_SocialLinks
+
+    ' ======= Browsing =======
+    usecase "Search Models & Filter" as UC_Search
+    usecase "Interact with 3D Viewer" as UC_Viewer
+
+    ' ======= Interactions =======
+    usecase "Manage Wishlist" as UC_Wishlist
+    usecase "Create Curated Collections" as UC_Collection
+    usecase "Modify Collection Items" as UC_CollectionItems
+
+    ' ======= E-Commerce Flow =======
+    usecase "Assemble Cart" as UC_Cart
+    usecase "Configure Print Materials (Specs)" as UC_PrintJob
+    usecase "Proceed to Universal Checkout" as UC_Checkout
+    usecase "Verify Licensing & Terms" as UC_License
+    usecase "Process Webhook Payments" as UC_Webhook
+    usecase "Unlock Digital Downloads" as UC_Download
+
+    ' ======= Social Networking =======
+    usecase "Follow / Unfollow Creator" as UC_Follow
+    usecase "Create Social Feed Post" as UC_Post
+    usecase "Like a Social Post" as UC_Like
+    usecase "Comment on a Post" as UC_Comment
+
+    ' ======= Trust & Safety =======
+    usecase "Submit Model Review" as UC_ReviewModel
+    usecase "Submit User/Provider Rating" as UC_ReviewUser
+    usecase "Report Suspect Content/User" as UC_Report
+
+    ' ======= Artist Specific =======
+    usecase "Upload 3D Models" as UC_Upload
+    usecase "Define Dual Licenses & Pricings" as UC_Pricing
+    usecase "Request Earning Payouts" as UC_Payout
+
+    ' ======= Provider Specific =======
+    usecase "Accept/Reject Incoming Jobs" as UC_ReceivePrint
+    usecase "Define Print Capability Configs" as UC_ConfigPrint
+    usecase "Update Courier & Tracking Info" as UC_Tracking
+
+    ' ======= Admin Specific =======
+    usecase "Moderate Content (Approve/Reject)" as UC_Approve
+    usecase "Resolve Abuse Reports" as UC_ResolveReport
+    usecase "Ban/Suspend Malicious Nodes" as UC_Ban
+    usecase "Export System Revenue Stats" as UC_StatsAdmin
+
+    ' ======= Automated System/Time =======
+    usecase "Compile Global Aggregated Stats" as UC_CronStats
+    usecase "Prune Abandoned Webhooks/Carts" as UC_CronPay
+    usecase "Recalculate Averages from Reviews" as UC_CalcRating
+    usecase "Dispatch In-App/Email Alerts" as UC_Notify
+}
+
+' ======================= Connections =======================
+Guest --> UC_Auth
+Guest --> UC_Search
+Guest --> UC_Viewer
+
+Customer --> UC_Login
+Customer --> UC_Profile
+Customer --> UC_Wishlist
+Customer --> UC_Cart
+Customer --> UC_PrintJob
+Customer --> UC_Checkout
+Customer --> UC_Download
+Customer --> UC_Follow
+Customer --> UC_Post
+Customer --> UC_ReviewModel
+Customer --> UC_ReviewUser
+Customer --> UC_Report
+Customer --> UC_Collection
+
+Artist --> UC_Upload
+Artist --> UC_Pricing
+Artist --> UC_Payout
+
+Provider --> UC_ConfigPrint
+Provider --> UC_ReceivePrint
+Provider --> UC_Tracking
+
+Admin --> UC_Approve
+Admin --> UC_ResolveReport
+Admin --> UC_Ban
+Admin --> UC_StatsAdmin
+
+' Includes and Extends
+UC_Auth ..> UC_Login : <<include>>
+UC_Profile <.. UC_Address : <<extend>>
+UC_Profile <.. UC_NSFW : <<extend>>
+UC_Profile <.. UC_SocialLinks : <<extend>>
+UC_Profile <.. UC_2FA : <<extend>>
+
+UC_Collection ..> UC_CollectionItems : <<include>>
+
+UC_Post <.. UC_Like : <<extend>>
+UC_Post <.. UC_Comment : <<extend>>
+
+UC_Cart <.. UC_Checkout : <<extend>>
+UC_Checkout ..> UC_License : <<include>>
+UC_Checkout ..> UC_PrintJob : <<extend>>
+
+UC_Upload ..> UC_Pricing : <<include>>
+
+' System Webhook Triggers
+Gateway --> UC_Webhook
+UC_Checkout ..> UC_Webhook : <<include>>
+UC_Webhook ..> UC_Notify : <<trigger>>
+
+' Notification Engine Triggers
+Notif --> UC_Notify
+UC_Follow ..> UC_Notify : <<trigger>>
+UC_Post ..> UC_Notify : <<trigger>>
+UC_ReceivePrint ..> UC_Notify : <<trigger>>
+UC_ReviewModel ..> CalcRating : <<trigger>>
+
+' Time Actor Triggers
+Time --> UC_CronStats
+Time --> UC_CronPay
+Time --> UC_CalcRating
 
 @enduml
