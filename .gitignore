@@ -2,3 +2,5 @@
 *.env*
 !.env.docker.example
 node_modules/
+*.log
+*.txt

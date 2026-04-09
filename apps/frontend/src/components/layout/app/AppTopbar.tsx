@@ -226,7 +226,7 @@ export default function AppTopbar({
               </button>
               <button
                 onClick={showRegister}
-                className="px-4 py-1.5 bg-yellow-400 hover:bg-yellow-300 text-black text-sm font-bold rounded-lg transition-colors cursor-pointer"
+                className="px-4 py-1.5 bg-white hover:bg-yellow-300 text-black text-sm font-bold rounded-lg transition-colors cursor-pointer"
               >
                 Sign Up
               </button>
