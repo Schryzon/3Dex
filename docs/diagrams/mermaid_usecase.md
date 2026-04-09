@@ -1,80 +1,127 @@
-# Use Case Diagram
+# Godly Use Case Diagram
 
-This diagram represents the use cases derived from the 3Dex application schema, explicitly highlighting actor inheritance (generalization) and use case dependencies (`include` and `extend`).
+This exhaustive diagram represents **every** feature, flow, and abstraction boundary within the 3Dex platform. It heavily maps out actor generalization alongside automated triggers originating from autonomous `System` entities (e.g. Midtrans) and `Time` schedulers.
 
 ```mermaid
 flowchart LR
-    %% Actors
-    Guest(("Guest"))
-    Customer(("Customer"))
-    Artist(("Artist"))
-    Provider(("Provider (Print)"))
-    Admin(("Admin"))
+    %% Structural & Design constraints
+    classDef actor fill:#fce4ec,stroke:#880e4f,stroke-width:2px;
+    classDef system fill:#e3f2fd,stroke:#0d47a1,stroke-width:2px;
+    classDef time fill:#e0f2f1,stroke:#004d40,stroke-width:2px;
+    classDef uc fill:#ffffff,stroke:#424242,stroke-width:1px;
 
-    %% Generalization (Inheritance)
-    Customer -- inherits --> Guest
-    Artist -- inherits --> Customer
-    Provider -- inherits --> Customer
-    Admin -- inherits --> Customer
+    %% Base Actors
+    Guest(("Guest")):::actor
+    Customer(("Customer")):::actor
+    Artist(("Artist")):::actor
+    Provider(("Provider")):::actor
+    Admin(("Admin")):::actor
 
-    subgraph 3Dex Platform Environment
-        UC_Auth([Register / Login])
-        UC_Profile([Manage User Profile])
-        UC_Search([Browse / Search Models])
-        UC_View([View Model Details])
-        UC_Cart([Add to Wishlist / Cart])
-        UC_Checkout([Checkout & Place Order])
-        UC_Pay([Process Payment Midtrans])
-        UC_Download([Download 3D Model])
-        UC_Print([Request 3D Print Job])
-        UC_Review([Review Model / Provider])
-        UC_Social([Social: Follow / Post])
-        UC_Interact([Social: Like / Comment])
-        UC_Collection([Manage Collections])
+    %% Non-Human Actors
+    SystemMidtrans(("<<System>><br>Midtrans PG")):::system
+    SystemNotif(("<<System>><br>Notif Engine")):::system
+    TimeActor(("<<Time>><br>Cron Scheduler")):::time
+
+    %% Inheritance visually represented via dotted lines
+    Customer -. inherits .-> Guest
+    Artist -. inherits .-> Customer
+    Provider -. inherits .-> Customer
+    Admin -. inherits .-> Customer
+
+    subgraph 3Dex Platform Environment [3Dex Complete Architecture Bound]
+        direction TB
+
+        %% Auth & Profile
+        Auth([Register / Login]):::uc
+        2FA([Manage 2FA Security]):::uc
+        Profile([Manage Profile & Bio]):::uc
+        Address([Manage Shipping Addresses]):::uc
+        Theme([Toggle NSFW & Themes]):::uc
+
+        %% Catalog
+        Search([Browse & Filter Assets]):::uc
+        View([Interact with 3D Viewer]):::uc
+        Wishlist([Manage Wishlist/Saves]):::uc
+        Collection([Create & Manage Curated Collections]):::uc
         
-        UC_Upload([Upload & Sell Models])
-        UC_Portfolio([Manage Portfolio])
+        %% Social Community
+        Follow([Follow / Unfollow Users]):::uc
+        Post([Create Social Feed Posts]):::uc
+        Interact([Like & Comment on Posts]):::uc
+        Report([Report Abuse / TOS Violation]):::uc
         
-        UC_AcceptPrint([Accept & Manage Print Jobs])
-        UC_ConfigPrint([Configure Print Materials])
+        %% E-Commerce
+        Cart([Manage Shopping Cart]):::uc
+        PrintConfig([Configure Print Materials / Sizes]):::uc
+        Checkout([Checkout & Place Order]):::uc
+        Download([Unlock & Download Digital Assets]):::uc
+        Review([Submit Restricted User/Model Reviews]):::uc
+
+        %% Artist & Provider
+        Upload([Upload Native 3D Models / Set Assets]):::uc
+        Pricing([Set Dual Licensing & Pricing]):::uc
+        Portfolio([Arrange External Portfolio Links]):::uc
         
-        UC_Approve([Approve / Reject Content])
-        UC_Stats([Manage Platform Stats])
-        UC_ManageUsers([Manage Users])
-        UC_Reports([Review Reports])
+        AcceptPrint([Accept/Deny Incoming Print Orders]):::uc
+        TrackShip([Update Logistics & Tracking Info]):::uc
+
+        %% Admin Moderation
+        Approve([Approve/Reject Content Pipelines]):::uc
+        Moderate([Review Reports & Enforce Bans]):::uc
+        GenStats([Visualize Periodical Platform Stats]):::uc
+
+        %% System Operations
+        Webhook([Process Payment Webhooks]):::uc
+        NotifyUser([Dispatch In-App & Email Notifications]):::uc
+        CronCart([Prune Abandoned Payments/Carts]):::uc
+        CronStats([Compile Periodic Data Analytics]):::uc
+        CalcRatings([Recalculate Weighted Averages]):::uc
     end
 
-    %% Base Associations
-    Guest --> UC_Auth
-    Guest --> UC_Search
+    %% Human Connections
+    Guest --> Auth
+    Guest --> Search
+    Guest --> View
 
-    Customer --> UC_Profile
-    Customer --> UC_Cart
-    Customer --> UC_Checkout
-    Customer --> UC_Download
-    Customer --> UC_Print
-    Customer --> UC_Review
-    Customer --> UC_Social
-    Customer --> UC_Collection
+    Customer --> Profile
+    Customer --> Wishlist
+    Customer --> Collection
+    Customer --> Follow
+    Customer --> Post
+    Customer --> Report
+    Customer --> Cart
+    Customer --> Checkout
+    Customer --> Review
+    Customer --> Download
 
-    Artist --> UC_Upload
-    Artist --> UC_Portfolio
+    Artist --> Upload
+    Artist --> Portfolio
 
-    Provider --> UC_AcceptPrint
-    Provider --> UC_ConfigPrint
+    Provider --> PrintConfig
+    Provider --> AcceptPrint
+    Provider --> TrackShip
 
-    Admin --> UC_Approve
-    Admin --> UC_Stats
-    Admin --> UC_ManageUsers
-    Admin --> UC_Reports
+    Admin --> Approve
+    Admin --> Moderate
+    Admin --> GenStats
 
-    %% Includes (Mandatory execution)
-    UC_Checkout -. "<<include>>" .-> UC_Pay
-    UC_Print -. "<<include>>" .-> UC_Checkout
+    %% Non-Human Connections & Triggers
+    SystemMidtrans --> Webhook
+    Checkout -. "<<include>>" .-> Webhook
+    Webhook -. "<<trigger>>" .-> NotifyUser
+    
+    SystemNotif --> NotifyUser
 
-    %% Extends (Optional extension / Alternative flow)
-    UC_View -. "<<extend>>" .-> UC_Search
-    UC_Cart -. "<<extend>>" .-> UC_View
-    UC_Interact -. "<<extend>>" .-> UC_Social
-    UC_Portfolio -. "<<extend>>" .-> UC_Upload
+    TimeActor --> CronCart
+    TimeActor --> CronStats
+    TimeActor --> CalcRatings
+
+    %% Extensions & Inclusions within Platform
+    Auth -. "<<extend>>" .-> 2FA
+    Profile -. "<<extend>>" .-> Address
+    Profile -. "<<extend>>" .-> Theme
+    Post -. "<<extend>>" .-> Interact
+    Upload -. "<<include>>" .-> Pricing
+    Follow -. "<<trigger>>" .-> NotifyUser
+    Review -. "<<trigger>>" .-> CalcRatings
 ```

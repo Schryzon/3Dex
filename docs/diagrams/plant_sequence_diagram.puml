@@ -1,0 +1,28 @@
+@startuml
+skinparam style strictuml
+title User Review Submission Flow
+
+actor "Verified Buyer" as Buyer
+participant "Frontend (Next.js)" as Frontend
+participant "Backend API (Express)" as Backend
+database "PostgreSQL (Prisma)" as DB
+
+Buyer -> Frontend : Clicks "Submit Review" on Artist Profile
+Frontend -> Backend : GET /purchases?target_user_id={id}
+Backend -> DB : Query completed purchases & orders
+DB --> Backend : Return purchase history results
+Backend --> Frontend : Return user eligibility status
+
+alt User has NOT purchased/ordered from Artist
+    Frontend --> Buyer : Show "Must purchase first" Error Modal
+else User HAS purchased/ordered from Artist
+    Frontend --> Buyer : Show Review Submission Modal
+    Buyer -> Frontend : Enters rating (1-5) and comment
+    Buyer -> Frontend : Clicks "Submit"
+    Frontend -> Backend : POST /reviews/user
+    Backend -> DB : Validate transaction & Insert User_Review
+    DB --> Backend : Return record success status
+    Backend --> Frontend : Response 201 Created
+    Frontend --> Buyer : Show Success Toast & Refresh Reviews Tab
+end
+@enduml
