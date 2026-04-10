@@ -112,16 +112,17 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
       >
         <PerspectiveCamera makeDefault position={[0, 0, 5]} />
 
-        {/* Lighting */}
-        <ambientLight intensity={0.4} />
+        {/* Lighting adapted for modern Three.js PBR intensities */}
+        <ambientLight intensity={1.5} />
+        <hemisphereLight intensity={1} color="#ffffff" groundColor="#333333" />
         <directionalLight
           position={[10, 10, 5]}
-          intensity={1}
+          intensity={3}
           castShadow
           shadow-mapSize-width={1024}
           shadow-mapSize-height={1024}
         />
-        <pointLight position={[-10, -10, -5]} intensity={0.5} />
+        <pointLight position={[-10, -10, -5]} intensity={1.5} />
 
         {/* Environment for reflections */}
         <Environment preset="studio" />

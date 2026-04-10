@@ -270,10 +270,11 @@ export default function ModelViewer3D({ modelUrl }: { modelUrl?: string }) {
 function StageSetup() {
     return (
         <>
-            <ambientLight intensity={0.4} />
-            <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={2} castShadow />
-            <pointLight position={[-10, -10, -10]} intensity={1} color="#450a0a" />
-            <directionalLight position={[0, 5, 0]} intensity={1} />
+            <ambientLight intensity={1.5} />
+            <hemisphereLight intensity={1} color="#ffffff" groundColor="#333333" />
+            <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={5} castShadow />
+            <pointLight position={[-10, -10, -10]} intensity={3} color="#450a0a" />
+            <directionalLight position={[0, 5, 0]} intensity={3} />
         </>
     );
 }
