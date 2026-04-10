@@ -172,7 +172,14 @@ export default function AppTopbar({
               {isAvatarDropdownOpen && (
                 <div className="absolute right-0 top-full mt-2 w-56 bg-[#111] border border-white/[0.06] rounded-xl shadow-2xl z-50 overflow-hidden">
                   <div className="px-4 py-3 border-b border-white/[0.06]">
-                    <p className="text-white text-sm font-medium">{user?.username}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-white text-sm font-medium">{user?.username}</p>
+                      {user?.role && user.role !== 'CUSTOMER' && (
+                        <span className="px-1.5 py-0.25 bg-yellow-400/10 text-yellow-500 text-[9px] font-bold tracking-wider rounded uppercase">
+                          {user.role}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-gray-500 text-xs">{user?.email}</p>
                   </div>
                   <div className="py-1">

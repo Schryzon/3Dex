@@ -48,8 +48,14 @@ function Model({ url }: ModelProps) {
         if ((child as THREE.Mesh).isMesh) {
           const m = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;
           if (m) {
-            // Fix double-siding and white model issues
             m.side = THREE.DoubleSide;
+
+            // Fix for improperly exported GLTF models (common in game rips)
+            // where base color is #000000, causing textures to multiply to pitch black.
+            if (m.map && m.color.r === 0 && m.color.g === 0 && m.color.b === 0) {
+              m.color.setHex(0xffffff);
+            }
+
             if (!m.map && m.color.r > 0.9 && m.color.g > 0.9 && m.color.b > 0.9) {
               m.color.setHex(0xcccccc);
             }
@@ -105,7 +111,7 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
           antialias: true,
           alpha: true,
           powerPreference: 'high-performance',
-          toneMapping: 4, // ACESFilmicToneMapping
+          toneMapping: 7, // NeutralToneMapping (prevents blowout/overexposure on PBR models)
           toneMappingExposure: 1.0,
           outputColorSpace: 'srgb',
         }}
@@ -113,10 +119,11 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
         <PerspectiveCamera makeDefault position={[0, 0, 5]} />
 
         {/* Lighting */}
-        <ambientLight intensity={0.4} />
+        <ambientLight intensity={1.2} />
+        <hemisphereLight intensity={0.5} position={[0, 10, 0]} color="#ffffff" groundColor="#444444" />
         <directionalLight
           position={[10, 10, 5]}
-          intensity={1}
+          intensity={2.5}
           castShadow
           shadow-mapSize-width={1024}
           shadow-mapSize-height={1024}

@@ -279,22 +279,22 @@ export default function AboutUsPage() {
                 {/* License */}
                 <section>
                     <SectionLabel icon={Scale} label="Software License" />
-                    <h2 className="text-3xl font-bold tracking-tight mb-4">Open Source under GPL-3.0</h2>
+                    <h2 className="text-3xl font-bold tracking-tight mb-4">Open Source under AGPL-3.0</h2>
                     <div className="p-8 bg-[#111] border border-white/10 rounded-2xl">
                         <div className="flex items-start gap-5 mb-6">
                             <div className="shrink-0 w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
                                 <Scale className="w-6 h-6 text-gray-400" />
                             </div>
                             <div>
-                                <p className="font-bold text-lg mb-1">GNU General Public License v3.0</p>
-                                <p className="text-white/50 text-sm">The 3Dēx platform (frontend and backend) is licensed under the GPL-3.0.</p>
+                                <p className="font-bold text-lg mb-1">GNU Affero General Public License v3.0</p>
+                                <p className="text-white/50 text-sm">The 3Dēx platform (frontend and backend) is licensed under the AGPL-3.0.</p>
                             </div>
                         </div>
                         <div className="grid md:grid-cols-3 gap-4 text-sm mb-6">
                             {[
                                 { label: 'You can', items: ['Use freely for any purpose', 'Study and modify the code', 'Distribute copies'] },
-                                { label: 'You must', items: ['Keep the GPL-3.0 license', 'Share source code of modifications', 'State changes you made'] },
-                                { label: 'You cannot', items: ['Sublicense under different terms', 'Hold contributors liable', 'Close-source modified forks'] },
+                                { label: 'You must', items: ['Keep the AGPL-3.0 license', 'Share source code for ALL distributions', 'Include source for network users'] },
+                                { label: 'You cannot', items: ['Sublicense under different terms', 'Hold contributors liable', 'Close-source modifications'] },
                             ].map(col => (
                                 <div key={col.label} className="p-4 bg-white/[0.02] border border-white/5 rounded-xl">
                                     <p className="font-bold text-xs uppercase tracking-widest text-gray-500 mb-3">{col.label}</p>

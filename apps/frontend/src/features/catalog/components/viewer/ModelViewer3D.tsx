@@ -111,6 +111,12 @@ function Model({ url }: { url: string }) {
                 const material = mesh.material as THREE.MeshStandardMaterial;
 
                 if (material) {
+                    // Fix for improperly exported GLTF models (common in game rips)
+                    // where base color is #000000, causing textures to multiply to pitch black.
+                    if (material.map && material.color.r === 0 && material.color.g === 0 && material.color.b === 0) {
+                        material.color.setHex(0xffffff);
+                    }
+
                     // Fix "Full White" issues common in untextured models
                     if (!material.map && material.color.r > 0.9 && material.color.g > 0.9 && material.color.b > 0.9) {
                         material.color.setHex(0xcccccc); // Set to light gray rather than pure white
@@ -180,7 +186,7 @@ export default function ModelViewer3D({ modelUrl }: { modelUrl?: string }) {
                         shadows
                         gl={{
                             antialias: true,
-                            toneMapping: 4, // ACESFilmicToneMapping
+                            toneMapping: 7, // NeutralToneMapping (prevents blowout/overexposure on PBR models)
                             toneMappingExposure: 1.0,
                             outputColorSpace: 'srgb',
                         }}
@@ -270,10 +276,11 @@ export default function ModelViewer3D({ modelUrl }: { modelUrl?: string }) {
 function StageSetup() {
     return (
         <>
-            <ambientLight intensity={0.4} />
-            <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={2} castShadow />
+            <ambientLight intensity={1.2} />
+            <hemisphereLight intensity={0.5} position={[0, 10, 0]} color="#ffffff" groundColor="#444444" />
+            <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={2.5} castShadow />
             <pointLight position={[-10, -10, -10]} intensity={1} color="#450a0a" />
-            <directionalLight position={[0, 5, 0]} intensity={1} />
+            <directionalLight position={[0, 5, 0]} intensity={2.5} />
         </>
     );
 }
