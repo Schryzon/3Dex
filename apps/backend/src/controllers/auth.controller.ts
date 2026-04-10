@@ -138,15 +138,9 @@ export async function complete_profile(req: any, res: Response) {
         const updated = await prisma.user.update({
             where: { id: userId },
             data: { username: trimmed },
-            select: {
-                id: true,
-                email: true,
-                username: true,
-                role: true,
-                avatar_url: true,
-                display_name: true,
-            },
         });
+
+        const { password, google_id, ...safe_user } = updated;
 
         // Reissue the token with the fresh username
         const token = sign_token({
@@ -159,7 +153,7 @@ export async function complete_profile(req: any, res: Response) {
         // Update the session cookie
         res.cookie("3dex_session", token, COOKIE_OPTIONS);
 
-        res.json(await sign_user_urls(updated));
+        res.json(await sign_user_urls(safe_user));
     } catch (error: any) {
         res.status(500).json({ message: error.message });
     }
@@ -193,32 +187,27 @@ export async function get_me(req: any, res: Response) {
     try {
         const db_user = await prisma.user.findUnique({
             where: { id: user.id },
-            select: {
-                id: true,
-                email: true,
-                username: true,
-                role: true,
-                avatar_url: true,
-                display_name: true,
-            },
         });
 
         if (!db_user) {
             return res.status(404).json({ message: "User not found" });
         }
 
+        // Remove sensitive info
+        const { password, google_id, ...safe_user } = db_user;
+
         // Reissue the token with the freshest user data
         const token = sign_token({
-            id: db_user.id,
-            email: db_user.email,
-            username: db_user.username,
-            role: db_user.role,
+            id: safe_user.id,
+            email: safe_user.email,
+            username: safe_user.username,
+            role: safe_user.role,
         });
 
         // Update the session cookie
         res.cookie("3dex_session", token, COOKIE_OPTIONS);
 
-        res.json(await sign_user_urls(db_user));
+        res.json(await sign_user_urls(safe_user));
     } catch (error: any) {
         res.status(500).json({ message: error.message });
     }
