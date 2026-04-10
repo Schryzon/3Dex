@@ -186,7 +186,7 @@ export default function ModelViewer3D({ modelUrl }: { modelUrl?: string }) {
                         shadows
                         gl={{
                             antialias: true,
-                            toneMapping: 7, // NeutralToneMapping (fixes dark models crushing to black)
+                            toneMapping: 7, // NeutralToneMapping (prevents blowout/overexposure on PBR models)
                             toneMappingExposure: 1.0,
                             outputColorSpace: 'srgb',
                         }}
@@ -276,10 +276,11 @@ export default function ModelViewer3D({ modelUrl }: { modelUrl?: string }) {
 function StageSetup() {
     return (
         <>
-            <ambientLight intensity={0.4} />
-            <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={2} castShadow />
+            <ambientLight intensity={1.2} />
+            <hemisphereLight intensity={0.5} position={[0, 10, 0]} color="#ffffff" groundColor="#444444" />
+            <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={2.5} castShadow />
             <pointLight position={[-10, -10, -10]} intensity={1} color="#450a0a" />
-            <directionalLight position={[0, 5, 0]} intensity={1} />
+            <directionalLight position={[0, 5, 0]} intensity={2.5} />
         </>
     );
 }
