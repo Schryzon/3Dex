@@ -180,7 +180,7 @@ export default function ModelViewer3D({ modelUrl }: { modelUrl?: string }) {
                         shadows
                         gl={{
                             antialias: true,
-                            toneMapping: 4, // ACESFilmicToneMapping
+                            toneMapping: 7, // NeutralToneMapping (fixes dark models crushing to black)
                             toneMappingExposure: 1.0,
                             outputColorSpace: 'srgb',
                         }}

@@ -1,16 +1,32 @@
 # 3Dēx
 
 <p align="center">
+  <img src="apps/frontend/public/og-image.png" alt="3Dēx Social Preview" width="44%" />
+</p>
+
+<p align="center">
     <img src="https://github.com/Schryzon/3Dex/actions/workflows/deploy.yml/badge.svg" />
+    <img src="https://img.shields.io/github/repo-size/Schryzon/3Dex?style=flat-square&color=gray" />
+    <img src="https://img.shields.io/github/stars/Schryzon/3Dex?style=flat-square&color=yellow" />
+    <img src="https://img.shields.io/github/forks/Schryzon/3Dex?style=flat-square&color=blue" />
+    <br />
     <img src="https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js&logoColor=white" />
     <img src="https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB" />
+    <img src="https://img.shields.io/badge/Three.js-black?style=flat-square&logo=three.js&logoColor=white" />
+    <img src="https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white" />
+    <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white" />
+    <img src="https://img.shields.io/badge/TanStack_Query-FF4154?style=flat-square&logo=react-query&logoColor=white" />
+    <br />
     <img src="https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white" />
     <img src="https://img.shields.io/badge/Express-000000?style=flat-square&logo=express&logoColor=white" />
     <img src="https://img.shields.io/badge/PostgreSQL-336791?style=flat-square&logo=postgresql&logoColor=white" />
     <img src="https://img.shields.io/badge/Prisma-2D3748?style=flat-square&logo=prisma&logoColor=white" />
-    <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white" />
-    <img src="https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white" />
-    <img src="https://img.shields.io/badge/License-GPL--3.0-blue.svg?style=flat-square" />
+    <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white" />
+    <br />
+    <img src="https://img.shields.io/badge/Framer_Motion-0055FF?style=flat-square&logo=framer&logoColor=white" />
+    <img src="https://img.shields.io/badge/Zustand-443E38?style=flat-square" />
+    <img src="https://img.shields.io/badge/Zod-3E67B1?style=flat-square&logo=zod&logoColor=white" />
+    <img src="https://img.shields.io/badge/License-AGPL--3.0-orange.svg?style=flat-square" />
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" />
 </p>
 
@@ -88,10 +104,10 @@ Refer to the following guide for initial setup and development:
 ---
 
 ## License
-This project is licensed under the **GNU Affero General Public License v3.0 (GPL-3.0)**.
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
 
 You are free to use, study, modify, and distribute this software under the terms of the AGPL-3.0.  
-Any distributed modifications must also be licensed under AGPL-3.0.
+Any distributed modifications (including those offered over a network) must also be licensed under AGPL-3.0 and made available as open source.
 
 See the [LICENSE](./LICENSE) file for full details.
 

@@ -105,7 +105,7 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
           antialias: true,
           alpha: true,
           powerPreference: 'high-performance',
-          toneMapping: 4, // ACESFilmicToneMapping
+          toneMapping: 7, // NeutralToneMapping (fixes dark models crushing to black)
           toneMappingExposure: 1.0,
           outputColorSpace: 'srgb',
         }}
