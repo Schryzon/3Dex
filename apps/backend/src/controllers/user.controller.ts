@@ -366,6 +366,22 @@ export async function revert_to_customer(req: Auth_Request, res: Response): Prom
             }
         });
 
+        // Audit log — actor is the user themselves (self-initiated step-down)
+        await prisma.admin_Audit_Log.create({
+            data: {
+                admin_id: id,
+                action: 'USER_STEP_DOWN',
+                target_id: id,
+                target_type: 'USER',
+                reason: `Voluntary step-down from ${role} to CUSTOMER`,
+                metadata: {
+                    username: user.username,
+                    previous_role: role,
+                    email: user.email,
+                }
+            }
+        });
+
         res.json({ 
             message: "Successfully reverted to regular user.", 
             user: await sign_user_urls(user) 
