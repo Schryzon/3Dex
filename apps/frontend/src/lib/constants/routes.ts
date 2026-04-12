@@ -41,6 +41,6 @@ export const ROUTES = {
         USERS: '/admin/users',
         MODELS: '/admin/models',
         REPORTS: '/admin/reports',
-        ANALYTICS: '/admin/analytics',
+        AUDIT_LOGS: '/admin/audit-logs',
     }
 } as const;
