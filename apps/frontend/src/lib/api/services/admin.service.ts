@@ -63,5 +63,38 @@ export const adminService = {
             stats: any;
         }>('/admin/summary');
         return response.data;
+    },
+
+    // Audit Logs
+    getAuditLogs: async (params?: {
+        action?: string;
+        admin_id?: string;
+        from?: string;
+        to?: string;
+        page?: number;
+        limit?: number;
+    }) => {
+        const query = new URLSearchParams();
+        if (params?.action)    query.set('action', params.action);
+        if (params?.admin_id)  query.set('admin_id', params.admin_id);
+        if (params?.from)      query.set('from', params.from);
+        if (params?.to)        query.set('to', params.to);
+        if (params?.page)      query.set('page', String(params.page));
+        if (params?.limit)     query.set('limit', String(params.limit));
+        const qs = query.toString();
+        const response = await api.get<{
+            data: {
+                id: string;
+                action: string;
+                target_id: string;
+                target_type: string;
+                reason: string;
+                metadata: any;
+                created_at: string;
+                admin: { id: string; username: string; display_name: string | null; avatar_url: string | null };
+            }[];
+            meta: { total: number; page: number; limit: number; pages: number };
+        }>(`/admin/audit-logs${qs ? `?${qs}` : ''}`);
+        return response.data;
     }
 };

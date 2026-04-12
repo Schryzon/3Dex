@@ -16,6 +16,8 @@ import {
     Box,
     Settings2,
     Settings,
+    Flag,
+    Shield,
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 import { ROUTES } from './routes';
@@ -49,10 +51,11 @@ export const SIDEBAR_ARTIST: NavItem[] = [
 ];
 
 export const SIDEBAR_ADMIN: NavItem[] = [
-    { id: 'admin-dash', label: 'Dashboard', icon: LayoutDashboard, href: ROUTES.ADMIN.DASHBOARD },
-    { id: 'users', label: 'Users', icon: Users, href: ROUTES.ADMIN.USERS },
-    { id: 'models', label: 'Models', icon: FileText, href: ROUTES.ADMIN.MODELS },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3, href: ROUTES.ADMIN.ANALYTICS },
+    { id: 'admin-dash', label: 'Dashboard',  icon: LayoutDashboard, href: ROUTES.ADMIN.DASHBOARD },
+    { id: 'users',      label: 'Users',      icon: Users,           href: ROUTES.ADMIN.USERS },
+    { id: 'models',     label: 'Models',     icon: FileText,        href: ROUTES.ADMIN.MODELS },
+    { id: 'reports',    label: 'Reports',    icon: Flag,            href: ROUTES.ADMIN.REPORTS },
+    { id: 'audit-logs', label: 'Audit Logs', icon: Shield,          href: ROUTES.ADMIN.AUDIT_LOGS },
 ];
 
 export const SIDEBAR_PROVIDER: NavItem[] = [

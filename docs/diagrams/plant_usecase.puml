@@ -79,9 +79,10 @@ package "3Dex Platform Mastery Map" {
     usecase "Update Courier & Tracking Info" as UC_Tracking
 
     ' ======= Admin Specific =======
-    usecase "Moderate Content (Approve/Reject)" as UC_Approve
+    usecase "Moderate Content & Users (Approve/Reject)" as UC_Approve
     usecase "Resolve Abuse Reports" as UC_ResolveReport
     usecase "Ban/Suspend Malicious Nodes" as UC_Ban
+    usecase "View & Audit Admin Actions" as UC_Audit
     usecase "Export System Revenue Stats" as UC_StatsAdmin
 
     ' ======= Automated System/Time =======
@@ -121,6 +122,7 @@ Provider --> UC_Tracking
 Admin --> UC_Approve
 Admin --> UC_ResolveReport
 Admin --> UC_Ban
+Admin --> UC_Audit
 Admin --> UC_StatsAdmin
 
 ' Includes and Extends

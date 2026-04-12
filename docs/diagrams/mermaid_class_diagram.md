@@ -67,8 +67,11 @@ classDiagram
     class Admin {
         +approveModel(id: String)
         +rejectModel(id: String)
+        +approveUser(id: String)
+        +rejectUser(id: String)
         +suspendUser(id: String)
         +generatePlatformReport()
+        +viewAuditLogs()
     }
 
     Customer --|> User : inherits
@@ -295,6 +298,17 @@ classDiagram
         +reviewReport(status: Report_Status)
     }
 
+    class Admin_Audit_Log {
+        +String id
+        +String admin_id
+        +Audit_Action action
+        +String target_id
+        +String target_type
+        +String reason
+        +Json metadata
+        +DateTime created_at
+    }
+
     User *-- Cart_Item : owns
     User *-- Wishlist : owns
     Order *-- Order_Item : contains
@@ -322,6 +336,7 @@ classDiagram
     User "1" --> "*" Notification : receives
     User "1" --> "*" Collection : manages
     User "1" --> "*" Report : submits
+    User "1" --> "*" Admin_Audit_Log : performs_action
     
     Model "*" --> "*" Tag : tagged_with
 ```

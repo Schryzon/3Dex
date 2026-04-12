@@ -7,7 +7,8 @@ import {
     approve_user,
     reject_user,
     trigger_stats_aggregation,
-    get_dashboard_summary
+    get_dashboard_summary,
+    get_audit_logs
 } from "../controllers/admin.controller";
 import {
     get_reports,
@@ -254,5 +255,50 @@ router.post("/reports/:id/dismiss", require_auth, require_admin, dismiss_report)
  *         description: Content deleted
  */
 router.delete("/reports/:type/:id/delete", require_auth, require_admin, delete_reported_content);
+
+/**
+ * @openapi
+ * /admin/audit-logs:
+ *   get:
+ *     summary: Get admin audit logs (paginated)
+ *     tags:
+ *       - Admin
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: action
+ *         schema:
+ *           type: string
+ *           enum: [DELETE_MODEL, DELETE_POST, DELETE_COMMENT, BAN_USER, REJECT_MODEL]
+ *       - in: query
+ *         name: admin_id
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: from
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *       - in: query
+ *         name: to
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 30
+ *     responses:
+ *       200:
+ *         description: Paginated audit logs
+ */
+router.get("/audit-logs", require_auth, require_admin, get_audit_logs);
 
 export default router;
