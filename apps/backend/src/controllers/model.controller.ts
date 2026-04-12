@@ -394,6 +394,49 @@ export async function delete_model(req: Request, res: Response) {
       });
     }
 
+    // Audit log — always written (admin requires a reason, artist gets auto-reason)
+    if (user_role === "ADMIN") {
+      const { reason } = req.body;
+      if (!reason || !reason.trim()) {
+        return res.status(400).json({ message: "Admins must provide a reason when deleting a model." });
+      }
+
+      await prisma.admin_Audit_Log.create({
+        data: {
+          admin_id: user_id,
+          action: "DELETE_MODEL",
+          target_id: model_id,
+          target_type: "MODEL",
+          reason: reason.trim(),
+          metadata: {
+            title: (model as any).title,
+            artist_id: (model as any).artist_id,
+            artist_username: (model as any).artist?.username || null,
+            price: (model as any).price,
+            deleted_by: "ADMIN",
+          },
+        },
+      });
+    } else {
+      // Artist deleting their own model — audited automatically, no reason required
+      await prisma.admin_Audit_Log.create({
+        data: {
+          admin_id: user_id,           // the artist acts as the "actor" in this log
+          action: "DELETE_MODEL",
+          target_id: model_id,
+          target_type: "MODEL",
+          reason: "Owner-initiated deletion",
+          metadata: {
+            title: (model as any).title,
+            artist_id: (model as any).artist_id,
+            artist_username: (model as any).artist?.username || null,
+            price: (model as any).price,
+            deleted_by: "OWNER",
+          },
+        },
+      });
+    }
+
     await delete_model_by_id(model_id);
 
     res.json({

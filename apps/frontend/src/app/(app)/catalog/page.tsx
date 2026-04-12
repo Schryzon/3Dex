@@ -114,6 +114,13 @@ function CatalogContent() {
     const totalResults = data?.pages[0]?.pagination?.total || 0;
     const hasMore = hasNextPage;
 
+    // Track cards dismissed via delete so they vanish immediately
+    const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+    const visibleProducts = products.filter((p) => !dismissed.has(p.id));
+    const handleDeleted = useCallback((id: string) => {
+        setDismissed((prev) => new Set([...prev, id]));
+    }, []);
+
     const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
     const handleSave = async (productId: string) => {
@@ -285,7 +292,7 @@ function CatalogContent() {
                         ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 gap-4 md:gap-5'
                         : 'grid grid-cols-1 lg:grid-cols-2 gap-3'
                 }>
-                    {products.map((product) => (
+                    {visibleProducts.map((product) => (
                         <CatalogProductCard
                             key={product.id}
                             id={product.id}
@@ -306,6 +313,8 @@ function CatalogContent() {
                             reviewCount={product.reviewCount || 0}
                             isNsfw={product.is_nsfw}
                             viewMode={viewMode}
+                            artistId={product.artist.id}
+                            onDeleted={() => handleDeleted(product.id)}
                         />
                     ))}
                 </div>

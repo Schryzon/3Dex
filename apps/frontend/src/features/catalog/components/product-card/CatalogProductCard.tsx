@@ -6,6 +6,7 @@ import { Heart, Star, ShoppingCart, Check } from 'lucide-react';
 import { useCart } from '@/features/cart';
 import { formatPrice } from '@/lib/utils';
 import { getStorageUrl } from '@/lib/utils/storage';
+import ModelCardMenu from './ModelCardMenu';
 
 const FORMAT_COLORS: Record<string, string> = {
     blend: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
@@ -43,6 +44,10 @@ interface CatalogProductCardProps {
     reviewCount?: number;
     isNsfw?: boolean;
     viewMode?: 'grid' | 'list';
+    /** The artist's user ID — required for the three-dot menu access-control */
+    artistId?: string;
+    /** Called after a successful delete so the parent can remove the card */
+    onDeleted?: () => void;
 }
 
 export default function CatalogProductCard({
@@ -64,6 +69,8 @@ export default function CatalogProductCard({
     reviewCount,
     isNsfw = false,
     viewMode = 'grid',
+    artistId,
+    onDeleted,
 }: CatalogProductCardProps) {
     const [isHovered, setIsHovered] = useState(false);
     const [imageLoaded, setImageLoaded] = useState(false);
@@ -193,13 +200,25 @@ export default function CatalogProductCard({
                             e.stopPropagation();
                             onSave?.();
                         }}
-                        className={`self-center p-3 mr-3 rounded-xl transition-all cursor-pointer hover:bg-white/5 ${isSaved
+                        className={`self-center p-3 mr-1 rounded-xl transition-all cursor-pointer hover:bg-white/5 ${isSaved
                             ? 'text-red-500'
                             : 'text-gray-600 hover:text-white'
                             }`}
                     >
                         <Heart className={`w-5 h-5 ${isSaved ? 'fill-current' : ''}`} />
                     </button>
+
+                    {/* Three-dot menu (list view) */}
+                    {artistId && (
+                        <div className="self-center mr-3" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                            <ModelCardMenu
+                                modelId={id}
+                                modelTitle={title}
+                                artistId={artistId}
+                                onDeleted={onDeleted}
+                            />
+                        </div>
+                    )}
                 </div>
             </Wrapper>
         );
@@ -312,6 +331,18 @@ export default function CatalogProductCard({
                                     <ShoppingCart className="h-3.5 w-3.5 md:h-4 md:w-4" />
                                 )}
                             </button>
+                        )}
+
+                        {/* Three-dot menu (grid view — hidden on mobile) */}
+                        {artistId && (
+                            <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} className="max-md:hidden">
+                                <ModelCardMenu
+                                    modelId={id}
+                                    modelTitle={title}
+                                    artistId={artistId}
+                                    onDeleted={onDeleted}
+                                />
+                            </div>
                         )}
                     </div>
 

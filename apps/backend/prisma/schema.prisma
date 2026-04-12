@@ -92,6 +92,7 @@ model User {
   following     Follow[]       @relation("follower")
   notifications Notification[]
   collections   Collection[]
+  admin_audit_logs Admin_Audit_Log[] @relation("admin_audit_logs")
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -475,3 +476,28 @@ model Report {
   created_at DateTime @default(now())
 }
 
+// ─── Admin Audit Log ──────────────────────────────────────────────────────────
+
+enum Audit_Action {
+  DELETE_MODEL
+  DELETE_POST
+  DELETE_COMMENT
+  BAN_USER
+  REJECT_MODEL
+  REJECT_USER
+}
+
+model Admin_Audit_Log {
+  id          String       @id @default(uuid())
+  admin_id    String
+  admin       User         @relation("admin_audit_logs", fields: [admin_id], references: [id])
+  action      Audit_Action
+  target_id   String
+  target_type String
+  reason      String
+  metadata    Json?        // Snapshot of deleted resource (title, artist, etc.)
+  created_at  DateTime     @default(now())
+
+  @@index([admin_id])
+  @@index([created_at])
+}
