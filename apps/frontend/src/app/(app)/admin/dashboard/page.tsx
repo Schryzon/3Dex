@@ -18,7 +18,8 @@ import {
     ExternalLink,
     CheckCircle2,
     XCircle,
-    UserCircle
+    UserCircle,
+    Shield
 } from 'lucide-react';
 import Link from 'next/link';
 import { adminService } from '@/lib/api/services/admin.service';
@@ -84,6 +85,15 @@ export default function AdminDashboardPage() {
             href: '/admin/reports',
             description: 'User-flagged content awaiting moderation'
         },
+        {
+            label: 'Audit Logs',
+            value: '↗',
+            icon: Shield,
+            color: 'text-purple-400',
+            bg: 'bg-purple-400/10',
+            href: '/admin/audit-logs',
+            description: 'View all admin action records'
+        },
     ];
 
     const platformStats: any[] = [
@@ -108,7 +118,7 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {(stats as any).map((stat: any) => (
                     <Link
                         key={stat.label}

@@ -55,18 +55,42 @@ export async function approve_model(req: Request, res: Response) {
     }
 }
 
-export async function reject_model(req: Request, res: Response) {
+export async function reject_model(req: Auth_Request, res: Response) {
     const id = req.params.id as string;
+    const admin_id = req.user.id;
+    const { reason } = req.body;
 
     if (typeof id !== 'string') {
         return res.status(400).json({ message: "Invalid ID format" });
     }
 
+    if (!reason || !reason.trim()) {
+        return res.status(400).json({ message: "A reason is required when rejecting a model." });
+    }
+
     try {
         const model = await prisma.model.update({
             where: { id },
-            data: { status: "REJECTED" }
+            data: { status: "REJECTED" },
+            include: { artist: { select: { username: true } } }
         });
+
+        // Audit log
+        await prisma.admin_Audit_Log.create({
+            data: {
+                admin_id,
+                action: "REJECT_MODEL",
+                target_id: id,
+                target_type: "MODEL",
+                reason: reason.trim(),
+                metadata: {
+                    title: model.title,
+                    artist_username: (model as any).artist?.username || null,
+                    price: model.price,
+                }
+            }
+        });
+
         res.json(model);
     } catch (error) {
         res.status(404).json({ message: "Model not found!" });
@@ -166,6 +190,23 @@ export async function reject_user(req: Auth_Request, res: Response) {
                 }
             }
         });
+
+        // Audit log
+        await prisma.admin_Audit_Log.create({
+            data: {
+                admin_id,
+                action: "REJECT_USER",
+                target_id: id,
+                target_type: "USER",
+                reason: reason.trim(),
+                metadata: {
+                    username: user.username,
+                    role: user.role,
+                    email: user.email,
+                }
+            }
+        });
+
         res.json({ message: "User rejected!", user });
     } catch (error: any) {
         res.status(404).json({ message: "User not found or error updating!" });
@@ -240,6 +281,62 @@ export async function get_dashboard_summary(req: Request, res: Response) {
                 date: s.created_at,
                 transactions: s.data.total_transactions || 0
             })).reverse()
+        });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+/**
+ * Get Admin Audit Logs — paginated and filterable
+ */
+export async function get_audit_logs(req: Request, res: Response) {
+    try {
+        const {
+            action,
+            admin_id,
+            from,
+            to,
+            page = 1,
+            limit = 30
+        } = req.query;
+
+        const where: any = {};
+
+        if (action) where.action = action;
+        if (admin_id) where.admin_id = admin_id;
+        if (from || to) {
+            where.created_at = {};
+            if (from) where.created_at.gte = new Date(from as string);
+            if (to)   where.created_at.lte = new Date(to as string);
+        }
+
+        const take = Number(limit);
+        const skip = (Number(page) - 1) * take;
+
+        const [logs, total] = await Promise.all([
+            prisma.admin_Audit_Log.findMany({
+                where,
+                orderBy: { created_at: 'desc' },
+                take,
+                skip,
+                include: {
+                    admin: {
+                        select: { id: true, username: true, display_name: true, avatar_url: true }
+                    }
+                }
+            }),
+            prisma.admin_Audit_Log.count({ where })
+        ]);
+
+        res.json({
+            data: logs,
+            meta: {
+                total,
+                page: Number(page),
+                limit: take,
+                pages: Math.ceil(total / take)
+            }
         });
     } catch (error: any) {
         res.status(500).json({ message: error.message });
