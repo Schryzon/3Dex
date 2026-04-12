@@ -485,6 +485,8 @@ enum Audit_Action {
   BAN_USER
   REJECT_MODEL
   REJECT_USER
+  APPROVE_USER
+  USER_STEP_DOWN
 }
 
 model Admin_Audit_Log {

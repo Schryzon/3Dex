@@ -156,6 +156,23 @@ export async function approve_user(req: Auth_Request, res: Response) { // Auth_R
                 }
             }
         });
+
+        // Audit log
+        await prisma.admin_Audit_Log.create({
+            data: {
+                admin_id,
+                action: 'APPROVE_USER',
+                target_id: id,
+                target_type: 'USER',
+                reason: 'Application approved by admin',
+                metadata: {
+                    username: user.username,
+                    role: user.role,
+                    email: user.email,
+                }
+            }
+        });
+
         res.json({ message: "User approved!", user });
     } catch (error: any) {
         res.status(404).json({ message: "User not found or error updating!" });

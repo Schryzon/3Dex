@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Shield, Filter, ChevronLeft, ChevronRight, AlertTriangle, Trash2, UserX, X, RefreshCw, ClipboardList } from 'lucide-react';
+import { Shield, Filter, ChevronLeft, ChevronRight, AlertTriangle, Trash2, UserX, UserCheck, UserMinus, X, RefreshCw, ClipboardList } from 'lucide-react';
 import { adminService } from '@/lib/api/services/admin.service';
 import { getStorageUrl } from '@/lib/utils/storage';
 
@@ -21,12 +21,14 @@ type AuditLog = {
 };
 
 const ACTION_LABELS: Record<string, { label: string; color: string; icon: React.FC<{ className?: string }> }> = {
-    DELETE_MODEL:   { label: 'Delete Model',       color: 'text-red-400 bg-red-500/10 border-red-500/20',       icon: Trash2 },
-    DELETE_POST:    { label: 'Delete Post',        color: 'text-red-400 bg-red-500/10 border-red-500/20',       icon: Trash2 },
+    DELETE_MODEL:   { label: 'Delete Model',       color: 'text-red-400 bg-red-500/10 border-red-500/20',         icon: Trash2 },
+    DELETE_POST:    { label: 'Delete Post',        color: 'text-red-400 bg-red-500/10 border-red-500/20',         icon: Trash2 },
     DELETE_COMMENT: { label: 'Delete Comment',     color: 'text-orange-400 bg-orange-500/10 border-orange-500/20', icon: Trash2 },
     BAN_USER:       { label: 'Ban User',           color: 'text-purple-400 bg-purple-500/10 border-purple-500/20', icon: UserX },
     REJECT_MODEL:   { label: 'Reject Model',       color: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20', icon: AlertTriangle },
-    REJECT_USER:    { label: 'Reject Application', color: 'text-pink-400 bg-pink-500/10 border-pink-500/20',    icon: UserX },
+    REJECT_USER:    { label: 'Reject Application', color: 'text-pink-400 bg-pink-500/10 border-pink-500/20',       icon: UserX },
+    APPROVE_USER:   { label: 'Approve User',       color: 'text-green-400 bg-green-500/10 border-green-500/20',   icon: UserCheck },
+    USER_STEP_DOWN: { label: 'User Step-Down',     color: 'text-sky-400 bg-sky-500/10 border-sky-500/20',         icon: UserMinus },
 };
 
 const ALL_ACTIONS = Object.keys(ACTION_LABELS);
@@ -178,29 +180,57 @@ export default function AdminAuditLogsPage() {
                     </button>
                 </div>
 
-                {/* Stats strip */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {(['DELETE_MODEL', 'REJECT_MODEL', 'REJECT_USER', 'BAN_USER', 'DELETE_POST'] as const).map((a) => {
-                        const cfg = ACTION_LABELS[a];
-                        const Icon = cfg.icon;
-                        const count = logs.filter(l => l.action === a).length;
-                        return (
-                            <button
-                                key={a}
-                                onClick={() => { setFilterAction(filterAction === a ? '' : a); setPage(1); }}
-                                className={`flex items-center gap-2.5 p-3 rounded-xl border transition-all cursor-pointer text-left ${
-                                    filterAction === a
-                                        ? cfg.color + ' border-opacity-50'
-                                        : 'bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.04]'
-                                }`}
-                            >
-                                <Icon className={`w-4 h-4 shrink-0 ${filterAction === a ? '' : 'text-gray-600'}`} />
-                                <div>
-                                    <p className={`text-xs font-medium ${filterAction === a ? '' : 'text-gray-500'}`}>{cfg.label}</p>
-                                </div>
-                            </button>
-                        );
-                    })}
+                {/* Stats strip — two labelled groups */}
+                <div className="space-y-3">
+                    {/* Group 1: Moderation Actions */}
+                    <div>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-2 px-0.5">Moderation Actions</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            {(['DELETE_MODEL', 'REJECT_MODEL', 'REJECT_USER', 'BAN_USER'] as const).map((a) => {
+                                const cfg = ACTION_LABELS[a];
+                                const Icon = cfg.icon;
+                                return (
+                                    <button
+                                        key={a}
+                                        onClick={() => { setFilterAction(filterAction === a ? '' : a); setPage(1); }}
+                                        className={`flex items-center gap-2 p-2.5 rounded-xl border transition-all cursor-pointer text-left ${
+                                            filterAction === a
+                                                ? cfg.color + ' border-opacity-50'
+                                                : 'bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.04]'
+                                        }`}
+                                    >
+                                        <Icon className={`w-3.5 h-3.5 shrink-0 ${filterAction === a ? '' : 'text-gray-600'}`} />
+                                        <p className={`text-xs font-medium ${filterAction === a ? '' : 'text-gray-500'}`}>{cfg.label}</p>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Group 2: User Status / Role Updates */}
+                    <div>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-2 px-0.5">User Status &amp; Role Updates</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {(['APPROVE_USER', 'USER_STEP_DOWN'] as const).map((a) => {
+                                const cfg = ACTION_LABELS[a];
+                                const Icon = cfg.icon;
+                                return (
+                                    <button
+                                        key={a}
+                                        onClick={() => { setFilterAction(filterAction === a ? '' : a); setPage(1); }}
+                                        className={`flex items-center gap-2 p-2.5 rounded-xl border transition-all cursor-pointer text-left ${
+                                            filterAction === a
+                                                ? cfg.color + ' border-opacity-50'
+                                                : 'bg-white/[0.02] border-white/[0.05] hover:bg-white/[0.04]'
+                                        }`}
+                                    >
+                                        <Icon className={`w-3.5 h-3.5 shrink-0 ${filterAction === a ? '' : 'text-gray-600'}`} />
+                                        <p className={`text-xs font-medium ${filterAction === a ? '' : 'text-gray-500'}`}>{cfg.label}</p>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
                 </div>
 
                 {/* Filters */}
@@ -267,7 +297,7 @@ export default function AdminAuditLogsPage() {
                                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
                                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Target</th>
                                 <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Reason</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actor</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -335,7 +365,7 @@ export default function AdminAuditLogsPage() {
                                             <p className="text-gray-300 text-xs line-clamp-2" title={log.reason}>{log.reason}</p>
                                         </td>
 
-                                        {/* Admin */}
+                                        {/* Actor — admin for most, user themselves for USER_STEP_DOWN */}
                                         <td className="px-4 py-3">
                                             <div className="flex items-center gap-2">
                                                 {log.admin.avatar_url ? (
@@ -345,7 +375,11 @@ export default function AdminAuditLogsPage() {
                                                         className="w-6 h-6 rounded-full border border-white/10 object-cover shrink-0"
                                                     />
                                                 ) : (
-                                                    <span className="w-6 h-6 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-[10px] font-bold text-purple-300 shrink-0">
+                                                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
+                                                        log.action === 'USER_STEP_DOWN'
+                                                            ? 'bg-sky-500/20 border border-sky-500/30 text-sky-300'
+                                                            : 'bg-purple-500/20 border border-purple-500/30 text-purple-300'
+                                                    }`}>
                                                         {log.admin.username.charAt(0).toUpperCase()}
                                                     </span>
                                                 )}
@@ -353,7 +387,9 @@ export default function AdminAuditLogsPage() {
                                                     <p className="text-gray-300 text-xs font-medium">
                                                         {log.admin.display_name || log.admin.username}
                                                     </p>
-                                                    <p className="text-gray-600 text-[10px]">@{log.admin.username}</p>
+                                                    <p className="text-gray-600 text-[10px]">
+                                                        {log.action === 'USER_STEP_DOWN' ? 'self' : '@'}{log.admin.username}
+                                                    </p>
                                                 </div>
                                             </div>
                                         </td>
