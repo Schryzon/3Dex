@@ -236,6 +236,17 @@ erDiagram
         DateTime created_at
     }
 
+    Admin_Audit_Log {
+        String id PK
+        String admin_id FK
+        Audit_Action action
+        String target_id
+        String target_type
+        String reason
+        Json metadata
+        DateTime created_at
+    }
+
     %% Relationships Crow's Foot
     User ||--o{ Model : "creates models"
     User ||--o{ Purchase : "purchases"
@@ -252,6 +263,7 @@ erDiagram
     User ||--o{ Notification : "receives"
     User ||--o{ Collection : "creates collection"
     User ||--o{ Report : "reports"
+    User ||--o{ Admin_Audit_Log : "logged in audit"
 
     Model }o--|| Category : "belongs to category"
     Model }o--o{ Tag : "has tags"

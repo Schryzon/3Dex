@@ -252,6 +252,18 @@ entity Report {
   * created_at : DateTime
 }
 
+entity Admin_Audit_Log {
+  * id : String <<PK>>
+  --
+  * admin_id : String <<FK>>
+  * action : Audit_Action
+  target_id : String
+  target_type : String
+  reason : String
+  metadata : Json
+  * created_at : DateTime
+}
+
 User ||--o{ Model : "artist"
 User ||--o{ Purchase : "purchases"
 User ||--o{ Review : "writes"
@@ -269,6 +281,7 @@ User ||--o{ Follow : "following"
 User ||--o{ Notification : "receives"
 User ||--o{ Collection : "owns"
 User ||--o{ Report : "reports"
+User ||--o{ Admin_Audit_Log : "logged in audit"
 
 Model }o--|| Category : "belongs to"
 Model }o--o{ Tag : "has tags"
