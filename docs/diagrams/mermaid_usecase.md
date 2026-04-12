@@ -66,8 +66,9 @@ flowchart LR
         TrackShip([Update Logistics & Tracking Info]):::uc
 
         %% Admin Moderation
-        Approve([Approve/Reject Content Pipelines]):::uc
+        Approve([Approve/Reject Content & Users]):::uc
         Moderate([Review Reports & Enforce Bans]):::uc
+        Audit([View & Audit Admin Actions]):::uc
         GenStats([Visualize Periodical Platform Stats]):::uc
 
         %% System Operations
@@ -103,6 +104,7 @@ flowchart LR
 
     Admin --> Approve
     Admin --> Moderate
+    Admin --> Audit
     Admin --> GenStats
 
     %% Non-Human Connections & Triggers
