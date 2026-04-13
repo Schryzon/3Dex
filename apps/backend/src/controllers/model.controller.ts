@@ -8,6 +8,7 @@ import {
 } from "../services/model.service";
 import { get_download_url_s3, sign_user_urls } from "../services/storage.service";
 import { get_purchase } from "../services/purchase.service";
+import { embed_and_save_model } from "../services/embedding.service";
 import prisma from "../prisma";
 import { Auth_Request } from "../middlewares/auth.middleware";
 
@@ -318,6 +319,9 @@ export async function upload_model(req: Request, res: Response) {
       is_printable: is_printable !== undefined ? !!is_printable : true,
       file_format: file_format
     });
+
+    // Fire & Forget: Background Embedding for Dēxie
+    embed_and_save_model(model.id).catch(err => console.error("[Dēxie Background] Failed to embed:", err.message));
 
     res.status(201).json(model);
   } catch (error: any) {

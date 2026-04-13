@@ -6,11 +6,14 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client"
   binaryTargets = ["native", "linux-musl", "windows"]
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
   provider = "postgresql"
+  extensions = [vector]
 }
 
 enum Role {
@@ -71,6 +74,9 @@ model User {
   last_login_at      DateTime?
   show_nsfw          Boolean @default(false)
   
+  // Dexie AI Ecosystem Settings
+  dexie_enabled      Boolean @default(true)
+  
   models        Model[]        @relation("artist_models")
   purchases     Purchase[]
   reviews       Review[]       // Product Reviews given
@@ -112,6 +118,7 @@ model Model {
   license     License_Type @default(PERSONAL_USE)
   is_printable Boolean     @default(true)
   file_format String       @default("glb")
+  embedding   Unsupported("vector(384)")? // 384 dimensions for all-MiniLM-L6-v2
 
   artist_id String
   artist    User   @relation("artist_models", fields: [artist_id], references: [id])

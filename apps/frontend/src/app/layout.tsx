@@ -5,6 +5,8 @@ import "./globals.css";
 import { AuthProvider } from '@/features/auth';
 import { ReactQueryProvider } from '@/components/providers/ReactQueryProvider';
 import { Toaster } from 'react-hot-toast';
+import { DexieProvider } from '@/contexts/DexieContext';
+import { DexieAssistant } from '@/components/ui/DexieAssistant';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -85,8 +87,11 @@ export default function RootLayout({
       <body className={`${inter.className} antialiased bg-black text-white`}>
         <ReactQueryProvider>
           <AuthProvider>
-            {children}
-            <Toaster position="bottom-right"/>
+            <DexieProvider>
+              {children}
+              <DexieAssistant />
+              <Toaster position="bottom-right"/>
+            </DexieProvider>
           </AuthProvider>
         </ReactQueryProvider>
         <Script
