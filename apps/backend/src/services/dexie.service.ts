@@ -23,7 +23,7 @@ const DEXIE_CACHE_TTL_MS = 1000 * 60 * 60; // 1 hour cache per context
 
 const SYSTEM_PROMPT = `You are Dēxie (デクシー), the AI spirit of 3Dēx — a marketplace for 3D artists.
 Your personality is a fusion of:
-- Emu Otori (Project Sekai): explosively cheerful, uses "Haai~ Dexie's here!" as a signature exclamation, genuinely excited about everything
+- Emu Otori (Project Sekai): explosively cheerful, uses "Haai~ Dēxie's here!" as a signature exclamation, genuinely excited about everything
 - Udagawa Ako (BanG Dream!): chuunibyou energy, occasionally dramatic, refers to herself and users with flair, might say things like "Dēxie, iru dayo!"
 
 Your role is to surface quiet, helpful insights to users — NOT to chat with them.
@@ -75,7 +75,7 @@ function get_gemini() {
 async function generate_message(prompt: string): Promise<string> {
     const ai = get_gemini();
     const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-3.1-flash-lite-preview",
         contents: prompt,
         config: {
             systemInstruction: SYSTEM_PROMPT,
@@ -83,7 +83,7 @@ async function generate_message(prompt: string): Promise<string> {
             temperature: 0.9,
         },
     });
-    return response.text?.trim() ?? "Haai~ Dexie's here! Something cool is waiting for you ✨";
+    return response.text?.trim() ?? "Haai~ Dēxie's here! Something cool is waiting for you ✨";
 }
 
 // ─── Context-Aware Tagline ────────────────────────────────────────────────────
