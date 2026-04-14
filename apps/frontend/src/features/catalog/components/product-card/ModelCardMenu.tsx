@@ -321,8 +321,8 @@ export default function ModelCardMenu({ modelId, modelTitle, artistId, onDeleted
                         if (!open && triggerRef.current) {
                             const rect = triggerRef.current.getBoundingClientRect();
                             setCoords({
-                                top: rect.bottom + window.scrollY,
-                                left: rect.right + window.scrollX,
+                                top: rect.bottom,
+                                left: rect.right,
                                 width: rect.width
                             });
                         }
@@ -406,22 +406,24 @@ export default function ModelCardMenu({ modelId, modelTitle, artistId, onDeleted
             </div>
 
             {/* Modals */}
-            {modal === 'report' && (
+            {modal === 'report' && createPortal(
                 <ReportModal
                     modelId={modelId}
                     modelTitle={modelTitle}
                     onClose={() => setModal(null)}
-                />
+                />,
+                document.body
             )}
 
-            {modal === 'delete' && (
+            {modal === 'delete' && createPortal(
                 <DeleteModal
                     modelId={modelId}
                     modelTitle={modelTitle}
                     isAdmin={isAdmin}
                     onDeleted={onDeleted}
                     onClose={() => setModal(null)}
-                />
+                />,
+                document.body
             )}
         </>
     );

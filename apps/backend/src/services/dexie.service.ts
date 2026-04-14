@@ -86,7 +86,7 @@ async function generate_message(prompt: string, max_retries = 2): Promise<string
     for (let attempt = 0; attempt <= max_retries; attempt++) {
         try {
             const response = await ai.models.generateContent({
-                model: "gemini-3.1-flash-lite-preview",
+                model: "gemini-flash-latest",
                 contents: prompt,
                 config: {
                     systemInstruction: SYSTEM_PROMPT,
