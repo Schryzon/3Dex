@@ -78,24 +78,48 @@ function get_gemini() {
     return new GoogleGenAI({ apiKey: api_key });
 }
 
-async function generate_message(prompt: string): Promise<string> {
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function generate_message(prompt: string, max_retries = 2): Promise<string> {
     const ai = get_gemini();
-    const response = await ai.models.generateContent({
-        model: "gemini-3.1-flash-lite-preview",
-        contents: prompt,
-        config: {
-            systemInstruction: SYSTEM_PROMPT,
-            maxOutputTokens: 60,
-            temperature: 0.9,
-            safetySettings: [
-                { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
-                { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
-                { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
-                { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
-            ],
-        },
-    });
-    return response.text?.trim() ?? "Haai~ Dēxie's here! Something cool is waiting for you ✨";
+
+    for (let attempt = 0; attempt <= max_retries; attempt++) {
+        try {
+            const response = await ai.models.generateContent({
+                model: "gemini-3.1-flash-lite-preview",
+                contents: prompt,
+                config: {
+                    systemInstruction: SYSTEM_PROMPT,
+                    maxOutputTokens: 60,
+                    temperature: 0.9,
+                    safetySettings: [
+                        { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
+                        { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
+                        { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
+                        { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
+                    ],
+                },
+            });
+
+            return response.text?.trim() ?? "Haai~ Dēxie's here! Something cool is waiting for you ✨";
+        } catch (error: any) {
+            const is_retryable =
+                error.message?.includes("503") ||
+                error.status === 503 ||
+                error.message?.includes("high demand");
+
+            if (is_retryable && attempt < max_retries) {
+                const delay = Math.pow(2, attempt) * 1000;
+                console.warn(`[Dēxie] Gemini high demand (503). Retrying in ${delay}ms... (Attempt ${attempt + 1}/${max_retries})`);
+                await sleep(delay);
+                continue;
+            }
+
+            throw error;
+        }
+    }
+
+    return "Haai~ Dēxie's here! Something cool is waiting for you ✨";
 }
 
 // ─── Context-Aware Tagline ────────────────────────────────────────────────────
@@ -116,9 +140,9 @@ export async function get_dexie_tagline(
 
     // 2. Try global context cache (only for non-personalized context_detail)
     // We only use global cache if the context_detail doesn't sound like it has user-specific data
-    const can_use_global = !context_detail.toLowerCase().includes("user's") && 
-                          !context_detail.toLowerCase().includes("user has");
-    
+    const can_use_global = !context_detail.toLowerCase().includes("user's") &&
+        !context_detail.toLowerCase().includes("user has");
+
     if (can_use_global) {
         const global_cached = get_cached(context_key, true);
         if (global_cached) return global_cached;
@@ -130,13 +154,13 @@ ${context_detail}
 </user_context>`;
 
     const message = await generate_message(prompt);
-    
+
     // Save to both if applicable
     set_cached(user_cache_key, message);
     if (can_use_global) {
         set_cached(context_key, message, true);
     }
-    
+
     return message;
 }
 
