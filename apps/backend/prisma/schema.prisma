@@ -159,6 +159,7 @@ model Purchase {
 
   created_at DateTime @default(now())
 
+  @@unique([user_id, model_id])
   @@index([user_id])
   @@index([model_id])
 }
