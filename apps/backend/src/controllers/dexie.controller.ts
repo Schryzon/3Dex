@@ -37,17 +37,38 @@ export async function get_tagline(req: Request, res: Response) {
                 ? `User is browsing the catalog and seems interested in "${tag}" models`
                 : "User is browsing the full 3D model catalog";
             break;
-        case "cart":
-            context_detail = "User has items in their cart and is considering a purchase";
+        case "cart": {
+            let cart_summary = "User has items in their cart and is considering a purchase";
+            if (user?.id) {
+                const cart = await prisma.cart_Item.findMany({
+                    where: { user_id: user.id },
+                    include: { model: { select: { title: true } } },
+                });
+                if (cart.length > 0) {
+                    const titles = cart.map(i => i.model.title).join(", ");
+                    cart_summary = `User has ${cart.length} items in their cart: [${titles}]. They are close to buying!`;
+                }
+            }
+            context_detail = cart_summary;
             break;
+        }
         case "wishlist":
             context_detail = "User is viewing their wishlist of saved 3D models";
             break;
-        case "catalog":
-            context_detail = tag
-                ? `User is viewing a specific model tagged with "${tag}"`
-                : "User is viewing a model detail page";
+        case "catalog": {
+            let detail = "User is viewing a model detail page";
+            if (tag) {
+                const model = await prisma.model.findUnique({
+                    where: { id: tag },
+                    include: { artist: { select: { username: true } }, category: { select: { name: true } } },
+                });
+                if (model) {
+                    detail = `User is viewing the 3D model "${model.title}" by "${model.artist.username}" in the ${model.category?.name ?? "general"} category.`;
+                }
+            }
+            context_detail = detail;
             break;
+        }
         case "library":
             context_detail = "User is viewing their purchased model library";
             break;

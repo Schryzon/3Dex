@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/features/auth";
 import api from "@/lib/api/client";
@@ -29,23 +29,52 @@ export function DexieProvider({ children }: { children: React.ReactNode }) {
 
   // Deduce context key from the current URL
   const getContextKey = () => {
-    if (pathname.includes("/catalog")) return "catalog";
-    if (pathname.includes("/cart")) return "cart";
-    if (pathname.includes("/wishlist")) return "wishlist";
-    if (pathname.includes("/profile/library")) return "library";
-    if (pathname.startsWith("/artist/")) return "artist";
-    if (pathname === "/") return "home";
-    return "browse";
+    // 1. Dēxie stays silent on the catalog browse list page
+    if (pathname === "/catalog") return null;
+
+    // 2. Specific 3D model detail page
+    const detailMatch = pathname.match(/^\/catalog\/([^\/]+)$/);
+    if (detailMatch) return { ctx: "catalog", tag: detailMatch[1] };
+
+    if (pathname.includes("/cart")) return { ctx: "cart" };
+    if (pathname.includes("/wishlist")) return { ctx: "wishlist" };
+    if (pathname.includes("/profile/library")) return { ctx: "library" };
+    if (pathname.startsWith("/artist/")) {
+      const artistMatch = pathname.match(/^\/artist\/([^\/]+)$/);
+      return { ctx: "artist", tag: artistMatch?.[1] };
+    }
+    if (pathname === "/") return { ctx: "home" };
+    
+    return { ctx: "browse" };
   };
+
+  const seenMessages = useRef<Set<string>>(new Set());
 
   const fetchTagline = async () => {
     try {
-      const ctx = getContextKey();
+      const config = getContextKey();
+      if (!config) {
+        setEnabled(false);
+        setMessage(null);
+        return;
+      }
+
+      const { ctx, tag } = config;
       // Only fetch if it's a page that Dēxie cares about
-      const res = await api.get<any>(`/dexie/tagline?ctx=${ctx}`);
+      const url = `/dexie/tagline?ctx=${ctx}${tag ? `&tag=${tag}` : ""}`;
+      const res = await api.get<any>(url);
+      
       setEnabled(res.enabled);
+      
       if (res.enabled && res.message) {
-        setMessage(res.message);
+        // Deduplication: Only show if not seen this session
+        if (!seenMessages.current.has(res.message)) {
+          setMessage(res.message);
+          seenMessages.current.add(res.message);
+        } else {
+          // If already seen, we stay quiet for this specific page visit
+          setMessage(null);
+        }
       } else {
         setMessage(null);
       }
