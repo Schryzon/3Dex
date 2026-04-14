@@ -1,7 +1,7 @@
 # 3Dēx
 
 <p align="center">
-  <img src="apps/frontend/public/og-image.png" alt="3Dēx Social Preview" width="44%" />
+  <img src="og-image.png" alt="3Dēx Social Preview" width="44%" />
 </p>
 
 <p align="center">
