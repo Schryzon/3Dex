@@ -58,15 +58,15 @@ export default function Collection() {
     if (selectedItems.size === 0) return;
     for (const itemId of selectedItems) {
       const purchase = collections.find(p => p.id === itemId);
-      if (purchase) await handleDownload(purchase.model_id, purchase.model.title);
+      if (purchase && purchase.model) await handleDownload(purchase.model_id, purchase.model.title);
     }
     setSelectedItems(new Set());
   };
 
   const filteredCollections = collections
-    .filter((item) => item.model.title.toLowerCase().includes(searchQuery.toLowerCase()))
+    .filter((item) => (item.model?.title || "Deleted Model").toLowerCase().includes(searchQuery.toLowerCase()))
     .sort((a, b) => {
-      if (sortBy === 'name') return a.model.title.localeCompare(b.model.title);
+      if (sortBy === 'name') return (a.model?.title || "Deleted Model").localeCompare(b.model?.title || "Deleted Model");
       if (sortBy === 'price') return b.price_paid - a.price_paid;
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
@@ -185,12 +185,19 @@ export default function Collection() {
                   }`}
               >
                 {/* Thumbnail */}
-                <div className="aspect-square bg-gray-800 relative overflow-hidden">
-                  <img
-                    src={getStorageUrl(item.model.preview_url)}
-                    alt={item.model.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
+                <div className="aspect-square bg-gray-800 relative overflow-hidden flex items-center justify-center">
+                  {item.model ? (
+                    <img
+                      src={getStorageUrl(item.model.preview_url)}
+                      alt={item.model.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center gap-2 text-gray-500">
+                      <FolderOpen className="w-12 h-12" />
+                      <span className="text-xs font-medium">(Deleted Model)</span>
+                    </div>
+                  )}
 
                   {/* Checkbox Overlay */}
                   <div className="absolute top-3 left-3">
@@ -219,7 +226,9 @@ export default function Collection() {
                 <div className="p-4">
                   <Link href={`/catalog/${item.model_id}`}>
                     <h3 className="font-semibold text-white mb-2 truncate hover:text-yellow-400 cursor-pointer transition-colors">
-                      {item.model.title}
+                      {item.model?.title || (
+                        <span className="text-gray-500 italic">(Deleted Model)</span>
+                      )}
                     </h3>
                   </Link>
 
@@ -229,11 +238,12 @@ export default function Collection() {
                   </div>
 
                   <button
-                    onClick={() => handleDownload(item.model_id, item.model.title)}
-                    className="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-semibold py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
+                    onClick={() => item.model && handleDownload(item.model_id, item.model.title)}
+                    disabled={!item.model}
+                    className="w-full bg-yellow-400 hover:bg-yellow-300 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed text-black font-semibold py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
                   >
                     <Download className="w-4 h-4" />
-                    Download
+                    {item.model ? "Download" : "Unavailable"}
                   </button>
                 </div>
               </div>
@@ -258,17 +268,23 @@ export default function Collection() {
                   />
 
                   {/* Thumbnail */}
-                  <img
-                    src={getStorageUrl(item.model.preview_url)}
-                    alt={item.model.title}
-                    className="w-16 h-16 object-cover rounded flex-shrink-0"
-                  />
+                  {item.model ? (
+                    <img
+                      src={getStorageUrl(item.model.preview_url)}
+                      alt={item.model.title}
+                      className="w-16 h-16 object-cover rounded flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 bg-gray-800 rounded flex items-center justify-center flex-shrink-0">
+                      <FolderOpen className="w-8 h-8 text-gray-600" />
+                    </div>
+                  )}
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <Link href={`/catalog/${item.model_id}`}>
                       <h3 className="font-semibold text-white truncate hover:text-yellow-400 cursor-pointer transition-colors">
-                        {item.model.title}
+                        {item.model?.title || <span className="text-gray-500 italic">(Deleted Model)</span>}
                       </h3>
                     </Link>
                     <div className="flex items-center gap-1 mt-1 text-xs text-gray-400">
@@ -280,11 +296,12 @@ export default function Collection() {
                   {/* Actions */}
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <button
-                      onClick={() => handleDownload(item.model_id, item.model.title)}
-                      className="bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+                      onClick={() => item.model && handleDownload(item.model_id, item.model.title)}
+                      disabled={!item.model}
+                      className="bg-yellow-400 hover:bg-yellow-300 disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed text-black font-semibold px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
                     >
                       <Download className="w-4 h-4" />
-                      <span className="hidden sm:inline">Download</span>
+                      <span className="hidden sm:inline">{item.model ? "Download" : "Unavailable"}</span>
                     </button>
                     <Link
                       href={`/catalog/${item.model_id}`}

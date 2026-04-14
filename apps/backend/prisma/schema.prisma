@@ -149,17 +149,16 @@ model Purchase {
   id String @id @default(uuid())
 
   user_id  String
-  model_id String
+  model_id String?
 
-  user  User  @relation(fields: [user_id], references: [id])
-  model Model @relation(fields: [model_id], references: [id])
+  user  User   @relation(fields: [user_id], references: [id])
+  model Model? @relation(fields: [model_id], references: [id], onDelete: SetNull)
 
   price_paid Int // in IDR
   license    License_Type @default(PERSONAL_USE)
 
   created_at DateTime @default(now())
 
-  @@unique([user_id, model_id])
   @@index([user_id])
   @@index([model_id])
 }
@@ -192,7 +191,7 @@ model Review {
   model_id String
 
   user  User  @relation(fields: [user_id], references: [id])
-  model Model @relation(fields: [model_id], references: [id])
+  model Model @relation(fields: [model_id], references: [id], onDelete: Cascade)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -207,7 +206,7 @@ model Wishlist {
   model_id String
 
   user  User  @relation(fields: [user_id], references: [id])
-  model Model @relation(fields: [model_id], references: [id])
+  model Model @relation(fields: [model_id], references: [id], onDelete: Cascade)
 
   created_at DateTime @default(now())
 
@@ -222,7 +221,7 @@ model Cart_Item {
   quantity Int @default(1)
 
   user  User  @relation(fields: [user_id], references: [id])
-  model Model @relation(fields: [model_id], references: [id])
+  model Model @relation(fields: [model_id], references: [id], onDelete: Cascade)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -295,7 +294,7 @@ model Order_Item {
   order    Order  @relation(fields: [order_id], references: [id])
 
   model_id String?
-  model    Model? @relation(fields: [model_id], references: [id])
+  model    Model? @relation(fields: [model_id], references: [id], onDelete: SetNull)
 
   /// Unit price in IDR at time of purchase
   price Int

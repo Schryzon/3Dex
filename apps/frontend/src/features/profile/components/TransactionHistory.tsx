@@ -60,7 +60,7 @@ export default function TransactionHistoryPage() {
     const matchesStatus = filterStatus === 'all' || transaction.status === filterStatus;
     const matchesSearch = searchQuery === '' ||
       transaction.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      transaction.modelName?.toLowerCase().includes(searchQuery.toLowerCase());
+      (transaction.modelName || "Deleted Model").toLowerCase().includes(searchQuery.toLowerCase());
 
     let matchesDate = true;
     if (dateFrom && dateTo) {
@@ -316,7 +316,7 @@ export default function TransactionHistoryPage() {
                   >
                     <div className="flex flex-col sm:flex-row gap-4">
                       {/* Model Thumbnail (if applicable) */}
-                      {transaction.modelThumbnail && (
+                      {transaction.modelThumbnail ? (
                         <div className="w-20 h-20 bg-gray-800 rounded-lg overflow-hidden flex-shrink-0">
                           <img
                             src={transaction.modelThumbnail}
@@ -324,7 +324,11 @@ export default function TransactionHistoryPage() {
                             className="w-full h-full object-cover"
                           />
                         </div>
-                      )}
+                      ) : transaction.type === 'purchase' ? (
+                        <div className="w-20 h-20 bg-gray-900 border border-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <FolderOpen className="w-8 h-8 text-gray-700" />
+                        </div>
+                      ) : null}
 
                       {/* Transaction Details */}
                       <div className="flex-1 min-w-0">
@@ -339,7 +343,7 @@ export default function TransactionHistoryPage() {
                               </span>
                             </div>
                             <h3 className="font-semibold text-white mb-1">
-                              {transaction.modelName || `Transaction ${transaction.id}`}
+                              {transaction.modelName || (transaction.type === 'purchase' ? <span className="text-gray-500 italic">(Deleted Model)</span> : `Transaction ${transaction.id}`)}
                             </h3>
                             <p className="text-sm text-gray-400">
                               ID: {transaction.id} • {transaction.paymentMethod}
