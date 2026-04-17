@@ -106,8 +106,8 @@ export function DexieAssistant() {
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            className={`relative w-full cursor-pointer overflow-hidden rounded-2xl border border-blue-500/30 bg-black/95 p-4 shadow-[0_8px_32px_-12px_rgba(59,130,246,0.6)] backdrop-blur-xl ${
-              isExpanded ? "max-w-[400px]" : "max-w-[320px] md:max-w-[400px]"
+            className={`relative w-full cursor-pointer overflow-hidden rounded-2xl border border-blue-500/30 bg-black/95 p-4 shadow-[0_8px_32px_-12px_rgba(59,130,246,0.6)] backdrop-blur-xl transition-all duration-500 ${
+              isExpanded ? "max-w-[calc(100vw-2rem)] md:max-w-xl" : "max-w-[320px] md:max-w-[440px]"
             }`}
             onClick={() => setIsExpanded(!isExpanded)}
             style={{ rotateX, rotateY, perspective: 1000 }}
@@ -146,11 +146,11 @@ export function DexieAssistant() {
 
               <div className="flex-1 min-w-0 pr-6">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="bg-gradient-to-r from-blue-400 to-yellow-400 bg-clip-text text-[11px] font-black tracking-[0.15em] text-transparent">
+                  <span className="bg-gradient-to-r from-blue-400 to-yellow-400 bg-clip-text text-[10px] font-black uppercase tracking-[0.3em] text-transparent font-mono">
                     Dēxie
                   </span>
                 </div>
-                <p className={`text-[13px] leading-relaxed text-zinc-200 font-medium ${isExpanded ? "" : "line-clamp-3"}`}>
+                <p className={`text-[13px] leading-tight text-zinc-200 font-medium ${isExpanded ? "" : "line-clamp-6 md:line-clamp-none"}`}>
                   {displayText}
                   {displayText.length < message.length && (
                     <motion.span 
