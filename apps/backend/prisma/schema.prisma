@@ -52,6 +52,7 @@ model User {
   banner_url   String?
   location     String? // General location string
   website      String?
+  phone_number String?
   
   // Structured Data
   addresses    Json[] // [{ label, street, city, region, country, zip, is_default }]

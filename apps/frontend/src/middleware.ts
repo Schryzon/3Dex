@@ -17,7 +17,6 @@ const PUBLIC_ROUTES = new Set([
 // Route prefixes that anyone can access
 const PUBLIC_PREFIXES = [
   '/catalog',
-  '/community',
   '/print-services',
   '/u/',
   '/become-artist',
@@ -46,6 +45,7 @@ const ROLE_GATED_ROUTES: Record<string, string[]> = {
 // Routes that require any authenticated user (any role is fine)
 const AUTH_REQUIRED_PREFIXES = [
   '/dashboard',
+  '/community',
   '/profile',
   '/notifications',
   '/downloads',

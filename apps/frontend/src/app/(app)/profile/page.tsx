@@ -490,7 +490,7 @@ function ProfileContent() {
         bio: user?.bio || '',
         location: user?.location || '',
         receiverName: '',
-        phoneNumber: '',
+        phoneNumber: (user as any)?.phone_number || '',
         postcode: '',
         detailedAddress: '',
         courierPreference: 'JNE',
@@ -518,7 +518,7 @@ function ProfileContent() {
                 bio: user.bio || '',
                 location: user.location || '',
                 receiverName: '',
-                phoneNumber: '',
+                phoneNumber: (user as any).phone_number || '',
                 postcode: '',
                 detailedAddress: '',
                 courierPreference: 'JNE',
@@ -552,6 +552,7 @@ function ProfileContent() {
                 bio: formData.bio,
                 location: formData.location,
                 website: formData.website,
+                phone_number: formData.phoneNumber,
                 show_nsfw: formData.showNsfw,
                 social_twitter: formData.socialLinks.twitter,
                 social_instagram: formData.socialLinks.instagram,
@@ -577,6 +578,7 @@ function ProfileContent() {
                 displayName: updatedUser.display_name || prev.displayName,
                 bio: updatedUser.bio || prev.bio,
                 location: updatedUser.location || prev.location,
+                phoneNumber: updatedUser.phone_number || prev.phoneNumber,
                 website: updatedUser.website || prev.website,
                 showNsfw: updatedUser.show_nsfw !== undefined ? !!updatedUser.show_nsfw : prev.showNsfw,
                 socialLinks: {
@@ -1079,6 +1081,18 @@ function ProfileContent() {
                                                             onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                                                             placeholder="Jakarta, Indonesia"
                                                             className="w-full bg-black/50 text-white pl-12 pr-4 py-3 rounded-xl border border-gray-800 focus:border-yellow-400 focus:outline-none transition-all"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm text-gray-400 mb-2 font-medium">Phone Number</label>
+                                                    <div className="relative">
+                                                        <input
+                                                            type="tel"
+                                                            value={formData.phoneNumber}
+                                                            onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value.replace(/\D/g, '') })}
+                                                            placeholder="0812 XXXX XXXX"
+                                                            className="w-full bg-black/50 text-white px-4 py-3 rounded-xl border border-gray-800 focus:border-yellow-400 focus:outline-none transition-all"
                                                         />
                                                     </div>
                                                 </div>

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { create_order, handle_payment_webhook, get_user_orders } from "../services/order.service";
+import { create_order, handle_payment_webhook, get_user_orders, cancel_pending_order } from "../services/order.service";
 
 /**
  * initiate_checkout
@@ -65,6 +65,21 @@ export async function list_orders(req: Request, res: Response) {
         const user_id = (req as any).user.id;
         const orders = await get_user_orders(user_id);
         res.json(orders);
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+
+/**
+ * cancel_order
+ * POST /orders/:id/cancel
+ */
+export async function cancel_order(req: Request, res: Response) {
+    try {
+        const order_id = req.params.id as string;
+        const result = await cancel_pending_order(order_id);
+        res.json(result);
     } catch (error: any) {
         res.status(500).json({ message: error.message });
     }

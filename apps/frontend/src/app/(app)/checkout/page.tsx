@@ -6,6 +6,7 @@ import { useCart } from '@/features/cart';
 import { useAuth } from '@/features/auth';
 import { useState } from 'react';
 import { formatPrice } from '@/lib/utils';
+import { api } from '@/lib/api';
 import { orderService } from '@/lib/api/services';
 import { orderKeys } from '@/lib/api/services/order.service';
 import { cartKeys } from '@/lib/api/services/cart.service';
@@ -94,7 +95,7 @@ export default function CheckoutPage() {
     const [billing, setBilling] = useState({
         fullName: user?.username || '',
         email: user?.email || '',
-        phone: '',
+        phone: (user as any)?.phone_number || '',
     });
 
     if (!authLoading && !user) { router.push('/'); return null; }
@@ -151,7 +152,15 @@ export default function CheckoutPage() {
                     setCheckoutStatus('failed');
                     setIsProcessing(false);
                 },
-                onClose: () => setIsProcessing(false),
+                onClose: async () => {
+                    setIsProcessing(false);
+                    try {
+                        if (orderId) {
+                            await api.post(`/orders/${orderId}/cancel`);
+                        }
+                    } catch(e) {}
+                    setCheckoutStatus('failed');
+                },
             });
         } catch (err: any) {
             setError(err.response?.data?.message || err.message || 'Checkout failed. Please try again.');
@@ -248,7 +257,7 @@ export default function CheckoutPage() {
                                         type="tel"
                                         placeholder="0812 XXXX XXXX"
                                         value={billing.phone}
-                                        onChange={v => setBilling(b => ({ ...b, phone: v }))}
+                                        onChange={v => setBilling(b => ({ ...b, phone: v.replace(/\D/g, '') }))}
                                         hint="Used for payment notifications and invoice delivery."
                                     />
                                 </div>

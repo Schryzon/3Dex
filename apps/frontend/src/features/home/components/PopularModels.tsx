@@ -99,6 +99,13 @@ export default function PopularModels() {
                     ref={scrollContainerRef}
                     onMouseEnter={() => setIsPaused(true)}
                     onMouseLeave={() => setIsPaused(false)}
+                    onTouchStart={() => setIsPaused(true)}
+                    onTouchEnd={() => setTimeout(() => setIsPaused(false), 2000)}
+                    onWheel={() => { 
+                        setIsPaused(true); 
+                        if ((window as any)._wheelTimeout) clearTimeout((window as any)._wheelTimeout);
+                        (window as any)._wheelTimeout = setTimeout(() => setIsPaused(false), 2000);
+                    }}
                     className="flex gap-5 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900 scroll-smooth"
                     style={{ scrollbarWidth: 'thin' }}
                 >
