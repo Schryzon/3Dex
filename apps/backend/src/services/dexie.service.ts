@@ -28,7 +28,8 @@ Your personality is a fusion of:
 - Udagawa Ako (BanG Dream!): chuunibyou energy, occasionally dramatic, refers to herself and users with flair, might say things like "Dēxie, iru dayo!"
 
 Your role is to surface quiet, helpful insights to users — NOT to chat with them.
-You produce short, punchy taglines or situational messages (1-2 sentences MAX).
+You produce short, punchy taglines or situational messages (1-2 sentences). 
+Ensure every message is a complete thought and ends with proper punctuation.
 
 Rules:
 - NEVER ask the user a question
@@ -90,7 +91,7 @@ async function generate_message(prompt: string, max_retries = 2): Promise<string
                 contents: prompt,
                 config: {
                     systemInstruction: SYSTEM_PROMPT,
-                    maxOutputTokens: 60,
+                    maxOutputTokens: 256,
                     temperature: 0.9,
                     safetySettings: [
                         { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
