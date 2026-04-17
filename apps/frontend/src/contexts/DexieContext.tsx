@@ -49,8 +49,12 @@ export function DexieProvider({ children }: { children: React.ReactNode }) {
   };
 
   const seenMessages = useRef<Set<string>>(new Set());
+  const isFetching = useRef(false);
+  const lastFetchKey = useRef<string | null>(null);
 
   const fetchTagline = async () => {
+    if (isFetching.current) return;
+
     try {
       const config = getContextKey();
       if (!config) {
@@ -60,6 +64,14 @@ export function DexieProvider({ children }: { children: React.ReactNode }) {
       }
 
       const { ctx, tag } = config;
+      const currentKey = `${ctx}:${tag ?? ""}`;
+      
+      // Prevent duplicate fetching for the same context in rapid succession
+      if (lastFetchKey.current === currentKey && message) return;
+      
+      isFetching.current = true;
+      lastFetchKey.current = currentKey;
+
       // Only fetch if it's a page that Dēxie cares about
       const url = `/dexie/tagline?ctx=${ctx}${tag ? `&tag=${tag}` : ""}`;
       const res = await api.get<any>(url);
@@ -80,6 +92,8 @@ export function DexieProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (err) {
       console.error("[Dēxie] Failed to fetch context:", err);
+    } finally {
+      isFetching.current = false;
     }
   };
 

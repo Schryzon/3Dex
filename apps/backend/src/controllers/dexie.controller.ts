@@ -4,6 +4,7 @@ import {
     get_dexie_tagline,
     get_dexie_picks,
     is_dexie_enabled,
+    FALLBACK_MESSAGES,
 } from "../services/dexie.service";
 import prisma from "../prisma";
 
@@ -85,7 +86,8 @@ export async function get_tagline(req: Request, res: Response) {
     } catch (error: any) {
         // Gracefully fallback — Dēxie being quiet is better than a broken UI
         console.error("[Dēxie] Tagline generation failed:", error.message);
-        res.json({ enabled: true, message: "Wandahoi~! Welcome to 3Dex ✨" });
+        const fallback = FALLBACK_MESSAGES[Math.floor(Math.random() * FALLBACK_MESSAGES.length)];
+        res.json({ enabled: true, message: fallback });
     }
 }
 
