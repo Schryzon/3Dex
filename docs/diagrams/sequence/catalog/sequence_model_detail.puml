@@ -1,0 +1,48 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "User" as U
+participant "Frontend" as FE
+participant "GET /models/:id" as API
+participant "model.controller" as MC
+participant "purchase.service" as PS
+participant "storage.service" as SS
+database "PostgreSQL" as DB
+
+U -> FE : click model card in catalog
+FE -> API : GET /models/:id\n[Cookie: optional]
+API -> MC : get_model_detail(req)
+MC -> DB : model.findUnique({ id })\ninclude artist, category, tags, reviews _count
+DB --> MC : Model | null
+alt not found
+    MC --> FE : 404
+    FE --> U : 404 page
+end
+
+alt user is authenticated
+    MC -> PS : get_purchase(user_id, model_id)
+    PS -> DB : purchase.findUnique({ user_id_model_id })
+    DB --> PS : Purchase | null
+    PS --> MC : Purchase | null
+    alt model.artist_id == user_id
+        MC -> MC : isPurchased = true (creator owns it)
+    else purchase exists
+        MC -> MC : isPurchased = true
+    else not purchased
+        MC -> MC : isPurchased = false
+    end
+else guest
+    MC -> MC : isPurchased = false
+end
+
+MC -> SS : presign preview_url
+MC -> SS : presign file_url
+MC -> SS : presign each gallery_url
+MC -> SS : sign_user_urls(artist)
+SS --> MC : all signed URLs
+
+MC --> FE : Model with isPurchased flag + signed URLs
+FE --> U : render model detail:\n  3D viewer (Three.js), gallery, price,\n  "Buy" or "Download" based on isPurchased
+@enduml

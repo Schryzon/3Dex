@@ -1,0 +1,35 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|Customer|
+start
+:Clicks "Cancel Order";
+
+|Frontend|
+:POST /orders/:id/cancel;
+
+|Database|
+:Lookup Order by ID;
+
+|Backend|
+if (order not found?) then (yes)
+  :Return 404 Not Found;
+  stop
+endif
+
+if (order.status != PENDING?) then (yes)
+  :Return 400 Cannot cancel non-pending order;
+  stop
+endif
+
+|Database|
+:Update Order { status: CANCELLED };
+
+|Backend|
+:Return 200 OK;
+
+|Frontend|
+:User sees Cancelled status on orders page;
+stop
+@enduml

@@ -1,0 +1,35 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "User" as U
+participant "Frontend" as FE
+participant "PATCH /dexie/toggle" as API
+participant "dexie.controller" as DC
+database "PostgreSQL" as DB
+
+U -> FE : open Settings page
+FE --> U : show Dexie toggle switch (on/off)
+
+U -> FE : flip toggle → OFF
+FE -> API : PATCH /dexie/toggle\n{ enabled: false }\n[Cookie: 3dex_session]
+API -> DC : toggle_dexie(req)
+DC -> DC : validate typeof enabled == boolean
+DC -> DB : user.update({ id, dexie_enabled: false })
+DB --> DC : done
+DC --> FE : 200 { message: "Dexie will quietly wait...", dexie_enabled: false }
+FE -> FE : DexieContext.setEnabled(false)
+FE -> FE : setMessage(null)
+FE --> U : Dexie bubble disappears\ntoggle shows OFF
+
+U -> FE : flip toggle → ON
+FE -> API : PATCH /dexie/toggle\n{ enabled: true }
+API -> DC : toggle_dexie(req)
+DC -> DB : user.update({ id, dexie_enabled: true })
+DB --> DC : done
+DC --> FE : 200 { message: "Dexie is active!", dexie_enabled: true }
+FE -> FE : DexieContext.setEnabled(true)
+FE -> FE : fetchTagline() re-fires
+FE --> U : Dexie message appears again
+@enduml

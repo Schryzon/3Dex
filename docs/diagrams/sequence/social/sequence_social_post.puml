@@ -1,0 +1,64 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "User (Artist/Provider)" as U
+participant "Frontend" as FE
+participant "POST /posts" as API
+participant "post.controller" as PC
+database "PostgreSQL" as DB
+
+U -> FE : open Community page
+FE -> PC : GET /posts (get_feed_posts)
+PC -> DB : post.findMany(orderBy: created_at desc)\ninclude user, _count(likes,comments), likes(where: current_user)
+DB --> PC : Post[]
+PC -> PC : map: add is_liked, is_followed flags
+PC --> FE : feed Post[]
+FE --> U : render feed
+
+U -> FE : click "New Post"
+FE --> U : upload media form
+U -> FE : select images + enter caption + submit
+FE -> PC : POST /storage/upload-url (for each image)
+PC --> FE : presigned URLs
+FE -> FE : PUT images to S3
+FE -> API : POST /posts\n{ caption, media_urls: [keys], is_nsfw }
+API -> PC : create_post(req)
+PC -> PC : check role: only ARTIST or PROVIDER allowed
+alt role is CUSTOMER or ADMIN
+    PC --> FE : 403 Only Artists and Providers can post!
+    FE --> U : access denied
+end
+PC -> PC : validate media_urls not empty
+PC -> DB : post.create({ user_id, caption, media_urls, is_nsfw })
+DB --> PC : Post
+PC --> FE : 201 Post
+FE --> U : post appears in feed
+
+U -> FE : click heart icon on a post
+FE -> API : POST /posts/:post_id/like
+API -> PC : toggle_like(req)
+PC -> DB : post_Like.findUnique({ user_id_post_id })
+DB --> PC : PostLike | null
+alt like exists (toggle off)
+    PC -> DB : post_Like.delete({ user_id_post_id })
+    PC -> DB : post.update({ like_count: decrement })
+    PC --> FE : { message: "Unliked" }
+else no like (toggle on)
+    PC -> DB : post_Like.create({ user_id, post_id })
+    PC -> DB : post.update({ like_count: increment })
+    PC --> FE : { message: "Liked" }
+end
+FE --> U : heart icon toggled
+
+U -> FE : type comment + submit
+FE -> API : POST /posts/:post_id/comments\n{ content }
+API -> PC : add_comment(req)
+PC -> PC : validate content not empty
+PC -> DB : post_Comment.create({ user_id, post_id, content })
+DB --> PC : Post_Comment
+PC -> DB : post.update({ comment_count: increment })
+PC --> FE : Post_Comment
+FE --> U : comment appears below post
+@enduml

@@ -1,0 +1,37 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User or Admin|
+start
+:Sends DELETE /posts/:post_id;
+
+|Database|
+:Lookup Post by id;
+
+|Backend|
+if (post not found?) then (yes)
+  :Return 404 Not Found;
+  stop
+endif
+
+if (not owner AND not admin?) then (yes)
+  :Return 403 Forbidden;
+  stop
+endif
+
+|Database|
+if (role == ADMIN?) then (yes)
+  :Write Admin_Audit_Log (DELETE_POST);
+endif
+
+:Delete Post record;
+note right: CASCADE: Post_Like, Post_Comment
+
+|Backend|
+:Return 200 OK;
+
+|Frontend|
+:Post removed from UI;
+stop
+@enduml

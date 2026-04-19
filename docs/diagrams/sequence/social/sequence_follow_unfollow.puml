@@ -1,0 +1,45 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "User" as U
+participant "Frontend" as FE
+participant "follow.controller" as FC
+database "PostgreSQL" as DB
+participant "notification.service" as NS
+
+U -> FE : visit an artist's profile
+FE -> FC : GET /users/:id/followers\nGET /users/:id/following
+FC -> DB : follow.findMany({ following_id: target })\nfollow.findMany({ follower_id: target })
+DB --> FC : Follow[] counts
+FC --> FE : follower/following counts + is_following flag
+FE --> U : render Follow button
+
+U -> FE : click "Follow"
+FE -> FC : POST /follow\n{ following_id: target_user_id }
+FC -> DB : follow.findUnique({ follower_id, following_id })
+DB --> FC : Follow | null
+alt already following
+    FC --> FE : 400 Already following
+    FE --> U : button already toggled
+end
+FC -> DB : follow.create({ follower_id: user_id, following_id: target_user_id })
+DB --> FC : Follow
+FC -> NS : create notification for target user\n{ type: FOLLOW, title: "New Follower",\n  message: "@user started following you" }
+NS -> DB : notification.create({ user_id: target, ... })
+FC --> FE : { message: "Followed" }
+FE --> U : Follow button → Following
+
+U -> FE : click "Unfollow"
+FE -> FC : DELETE /follow/:following_id
+FC -> DB : follow.findUnique({ follower_id, following_id })
+DB --> FC : Follow | null
+alt not following
+    FC --> FE : 404 Follow not found
+end
+FC -> DB : follow.delete({ id })
+DB --> FC : done
+FC --> FE : { message: "Unfollowed" }
+FE --> U : Following button → Follow
+@enduml

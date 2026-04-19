@@ -1,0 +1,48 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Requests catalog listing / model grid;
+
+|Frontend|
+:GET /models params (search, category, filter, sort, page);
+
+|Backend|
+:Check if authenticated (is_self, is_admin);
+
+:Build status filter;
+if (admin or self?) then (yes)
+  :No status filter;
+else (no)
+  :status = APPROVED;
+endif
+
+:Build role filter;
+if (admin or self?) then (no)
+  :artist.role = ARTIST;
+endif
+
+:Build NSFW filter;
+:Apply search term via OR condition;
+:Apply price range;
+:Apply category_id;
+:Apply tags / exclude_id;
+:Apply sort order + pagination;
+
+|Database|
+:Query model.findMany (where, orderBy, skip, take);
+:Count total matching records;
+
+|MinIO|
+:Presign preview_urls & file_urls for all results;
+
+|Backend|
+:Compile { data: Model[], meta: { total, pages } };
+:Return 200 OK;
+
+|Frontend|
+:Render paginated model grid;
+stop
+@enduml

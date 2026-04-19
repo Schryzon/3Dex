@@ -1,0 +1,38 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Wants to access /community;
+
+|Backend (Auth)|
+:Middleware checks auth session;
+if (no valid JWT?) then (yes)
+  |Frontend|
+  :Redirect to /login;
+  stop
+endif
+
+|Frontend|
+:GET /posts?page=1&limit=10;
+
+|Database|
+:Fetch posts order by date desc;
+:Include user details, likes count, comment count;
+
+|Backend|
+:Map is_liked flag;
+:Map is_followed flag;
+:Return feed Page[];
+
+|Frontend|
+:Render feed cards;
+
+|User|
+:Scrolls to load more;
+
+|Frontend|
+:Fetch page+1;
+stop
+@enduml

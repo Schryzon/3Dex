@@ -1,0 +1,39 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "Artist" as A
+participant "Frontend" as FE
+participant "PATCH /models/:id" as API
+participant "model.controller" as MC
+participant "model.service" as MS
+database "PostgreSQL" as DB
+
+A -> FE : open model edit form
+FE -> MC : GET /models/:id (current data)
+MC -> DB : model.findUnique({ id })
+DB --> MC : Model
+MC --> FE : current model data
+FE --> A : pre-filled edit form
+
+A -> FE : change title, price, tags, category\n+ submit
+FE -> API : PATCH /models/:id\n{ title, price, category, tags,\n  license, is_printable, is_nsfw }
+API -> MC : update_model(req)
+MC -> DB : model.findUnique({ id })
+DB --> MC : Model
+alt model not found
+    MC --> FE : 404
+end
+alt model.artist_id != user_id AND role != ADMIN
+    MC --> FE : 403 Not authorized
+end
+MC -> MS : update_model_by_id(model_id, { ...safe_fields })
+MS -> DB : category.findUnique(slug) if category changed
+DB --> MS : Category | null
+MS -> DB : model.update({ title, price, category_id,\n  license, is_printable, is_nsfw,\n  tags: { set: [] then connect new tags } })
+DB --> MS : updated Model
+MS --> MC : updated Model
+MC --> FE : 200 updated Model
+FE --> A : changes reflected on model card
+@enduml

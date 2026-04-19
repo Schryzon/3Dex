@@ -1,0 +1,50 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Submits email + password;
+
+|Frontend|
+:POST /auth/login { email, password };
+
+|Backend (Auth)|
+if (fields missing?) then (yes)
+  :Return 400 Missing fields;
+  stop
+endif
+
+|Database|
+:Lookup user by email;
+
+|Backend (Auth)|
+if (user found?) then (no)
+  :Return 401 Invalid credentials;
+  stop
+endif
+
+:bcrypt.compare(password, hash);
+if (password matches?) then (no)
+  :Return 401 Invalid credentials;
+  stop
+endif
+
+|Database|
+:Update last_login_at;
+
+|Backend (Auth)|
+:Sign JWT ({ id, email, username, role });
+:Set-Cookie 3dex_session (httpOnly, 7d);
+
+|MinIO|
+:Sign avatar_url & banner_url;
+
+|Backend (Auth)|
+:Return 200 { user };
+
+|Frontend|
+:Store user in AuthContext;
+:Redirect to /;
+stop
+@enduml

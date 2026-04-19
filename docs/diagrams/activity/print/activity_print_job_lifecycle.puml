@@ -1,0 +1,49 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|Provider|
+start
+:Receives new PRINT_JOB order;
+:Reviews order details;
+
+fork
+  |Provider|
+  :Accepts job;
+  |Frontend|
+  :PATCH /print/orders/:id { action: ACCEPT };
+  |Backend|
+  :Validate provider_id;
+  |Database|
+  :Update items { print_status: ACCEPTED };
+  
+  |Provider|
+  :Starts preparing print;
+  :Uploads proof photos and ships;
+  |Frontend|
+  :PATCH { action: SHIP, tracking_number, proof_urls };
+  |Database|
+  :Update order { tracking_number, proof_urls };
+  :Update items { print_status: SHIPPED };
+  
+  |Provider|
+  :Marks delivered;
+  |Frontend|
+  :PATCH { action: COMPLETE };
+  |Database|
+  :Update items { print_status: DELIVERED };
+  |Backend|
+  :Job closed;
+fork again
+  |Provider|
+  :Rejects job;
+  |Frontend|
+  :PATCH /print/orders/:id { action: REJECT };
+  |Database|
+  :Update order { status: CANCELLED };
+  :Update items { print_status: CANCELLED };
+  |Backend|
+  :Job marked cancelled;
+end fork
+stop
+@enduml

@@ -1,0 +1,38 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "User" as U
+participant "Frontend" as FE
+participant "wishlist.controller" as WC
+database "PostgreSQL" as DB
+participant "MinIO / S3" as S3
+
+U -> FE : click wishlist heart on model card
+FE -> WC : POST /wishlist { model_id }
+WC -> DB : wishlist.findUnique({ user_id_model_id })
+DB --> WC : Wishlist | null
+alt already wishlisted (toggle off)
+    WC -> DB : wishlist.delete({ id })
+    DB --> WC : done
+    WC --> FE : { wishlisted: false }
+    FE --> U : icon un-filled
+else not wishlisted (toggle on)
+    WC -> DB : wishlist.create({ user_id, model_id })
+    DB --> WC : Wishlist
+    WC --> FE : { wishlisted: true }
+    FE --> U : icon filled
+end
+
+U -> FE : navigate to Wishlist page
+FE -> WC : GET /wishlist
+WC -> DB : wishlist.findMany({ user_id })\ninclude model.artist, category
+DB --> WC : Wishlist with models
+loop for each item
+    WC -> S3 : presign preview_url
+    S3 --> WC : signed URL
+end
+WC --> FE : signed wishlist items
+FE --> U : render wishlist grid
+@enduml

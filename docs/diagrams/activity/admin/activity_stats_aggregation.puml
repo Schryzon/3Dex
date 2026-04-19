@@ -1,0 +1,37 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|Cron Service or Admin|
+start
+:Trigger STATS_AGGREGATION task;
+
+|Backend (Cron Service)|
+:Initialize aggregate_stats();
+:Define period_start and period_end;
+
+|Database|
+fork
+  :Count total Orders (status=PAID) in period;
+  :Sum gross_amount from Payments in period;
+fork again
+  :Count new User registrations in period;
+  :Count new Models created in period;
+fork again
+  :Find top-selling models in period;
+  :Find top-earning artists in period;
+end fork
+
+|Backend (Cron Service)|
+:Aggregate all results into JSON data;
+
+|Database|
+:Create Stats record { period_start, period_end, data };
+
+|Backend (Cron Service)|
+:Return new Stats record;
+
+|Frontend|
+:Admin dashboard reflects updated chart data;
+stop
+@enduml

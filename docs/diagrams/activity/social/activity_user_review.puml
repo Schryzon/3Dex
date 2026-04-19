@@ -1,0 +1,69 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|Customer|
+start
+:Views Artist/Provider profile;
+
+|Frontend|
+:GET /reviews/user/:id/eligible;
+
+|Backend|
+:Check if reviewer == target;
+if (self-review?) then (yes)
+  :Return eligible: false (SELF);
+  stop
+endif
+
+|Database|
+:Check user_Review table;
+if (already reviewed?) then (yes)
+  |Backend|
+  :Return eligible: false (ALREADY_REVIEWED);
+  |Frontend|
+  :Hide review button;
+  stop
+endif
+
+|Database|
+:Check for purchase from artist;
+:Check for print order from provider;
+
+|Backend|
+if (transaction exists?) then (yes)
+  :Return eligible: true;
+  |Frontend|
+  :Show review form;
+else (no)
+  :Return eligible: false (NO_TRANSACTION);
+  |Frontend|
+  :Show "Buy first" warning;
+  stop
+endif
+
+|Customer|
+:Submits review form;
+
+|Frontend|
+:POST /reviews/user;
+
+|Database|
+:Create user_Review record;
+if (P2002 duplicate?) then (yes)
+  |Backend|
+  :Return 409 Conflict;
+  stop
+endif
+
+|Database|
+:Aggregate avg rating;
+:Update user overall rating;
+
+|Backend|
+:Return 200 OK;
+
+|Frontend|
+:Review published;
+stop
+@enduml

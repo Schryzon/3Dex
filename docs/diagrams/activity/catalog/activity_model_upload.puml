@@ -1,0 +1,46 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|Artist|
+start
+:Fills upload form (title, file, etc.);
+
+|Frontend|
+:Request presigned PUT URLs for GLB and Preview;
+
+|MinIO|
+:Return signed URLs;
+
+|Frontend|
+:Upload GLB binary direct to MinIO;
+:Upload WebP preview direct to MinIO;
+:POST /models { all metadata + keys };
+
+|Backend|
+:Validate inputs & file extension;
+if (invalid format?) then (yes)
+  :Return 400 Invalid format;
+  stop
+endif
+
+|Database|
+:Resolve category ID;
+:Create Model record (status: PENDING);
+
+fork
+  |Backend|
+  :Return 201 Created;
+  |Frontend|
+  :Show "Pending review" to Artist;
+fork again
+  |Backend (Worker)|
+  :embed_and_save_model(model.id);
+  |Gemini API|
+  :Encode text via all-MiniLM;
+  |Database|
+  :Save vector to model.embeding;
+end fork
+
+stop
+@enduml

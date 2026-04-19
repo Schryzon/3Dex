@@ -56,6 +56,21 @@ export async function get_tagline(req: Request, res: Response) {
         case "wishlist":
             context_detail = "User is viewing their wishlist of saved 3D models";
             break;
+        case "checkout": {
+            let detail = "User is at the checkout page ready to pay.";
+            if (user?.id) {
+                const cart = await prisma.cart_Item.findMany({
+                    where: { user_id: user.id },
+                    include: { model: { select: { title: true } } },
+                });
+                if (cart.length > 0) {
+                    const titles = cart.map((i: any) => i.model.title).join(", ");
+                    detail = `User is at the checkout payment screen for ${cart.length} items: [${titles}]. Give them encouragement!`;
+                }
+            }
+            context_detail = detail;
+            break;
+        }
         case "catalog": {
             let detail = "User is viewing a model detail page";
             if (tag) {
@@ -153,7 +168,7 @@ export async function toggle_dexie(req: Auth_Request, res: Response) {
 
     res.json({
         message: enabled
-            ? "Dēxie is now active! Wandahoi~! ✨"
+            ? "Dēxie is now active! ✨"
             : "Dēxie will quietly wait until you need her.",
         dexie_enabled: enabled,
     });

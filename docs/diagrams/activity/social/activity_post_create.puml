@@ -1,0 +1,41 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|Artist / Provider|
+start
+:Fills post form (caption + images);
+
+|Frontend|
+:Request presigned PUT URLs;
+
+|MinIO|
+:Return signed URLs;
+
+|Frontend|
+:Upload images directly to storage;
+:POST /posts { caption, media_urls[], is_nsfw };
+
+|Backend|
+:Check user role;
+if (Customer role?) then (yes)
+  :Return 403 Forbidden;
+  stop
+endif
+
+:Validate media_urls not empty;
+if (no media?) then (yes)
+  :Return 400 Bad Request;
+  stop
+endif
+
+|Database|
+:Create Post record;
+
+|Backend|
+:Return 201 Created;
+
+|Frontend|
+:Post appears in feed;
+stop
+@enduml

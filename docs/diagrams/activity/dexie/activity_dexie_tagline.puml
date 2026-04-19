@@ -1,0 +1,64 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|Frontend|
+start
+:User navigates to new route;
+:Evaluate pathname context;
+if (context is null?) then (yes)
+  :Turn Dexie off in UI;
+  stop
+endif
+
+if (already fetching OR duplicate call?) then (yes)
+  :Skip (deduplicate);
+  stop
+endif
+
+:GET /dexie/tagline?ctx=X&tag=Y;
+
+|Backend|
+:Check dexie_enabled flag;
+if (disabled?) then (yes)
+  :Return { enabled: false };
+  |Frontend|
+  :Hide Dexie UI;
+  stop
+endif
+
+:Check per-user message cache (1hr);
+if (cache hit?) then (yes)
+  :Return cached message;
+else (no)
+  :Check global context cache (6hr);
+  if (cache hit and generic?) then (yes)
+    :Return global cached message;
+  else (no)
+    |Gemini API|
+    :Call Gemini Flash API;
+    if (503 rate limit?) then (yes)
+      |Backend|
+      :Exponential backoff retry;
+      if (still failing?) then (yes)
+        :Set random FALLBACK_MESSAGE;
+      endif
+    endif
+    
+    |Backend|
+    :Set cache (user=1hr, global=6hr);
+  endif
+endif
+
+|Backend|
+:Return { enabled: true, message };
+
+|Frontend|
+:Deduplicate against seenMessages Set;
+if (seen this session?) then (yes)
+  :Stay quiet;
+else (no)
+  :Display Dexie message bubble;
+endif
+stop
+@enduml

@@ -15,13 +15,13 @@ jest.mock('@google/genai', () => ({
     getGenerativeModel: jest.fn().mockReturnValue({
       generateContent: jest.fn().mockResolvedValue({
         response: {
-          text: () => "Wandahoi~! (Mocked)",
+          text: () => "Dēxie is here! (Mocked)",
         },
       }),
     }),
     models: {
        generateContent: jest.fn().mockResolvedValue({
-          text: () => "Wandahoi~! (Mocked)",
+          text: () => "Dēxie is here! (Mocked)",
        })
     }
   })),

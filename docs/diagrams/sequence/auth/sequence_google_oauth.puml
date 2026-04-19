@@ -1,0 +1,47 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "User" as U
+participant "Frontend" as FE
+participant "Google OAuth" as G
+participant "POST /auth/google" as API
+participant "auth.service" as AS
+database "PostgreSQL" as DB
+participant "jwt.sign()" as JWT
+
+U -> FE : click "Continue with Google"
+FE -> G : Google One Tap / OAuth prompt
+G --> FE : credential (ID token string)
+FE -> API : POST /auth/google\n{ credential }
+API -> AS : google_login(credential)
+AS -> G : OAuth2Client.verifyIdToken(credential)
+G --> AS : GooglePayload { sub, email, name, picture }
+AS -> DB : user.findUnique({ google_id: sub })
+alt user exists
+    DB --> AS : existing User
+else user does not exist
+    AS -> DB : user.findUnique({ email })
+    alt email already registered locally
+        DB --> AS : User (no google_id)
+        AS -> DB : user.update({ google_id: sub })
+        DB --> AS : Updated User
+    else brand new user
+        AS -> DB : user.create({ email, username: auto-generated, google_id, role: CUSTOMER, account_status: APPROVED })
+        DB --> AS : new User
+        AS --> API : { user, isNew: true }
+    end
+end
+AS --> API : { user, isNew }
+API -> JWT : sign_token({ id, email, username, role })
+JWT --> API : token
+API -> API : Set-Cookie: 3dex_session=token
+alt isNew = true
+    API --> FE : 200 { user, needs_username: true }
+    FE --> U : redirect to /complete-profile
+else
+    API --> FE : 200 { user, needs_username: false }
+    FE --> U : redirect to /
+end
+@enduml

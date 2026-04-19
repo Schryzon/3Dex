@@ -1,0 +1,57 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "User" as U
+participant "Frontend" as FE
+participant "collection.controller" as CC
+database "PostgreSQL" as DB
+
+U -> FE : open "My Collections"
+FE -> CC : GET /collections
+CC -> DB : collection.findMany({ user_id })\ninclude items _count
+DB --> CC : Collection[]
+CC --> FE : collections list
+FE --> U : render collection grid
+
+U -> FE : click "New Collection"
+FE --> U : name + description + visibility form
+U -> FE : submit { name, description, is_public: true }
+FE -> CC : POST /collections\n{ name, description, is_public }
+CC -> DB : collection.create({ user_id, name, description, is_public })
+DB --> CC : Collection
+CC --> FE : 201 Collection
+FE --> U : new collection card appears
+
+U -> FE : open a collection detail page
+FE -> CC : GET /collections/:id
+CC -> DB : collection.findUnique({ id })\ninclude items.model with artist, tags
+DB --> CC : Collection with items
+
+alt collection is private AND user is not owner
+    CC --> FE : 403 Forbidden
+    FE --> U : access denied
+end
+
+CC --> FE : Collection with items
+FE --> U : render items grid
+
+U -> FE : click "Add to Collection" on a model in catalog
+FE -> FE : show collection picker modal
+U -> FE : select target collection
+FE -> CC : POST /collections/:id/items\n{ model_id }
+CC -> DB : collection.findUnique({ id })\nvalidate user_id == req.user.id
+CC -> DB : collection_Item.create({ collection_id, model_id })
+DB --> CC : Collection_Item
+CC --> FE : 201 Collection_Item
+FE --> U : model added to collection
+
+U -> FE : click remove icon on collection item
+FE -> CC : DELETE /collections/:id/items/:model_id
+CC -> DB : validate ownership
+CC -> DB : collection_Item.delete({ collection_id_model_id })
+DB --> CC : done
+CC --> FE : { message: "Removed from collection" }
+FE --> U : item removed
+@enduml

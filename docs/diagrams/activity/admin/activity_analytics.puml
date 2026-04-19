@@ -1,0 +1,45 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|Admin or Artist|
+start
+:Opens analytics page;
+
+|Frontend|
+:GET /analytics/artist-stats OR /admin/analytics;
+
+|Backend|
+:Validate user role matches the endpoint;
+if (unauthorized role?) then (yes)
+  |Backend|
+  :Return 403 Forbidden;
+  
+  |Frontend|
+  :Show 403 error page;
+  stop
+endif
+
+|Database|
+fork
+  :Count total models;
+  :Count total purchases and sum revenue;
+fork again
+  :Count reviews;
+  :Calculate average rating;
+fork again
+  :Fetch recent purchases;
+  :Aggregate time-series revenue data;
+end fork
+
+|Backend|
+:Compile aggregated stats JSON;
+:Return 200 OK with data;
+
+|Frontend|
+:Render Revenue chart (bar/line);
+:Render Top models by sales;
+:Render Rating distribution;
+:Render Follower count;
+stop
+@enduml

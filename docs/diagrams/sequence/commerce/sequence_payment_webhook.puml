@@ -1,0 +1,40 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+participant "Midtrans" as MT
+participant "POST /orders/notification" as WH
+participant "order.service" as OS
+database "PostgreSQL" as DB
+participant "notification.service" as NS
+
+MT -> WH : POST /orders/notification\n{ order_id, transaction_status,\n  fraud_status, payment_type,\n  transaction_id, gross_amount }
+WH -> OS : handle_payment_webhook(notification)
+OS -> DB : order.findUnique({ id: order_id })\ninclude items
+DB --> OS : Order | null
+alt order not found
+    OS --> WH : 404
+end
+OS -> DB : payment.upsert({\n  transaction_id,\n  payment_type,\n  gross_amount,\n  transaction_status,\n  fraud_status,\n  raw_response })
+DB --> OS : Payment
+
+alt transaction_status = "settlement" OR "capture" AND fraud_status != "deny"
+    OS -> DB : order.update({ status: PAID })
+    loop for each order_item
+        OS -> DB : purchase.upsert({\n  user_id, model_id,\n  price_paid, license })
+        DB --> OS : Purchase
+    end
+    OS -> NS : send notification to user\n("Your purchase is complete!")
+    NS -> DB : notification.create(...)
+else transaction_status = "deny" OR "cancel" OR "expire"
+    OS -> DB : order.update({ status: CANCELLED })
+    OS -> NS : send notification to user\n("Payment failed or cancelled.")
+    NS -> DB : notification.create(...)
+else transaction_status = "pending"
+    OS -> DB : order.update({ status: PENDING })
+end
+
+OS --> WH : { message: "ok" }
+WH --> MT : 200 OK
+@enduml

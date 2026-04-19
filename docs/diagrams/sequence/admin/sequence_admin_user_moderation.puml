@@ -1,0 +1,40 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "Admin" as ADM
+participant "Frontend" as FE
+participant "PATCH /admin/users/:id/approve" as APP
+participant "PATCH /admin/users/:id/reject" as REJ
+participant "admin.controller" as AC
+database "PostgreSQL" as DB
+
+ADM -> FE : view pending users\nGET /admin/users?status=PENDING&roles=ARTIST,PROVIDER
+FE -> DB : user.findMany({ account_status: PENDING, role in [ARTIST, PROVIDER] })
+DB --> FE : User[]
+FE --> ADM : display applicant queue with portfolio/config
+
+ADM -> FE : click "Approve" on Artist applicant
+FE -> APP : PATCH /admin/users/:id/approve
+APP -> AC : approve_user(req)
+AC -> DB : user.update({ id,\n  account_status: APPROVED,\n  approved_at: now,\n  status_history: push({ status: APPROVED, admin_id }) })
+DB --> AC : Updated User
+AC -> DB : admin_Audit_Log.create({\n  admin_id, action: APPROVE_USER,\n  target_id: user_id,\n  reason: "Application approved by admin",\n  metadata: { username, role, email } })
+DB --> AC : Audit Log
+AC --> FE : 200 { message: "User approved!", user }
+FE --> ADM : user approved, moved from queue
+
+ADM -> FE : click "Reject" on Provider applicant
+FE --> ADM : prompt for rejection reason
+ADM -> FE : enter reason + confirm
+FE -> REJ : PATCH /admin/users/:id/reject\n{ reason }
+REJ -> AC : reject_user(req)
+AC -> AC : validate reason not empty
+AC -> DB : user.update({ id,\n  account_status: REJECTED,\n  rejected_at: now,\n  status_history: push({ status: REJECTED, reason, admin_id }) })
+DB --> AC : Updated User
+AC -> DB : admin_Audit_Log.create({\n  admin_id, action: REJECT_USER,\n  target_id: user_id,\n  reason, metadata: { username, role, email } })
+DB --> AC : Audit Log
+AC --> FE : 200 { message: "User rejected!", user }
+FE --> ADM : user rejected, queue updated
+@enduml

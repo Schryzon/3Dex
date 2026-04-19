@@ -1,0 +1,36 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "Customer" as C
+participant "Frontend" as FE
+participant "POST /print/orders" as API
+participant "print.controller" as PC
+database "PostgreSQL" as DB
+
+C -> FE : browse providers (GET /print/providers?city=Jakarta&material=PLA)
+FE -> PC : get_providers(req)
+PC -> DB : user.findMany({ role: PROVIDER, account_status: APPROVED })
+DB --> PC : Provider[]
+PC -> PC : filter by material in provider_config.materials
+PC -> PC : sort by location score (city/country match)
+PC --> FE : sorted Provider[]
+FE --> C : show provider list with rating, materials, location
+
+C -> FE : select provider + configure print items
+FE --> C : show print config form\n(material, color, scale per model)
+C -> FE : submit order:\n{ provider_id, items: [{model_id, print_config}],\n  shipping_address, courier_name }
+FE -> API : POST /print/orders
+API -> PC : create_print_order(req)
+PC -> DB : user.findUnique({ id: provider_id })
+DB --> PC : Provider | null
+alt invalid provider
+    PC --> FE : 400 Invalid provider!
+    FE --> C : error
+end
+PC -> DB : order.create({\n  user_id, provider_id,\n  type: PRINT_JOB, status: PENDING,\n  shipping_address, courier_name,\n  items: [{model_id, price: 0, print_config, print_status: PENDING}] })
+DB --> PC : Order
+PC --> FE : 201 Order
+FE --> C : "Print order submitted! Waiting for provider."
+@enduml

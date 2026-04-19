@@ -19,6 +19,7 @@ actor "Admin" as Admin
 actor "System: Midtrans" as Gateway <<System>>
 actor "System: Notif Engine" as Notif <<System>>
 actor "Time / Cron Scheduler" as Time <<Time>>
+actor "System: Dexie AI" as DexieAI <<System>>
 
 ' Inheritance
 Customer -|> Guest
@@ -90,6 +91,11 @@ package "3Dex Platform Mastery Map" {
     usecase "Prune Abandoned Webhooks/Carts" as UC_CronPay
     usecase "Recalculate Averages from Reviews" as UC_CalcRating
     usecase "Dispatch In-App/Email Alerts" as UC_Notify
+
+    ' ======= Dexie AI Ecosystem =======
+    usecase "Surface Contextual Tagline" as UC_DexieTagline
+    usecase "Serve Personalised Picks (Taste-based)" as UC_DexiePicks
+    usecase "Toggle Dexie On/Off" as UC_DexieToggle
 }
 
 ' ======================= Connections =======================
@@ -110,6 +116,7 @@ Customer --> UC_ReviewModel
 Customer --> UC_ReviewUser
 Customer --> UC_Report
 Customer --> UC_Collection
+Customer --> UC_DexieToggle
 
 Artist --> UC_Upload
 Artist --> UC_Pricing
@@ -159,5 +166,16 @@ UC_ReviewModel ..> CalcRating : <<trigger>>
 Time --> UC_CronStats
 Time --> UC_CronPay
 Time --> UC_CalcRating
+
+' Dexie AI System Triggers
+DexieAI --> UC_DexieTagline : <<surfaces>>
+DexieAI --> UC_DexiePicks : <<aggregates>>
+
+' Dexie surfaces on page navigation (not user-initiated)
+UC_DexiePicks <.. UC_DexieTagline : <<extend>>
+
+' Extends browsing and model-viewing contexts
+UC_Search <.. UC_DexieTagline : <<extend>>
+UC_Viewer <.. UC_DexiePicks : <<extend>>
 
 @enduml

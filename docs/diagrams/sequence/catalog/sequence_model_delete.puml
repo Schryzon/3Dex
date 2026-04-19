@@ -1,0 +1,43 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "Artist/Admin" as U
+participant "Frontend" as FE
+participant "DELETE /models/:id" as API
+participant "model.controller" as MC
+database "PostgreSQL" as DB
+
+U -> FE : click "Delete Model" / admin clicks delete with reason
+FE -> API : DELETE /models/:id\n{ reason } (required if ADMIN)
+API -> MC : delete_model(req)
+MC -> DB : model.findUnique({ id })\ninclude artist
+DB --> MC : Model | null
+alt model not found
+    MC --> FE : 404 Model not found
+    FE --> U : error toast
+end
+
+alt user is ADMIN
+    MC -> MC : validate reason not empty
+    alt no reason
+        MC --> FE : 400 Admins must provide a reason
+        FE --> U : prompt for reason
+    end
+    MC -> DB : admin_Audit_Log.create({\n  admin_id: user_id, action: DELETE_MODEL,\n  target_id: model_id, target_type: MODEL,\n  reason, metadata: { title, artist_id, artist_username, price, deleted_by: ADMIN } })
+    DB --> MC : AuditLog
+else user is the Artist (owner)
+    alt not owner AND not admin
+        MC --> FE : 403 Not authorized
+        FE --> U : access denied
+    end
+    MC -> DB : admin_Audit_Log.create({\n  admin_id: user_id, action: DELETE_MODEL,\n  target_id: model_id,\n  reason: "Owner-initiated deletion",\n  metadata: { title, artist_id, deleted_by: OWNER } })
+    DB --> MC : AuditLog
+end
+
+MC -> DB : model.delete({ id })\n[CASCADE: reviews, wishlist, cart_items, collection_items]\n[SET NULL: order_items.model_id, purchases.model_id]
+DB --> MC : deleted
+MC --> FE : 200 { message: "Model deleted successfully!" }
+FE --> U : model removed from listing
+@enduml

@@ -1,0 +1,48 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|System|
+start
+:GET /dexie/picks?limit=8;
+
+|Database|
+:Check dexie_enabled for user;
+
+|Backend|
+if (disabled?) then (yes)
+  :Return { enabled: false, picks: [] };
+  stop
+endif
+
+|Database|
+:Fetch user.show_nsfw;
+:Fetch 5 recent wishlist items;
+:Fetch 5 recent purchase items;
+
+|Backend|
+:Extract titles, tags, category;
+if (taste data empty?) then (yes)
+  |Database|
+  :Fetch newest APPROVED models;
+  |Backend|
+  :Set as fallback picks;
+else (has data)
+  :Combine liked text into one string;
+  
+  |Gemini API|
+  :Embed text (all-MiniLM);
+  :Return query_vector (384 dims);
+  
+  |Database|
+  :Raw SQL cosine similarity search;
+  :Return top N models;
+endif
+
+|Backend|
+:Return { enabled: true, picks: Model[] };
+
+|Frontend|
+:Render Dexie's Picks carousel;
+stop
+@enduml

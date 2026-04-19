@@ -1,0 +1,70 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Clicks "Continue with Google";
+
+|Frontend|
+:Trigger Google One Tap prompt;
+
+|Google API|
+:Return credential (ID token);
+
+|Frontend|
+:POST /auth/google { credential };
+
+|Backend (Auth)|
+if (credential missing?) then (yes)
+  :Return 400 Bad Request;
+  stop
+endif
+
+|Google API|
+:Verify ID token (OAuth2Client);
+if (token valid?) then (no)
+  |Backend (Auth)|
+  :Return 401 Google Auth Failed;
+  stop
+endif
+
+|Backend (Auth)|
+:Extract sub, email, name, picture;
+
+|Database|
+:Lookup user by google_id;
+if (user exists?) then (yes)
+  |Backend (Auth)|
+  :Use existing user;
+else (no)
+  |Database|
+  :Lookup user by email;
+  if (user exists?) then (yes)
+    :Update user record (link google_id);
+    |Backend (Auth)|
+    :Set isNew = false;
+  else (no)
+    |Database|
+    :Create new User (auto-gen username);
+    |Backend (Auth)|
+    :Set isNew = true;
+  endif
+endif
+
+|Backend (Auth)|
+:Sign JWT ({ id, email, username, role });
+:Set-Cookie 3dex_session;
+
+if (isNew == true?) then (yes)
+  :Return 200 { user, needs_username: true };
+  |Frontend|
+  :Redirect to /complete-profile;
+else (no)
+  |Backend (Auth)|
+  :Return 200 { user, needs_username: false };
+  |Frontend|
+  :Redirect to /;
+endif
+stop
+@enduml

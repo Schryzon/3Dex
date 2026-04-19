@@ -1,0 +1,38 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "Admin" as ADM
+participant "Frontend" as FE
+participant "PATCH /admin/models/:id/approve" as APP_API
+participant "PATCH /admin/models/:id/reject" as REJ_API
+participant "admin.controller" as AC
+database "PostgreSQL" as DB
+
+ADM -> FE : view pending models list\nGET /admin/models/pending
+FE -> DB : model.findMany({ status: PENDING })
+DB --> FE : Model[]
+FE --> ADM : display pending queue
+
+ADM -> FE : click "Approve" on model
+FE -> APP_API : PATCH /admin/models/:id/approve
+APP_API -> AC : approve_model(req)
+AC -> DB : model.update({ id, status: APPROVED })
+DB --> AC : updated Model
+AC --> FE : 200 updated model
+FE --> ADM : model moved out of queue
+
+ADM -> FE : click "Reject" on different model
+FE --> ADM : prompt for rejection reason
+ADM -> FE : enter reason text + confirm
+FE -> REJ_API : PATCH /admin/models/:id/reject\n{ reason }
+REJ_API -> AC : reject_model(req)
+AC -> AC : validate reason not empty
+AC -> DB : model.update({ id, status: REJECTED })\ninclude artist
+DB --> AC : updated Model
+AC -> DB : admin_Audit_Log.create({\n  admin_id, action: REJECT_MODEL,\n  target_id: model_id,\n  reason, metadata: { title, artist, price } })
+DB --> AC : Audit Log
+AC --> FE : 200 updated model
+FE --> ADM : model rejected, queue updated
+@enduml

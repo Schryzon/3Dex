@@ -37,6 +37,7 @@ export function DexieProvider({ children }: { children: React.ReactNode }) {
     if (detailMatch) return { ctx: "catalog", tag: detailMatch[1] };
 
     if (pathname.includes("/cart")) return { ctx: "cart" };
+    if (pathname.includes("/checkout")) return { ctx: "checkout" };
     if (pathname.includes("/wishlist")) return { ctx: "wishlist" };
     if (pathname.includes("/profile/library")) return { ctx: "library" };
     if (pathname.startsWith("/artist/")) {
