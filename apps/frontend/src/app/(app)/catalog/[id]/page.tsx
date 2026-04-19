@@ -7,7 +7,7 @@ import { useWishlist } from '@/features/catalog/hooks/useWishlist';
 import { useAuth } from '@/features/auth';
 import { Share2, Heart, Plus, Check, Download, Eye, ShoppingCart, FolderPlus, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
 import Breadcrumbs from '@/components/common/Breadcrumbs';
-import { Suspense, lazy, useState, useEffect } from 'react';
+import { Suspense, lazy, useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { ProductDetails } from '@/features/catalog/components/product-details';
 import { RelatedProducts } from '@/features/catalog/components/product-details';
@@ -43,6 +43,11 @@ export default function CatalogDetailPage() {
     const [isClaiming, setIsClaiming] = useState(false);
     const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
     const [isRevealed, setIsRevealed] = useState(false);
+    
+    // Memoize categories to prevent infinite re-renders in RelatedProducts
+    const relatedCategories = useMemo(() => 
+        product?.category ? [product.category] : [], 
+    [product?.category]);
 
     // NSFW Access Control & Auto-redirect
     useEffect(() => {
@@ -297,8 +302,19 @@ export default function CatalogDetailPage() {
                                 )}
                                 {selectedImage === -1 ? (
                                     <Suspense fallback={
-                                        <div className="w-full h-full flex items-center justify-center">
-                                            <div className="w-8 h-8 border-2 border-yellow-500/20 border-t-yellow-500 rounded-full animate-spin" />
+                                        <div className="w-full h-full flex flex-col items-center justify-center bg-gray-900/50 backdrop-blur-md">
+                                            <div className="relative w-12 h-12 mb-4">
+                                                <div className="absolute inset-0 border-2 border-yellow-500/10 rounded-full"></div>
+                                                <div className="absolute inset-0 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
+                                            </div>
+                                            <div className="flex flex-col items-center gap-1">
+                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] animate-pulse">
+                                                    Loading 3D Engine
+                                                </span>
+                                                <span className="text-[9px] text-gray-500 font-medium">
+                                                    Streaming asset to your browser...
+                                                </span>
+                                            </div>
                                         </div>
                                     }>
                                         <div className={`w-full h-full transition-all duration-700 ${product.is_nsfw && !isRevealed ? 'blur-3xl scale-110 pointer-events-none' : ''}`}>
@@ -562,7 +578,7 @@ export default function CatalogDetailPage() {
                 <div className="mt-12 space-y-12">
                     <ProductDetails product={product} />
                     <ProductReviews productId={product.id} isPurchased={!!product.isPurchased} />
-                    <RelatedProducts productId={product.id} categories={[product.category]} />
+                    <RelatedProducts productId={product.id} categories={relatedCategories} />
                 </div>
             </div>
 

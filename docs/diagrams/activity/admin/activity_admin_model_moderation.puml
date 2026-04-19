@@ -1,0 +1,58 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|Admin|
+start
+:Views pending model queue;
+:Select model to review (preview + file in 3D viewer);
+
+|Frontend|
+fork
+  |Admin|
+  :Clicks "Approve";
+  
+  |Frontend|
+  :PATCH /admin/models/:id/approve;
+  
+  |Backend|
+  :Update status to APPROVED;
+  
+  |Database|
+  :Update model record;
+  
+  |Backend|
+  :Return 200 OK; 
+  
+fork again
+  |Admin|
+  :Clicks "Reject";
+  
+  |Frontend|
+  :Prompt for rejection reason;
+  
+  |Admin|
+  if (reason empty?) then (yes)
+    |Frontend|
+    :Show Reason required error;
+    stop
+  endif
+  
+  |Frontend|
+  :PATCH /admin/models/:id/reject { reason };
+  
+  |Backend|
+  :Update status to REJECTED;
+  
+  |Database|
+  :Update model record;
+  :Write Admin_Audit_Log (REJECT_MODEL);
+  
+  |Backend|
+  :Return 200 OK;
+end fork
+
+|Frontend|
+:Model removed from pending queue;
+stop
+@enduml

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { initiate_checkout, midtrans_notification, list_orders } from "../controllers/order.controller";
+import { initiate_checkout, midtrans_notification, list_orders, cancel_order } from "../controllers/order.controller";
 import { require_auth } from "../middlewares/auth.middleware";
 
 const router = Router();
@@ -72,5 +72,26 @@ router.post("/checkout", require_auth, initiate_checkout);
  *         description: OK
  */
 router.post("/notification", midtrans_notification);
+
+/**
+ * @openapi
+ * /orders/{id}/cancel:
+ *   post:
+ *     summary: Cancel a pending order
+ *     tags:
+ *       - Orders
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Order Cancelled
+ */
+router.post("/:id/cancel", require_auth, cancel_order);
 
 export default router;

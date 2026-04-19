@@ -1,0 +1,32 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "New User" as U
+participant "Frontend" as FE
+participant "POST /auth/register" as API
+participant "auth.service" as AS
+database "PostgreSQL" as DB
+
+U -> FE : fill registration form\n(email, username, password)
+FE -> API : POST /auth/register\n{ email, username, password }
+API -> API : validate all fields present
+alt missing fields
+    API --> FE : 400 Missing fields!
+    FE --> U : validation error
+end
+API -> AS : register_user(email, username, password)
+AS -> AS : bcrypt.hash(password, 10)
+AS -> DB : user.create({\n  email, username, hashed_password,\n  role: CUSTOMER,\n  account_status: PENDING (but auto-APPROVED for Customer) })
+alt duplicate email or username (P2002)
+    AS --> API : throw P2002
+    API --> FE : 409 Email or username exists!
+    FE --> U : conflict error
+end
+DB --> AS : new User
+AS --> API : User { id, email }
+API --> FE : 201 { id, email }
+FE --> U : "Account created! Please log in."
+FE -> FE : redirect to /login
+@enduml

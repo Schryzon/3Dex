@@ -260,3 +260,16 @@ export async function get_user_orders(user_id: string) {
         }))
     );
 }
+
+export async function cancel_pending_order(order_id: string) {
+    const order = await prisma.order.findUnique({ where: { id: order_id } });
+    if (!order) throw new Error("Order not found");
+    if (order.status !== "PENDING") {
+        throw new Error("Order is not pending");
+    }
+    await prisma.order.update({
+        where: { id: order_id },
+        data: { status: "CANCELLED" }
+    });
+    return { status: "CANCELLED" };
+}

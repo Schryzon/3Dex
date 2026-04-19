@@ -1,0 +1,36 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "Customer" as C
+participant "Frontend" as FE
+participant "POST /models/:id/reviews" as API
+participant "review.controller" as RC
+database "PostgreSQL" as DB
+
+C -> FE : click "Write a Review" on purchased model
+FE -> C : show review form (stars 1-5, comment)
+C -> FE : submit { rating: 4, comment: "Great model!" }
+FE -> API : POST /models/:id/reviews\n{ rating, comment }\n[Cookie: 3dex_session]
+API -> RC : create_review(req)
+RC -> RC : validate rating between 1-5
+RC -> DB : purchase.findUnique({\n  user_id_model_id: { user_id, model_id } })
+DB --> RC : Purchase | null
+alt not purchased
+    RC --> FE : 403 You must buy the model first!
+    FE --> C : show 403 error
+end
+RC -> DB : review.create({ user_id, model_id, rating, comment })
+DB --> RC : Review
+alt duplicate review (P2002)
+    RC --> FE : 409 You already reviewed this model!
+    FE --> C : already reviewed error
+end
+RC -> DB : review.aggregate({ model_id })\n_avg.rating, _count.rating
+DB --> RC : { avg, count }
+RC -> DB : model.update({ avg_rating, review_count })
+DB --> RC : updated Model
+RC --> FE : 201 Review
+FE --> C : review appears on model page
+@enduml

@@ -17,7 +17,6 @@ const PUBLIC_ROUTES = new Set([
 // Route prefixes that anyone can access
 const PUBLIC_PREFIXES = [
   '/catalog',
-  '/community',
   '/print-services',
   '/u/',
   '/become-artist',
@@ -46,6 +45,7 @@ const ROLE_GATED_ROUTES: Record<string, string[]> = {
 // Routes that require any authenticated user (any role is fine)
 const AUTH_REQUIRED_PREFIXES = [
   '/dashboard',
+  '/community',
   '/profile',
   '/notifications',
   '/downloads',
@@ -112,7 +112,9 @@ export async function middleware(request: NextRequest) {
     const secret = new TextEncoder().encode(JWT_SECRET);
     const { payload: jwtPayload } = await jwtVerify(token, secret);
     payload = jwtPayload as { role?: string };
-  } catch {
+  } catch (error: any) {
+    console.error('[Middleware] JWT verification failed:', error?.message || error);
+    console.error('[Middleware] JWT_SECRET present:', !!JWT_SECRET);
     // Invalid/expired token  treat as unauthenticated
     const res = NextResponse.redirect(new URL('/landing', request.url));
     res.cookies.delete('3dex_session');

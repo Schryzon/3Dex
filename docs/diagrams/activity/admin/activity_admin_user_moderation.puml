@@ -1,0 +1,59 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|Admin|
+start
+:Views pending user applications;
+:Review portfolio / provider_config;
+
+|Frontend|
+fork
+  |Admin|
+  :Clicks "Approve";
+  
+  |Frontend|
+  :PATCH /admin/users/:id/approve;
+  
+  |Backend|
+  :Set account_status to APPROVED;
+  
+  |Database|
+  :Update user record;
+  :Write Admin_Audit_Log (APPROVE_USER);
+  
+  |Backend|
+  :Return 200 OK;
+  
+fork again
+  |Admin|
+  :Clicks "Reject";
+  
+  |Frontend|
+  :Prompt for rejection reason;
+  
+  |Admin|
+  if (reason empty?) then (yes)
+    |Frontend|
+    :Show Reason required error;
+    stop
+  endif
+  
+  |Frontend|
+  :PATCH /admin/users/:id/reject { reason };
+  
+  |Backend|
+  :Set account_status to REJECTED;
+  
+  |Database|
+  :Update user record;
+  :Write Admin_Audit_Log (REJECT_USER);
+  
+  |Backend|
+  :Return 200 OK;
+end fork
+
+|Frontend|
+:Applicant removed from pending queue;
+stop
+@enduml

@@ -19,6 +19,7 @@ class User {
   + String banner_url
   + String location
   + String website
+  + String phone_number
   + Json[] addresses
   + Json[] portfolio
   + Json provider_config
@@ -31,6 +32,7 @@ class User {
   + Boolean two_factor_enabled
   + DateTime last_login_at
   + Boolean show_nsfw
+  + Boolean dexie_enabled
   + DateTime created_at
   + DateTime updated_at
   + register()
@@ -80,6 +82,10 @@ class Model {
   + String[] gallery_urls
   + Model_Status status
   + Boolean is_nsfw
+  + License_Type license
+  + Boolean is_printable
+  + String file_format
+  + Unsupported vector_embedding
   + String artist_id
   + String category_id
   + Float avg_rating
@@ -152,6 +158,7 @@ class Order {
   + String courier_name
   + String tracking_number
   + Json shipping_address
+  + String[] proof_urls
   + String snap_token
   + String snap_redirect_url
   + DateTime created_at
@@ -166,6 +173,7 @@ class Order_Item {
   + String order_id
   + String model_id
   + Int price
+  + Int quantity
   + Json print_config
   + Print_Status print_status
   + DateTime created_at

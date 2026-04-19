@@ -1,0 +1,35 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "User" as U
+participant "Frontend" as FE
+participant "GET /notifications" as NAPI
+participant "PATCH /notifications/:id/read" as RAPI
+participant "notification.controller" as NC
+database "PostgreSQL" as DB
+
+U -> FE : click notification bell icon
+FE -> NAPI : GET /notifications\n[Cookie: 3dex_session]
+NAPI -> NC : list_notifications(req)
+NC -> DB : notification.findMany({\n  user_id, orderBy: created_at desc })
+DB --> NC : Notification[]
+NC --> FE : Notification[]
+FE --> U : render notification panel\n(unread highlighted)
+
+U -> FE : click a notification
+FE -> RAPI : PATCH /notifications/:id/read
+RAPI -> NC : mark_read(req)
+NC -> DB : notification.update({ id, is_read: true })
+DB --> NC : done
+NC --> FE : 200 OK
+FE --> U : notification dot decrements
+
+U -> FE : click "Mark all as read"
+FE -> NC : PATCH /notifications/read-all
+NC -> DB : notification.updateMany({\n  user_id, is_read: false },\n  { is_read: true })
+DB --> NC : updated count
+NC --> FE : 200 OK
+FE --> U : all notification dots cleared
+@enduml

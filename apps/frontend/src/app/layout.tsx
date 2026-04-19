@@ -5,6 +5,8 @@ import "./globals.css";
 import { AuthProvider } from '@/features/auth';
 import { ReactQueryProvider } from '@/components/providers/ReactQueryProvider';
 import { Toaster } from 'react-hot-toast';
+import { DexieProvider } from '@/contexts/DexieContext';
+import { DexieAssistant } from '@/components/ui/DexieAssistant';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -21,7 +23,7 @@ export const metadata: Metadata = {
     template: '%s | 3Dēx',
   },
   description:
-    'The premier marketplace for high-quality 3D assets. Discover, buy, and sell game-ready models, textures, and HDRI maps or commission on-demand 3D printing from verified local providers.',
+    'An online community-driven 3D model marketplace. Buy, sell, and discover premium digital assets, and streamline your digital-to-physical production with our on-demand 3D printing services.',
   keywords: [
     '3D models', '3D assets', '3D marketplace', 'buy 3D models',
     '3D printing service', 'textures', 'HDRI', 'game assets',
@@ -41,10 +43,10 @@ export const metadata: Metadata = {
     siteName: '3Dēx',
     title: '3Dēx | The 3D Asset Marketplace',
     description:
-      'The premier marketplace for high-quality 3D assets. Discover, buy, and sell game-ready models, textures, and HDRI maps or commission on-demand 3D printing from verified local providers.',
+      'An online community-driven 3D model marketplace. Buy, sell, and discover premium digital assets, and streamline your digital-to-physical production with our on-demand 3D printing services.',
     images: [
       {
-        url: '/og-image.png',
+        url: `${BASE_URL}/og-image.png`,
         width: 1200,
         height: 630,
         alt: '3Dex - The 3D Asset Marketplace',
@@ -55,8 +57,8 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: '3Dēx | The 3D Asset Marketplace',
     description:
-      'Discover, buy, and sell premium 3D assets. Access game-ready models, studio-quality textures, and on-demand 3D printing all in one place.',
-    images: ['/og-image.png'],
+      'An online community-driven 3D model marketplace. Buy, sell, and discover premium digital assets, and streamline your digital-to-physical production with our on-demand 3D printing services.',
+    images: [`${BASE_URL}/og-image.png`],
   },
   robots: {
     index: true,
@@ -85,8 +87,11 @@ export default function RootLayout({
       <body className={`${inter.className} antialiased bg-black text-white`}>
         <ReactQueryProvider>
           <AuthProvider>
-            {children}
-            <Toaster position="bottom-right"/>
+            <DexieProvider>
+              {children}
+              <DexieAssistant />
+              <Toaster position="bottom-right" />
+            </DexieProvider>
           </AuthProvider>
         </ReactQueryProvider>
         <Script

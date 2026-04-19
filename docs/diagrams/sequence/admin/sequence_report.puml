@@ -1,0 +1,39 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "User" as U
+participant "Frontend" as FE
+participant "report.controller" as RC
+database "PostgreSQL" as DB
+participant "admin.controller" as AC
+
+U -> FE : click "Report" on model/post/comment
+FE --> U : show report reason form
+U -> FE : select reason + submit
+FE -> RC : POST /reports\n{ target_type: MODEL|POST|COMMENT,\n  reason,\n  [model_id|post_id|comment_id] }
+RC -> RC : validate target_type and reason
+RC -> DB : report.create({\n  reporter_id: user_id,\n  target_type, reason,\n  [model_id|post_id|comment_id],\n  status: PENDING })
+DB --> RC : Report
+RC --> FE : 201 Report
+FE --> U : "Report submitted"
+
+== Admin Review ==
+
+actor "Admin" as ADM
+
+ADM -> FE : GET /admin/reports?status=PENDING
+FE -> AC : list_reports(req)
+AC -> DB : report.findMany({ status: PENDING })\ninclude reporter
+DB --> AC : Report[]
+AC --> FE : Report[]
+FE --> ADM : pending reports list
+
+ADM -> FE : click "Resolve" on report
+FE -> AC : PATCH /admin/reports/:id\n{ status: REVIEWED }
+AC -> DB : report.update({ status: REVIEWED })
+DB --> AC : done
+AC --> FE : 200
+FE --> ADM : report removed from queue
+@enduml

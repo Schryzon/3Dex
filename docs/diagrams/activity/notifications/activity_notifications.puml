@@ -1,0 +1,41 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Clicks notification bell;
+
+|Frontend|
+:GET /notifications;
+
+|Database|
+:Fetch notifications (order by date desc);
+
+|Backend|
+:Return Notification[];
+
+|Frontend|
+:Render notification panel;
+
+fork
+  |User|
+  :Clicks a notification;
+  |Frontend|
+  :PATCH /notifications/:id/read;
+  |Database|
+  :Update notification { is_read: true };
+  |Frontend|
+  :Decrement unread badge;
+fork again
+  |User|
+  :Clicks "Mark all as read";
+  |Frontend|
+  :PATCH /notifications/read-all;
+  |Database|
+  :Update Many { is_read: true };
+  |Frontend|
+  :Clear unread badge;
+end fork
+stop
+@enduml

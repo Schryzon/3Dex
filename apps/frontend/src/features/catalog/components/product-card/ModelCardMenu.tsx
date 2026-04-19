@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { MoreVertical, Flag, Trash2, Pencil, X, AlertTriangle, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/features/auth';
@@ -280,7 +281,9 @@ export default function ModelCardMenu({ modelId, modelTitle, artistId, onDeleted
 
     const [open, setOpen] = useState(false);
     const [modal, setModal] = useState<'report' | 'delete' | null>(null);
+    const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 });
     const menuRef = useRef<HTMLDivElement>(null);
+    const triggerRef = useRef<HTMLButtonElement>(null);
 
     const isAdmin   = user?.role === 'ADMIN';
     const isOwner   = isAuthenticated && user?.id === artistId;
@@ -308,11 +311,22 @@ export default function ModelCardMenu({ modelId, modelTitle, artistId, onDeleted
                 {/* Trigger Button */}
                 <button
                     type="button"
+                    ref={triggerRef}
                     id={`model-menu-${modelId}`}
                     aria-label="More options"
                     onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
+                        
+                        if (!open && triggerRef.current) {
+                            const rect = triggerRef.current.getBoundingClientRect();
+                            setCoords({
+                                top: rect.bottom,
+                                left: rect.right,
+                                width: rect.width
+                            });
+                        }
+                        
                         setOpen((o) => !o);
                     }}
                     className={`flex items-center justify-center w-7 h-7 rounded-lg transition-all duration-200 cursor-pointer
@@ -324,10 +338,15 @@ export default function ModelCardMenu({ modelId, modelTitle, artistId, onDeleted
                     <MoreVertical className="w-3.5 h-3.5" />
                 </button>
 
-                {/* Dropdown */}
-                {open && (
+                {/* Dropdown via Portal */}
+                {open && createPortal(
                     <div
-                        className="absolute top-full right-0 mt-1.5 w-44 bg-[#1a1a1a] border border-white/[0.08] rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-40 animate-in fade-in zoom-in-95 duration-150"
+                        ref={menuRef}
+                        className="fixed w-44 bg-[#1a1a1a] border border-white/[0.08] rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-[9999] animate-in fade-in zoom-in-95 duration-150"
+                        style={{
+                            top: `${coords.top + 6}px`,
+                            left: `${coords.left - 176}px`, // 176 is w-44 (44 * 4)
+                        }}
                         onClick={(e) => e.stopPropagation()}
                     >
                         {canEdit && (
@@ -381,27 +400,30 @@ export default function ModelCardMenu({ modelId, modelTitle, artistId, onDeleted
                                 Report
                             </button>
                         )}
-                    </div>
+                    </div>,
+                    document.body
                 )}
             </div>
 
             {/* Modals */}
-            {modal === 'report' && (
+            {modal === 'report' && createPortal(
                 <ReportModal
                     modelId={modelId}
                     modelTitle={modelTitle}
                     onClose={() => setModal(null)}
-                />
+                />,
+                document.body
             )}
 
-            {modal === 'delete' && (
+            {modal === 'delete' && createPortal(
                 <DeleteModal
                     modelId={modelId}
                     modelTitle={modelTitle}
                     isAdmin={isAdmin}
                     onDeleted={onDeleted}
                     onClose={() => setModal(null)}
-                />
+                />,
+                document.body
             )}
         </>
     );

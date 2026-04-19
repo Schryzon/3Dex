@@ -1,0 +1,35 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Fills registration form (email, username, password);
+
+|Frontend|
+:POST /auth/register { email, username, password };
+
+|Backend (Auth)|
+:Validate all fields present;
+if (missing fields?) then (yes)
+  :Return 400 Missing fields;
+  stop
+endif
+
+:bcrypt.hash(password, 10);
+
+|Database|
+:Create user record (role: CUSTOMER, status: APPROVED);
+if (P2002 duplicate email/username?) then (yes)
+  |Backend (Auth)|
+  :Return 409 Conflict;
+  stop
+endif
+
+|Backend (Auth)|
+:Return 201 Created { id, email };
+
+|Frontend|
+:Redirect to /login;
+stop
+@enduml

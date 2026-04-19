@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/features/auth';
+import { useDexie } from '@/contexts/DexieContext';
 import {
     FolderOpen,
     Bookmark,
@@ -440,6 +441,7 @@ type TabType = 'profile' | 'settings' | 'collections' | 'bookmarks' | 'notificat
 
 function ProfileContent() {
     const { user, setUser, logout } = useAuth();
+    const { enabled: dexieEnabled, toggleDexie } = useDexie();
     const router = useRouter();
     const searchParams = useSearchParams();
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -488,7 +490,7 @@ function ProfileContent() {
         bio: user?.bio || '',
         location: user?.location || '',
         receiverName: '',
-        phoneNumber: '',
+        phoneNumber: (user as any)?.phone_number || '',
         postcode: '',
         detailedAddress: '',
         courierPreference: 'JNE',
@@ -516,7 +518,7 @@ function ProfileContent() {
                 bio: user.bio || '',
                 location: user.location || '',
                 receiverName: '',
-                phoneNumber: '',
+                phoneNumber: (user as any).phone_number || '',
                 postcode: '',
                 detailedAddress: '',
                 courierPreference: 'JNE',
@@ -550,6 +552,7 @@ function ProfileContent() {
                 bio: formData.bio,
                 location: formData.location,
                 website: formData.website,
+                phone_number: formData.phoneNumber,
                 show_nsfw: formData.showNsfw,
                 social_twitter: formData.socialLinks.twitter,
                 social_instagram: formData.socialLinks.instagram,
@@ -575,6 +578,7 @@ function ProfileContent() {
                 displayName: updatedUser.display_name || prev.displayName,
                 bio: updatedUser.bio || prev.bio,
                 location: updatedUser.location || prev.location,
+                phoneNumber: updatedUser.phone_number || prev.phoneNumber,
                 website: updatedUser.website || prev.website,
                 showNsfw: updatedUser.show_nsfw !== undefined ? !!updatedUser.show_nsfw : prev.showNsfw,
                 socialLinks: {
@@ -1081,6 +1085,18 @@ function ProfileContent() {
                                                     </div>
                                                 </div>
                                                 <div>
+                                                    <label className="block text-sm text-gray-400 mb-2 font-medium">Phone Number</label>
+                                                    <div className="relative">
+                                                        <input
+                                                            type="tel"
+                                                            value={formData.phoneNumber}
+                                                            onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value.replace(/\D/g, '') })}
+                                                            placeholder="0812 XXXX XXXX"
+                                                            className="w-full bg-black/50 text-white px-4 py-3 rounded-xl border border-gray-800 focus:border-yellow-400 focus:outline-none transition-all"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div>
                                                     <label className="block text-sm text-gray-400 mb-2 font-medium">Bio</label>
                                                     <textarea
                                                         value={formData.bio}
@@ -1424,6 +1440,20 @@ function ProfileContent() {
                                                     className={`w-12 h-6 rounded-full relative cursor-pointer transition-colors duration-200 shrink-0 ${marketNotifs ? 'bg-yellow-400' : 'bg-gray-700'}`}
                                                 >
                                                     <div className={`absolute left-1 top-1 w-4 h-4 rounded-full shadow-sm transition-transform duration-200 ${marketNotifs ? 'bg-black translate-x-[24px]' : 'bg-gray-400 translate-x-0'}`} />
+                                                </button>
+                                            </div>
+                                            <div className="flex items-center justify-between p-4 bg-gray-800/20 rounded-xl border border-gray-800">
+                                                <div>
+                                                    <p className="text-white font-medium flex items-center gap-2">
+                                                        <Sparkles className="w-4 h-4 text-blue-400" /> Dēxie AI Assistant
+                                                    </p>
+                                                    <p className="text-sm text-gray-500">Allow Dēxie to provide situational recommendations and insights while you browse.</p>
+                                                </div>
+                                                <button
+                                                    onClick={() => toggleDexie(!dexieEnabled)}
+                                                    className={`w-12 h-6 rounded-full relative cursor-pointer transition-colors duration-200 shrink-0 ${dexieEnabled ? 'bg-blue-500' : 'bg-gray-700'}`}
+                                                >
+                                                    <div className={`absolute left-1 top-1 w-4 h-4 rounded-full shadow-sm transition-transform duration-200 ${dexieEnabled ? 'bg-white translate-x-[24px]' : 'bg-gray-400 translate-x-0'}`} />
                                                 </button>
                                             </div>
                                         </div>

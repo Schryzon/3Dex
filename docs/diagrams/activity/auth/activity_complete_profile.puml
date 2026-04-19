@@ -1,0 +1,45 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Google user lands on /complete-profile;
+:Enters desired username;
+
+|Frontend|
+:PATCH /auth/complete-profile { username };
+
+|Backend (Auth)|
+:Trim and lowercase username;
+:Validate length (3-30 chars);
+if (invalid length?) then (yes)
+  :Return 400 Pattern Error;
+  stop
+endif
+:Validate regex pattern ([a-z0-9_]);
+if (invalid characters?) then (yes)
+  :Return 400 Character Error;
+  stop
+endif
+
+|Database|
+:Lookup username;
+if (username taken?) then (yes)
+  |Backend (Auth)|
+  :Return 409 Username already taken;
+  stop
+endif
+
+|Database|
+:Update user record with full username;
+
+|Backend (Auth)|
+:Re-issue JWT with new username;
+:Set-Cookie: 3dex_session;
+:Return 200 OK;
+
+|Frontend|
+:Redirect to /;
+stop
+@enduml

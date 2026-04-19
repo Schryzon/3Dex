@@ -1,0 +1,53 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|Customer|
+start
+:Submits checkout request with items[];
+
+|Backend|
+:Validate items array not empty;
+if (no items?) then (yes)
+  :Return 400 Bad Request;
+  stop
+endif
+
+|Database|
+:Fetch all models by ID;
+
+|Backend|
+:Check if model already purchased;
+if (any model already owned?) then (yes)
+  :Return 400 Already purchased;
+  stop
+endif
+
+|Database|
+:Create Order record (Status: PENDING);
+:Create Order_Item for each model;
+
+|Backend|
+:Calculate total_amount;
+
+|Midtrans API|
+:Create Transaction request (Snap API);
+if (Gateway error?) then (yes)
+  |Backend|
+  :Rollback order;
+  :Return 500 Internal Error;
+  stop
+endif
+
+:Return snap_token + redirect_url;
+
+|Database|
+:Update Order with snap_token;
+
+|Backend|
+:Return { snap_token, total };
+
+|Frontend|
+:Open Midtrans payment popup;
+stop
+@enduml

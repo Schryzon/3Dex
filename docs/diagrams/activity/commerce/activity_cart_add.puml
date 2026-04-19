@@ -1,0 +1,45 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Clicks "Add to Cart";
+
+|Frontend|
+:POST /cart/add { modelId };
+
+|Backend|
+:Validate modelId present;
+if (missing?) then (yes)
+  :Return 400 Bad Request;
+  stop
+endif
+
+|Database|
+:Lookup model by id;
+
+|Backend|
+if (not found?) then (yes)
+  :Return 404 Not Found;
+  stop
+endif
+
+if (model.price == 0?) then (yes)
+  :Return 400 Free models cannot be added;
+  stop
+endif
+
+|Database|
+:Upsert cart_Item record;
+
+|MinIO|
+:Presign preview_url;
+
+|Backend|
+:Return 201 Created;
+
+|Frontend|
+:Update cart count badge in UI;
+stop
+@enduml

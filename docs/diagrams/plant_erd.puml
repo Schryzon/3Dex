@@ -21,6 +21,7 @@ entity User {
   banner_url : String
   location : String
   website : String
+  phone_number : String
   addresses : Json[]
   portfolio : Json[]
   provider_config : Json
@@ -33,6 +34,7 @@ entity User {
   two_factor_enabled : Boolean
   last_login_at : DateTime
   show_nsfw : Boolean
+  dexie_enabled : Boolean
   * created_at : DateTime
   * updated_at : DateTime
 }
@@ -48,6 +50,10 @@ entity Model {
   gallery_urls : String[]
   status : Model_Status
   is_nsfw : Boolean
+  license : License_Type
+  is_printable : Boolean
+  file_format : String
+  embedding : Unsupported("vector(384)")
   * artist_id : String <<FK>>
   category_id : String <<FK>>
   avg_rating : Float
@@ -120,6 +126,7 @@ entity Order {
   courier_name : String
   tracking_number : String
   shipping_address : Json
+  proof_urls : String[]
   snap_token : String
   snap_redirect_url : String
   * created_at : DateTime
@@ -132,6 +139,7 @@ entity Order_Item {
   * order_id : String <<FK>>
   model_id : String <<FK>>
   * price : Int
+  * quantity : Int
   print_config : Json
   print_status : Print_Status
   * created_at : DateTime

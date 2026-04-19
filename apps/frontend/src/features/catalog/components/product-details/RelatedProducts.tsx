@@ -34,9 +34,11 @@ export default function RelatedProducts({ productId, categories }: Props) {
   const { user } = useAuth();
   const { isInWishlist, toggle: toggleWishlist } = useWishlist();
 
+  const categoriesKey = categories?.join(',') || '';
+
   useEffect(() => {
     fetchRelatedProducts();
-  }, [productId, categories]);
+  }, [productId, categoriesKey]);
 
   const fetchRelatedProducts = async () => {
     try {

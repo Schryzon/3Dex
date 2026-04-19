@@ -1,0 +1,39 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Requests model download;
+
+|Frontend|
+:GET /models/:id/download;
+
+|Database|
+:Lookup model by id;
+
+|Backend|
+if (model not found?) then (yes)
+  :Return 404 Not Found;
+  stop
+endif
+
+|Database|
+:Lookup Purchase record for user & model;
+
+|Backend|
+if (purchase exists OR artist == user OR admin OR price == 0?) then (yes)
+  |MinIO|
+  :Generate presigned GET URL (short TTL);
+  
+  |Backend|
+  :Return 200 { download_url, license };
+  
+  |Frontend|
+  :Trigger browser download;
+else (no)
+  |Backend|
+  :Return 403 Forbidden;
+endif
+stop
+@enduml

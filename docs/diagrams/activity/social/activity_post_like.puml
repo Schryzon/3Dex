@@ -1,0 +1,33 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Clicks heart icon on post;
+
+|Frontend|
+:POST /posts/:post_id/like;
+
+|Database|
+:Lookup post_Like record;
+
+|Backend|
+if (like exists?) then (yes)
+  |Database|
+  :Delete post_Like;
+  :Decrement post like_count;
+  |Backend|
+  :Return "Unliked";
+else (no)
+  |Database|
+  :Create post_Like;
+  :Increment post like_count;
+  |Backend|
+  :Return "Liked";
+endif
+
+|Frontend|
+:Update UI state;
+stop
+@enduml

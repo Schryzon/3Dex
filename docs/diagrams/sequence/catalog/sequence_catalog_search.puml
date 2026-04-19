@@ -1,0 +1,37 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "User" as U
+participant "Frontend" as FE
+participant "GET /models" as API
+participant "model.controller" as MC
+participant "storage.service" as SS
+participant "MinIO / S3" as S3
+database "PostgreSQL" as DB
+
+U -> FE : type in search box / apply filters
+FE -> API : GET /models?search=mecha&category_id=x\n&min_price=0&max_price=50000\n&sort=rating&page=1&limit=20
+API -> MC : list_models(req)
+MC -> MC : parse user context:\n  is_self = (user && artist_id == user.id)\n  is_admin = (user.role == ADMIN)
+MC -> MC : build where clause:\n  status: APPROVED (unless admin/self)\n  artist.role: ARTIST (unless admin/self)\n  is_nsfw: false (unless nsfw=true in query)\n  OR search across title, description, tags, category
+MC -> MC : build orderBy from sort param\n(newest|oldest|price_asc|price_desc|rating|popular)
+MC -> MC : pagination: skip=(page-1)*limit, take=limit
+MC -> DB : model.findMany({ where, orderBy, take, skip,\n  include: { artist, category, tags } })
+DB --> MC : Model[]
+MC -> DB : model.count({ where })
+DB --> MC : total count
+loop for each model
+    MC -> SS : get_download_url_s3(preview_url) if not http
+    SS -> S3 : presign GET URL
+    S3 --> SS : signed URL
+    SS --> MC : signed preview_url
+    MC -> SS : get_download_url_s3(file_url) if not http
+    SS --> MC : signed file_url
+    MC -> SS : sign_user_urls(artist)
+    SS --> MC : artist with signed avatar_url
+end
+MC --> FE : { data: Model[], meta: { total, page, limit, pages } }
+FE --> U : render paginated model grid
+@enduml

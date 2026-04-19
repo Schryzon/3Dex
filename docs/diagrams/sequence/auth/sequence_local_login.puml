@@ -1,0 +1,45 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+skinparam sequenceParticipant underline
+
+actor "User" as U
+participant "Frontend" as FE
+participant "POST /auth/login" as API
+participant "auth.service" as AS
+database "PostgreSQL" as DB
+participant "jwt.sign()" as JWT
+
+U -> FE : submit email + password
+FE -> API : POST /auth/login\n{ email, password }
+API -> API : validate fields present
+alt missing fields
+    API --> FE : 400 Missing fields!
+    FE --> U : show error
+end
+API -> AS : login_user(email, password)
+AS -> DB : user.findUnique({ email })
+DB --> AS : User | null
+alt user not found
+    AS --> API : null
+    API --> FE : 401 Invalid credentials!
+    FE --> U : show error
+end
+AS -> AS : bcrypt.compare(password, user.password)
+alt wrong password
+    AS --> API : null
+    API --> FE : 401 Invalid credentials!
+    FE --> U : show error
+end
+AS -> DB : user.update({ last_login_at: now })
+AS --> API : User
+API -> JWT : sign_token({ id, email, username, role })
+JWT --> API : token
+API -> API : Set-Cookie: 3dex_session=token\nhttpOnly, sameSite=lax, maxAge=7d
+API -> AS : sign_user_urls(user)
+AS --> API : user with signed avatar_url
+API --> FE : 200 { user }
+FE -> FE : store user in AuthContext
+FE --> U : redirect to /
+@enduml

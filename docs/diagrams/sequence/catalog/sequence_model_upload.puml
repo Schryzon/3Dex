@@ -1,0 +1,52 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "Artist" as A
+participant "Frontend" as FE
+participant "POST /storage/upload-url" as SAPI
+participant "storage.service" as SS
+participant "MinIO / S3" as S3
+participant "POST /models" as MAPI
+participant "model.controller" as MC
+participant "model.service" as MS
+participant "embedding.service" as ES
+database "PostgreSQL" as DB
+
+A -> FE : fill upload form\n(title, price, tags, file, preview)
+FE -> SAPI : POST /storage/upload-url\n{ filename: model.glb, content_type: model/gltf-binary }
+SAPI -> SS : get_upload_url(filename, content_type)
+SS -> S3 : presign PUT URL
+S3 --> SS : presigned_url + key
+SS --> SAPI : { upload_url, key }
+SAPI --> FE : { upload_url, key }
+
+FE -> S3 : PUT presigned_url (raw GLB binary)
+S3 --> FE : 200 OK
+
+FE -> SAPI : POST /storage/upload-url\n{ filename: preview.webp, content_type: image/webp }
+SAPI --> FE : { upload_url: preview_url, key: preview_key }
+FE -> S3 : PUT presigned_url (preview image)
+S3 --> FE : 200 OK
+
+FE -> MAPI : POST /models\n{ title, price, file_url: key, preview_url: preview_key,\n  artist_id, category, tags, license, is_printable, is_nsfw }
+MAPI -> MC : upload_model(req)
+MC -> MC : validate required fields
+MC -> MC : extract file_format from file_url extension
+alt not .glb or .gltf
+    MC --> FE : 400 Invalid file format
+end
+MC -> DB : category.findUnique({ slug })
+DB --> MC : Category | null
+MC -> MS : create_model({ ...data, category_id, file_format })
+MS -> DB : model.create({ ... })
+DB --> MS : Model (status: PENDING)
+MS --> MC : Model
+MC -> ES : embed_and_save_model(model.id) [fire & forget]
+ES -> DB : model.findUnique (get title + description)
+ES -> ES : encode text via all-MiniLM-L6-v2
+ES -> DB : model.update({ embedding: vector })
+MC --> FE : 201 { model }
+FE --> A : "Model uploaded! Pending admin review."
+@enduml

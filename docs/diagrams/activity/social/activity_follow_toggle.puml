@@ -1,0 +1,50 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Visits another user's profile;
+
+|Frontend|
+:GET /follow/:following_id/status;
+
+|Backend|
+if (already following?) then (yes)
+  |Frontend|
+  :Show "Following" button;
+  
+  |User|
+  :Clicks "Unfollow";
+  |Frontend|
+  :DELETE /follow/:following_id;
+  
+  |Database|
+  :Delete follow record;
+  
+  |Frontend|
+  :Button reverts to "Follow";
+else (not following)
+  |Frontend|
+  :Show "Follow" button;
+  
+  |User|
+  :Clicks "Follow";
+  |Frontend|
+  :POST /follow { following_id };
+  
+  |Backend|
+  if (already follows?) then (yes)
+    :Return 400 Bad Request;
+    stop
+  endif
+  
+  |Database|
+  :Create follow record;
+  :Create notification for target user;
+  
+  |Frontend|
+  :Button becomes "Following";
+endif
+stop
+@enduml

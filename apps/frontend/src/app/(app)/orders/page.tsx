@@ -87,7 +87,7 @@ export default function OrdersPage() {
                                         {order.items.map((item: OrderItem) => (
                                             <div key={item.id} className="flex items-center justify-between gap-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-12 h-12 bg-gray-800 rounded-lg overflow-hidden flex-shrink-0">
+                                                    <div className="w-12 h-12 bg-gray-800 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
                                                         {(item.model?.preview_url || (item.print_config as any)?.model_thumbnail) ? (
                                                             <img 
                                                                 src={item.model?.preview_url ? getStorageUrl(item.model.preview_url) : (item.print_config as any)?.model_thumbnail} 
@@ -95,12 +95,15 @@ export default function OrdersPage() {
                                                                 className="w-full h-full object-cover" 
                                                             />
                                                         ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-600">3D</div>
+                                                            <div className="flex flex-col items-center text-gray-700">
+                                                                <ShoppingBag className="w-5 h-5 mb-0.5" />
+                                                                <span className="text-[8px] font-bold uppercase">N/A</span>
+                                                            </div>
                                                         )}
                                                     </div>
                                                     <div>
                                                         <p className="text-sm font-semibold text-white truncate max-w-[200px]">
-                                                            {item.model?.title || (item.print_config as any)?.model_title || 'Unknown Model'}
+                                                            {item.model?.title || (item.print_config as any)?.model_title || <span className="text-gray-500 italic">(Deleted Model)</span>}
                                                         </p>
                                                         <div className="flex items-center gap-1.5 mt-0.5">
                                                             {item.model?.artist.avatar_url ? (
@@ -114,7 +117,7 @@ export default function OrdersPage() {
                                                                     <ShoppingBag className="w-2.5 h-2.5 text-gray-600" />
                                                                 </div>
                                                             )}
-                                                            <p className="text-xs text-gray-500">by {item.model?.artist.username || 'System'}</p>
+                                                            <p className="text-xs text-gray-500">by {item.model?.artist.username || (item.print_config as any)?.artist_name || 'System'}</p>
                                                         </div>
                                                     </div>
                                                 </div>

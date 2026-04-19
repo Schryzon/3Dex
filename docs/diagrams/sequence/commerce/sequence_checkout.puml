@@ -1,0 +1,40 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "Customer" as C
+participant "Frontend" as FE
+participant "POST /orders/checkout" as API
+participant "order.service" as OS
+participant "Midtrans SDK" as MT
+database "PostgreSQL" as DB
+
+C -> FE : click "Checkout" from cart
+FE -> FE : read cart items (model_ids[])
+FE -> API : POST /orders/checkout\n{ items: [{ model_id, quantity }] }
+API -> OS : create_order(user_id, lines)
+OS -> DB : model.findMany({ id IN model_ids })\n(validate all models exist & APPROVED)
+DB --> OS : Model[]
+
+loop for each model
+    OS -> DB : purchase.findUnique({ user_id, model_id })
+    DB --> OS : Purchase | null
+    alt already purchased
+        OS --> API : throw "Already purchased: <title>"
+        API --> FE : 400 error
+        FE --> C : "You already own this model"
+    end
+end
+
+OS -> DB : order.create({ user_id, type: ASSET, status: PENDING,\n  items: [ {model_id, price} ] })
+DB --> OS : Order { id, total_amount }
+OS -> MT : snap.createTransaction({\n  transaction_details: { order_id, gross_amount },\n  item_details: [ ... ],\n  customer_details: { ... } })
+MT --> OS : { token, redirect_url }
+OS -> DB : order.update({ snap_token, snap_redirect_url })
+DB --> OS : updated Order
+OS --> API : { order_id, snap_token, snap_redirect_url, total }
+API --> FE : 200 { snap_token, ... }
+FE -> FE : window.snap.pay(snap_token)
+FE --> C : Midtrans payment popup opens
+@enduml

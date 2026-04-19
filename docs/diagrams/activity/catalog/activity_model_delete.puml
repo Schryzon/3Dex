@@ -1,0 +1,49 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|Artist or Admin|
+start
+:Clicks "Delete Model" / Admin provides reason;
+
+|Frontend|
+:DELETE /models/:id { reason };
+
+|Database|
+:Lookup model by id;
+
+|Backend|
+if (model not found?) then (yes)
+  :Return 404 Not Found;
+  stop
+endif
+
+if (user is ADMIN?) then (yes)
+  :Validate reason is present;
+  if (reason empty?) then (yes)
+    :Return 400 Reason required;
+    stop
+  endif
+  |Database|
+  :Write Admin_Audit_Log (DELETE_MODEL by Admin);
+else (artist)
+  |Backend|
+  if (model.artist_id != user_id?) then (yes)
+    :Return 403 Forbidden;
+    stop
+  endif
+  |Database|
+  :Write Admin_Audit_Log (DELETE_MODEL by Owner);
+endif
+
+|Database|
+:Delete model record;
+note right: CASCADE: Reviews, Wishlist, Cart_Items\nSET NULL: Order_Items, Purchases
+
+|Backend|
+:Return 200 OK;
+
+|Frontend|
+:Model removed from UI;
+stop
+@enduml

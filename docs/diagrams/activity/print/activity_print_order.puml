@@ -1,0 +1,55 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|Customer|
+start
+:Browses print providers;
+
+|Frontend|
+:GET /print/providers;
+
+|Database|
+:Fetch APPROVED providers;
+
+|Backend|
+:Filter by material;
+if (city or country specified?) then (yes)
+  :Score and sort by location_score;
+else if (sort == rating?) then (yes)
+  :Sort by rating;
+endif
+:Return sorted providers list;
+
+|Frontend|
+:Render providers;
+
+|Customer|
+:Selects provider;
+:Configures print items;
+:Submits print order;
+
+|Frontend|
+:POST /print/orders;
+
+|Backend|
+:Validate provider_id & items;
+
+|Database|
+:Lookup provider;
+if (not found / invalid?) then (yes)
+  |Backend|
+  :Return 400 Invalid provider;
+  stop
+endif
+
+:Create Order { status: PENDING };
+:Create Order_Item for each item;
+
+|Backend|
+:Return 201 Created;
+
+|Frontend|
+:Show "Print order submitted";
+stop
+@enduml

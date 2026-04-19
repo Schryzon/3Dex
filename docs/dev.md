@@ -48,6 +48,7 @@ This guide details the setup and development processes to ensure consistent impl
 | Database | PostgreSQL |
 | ORM | Prisma |
 | Storage | MinIO (S3 Compatible) |
+| AI / Ecosystem | Google Gemini (Dēxie AI) |
 | Version Control | Git + GitHub |
 
 ---
@@ -138,6 +139,7 @@ STORAGE_ACCESS_KEY="minioadmin"
 STORAGE_SECRET_KEY="minioadmin"
 STORAGE_BUCKET="3dex-models"
 SB_MIDTRANS_SERVER_KEY="sandbox-midtrans-server-key"
+GEMINI_API_KEY="your-google-ai-studio-key"
 ```
 
 ### Frontend (`apps/frontend/.env.local`)

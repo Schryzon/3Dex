@@ -7,10 +7,12 @@
 generator client {
   provider = "prisma-client-js"
   binaryTargets = ["native", "linux-musl", "windows"]
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
   provider = "postgresql"
+  extensions = [vector]
 }
 
 enum Role {
@@ -50,6 +52,7 @@ model User {
   banner_url   String?
   location     String? // General location string
   website      String?
+  phone_number String?
   
   // Structured Data
   addresses    Json[] // [{ label, street, city, region, country, zip, is_default }]
@@ -70,6 +73,9 @@ model User {
   two_factor_enabled Boolean @default(false)
   last_login_at      DateTime?
   show_nsfw          Boolean @default(false)
+  
+  // Dexie AI Ecosystem Settings
+  dexie_enabled      Boolean @default(true)
   
   models        Model[]        @relation("artist_models")
   purchases     Purchase[]
@@ -112,6 +118,7 @@ model Model {
   license     License_Type @default(PERSONAL_USE)
   is_printable Boolean     @default(true)
   file_format String       @default("glb")
+  embedding   Unsupported("vector(384)")? // 384 dimensions for all-MiniLM-L6-v2
 
   artist_id String
   artist    User   @relation("artist_models", fields: [artist_id], references: [id])
@@ -142,10 +149,10 @@ model Purchase {
   id String @id @default(uuid())
 
   user_id  String
-  model_id String
+  model_id String?
 
-  user  User  @relation(fields: [user_id], references: [id])
-  model Model @relation(fields: [model_id], references: [id])
+  user  User   @relation(fields: [user_id], references: [id])
+  model Model? @relation(fields: [model_id], references: [id], onDelete: SetNull)
 
   price_paid Int // in IDR
   license    License_Type @default(PERSONAL_USE)
@@ -185,7 +192,7 @@ model Review {
   model_id String
 
   user  User  @relation(fields: [user_id], references: [id])
-  model Model @relation(fields: [model_id], references: [id])
+  model Model @relation(fields: [model_id], references: [id], onDelete: Cascade)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -200,7 +207,7 @@ model Wishlist {
   model_id String
 
   user  User  @relation(fields: [user_id], references: [id])
-  model Model @relation(fields: [model_id], references: [id])
+  model Model @relation(fields: [model_id], references: [id], onDelete: Cascade)
 
   created_at DateTime @default(now())
 
@@ -215,7 +222,7 @@ model Cart_Item {
   quantity Int @default(1)
 
   user  User  @relation(fields: [user_id], references: [id])
-  model Model @relation(fields: [model_id], references: [id])
+  model Model @relation(fields: [model_id], references: [id], onDelete: Cascade)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -288,7 +295,7 @@ model Order_Item {
   order    Order  @relation(fields: [order_id], references: [id])
 
   model_id String?
-  model    Model? @relation(fields: [model_id], references: [id])
+  model    Model? @relation(fields: [model_id], references: [id], onDelete: SetNull)
 
   /// Unit price in IDR at time of purchase
   price Int

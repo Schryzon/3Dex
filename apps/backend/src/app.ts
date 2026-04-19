@@ -26,13 +26,26 @@ import notification_routes from "./routes/notification";
 import follow_routes from "./routes/follow";
 import collection_routes from "./routes/collections";
 import report_routes from "./routes/reports";
+import dexie_routes from "./routes/dexie";
 
 // Initialize Backend
 const app = express();
 
 // Middleware
 app.use(helmet({
-    contentSecurityPolicy: false, // Disable CSP for now to avoid breaking 3D viewers/images
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://accounts.google.com", "https://app.sandbox.midtrans.com", "https://app.midtrans.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            imgSrc: ["'self'", "data:", "blob:", "https://*.s3.amazonaws.com", "https://*.digitaloceanspaces.com", process.env.STORAGE_ENDPOINT || ""],
+            connectSrc: ["'self'", "https://accounts.google.com", "https://app.sandbox.midtrans.com", "https://app.midtrans.com", "blob:", "https://*.s3.amazonaws.com", "https://*.digitaloceanspaces.com", "https://huggingface.co", "https://cdn-lfs.huggingface.co", process.env.STORAGE_ENDPOINT || ""],
+            frameSrc: ["'self'", "https://accounts.google.com", "https://app.sandbox.midtrans.com", "https://app.midtrans.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            objectSrc: ["'none'"],
+            upgradeInsecureRequests: [],
+        },
+    },
 }));
 
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000')
@@ -74,6 +87,7 @@ app.use("/cart", cart_routes);
 app.use("/notifications", notification_routes);
 app.use("/collections", collection_routes);
 app.use("/reports", report_routes);
+app.use("/dexie", dexie_routes);
 
 // 404 Handler - Return JSON instead of HTML
 app.use((req, res) => {

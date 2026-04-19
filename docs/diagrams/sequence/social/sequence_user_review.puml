@@ -1,0 +1,46 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "Customer" as C
+participant "Frontend" as FE
+participant "POST /reviews/user" as API
+participant "review.controller" as RC
+database "PostgreSQL" as DB
+
+C -> FE : open artist/provider profile
+FE -> API : GET /reviews/user/:id/eligible\n[Cookie: 3dex_session]
+API -> RC : check_review_eligibility(req)
+RC -> DB : user_Review.findUnique({\n  reviewer_id_target_user_id })
+DB --> RC : existingReview | null
+alt already reviewed
+    RC --> FE : { eligible: false, reason: ALREADY_REVIEWED }
+    FE --> C : hide review button
+end
+RC -> DB : purchase.findFirst({ user_id, model.artist_id: target })
+DB --> RC : Purchase | null
+RC -> DB : order.findFirst({ user_id, provider_id: target, status: PAID, type: PRINT_JOB })
+DB --> RC : Order | null
+alt no transaction at all
+    RC --> FE : { eligible: false, reason: NO_TRANSACTION }
+    FE --> C : show "Buy from this creator first"
+end
+RC --> FE : { eligible: true }
+FE --> C : show review form
+
+C -> FE : submit { target_user_id, rating, comment }
+FE -> API : POST /reviews/user\n{ target_user_id, rating, comment }
+API -> RC : add_user_review(req)
+RC -> RC : check reviewer != target
+RC -> RC : check rating 1-5
+RC -> DB : re-check purchase / printOrder existence
+RC -> DB : user_Review.create({ reviewer_id, target_user_id, rating, comment })
+DB --> RC : User_Review
+RC -> DB : user_Review.aggregate({ target_user_id })\n_avg.rating, _count.rating
+DB --> RC : aggregated stats
+RC -> DB : user.update({ target_user_id, rating, review_count })
+DB --> RC : updated User
+RC --> FE : 200 User_Review
+FE --> C : review submitted, profile rating updated
+@enduml

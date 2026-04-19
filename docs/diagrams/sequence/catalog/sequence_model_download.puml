@@ -1,0 +1,42 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "Customer" as C
+participant "Frontend" as FE
+participant "GET /models/:id/download" as API
+participant "model.controller" as MC
+participant "purchase.service" as PS
+participant "storage.service" as SS
+participant "MinIO / S3" as S3
+database "PostgreSQL" as DB
+
+C -> FE : click "Download" on purchased model
+FE -> API : GET /models/:id/download\n[Cookie: 3dex_session]
+API -> MC : download_model(req)
+MC -> DB : model.findUnique({ id })
+DB --> MC : Model | null
+alt model not found
+    MC --> FE : 404 Model not found
+    FE --> C : show error
+end
+MC -> PS : get_purchase(user_id, model_id)
+PS -> DB : purchase.findUnique({ user_id, model_id })
+DB --> PS : Purchase | null
+PS --> MC : Purchase | null
+
+alt no purchase AND not artist AND not ADMIN AND price > 0
+    MC --> FE : 403 You have not purchased this model
+    FE --> C : show 403 error
+end
+
+MC -> SS : get_download_url_s3(model.file_url)
+SS -> S3 : presign GET URL (short TTL)
+S3 --> SS : signed_download_url
+SS --> MC : signed_download_url
+MC --> FE : 200 { download_url, license }
+FE -> S3 : GET signed_download_url
+S3 --> FE : binary file stream
+FE --> C : file download starts in browser
+@enduml

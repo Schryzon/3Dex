@@ -1,0 +1,44 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|Midtrans API|
+start
+:POST /orders/notification;
+
+|Backend|
+:Parse notification body;
+
+|Database|
+:Lookup Order by order_id;
+
+|Backend|
+if (order not found?) then (yes)
+  :Return 404;
+  stop
+endif
+
+|Database|
+:Upsert Payment record;
+
+|Backend|
+if (status == settlement OR capture/no-fraud?) then (yes)
+  |Database|
+  :Update Order status = PAID;
+  :Upsert Purchase record for each item;
+  :Create Notification (Purchase complete);
+else if (status IN [deny, cancel, expire]?) then (yes)
+  |Database|
+  :Update Order status = CANCELLED;
+  :Create Notification (Payment failed);
+else (pending)
+  |Database|
+  :Update Order status = PENDING;
+endif
+
+|Backend|
+:Return 200 OK to gateway;
+
+|Midtrans API|
+stop
+@enduml

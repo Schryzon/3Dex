@@ -1,0 +1,43 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxmessagesize 120
+
+actor "Admin" as ADM
+participant "Frontend" as FE
+participant "GET /admin/dashboard" as DASH
+participant "admin.controller" as AC
+database "PostgreSQL" as DB
+
+ADM -> FE : navigate to Admin Dashboard
+FE -> DASH : GET /admin/dashboard
+DASH -> AC : get_dashboard_summary(req)
+AC -> DB : model.count({ status: PENDING })
+AC -> DB : user.count({ account_status: PENDING, role IN [ARTIST, PROVIDER] })
+AC -> DB : report.count({ status: PENDING })
+AC -> DB : model.findMany({ status: PENDING, take: 3 }) include artist
+AC -> DB : user.findMany({ account_status: PENDING, role IN [ARTIST,PROVIDER], take: 3 })
+AC -> DB : report.findMany({ status: PENDING, take: 3 }) include reporter
+AC -> DB : stats.findMany({ take: 5, orderBy: created_at desc })
+DB --> AC : all results
+AC --> FE : {\n  counts: { models, users, reports },\n  recent: { models[], users[], reports[] },\n  stats: latestStats.data,\n  history: [{ date, transactions }] }
+FE --> ADM : render dashboard cards and transaction chart
+
+ADM -> FE : click "View Audit Logs"
+FE -> AC : GET /admin/audit-logs?page=1&limit=30
+AC -> AC : parse filter params (action, admin_id, from, to)
+AC -> DB : admin_Audit_Log.findMany({ where, orderBy: created_at desc,\n  take, skip, include: admin })
+AC -> DB : admin_Audit_Log.count({ where })
+DB --> AC : { logs[], total }
+AC --> FE : { data: logs[], meta: { total, page, pages } }
+FE --> ADM : paginated audit log table
+
+ADM -> FE : click "Trigger Stats Aggregation"
+FE -> AC : POST /admin/stats/trigger
+AC -> AC : aggregate_stats() from cron.service
+AC -> DB : query orders, models, users, payments for period
+AC -> DB : stats.create({ period_start, period_end, data })
+DB --> AC : Stats
+AC --> FE : { message: "Stats aggregation triggered", data }
+FE --> ADM : confirmation toast
+@enduml

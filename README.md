@@ -1,7 +1,7 @@
 # 3Dēx
 
 <p align="center">
-  <img src="apps/frontend/public/og-image.png" alt="3Dēx Social Preview" width="44%" />
+  <img src="og-image.png" alt="3Dēx Social Preview" width="44%" />
 </p>
 
 <p align="center">
@@ -58,6 +58,7 @@ This repository contains both the frontend and backend for the platform.
 - Secure File Storage (MinIO/S3 Presigned URLs)
 - Client-Side 3D Previews (Optimized interactive canvas)
 - Order Management & Payment Integration (Midtrans Sandbox / Production)
+- **Dēxie AI Assistant** (Emu x Ako persona, contextual situational AI)
 
 ---
 
@@ -67,6 +68,7 @@ This repository contains both the frontend and backend for the platform.
 - Database: PostgreSQL
 - ORM: Prisma
 - Storage: MinIO (S3 Compatible)
+- **AI Ecosystem:** Google Gemini (Generative AI)
 - Version Control: Git & GitHub
 
 ---

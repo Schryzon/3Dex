@@ -22,4 +22,4 @@ jobs:
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
             nvm use --lts
-            update-3dex ${{ github.original_ref || github.ref_name }}
+            update-3dex ${{ github.ref_name }}

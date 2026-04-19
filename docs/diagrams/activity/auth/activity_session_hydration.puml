@@ -1,0 +1,45 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Loads app / Refreshes page;
+
+|Frontend|
+:GET /auth/me;
+
+|Backend (Auth)|
+:auth.middleware evaluates 3dex_session JWT;
+if (no cookie or invalid?) then (yes)
+  :Return 401 Unauthorized;
+  |Frontend|
+  :Clear AuthContext;
+  stop
+endif
+
+:Decode token → { id, email, username, role };
+
+|Database|
+:Lookup user by id;
+
+|Backend (Auth)|
+if (not found?) then (yes)
+  :Return 404 Not Found;
+  stop
+endif
+
+:Strip sensitive fields (password, google_id);
+:Sign fresh JWT;
+:Set-Cookie 3dex_session;
+
+|MinIO|
+:Sign avatar_url & banner_url;
+
+|Backend (Auth)|
+:Return 200 { user };
+
+|Frontend|
+:Hydrate AuthContext;
+stop
+@enduml
