@@ -112,7 +112,9 @@ export async function middleware(request: NextRequest) {
     const secret = new TextEncoder().encode(JWT_SECRET);
     const { payload: jwtPayload } = await jwtVerify(token, secret);
     payload = jwtPayload as { role?: string };
-  } catch {
+  } catch (error: any) {
+    console.error('[Middleware] JWT verification failed:', error?.message || error);
+    console.error('[Middleware] JWT_SECRET present:', !!JWT_SECRET);
     // Invalid/expired token  treat as unauthenticated
     const res = NextResponse.redirect(new URL('/landing', request.url));
     res.cookies.delete('3dex_session');
