@@ -1,0 +1,30 @@
+@startuml
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 60
+
+object "cyber_artist : Artist" as artist {
+  id = "usr_artist_1"
+  username = "CyberCrafter"
+}
+
+object "notif_01 : Notification" as notification1 {
+  id = "not_444"
+  type = "SYSTEM"
+  title = "Model Approved"
+  message = "Your model was approved!"
+  is_read = false
+}
+
+object "notif_02 : Notification" as notification2 {
+  id = "not_445"
+  type = "SOCIAL"
+  title = "New Follower"
+  message = "Alice3D started following you."
+  is_read = true
+}
+
+artist *-- notification1 : receives
+artist *-- notification2 : receives
+
+@enduml

@@ -1,0 +1,198 @@
+@startuml
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 60
+
+' --- Users ---
+object "sys_admin : Admin" as admin {
+  id = "usr_admin_1"
+  username = "super_admin"
+  role = "Admin"
+}
+
+object "cyber_artist : Artist" as artist {
+  id = "usr_artist_1"
+  username = "CyberCrafter"
+  role = "Artist"
+}
+
+object "alice_buyer : Customer" as customer {
+  id = "usr_cust_2"
+  username = "Alice3D"
+  role = "Customer"
+}
+
+object "fast_print : Provider" as provider {
+  id = "usr_prov_1"
+  username = "FastPrint3D"
+  role = "Provider"
+}
+
+' --- Catalog & Models ---
+object "cat_scifi : Category" as category {
+  id = "cat_001"
+  name = "Sci-Fi"
+}
+
+object "tag_cyberpunk : Tag" as tag1 {
+  id = "tag_001"
+  name = "Cyberpunk"
+}
+
+object "tag_helmet : Tag" as tag2 {
+  id = "tag_002"
+  name = "Helmet"
+}
+
+object "cyber_helmet : Model" as model {
+  id = "mdl_helm_99"
+  title = "Cyberpunk Helmet 3D"
+  price = 2500
+  status = "Approved"
+  is_printable = true
+}
+
+' --- Shopping & Orders ---
+object "purchase_01 : Purchase" as purchase {
+  id = "pur_101"
+  price_paid = 2500
+  license = "Personal"
+}
+
+object "cart_item_01 : Cart_Item" as cart_item {
+  id = "cart_123"
+  quantity = 1
+}
+
+object "wishlist_01 : Wishlist" as wishlist {
+  id = "wish_456"
+}
+
+object "order_01 : Order" as order {
+  id = "ord_777"
+  total_amount = 5000
+  status = "Processing"
+}
+
+object "order_item_01 : Order_Item" as order_item {
+  id = "item_123"
+  price = 5000
+  quantity = 1
+}
+
+object "payment_01 : Payment" as payment {
+  id = "pay_456"
+  transaction_status = "Success"
+}
+
+' --- Social & Community ---
+object "model_review_01 : Review" as review {
+  id = "rev_55"
+  rating = 5
+  comment = "Prints perfectly!"
+}
+
+object "artist_review_01 : User_Review" as user_review {
+  id = "urev_88"
+  rating = 5
+  comment = "Great artist, very responsive."
+}
+
+object "post_01 : Post" as post {
+  id = "pst_888"
+  caption = "Working on a new mech design!"
+}
+
+object "post_like_01 : Post_Like" as like {
+  id = "lik_12"
+}
+
+object "post_comment_01 : Post_Comment" as comment {
+  id = "cmt_34"
+  content = "Looks awesome!"
+}
+
+object "follow_01 : Follow" as follow {
+  id = "fol_99"
+}
+
+object "collection_01 : Collection" as collection {
+  id = "col_111"
+  name = "Favorite Sci-Fi Props"
+}
+
+object "col_item_01 : Collection_Item" as col_item {
+  id = "citem_222"
+}
+
+' --- System & Admin ---
+object "report_01 : Report" as report {
+  id = "rep_333"
+  reason = "Inappropriate content"
+}
+
+object "notif_01 : Notification" as notification {
+  id = "not_444"
+  message = "Your model was approved!"
+}
+
+object "audit_log_01 : Admin_Audit_Log" as audit_log {
+  id = "aud_555"
+  action = "APPROVE_MODEL"
+}
+
+object "platform_stats : Stats" as stats {
+  id = "stat_1"
+  period_start = "2026-04-01T00:00:00Z"
+  period_end = "2026-04-30T23:59:59Z"
+}
+
+' --- Defining the Relationships ---
+artist --> model : creates
+category o-- model : categorizes
+model --> tag1 : tagged_with
+model --> tag2 : tagged_with
+
+customer --> purchase : purchases
+model o-- purchase : has
+
+customer *-- cart_item : owns
+model o-- cart_item : in cart
+
+customer *-- wishlist : owns
+model o-- wishlist : in wishlist
+
+customer --> order : places
+provider --> order : provider_for
+order *-- order_item : contains
+model o-- order_item : referenced in
+order *-- payment : processes
+
+customer *-- review : writes
+model o-- review : has
+
+customer --> user_review : gives
+user_review --> artist : receives
+
+artist *-- post : creates
+customer --> like : creates
+customer --> comment : creates
+post *-- like : has
+post *-- comment : has
+
+customer --> follow : follows
+follow --> artist : following
+
+customer --> collection : manages
+collection *-- col_item : contains
+model o-- col_item : referenced in
+
+customer --> report : submits
+report --> post : target
+
+artist *-- notification : receives
+
+admin --> audit_log : performs_action
+audit_log --> model : target
+
+@enduml

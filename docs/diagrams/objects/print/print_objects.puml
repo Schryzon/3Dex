@@ -1,0 +1,58 @@
+@startuml
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 60
+
+object "alice_buyer : Customer" as customer {
+  id = "usr_cust_2"
+  username = "Alice3D"
+}
+
+object "fast_print : Provider" as provider {
+  id = "usr_prov_1"
+  username = "FastPrint3D"
+  role = "Provider"
+}
+
+object "order_01 : Order" as order {
+  id = "ord_777"
+  total_amount = 5000
+  status = "Processing"
+  type = "Print"
+  courier_name = "JNE"
+  tracking_number = "TRACK123456"
+}
+
+object "order_item_01 : Order_Item" as order_item {
+  id = "item_123"
+  price = 5000
+  quantity = 1
+  print_status = "Printing"
+}
+
+object "print_config_01 : Json" as print_config {
+  material = "PLA"
+  infill = "20%"
+  color = "Black"
+}
+
+object "payment_01 : Payment" as payment {
+  id = "pay_456"
+  transaction_status = "Success"
+  payment_type = "Credit_Card"
+  gross_amount = 5000
+}
+
+object "cyber_helmet : Model" as model {
+  id = "mdl_helm_99"
+  is_printable = true
+}
+
+customer --> order : places
+provider --> order : provider_for
+order *-- order_item : contains
+order_item *-- print_config : print_config
+order_item --> model : referenced in
+order *-- payment : processes
+
+@enduml

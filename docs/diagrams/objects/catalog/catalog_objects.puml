@@ -1,0 +1,44 @@
+@startuml
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 60
+
+object "cyber_artist : Artist" as artist {
+  id = "usr_artist_1"
+  username = "CyberCrafter"
+  role = "Artist"
+}
+
+object "cat_scifi : Category" as category {
+  id = "cat_001"
+  name = "Sci-Fi"
+  slug = "sci-fi"
+}
+
+object "tag_cyberpunk : Tag" as tag1 {
+  id = "tag_001"
+  name = "Cyberpunk"
+}
+
+object "tag_helmet : Tag" as tag2 {
+  id = "tag_002"
+  name = "Helmet"
+}
+
+object "cyber_helmet : Model" as model {
+  id = "mdl_helm_99"
+  title = "Cyberpunk Helmet 3D"
+  price = 2500
+  status = "Approved"
+  is_printable = true
+  file_format = "STL"
+  avg_rating = 4.8
+  review_count = 15
+}
+
+artist --> model : creates
+category o-- model : categorizes
+model --> tag1 : tagged_with
+model --> tag2 : tagged_with
+
+@enduml

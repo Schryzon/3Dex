@@ -1,0 +1,53 @@
+@startuml
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 60
+
+object "alice_buyer : Customer" as customer {
+  id = "usr_cust_2"
+  username = "Alice3D"
+}
+
+object "cyber_helmet : Model" as model {
+  id = "mdl_helm_99"
+  price = 2500
+}
+
+object "cart_item_01 : Cart_Item" as cart_item {
+  id = "cart_123"
+  quantity = 2
+}
+
+object "wishlist_01 : Wishlist" as wishlist {
+  id = "wish_456"
+}
+
+object "collection_01 : Collection" as collection {
+  id = "col_111"
+  name = "Favorite Sci-Fi Props"
+}
+
+object "col_item_01 : Collection_Item" as col_item {
+  id = "citem_222"
+}
+
+object "purchase_01 : Purchase" as purchase {
+  id = "pur_101"
+  price_paid = 2500
+  license = "Personal"
+}
+
+customer *-- cart_item : owns
+cart_item --> model : in cart
+
+customer *-- wishlist : owns
+wishlist --> model : in wishlist
+
+customer --> collection : manages
+collection *-- col_item : contains
+col_item --> model : referenced in
+
+customer --> purchase : purchases
+purchase --> model : has
+
+@enduml

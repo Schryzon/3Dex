@@ -1,0 +1,49 @@
+@startuml
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 60
+
+object "sys_admin : Admin" as admin {
+  id = "usr_admin_1"
+  username = "super_admin"
+  role = "Admin"
+}
+
+object "cyber_artist : Artist" as artist {
+  id = "usr_artist_1"
+  username = "CyberCrafter"
+}
+
+object "cyber_helmet : Model" as model {
+  id = "mdl_helm_99"
+  status = "Pending"
+}
+
+object "report_01 : Report" as report {
+  id = "rep_333"
+  reason = "Inappropriate content"
+  status = "Resolved"
+}
+
+object "audit_log_01 : Admin_Audit_Log" as audit_log {
+  id = "aud_555"
+  action = "APPROVE_MODEL"
+}
+
+object "platform_stats : Stats" as stats {
+  id = "stat_1"
+  period_start = "2026-04-01T00:00:00Z"
+  period_end = "2026-04-30T23:59:59Z"
+}
+
+admin --> audit_log : performs_action
+audit_log --> model : target
+
+admin --> report : reviews
+report --> model : target
+
+admin --> stats : generates
+
+admin --> artist : approveUser / suspendUser
+
+@enduml

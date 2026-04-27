@@ -1,0 +1,61 @@
+@startuml
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 60
+
+object "cyber_artist : Artist" as artist {
+  id = "usr_artist_1"
+  username = "CyberCrafter"
+}
+
+object "alice_buyer : Customer" as customer {
+  id = "usr_cust_2"
+  username = "Alice3D"
+}
+
+object "post_01 : Post" as post {
+  id = "pst_888"
+  caption = "Working on a new mech design!"
+  like_count = 15
+  comment_count = 5
+}
+
+object "post_like_01 : Post_Like" as like {
+  id = "lik_12"
+}
+
+object "post_comment_01 : Post_Comment" as comment {
+  id = "cmt_34"
+  content = "Looks awesome!"
+}
+
+object "follow_01 : Follow" as follow {
+  id = "fol_99"
+}
+
+object "model_review_01 : Review" as review {
+  id = "rev_55"
+  rating = 5
+  comment = "Prints perfectly!"
+}
+
+object "artist_review_01 : User_Review" as user_review {
+  id = "urev_88"
+  rating = 5
+  comment = "Great artist, very responsive."
+}
+
+artist *-- post : creates
+customer --> like : creates
+customer --> comment : creates
+post *-- like : has
+post *-- comment : has
+
+customer --> follow : follows
+follow --> artist : following
+
+customer *-- review : writes
+customer --> user_review : gives
+user_review --> artist : receives
+
+@enduml

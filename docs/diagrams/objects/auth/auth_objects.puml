@@ -1,0 +1,33 @@
+@startuml
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 60
+
+object "john_doe : User" as base_user {
+  id = "usr_001"
+  email = "john@example.com"
+  username = "johndoe99"
+  role = "Customer"
+  account_status = "Active"
+  two_factor_enabled = true
+  last_login_at = "2026-04-27T10:00:00Z"
+}
+
+object "login_history_01 : Json" as login1 {
+  ip_address = "192.168.1.10"
+  device = "Windows PC"
+  status = "Success"
+  timestamp = "2026-04-27T10:00:00Z"
+}
+
+object "login_history_02 : Json" as login2 {
+  ip_address = "192.168.1.15"
+  device = "MacBook Pro"
+  status = "Failed"
+  timestamp = "2026-04-26T15:30:00Z"
+}
+
+base_user *-- login1 : status_history
+base_user *-- login2 : status_history
+
+@enduml
