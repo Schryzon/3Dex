@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import LoginModal from '../components/LoginModal';
 import RegisterModal from '../components/RegisterModal';
 import UsernameSetupModal from '../components/UsernameSetupModal';
@@ -58,6 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [showUsernameSetupModal, setShowUsernameSetupModal] = useState(false);
   /** When true, app layout should not redirect guests away (session expired mid-page). */
   const [skipAuthRedirect, setSkipAuthRedirect] = useState(false);
+  const queryClient = useQueryClient();
 
   // On mount, validate the session by calling /auth/me.
   // The HTTP-only cookie is sent automatically by the browser.
@@ -91,6 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setShowRegisterModal(false);
       setUserState(null);
       authService.clearStoredUser();
+      queryClient.clear();
     };
     window.addEventListener('auth:session-expired', onSessionExpired);
     return () => window.removeEventListener('auth:session-expired', onSessionExpired);
@@ -101,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { user: userData } = await authService.login(credentials);
     // Cache user data in localStorage for instant UI on next load
     authService.storeUser(userData);
+    queryClient.clear();
     setUserState(userData);
     setSkipAuthRedirect(false);
   };
@@ -115,6 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Server sets the HTTP-only cookie in the response
     const response = await authService.googleLogin(credential);
     authService.storeUser(response.user);
+    queryClient.clear();
     setUserState(response.user);
     setSkipAuthRedirect(false);
 
@@ -129,6 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Server clears the HTTP-only cookie
     await authService.logout();
     authService.clearStoredUser();
+    queryClient.clear();
     setUserState(null);
     setSkipAuthRedirect(false);
   };
