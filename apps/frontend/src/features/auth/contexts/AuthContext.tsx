@@ -168,7 +168,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     hideModals();
     if (skipAuthRedirect) {
       setSkipAuthRedirect(false);
-      router.replace(ROUTES.PUBLIC.LANDING);
+      // Prevent redirecting if the user just successfully logged in
+      if (!authService.getStoredUser()) {
+        router.replace(ROUTES.PUBLIC.LANDING);
+      }
     }
   };
 

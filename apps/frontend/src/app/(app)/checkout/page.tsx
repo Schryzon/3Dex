@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCart } from '@/features/cart';
 import { useAuth } from '@/features/auth';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { formatPrice } from '@/lib/utils';
 import { api } from '@/lib/api';
 import { orderService } from '@/lib/api/services';
@@ -82,7 +82,7 @@ function Field({
 export default function CheckoutPage() {
     const router = useRouter();
     const queryClient = useQueryClient();
-    const { user, isLoading: authLoading } = useAuth();
+    const { user, isLoading: authLoading, skipAuthRedirect } = useAuth();
     const { items, total, clearCart } = useCart();
 
     const [isProcessing, setIsProcessing] = useState(false);
@@ -98,15 +98,28 @@ export default function CheckoutPage() {
         phone: (user as any)?.phone_number || '',
     });
 
-    if (!authLoading && !user) { router.push('/'); return null; }
-    // Only redirect to cart if we haven't successfully started a checkout
-    if (!authLoading && !items.length && checkoutStatus === 'idle') { router.push('/cart'); return null; }
+    useEffect(() => {
+        if (authLoading || skipAuthRedirect) return;
+        if (!user) {
+            router.push('/');
+        } else if (!items.length && checkoutStatus === 'idle') {
+            router.push('/cart');
+        }
+    }, [authLoading, user, items.length, checkoutStatus, skipAuthRedirect, router]);
 
-    if (authLoading) return (
-        <div className="min-h-screen bg-[#080808] grid place-items-center">
-            <div className="w-5 h-5 rounded-full border-2 border-white/10 border-t-yellow-400 animate-spin" />
-        </div>
-    );
+    if (authLoading || skipAuthRedirect) {
+        return (
+            <div className="min-h-screen bg-[#080808] grid place-items-center">
+                <div className="w-5 h-5 rounded-full border-2 border-white/10 border-t-yellow-400 animate-spin" />
+            </div>
+        );
+    }
+
+    if (!user || (!items.length && checkoutStatus === 'idle')) {
+        return null;
+    }
+
+
 
     const handleCheckout = async () => {
         if (!billing.fullName || !billing.email || !billing.phone) {
@@ -158,7 +171,7 @@ export default function CheckoutPage() {
                         if (orderId) {
                             await api.post(`/orders/${orderId}/cancel`);
                         }
-                    } catch(e) {}
+                    } catch (e) { }
                     setCheckoutStatus('failed');
                 },
             });
