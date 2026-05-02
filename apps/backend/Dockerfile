@@ -1,5 +1,5 @@
 # Stage 1: Builder
-FROM node:24-alpine AS builder
+FROM node:24-slim AS builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ RUN npx prisma generate
 RUN npm run build
 
 # Stage 2: Runner
-FROM node:24-alpine AS runner
+FROM node:24-slim AS runner
 
 WORKDIR /app
 
@@ -25,10 +25,8 @@ ENV NODE_ENV=production
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./
 COPY --from=builder /app/node_modules ./node_modules
-
-# Ensure prisma is available for migrations on startup
-RUN npm install --omit=dev --ignore-scripts && npm cache clean --force
 
 EXPOSE 4000
 

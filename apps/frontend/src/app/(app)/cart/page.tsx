@@ -7,13 +7,13 @@ import { Suspense, useEffect } from 'react';
 
 export default function Page() {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, skipAuthRedirect } = useAuth();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!isLoading && !isAuthenticated && !skipAuthRedirect) {
       router.push('/');
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, skipAuthRedirect, router]);
 
   if (isLoading || !isAuthenticated) {
     return (
