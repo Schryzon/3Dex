@@ -9,8 +9,8 @@ import { sign_user_urls } from "../services/storage.service";
 const COOKIE_OPTIONS = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
-    domain: process.env.NODE_ENV === "production" ? ".3dex.studio" : undefined,
+    sameSite: (process.env.COOKIE_SAME_SITE as "lax" | "none" | "strict") || "lax",
+    domain: process.env.COOKIE_DOMAIN || undefined,
     // 7 days in milliseconds
     maxAge: 7 * 24 * 60 * 60 * 1000,
 };
@@ -165,14 +165,14 @@ export async function logout(req: Request, res: Response) {
     res.clearCookie("3dex_session", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        domain: process.env.NODE_ENV === "production" ? ".3dex.studio" : undefined,
+        sameSite: (process.env.COOKIE_SAME_SITE as "lax" | "none" | "strict") || "lax",
+        domain: process.env.COOKIE_DOMAIN || undefined,
     });
     // Also try to clear any legacy domain-less ghost cookie
     res.clearCookie("token", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: (process.env.COOKIE_SAME_SITE as "lax" | "none" | "strict") || "lax",
         domain: undefined,
     });
     res.json({ message: "Logged out successfully" });

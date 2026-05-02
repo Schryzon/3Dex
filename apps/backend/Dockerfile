@@ -27,9 +27,6 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules ./node_modules
 
-# Ensure prisma is available for migrations on startup
-RUN npm install --omit=dev --ignore-scripts && npm cache clean --force
-
 EXPOSE 4000
 
 # Run migrations and start the server
