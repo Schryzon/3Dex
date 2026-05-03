@@ -151,6 +151,20 @@ export const productService = {
         }
     },
 
+    async getSimilarModels(id: string, limit = 4): Promise<Model[]> {
+        if (USE_MOCK_DATA) {
+            return MOCK_PRODUCTS.filter(p => p.id !== id).slice(0, limit);
+        }
+        try {
+            const response = await apiClient.get<any>(`/models/${id}/similar?limit=${limit}`);
+            if (!response || !response.data) return [];
+            return response.data.map(mapModel);
+        } catch (error) {
+            console.error(`getSimilarModels(${id}) failed:`, error);
+            return [];
+        }
+    },
+
     async uploadProduct(formData: FormData, onProgress?: (progress: number) => void): Promise<Model> {
         return apiClient.upload<Model>(API_ENDPOINTS.MODELS.UPLOAD, formData, onProgress);
     },

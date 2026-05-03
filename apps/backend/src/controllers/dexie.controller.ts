@@ -173,3 +173,30 @@ export async function toggle_dexie(req: Auth_Request, res: Response) {
         dexie_enabled: enabled,
     });
 }
+
+/**
+ * POST /dexie/generate-model-details
+ *
+ * Uses Dēxie (Gemini Vision) to analyze an uploaded preview image and suggest model details.
+ * Body: { imageBase64: string, mimeType: string }
+ *
+ * Auth: required
+ */
+import { generate_model_details } from "../services/dexie.service";
+
+export async function generate_details(req: Auth_Request, res: Response) {
+    try {
+        const { imageBase64, mimeType } = req.body;
+
+        if (!imageBase64) {
+            return res.status(400).json({ message: "imageBase64 is required" });
+        }
+
+        const details = await generate_model_details(imageBase64, mimeType || "image/jpeg");
+        res.json(details);
+    } catch (error: any) {
+        console.error("[Dēxie Controller] Generate details error:", error);
+        res.status(500).json({ message: error.message || "Failed to generate details" });
+    }
+}
+

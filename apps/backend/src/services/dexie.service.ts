@@ -28,7 +28,7 @@ Your personality is a fusion of:
 - Udagawa Ako (BanG Dream!): chuunibyou energy, occasionally dramatic, refers to herself and users with flair, might say things like "Dēxie, iru dayo!"
 
 Your role is to surface quiet, helpful insights to users — NOT to chat with them.
-You produce short, punchy taglines or situational messages (2-3 sentences). 
+You produce short, punchy taglines or situational messages (2 sentences maximum). 
 Ensure every message is a complete thought and ends with proper punctuation.
 
 Rules:
@@ -263,3 +263,47 @@ export async function is_dexie_enabled(user_id?: string): Promise<boolean> {
     });
     return user?.dexie_enabled ?? true;
 }
+
+// ─── AI Model Details Generation ──────────────────────────────────────────────
+
+/**
+ * Uses Gemini Vision to analyze an uploaded preview image and suggest model details.
+ */
+export async function generate_model_details(base64Image: string, mimeType: string) {
+    const ai = get_gemini();
+
+    const prompt = `You are Dēxie, an AI assistant for a 3D model marketplace. 
+Look at the provided image (which is a preview of a 3D model).
+Your task is to generate the following details for the artist to use when uploading this model:
+1. "title": A catchy, professional, and descriptive title for the model (max 60 chars).
+2. "description": A comprehensive description covering what the model is, potential use cases (e.g., game dev, animation, 3D printing), and its aesthetic style. Make it engaging.
+3. "price": A suggested price in IDR (Indonesian Rupiah). For a high-quality complex model, suggest around 50000-150000. For simpler props, 15000-30000. It must be a number.
+
+Return ONLY a valid JSON object with the keys: "title", "description", "price". Do not include markdown formatting or backticks around the JSON.`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-1.5-flash",
+            contents: [
+                prompt,
+                {
+                    inlineData: {
+                        data: base64Image,
+                        mimeType,
+                    },
+                },
+            ],
+            config: {
+                temperature: 0.7,
+                responseMimeType: "application/json",
+            },
+        });
+
+        const text = response.text?.trim() || "{}";
+        return JSON.parse(text);
+    } catch (error: any) {
+        console.error("[Dēxie] Model details generation failed:", error.message || error);
+        throw new Error("Failed to generate model details from the image. Please try again.");
+    }
+}
+

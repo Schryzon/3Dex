@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { apiClient } from '@/lib/api/client';
+import { productService } from '@/lib/api/services/product.service';
 import { CatalogProductCard } from '../product-card';
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
@@ -43,23 +43,14 @@ export default function RelatedProducts({ productId, categories }: Props) {
   const fetchRelatedProducts = async () => {
     try {
       setLoading(true);
-      const category = categories && categories.length > 0 ? categories[0] : undefined;
+      const similar = await productService.getSimilarModels(productId, 4);
 
-      const response = await apiClient.get<any>('/models', {
-        params: {
-          exclude_id: productId,
-          limit: 8,
-          category: category,
-          status: 'APPROVED'
-        }
-      });
-
-      // Filter and Map backend models
-      const filtered = (response.data || []).filter((m: any) => !m.is_nsfw || user?.show_nsfw);
+      // Filter based on NSFW preferences
+      const filtered = similar.filter((m: any) => !m.is_nsfw || user?.show_nsfw);
 
       setProducts(filtered);
     } catch (error) {
-      console.error('Error fetching related products:', error);
+      console.error('Error fetching similar models:', error);
     } finally {
       setLoading(false);
     }
@@ -68,7 +59,7 @@ export default function RelatedProducts({ productId, categories }: Props) {
   if (loading) {
     return (
       <div className="space-y-6">
-        <h2 className="text-xl font-semibold text-white">Related Products</h2>
+        <h2 className="text-xl font-semibold text-white">Similar Models</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="bg-gray-900 rounded-xl overflow-hidden animate-pulse border border-white/5">
@@ -90,7 +81,7 @@ export default function RelatedProducts({ productId, categories }: Props) {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-white">Related <span className="text-yellow-400">Products</span></h2>
+        <h2 className="text-xl font-semibold text-white">Similar <span className="text-yellow-400">Models</span></h2>
         <Link
           href={`/catalog?category=${categories?.[0] || ''}`}
           className="text-zinc-500 hover:text-white text-[11px] font-medium flex items-center gap-2 group transition-all"

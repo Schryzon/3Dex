@@ -4,6 +4,7 @@ import { useRef, useEffect, Suspense, useState, useMemo } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
+import { Settings, Sun, RotateCw } from 'lucide-react';
 import { KTX2Loader } from 'three-stdlib';
 import { MeshoptDecoder } from 'meshoptimizer';
 
@@ -75,6 +76,19 @@ interface ProductViewer3DProps {
 export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isTouch, setIsTouch] = useState(false);
+  const [environment, setEnvironment] = useState<any>('studio');
+  const [autoRotate, setAutoRotate] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+
+  const environments = [
+    { id: 'studio', label: 'Studio' },
+    { id: 'city', label: 'City' },
+    { id: 'sunset', label: 'Sunset' },
+    { id: 'forest', label: 'Forest' },
+    { id: 'apartment', label: 'Apartment' },
+    { id: 'dawn', label: 'Dawn' },
+    { id: 'park', label: 'Park' },
+  ];
 
   useEffect(() => {
     // Detect touch support + small screen for "mobile" classification
@@ -131,7 +145,7 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
         <pointLight position={[-10, -10, -5]} intensity={0.5} />
 
         {/* Environment for reflections */}
-        <Environment preset="studio" />
+        <Environment preset={environment} />
 
         {/* 3D Model */}
         <Suspense fallback={null}>
@@ -145,8 +159,8 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
           enableRotate={true}
           minDistance={2}
           maxDistance={10}
-          autoRotate={false}
-          autoRotateSpeed={0.5}
+          autoRotate={autoRotate}
+          autoRotateSpeed={1.0}
         />
       </Canvas>
 
@@ -181,6 +195,62 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
               <span className="w-5 h-5 flex items-center justify-center bg-white/10 rounded-lg text-xs">⚙️</span>
               <span>Scroll: Zoom</span>
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Lighting & Rotation Controls (Top Right) */}
+      <div className="absolute top-4 right-4 z-30 flex flex-col items-end gap-2">
+        <button
+          onClick={() => setShowSettings(!showSettings)}
+          className={`p-2 rounded-xl backdrop-blur-md border transition-all duration-300 shadow-xl ${
+            showSettings 
+              ? 'bg-yellow-500 text-black border-yellow-400' 
+              : 'bg-black/60 text-white border-white/10 hover:bg-black/80 hover:border-white/30'
+          }`}
+          aria-label="3D Viewer Settings"
+        >
+          <Settings className="w-5 h-5" />
+        </button>
+
+        {showSettings && (
+          <div className="bg-black/80 backdrop-blur-xl border border-white/10 p-3 rounded-2xl w-48 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
+            
+            {/* Environment Selector */}
+            <div className="mb-4">
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1.5 mb-2">
+                <Sun className="w-3 h-3" /> Lighting
+              </label>
+              <div className="grid grid-cols-1 gap-1">
+                {environments.map(env => (
+                  <button
+                    key={env.id}
+                    onClick={() => setEnvironment(env.id)}
+                    className={`text-left px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                      environment === env.id 
+                        ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' 
+                        : 'text-gray-300 hover:bg-white/10 hover:text-white border border-transparent'
+                    }`}
+                  >
+                    {env.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Auto-Rotate Toggle */}
+            <div className="pt-3 border-t border-white/10 flex items-center justify-between">
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5 cursor-pointer" onClick={() => setAutoRotate(!autoRotate)}>
+                <RotateCw className={`w-3 h-3 ${autoRotate ? 'animate-spin-slow' : ''}`} /> Auto Rotate
+              </label>
+              <button
+                onClick={() => setAutoRotate(!autoRotate)}
+                className={`w-8 h-4 rounded-full transition-colors relative ${autoRotate ? 'bg-yellow-500' : 'bg-gray-700'}`}
+              >
+                <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform ${autoRotate ? 'left-4.5 translate-x-full' : 'left-0.5'}`} style={{ transform: autoRotate ? 'translateX(14px)' : 'translateX(0)' }} />
+              </button>
+            </div>
+            
           </div>
         )}
       </div>

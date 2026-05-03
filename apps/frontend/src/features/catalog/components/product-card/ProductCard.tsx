@@ -63,10 +63,17 @@ export default function ProductCard({ product, onAddToCart, onToggleFavorite, is
       >
         {/* Image Container */}
         <div className="relative aspect-[3/4] overflow-hidden bg-white/5">
+          {/* Blurred Background Image */}
+          <img
+            src={getStorageUrl(product.thumbnails[imageIndex])}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-50 transition-transform duration-700 group-hover:scale-125"
+          />
+          {/* Foreground Contained Image */}
           <img
             src={getStorageUrl(product.thumbnails[imageIndex])}
             alt={product.title}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            className="relative w-full h-full object-contain transition-transform duration-700 group-hover:scale-105 z-0"
           />
           {/* Subtle gradient by default, lighter opacity */}
           <div className={`absolute inset-0 bg-gradient-to-t from-[#0c0c0c]/80 via-transparent to-transparent transition-opacity duration-300 ${isHovered ? 'opacity-90' : 'opacity-40'}`} />

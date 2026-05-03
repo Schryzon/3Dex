@@ -141,10 +141,17 @@ export default function PostDetailModal({ postId, isOpen, onClose }: PostDetailM
                     <div className="relative flex-1 bg-black flex items-center justify-center border-b md:border-b-0 md:border-r border-gray-800 overflow-hidden">
                         {post.media_urls.length > 0 && (
                             <div className="relative w-full h-full flex items-center justify-center">
+                                {/* Blurred Background */}
+                                <img
+                                    src={getStorageUrl(post.media_urls[0])}
+                                    alt=""
+                                    className="absolute inset-0 w-full h-full object-cover blur-3xl scale-110 opacity-30"
+                                />
+                                {/* Foreground Contained Image */}
                                 <img
                                     src={getStorageUrl(post.media_urls[0])}
                                     alt="Post content"
-                                    className={`max-w-full max-h-full object-contain ${post.is_nsfw && !user?.show_nsfw ? 'blur-3xl scale-125' : ''}`}
+                                    className={`relative max-w-full max-h-full object-contain z-0 ${post.is_nsfw && !user?.show_nsfw ? 'blur-3xl scale-125' : ''}`}
                                 />
                                 {post.is_nsfw && !user?.show_nsfw && (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 text-white p-6 text-center backdrop-blur-md">
