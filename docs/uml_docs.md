@@ -1,6 +1,8 @@
 # 3Dex Platform Unified UML Documentation
 
-This document serves as the absolute single source of truth for the entire 3Dex platform's technical domain. It consolidates all use cases, actors, detailed models representing the objects in the program (including their attributes, constraints, and operational functions), and mapping the systemic relationships. This is designed so AI agents and architects can learn the entire system strictly through parsing this document.
+This document serves as the absolute single source of truth for the entire 3Dex platform's technical domain. It consolidates all use cases, actors, state machines, detailed models representing the objects in the program (including their attributes, constraints, and operational functions), and mapping the systemic relationships. 
+
+This is designed so AI agents and architects can learn the entire system strictly through parsing this document.
 
 ---
 
@@ -17,7 +19,7 @@ This document serves as the absolute single source of truth for the entire 3Dex 
 - **System: Midtrans (Gateway)**: External payment processor reacting to payment and processing requests.
 - **System: Notif Engine (Notif)**: Handles global dispatching of alerts and updates across the platform.
 - **Time / Cron Scheduler (Time)**: Daemon agent executing operations at chronological intervals.
-- **System: Dēxie AI Assistant**: A passive, context-aware AI persona (powered by Gemini Flash) embedded in the platform UI. She is **NOT a chatbot** — she never accepts user input. Instead, she autonomously surfaces short situational taglines and personalized model picks based on the current page and user taste signals. She can be disabled per-user via the `dexie_enabled` flag.
+- **System: Dēxie AI Assistant**: A passive, context-aware AI persona (powered by Gemini Flash) embedded in the platform UI. She autonomously surfaces short situational taglines and personalized model picks based on the current page and user taste signals. She can be disabled per-user via the `dexie_enabled` flag.
 
 ---
 
@@ -78,20 +80,34 @@ This document serves as the absolute single source of truth for the entire 3Dex 
   - **View & Audit Admin Actions**: Exploring logs on `Admin_Audit_Log` mapping tracking all destructive capabilities globally.
   - **Export System Revenue Stats**: Reading global chronological money trails.
 
-### Automated System Operations
-- **Compile Global Aggregated Stats**: Aggregating sales metrics per defined timeline blocks.
-- **Prune Abandoned Webhooks/Carts**: Dropping pending or expired snap tokens that polluted disk storage.
-- **Recalculate Averages from Reviews**: Dynamically recalculating total score sums vs participants to ensure normalized ranges.
-- **Dispatch In-App/Email Alerts**: Transforming state changes into human-readable notifications metrics via trigger webhooks.
+---
 
-### Dēxie AI Ecosystem
-- **Surface Contextual Tagline** *(Triggered automatically on page navigation)*: On navigating to a supported route (home, cart, wishlist, catalog detail, artist profile, library), the system calls `GET /dexie/tagline?ctx=<ctx>&tag=<id>`. Dēxie generates a short 2-3 sentence punchy situational message via Gemini Flash, keyed to the current context. Responses are cached per-user (1 hour) and globally for non-personalized contexts (6 hours) and deduplicated within a session. Returns `enabled: false` silently if the user has toggled Dēxie off. Fallback messages are served on Gemini 503s.
-- **Serve Personalised Picks (Taste-based)** *(Triggered on homepage / browse pages)*: `GET /dexie/picks` aggregates the user's last 5 wishlist items and last 5 purchases, concatenates their titles, tags, and categories into a combined string, embeds it via `all-MiniLM-L6-v2` (vector(384)), and runs a cosine similarity search against the Model table's `embedding` column to return the top N similar models not already owned. Guests fall back to newest approved models.
-- **Toggle Dēxie On/Off** *(User action)*: `PATCH /dexie/toggle` with `{ enabled: boolean }` (requires auth) updates the `dexie_enabled` flag on the User record. When disabled, all tagline and picks endpoints return `{ enabled: false }` and the frontend hides the assistant entirely.
+## 3. Core State Machines
+
+System behavior relies on strict enumerations to define workflow progression.
+
+### Order State Machine
+Defines the lifecycle of a purchase from Cart to Delivery.
+1. `PENDING`: Initial state upon Midtrans Snap generation.
+2. `PAID`: Webhook received successful payment notification. Digital assets are unlocked.
+3. `PROCESSING`: (If physical print) Provider has accepted the job and is printing.
+4. `SHIPPED`: Provider dispatched the physical item and attached tracking info.
+5. `COMPLETED`: User confirmed receipt, or 14 days passed since shipped.
+6. `CANCELLED`: Payment failed, or Admin intervened.
+7. `REFUNDED`: Funds returned to user.
+
+### Model State Machine
+Defines visibility and legality of a 3D asset.
+1. `DRAFT`: Uploaded, metadata incomplete. Invisible to public.
+2. `PENDING_REVIEW`: Submitted by Artist, awaiting Admin approval.
+3. `APPROVED`: Visible on Catalog and purchasable.
+4. `REJECTED`: Failed moderation. Artist must fix issues.
+5. `ARCHIVED`: Soft-deleted by the Artist.
+6. `TAKEDOWN`: Hard-hidden by Admin due to DMCA/ToS violations.
 
 ---
 
-## 3. Data Models, Constraints, Attributes, & Functions
+## 4. Data Models, Constraints, Attributes, & Functions
 
 Below details exhaustive class abstractions mapping tables directly to objects containing fields, typings, keys constraints, and internal behavioral functions.
 
@@ -102,8 +118,8 @@ Below details exhaustive class abstractions mapping tables directly to objects c
   - `username`: String (UK)
   - `password`: String
   - `google_id`: String (UK)
-  - `role`: Role 
-  - `account_status`: Account_Status
+  - `role`: Role (`GUEST`, `CUSTOMER`, `ARTIST`, `PROVIDER`, `ADMIN`)
+  - `account_status`: Account_Status (`ACTIVE`, `SUSPENDED`, `BANNED`)
   - `status_history`: Json[]
   - `approved_at`: DateTime
   - `rejected_at`: DateTime
@@ -136,36 +152,6 @@ Below details exhaustive class abstractions mapping tables directly to objects c
   - `changePassword(new_password: String)`
   - `deleteAccount()`
 
-### **Customer** (Extends User)
-- **Functions**:
-  - `addToCart(model_id: String, qty: Int)`
-  - `checkout()`
-  - `purchaseModel(model_id: String)`
-  - `writeReview(model_id: String, rating: Int)`
-
-### **Artist** (Extends User)
-- **Functions**:
-  - `uploadModel(data: Model)`
-  - `updateModel(id: String, data: Model)`
-  - `deleteModel(id: String)`
-  - `viewSalesStats()`
-
-### **Provider** (Extends User)
-- **Functions**:
-  - `acceptPrintJob(order_id: String)`
-  - `updatePrintStatus(order_id: String, status: Print_Status)`
-  - `updateProviderConfig(config: Json)`
-
-### **Admin** (Extends User)
-- **Functions**:
-  - `approveModel(id: String)`
-  - `rejectModel(id: String)`
-  - `approveUser(id: String)`
-  - `rejectUser(id: String)`
-  - `suspendUser(id: String)`
-  - `generatePlatformReport()`
-  - `viewAuditLogs()`
-
 ### **Model** (3D Asset Node)
 - **Attributes**:
   - `id`: String (PK)
@@ -177,7 +163,7 @@ Below details exhaustive class abstractions mapping tables directly to objects c
   - `gallery_urls`: String[]
   - `status`: Model_Status
   - `is_nsfw`: Boolean
-  - `license`: License_Type
+  - `license`: License_Type (`STANDARD`, `COMMERCIAL`, `EDITORIAL`)
   - `is_printable`: Boolean
   - `file_format`: String
   - `embedding`: Unsupported("vector(384)")
@@ -202,28 +188,6 @@ Below details exhaustive class abstractions mapping tables directly to objects c
 - **Functions**:
   - `verifyLicense(license: License_Type): Boolean`
 
-### **Category & Tag**
-- **Category Attributes**: `id`: String (PK), `name`: String (UK), `slug`: String (UK), `created_at`: DateTime
-- **Tag Attributes**: `id`: String (PK), `name`: String (UK), `created_at`: DateTime
-
-### **Review**
-- **Attributes**:
-  - `id`: String (PK)
-  - `rating`: Int
-  - `comment`: String
-  - `user_id`: String (FK)
-  - `model_id`: String (FK)
-  - `created_at`: DateTime
-  - `updated_at`: DateTime
-- **Functions**:
-  - `updateComment(content: String)`
-
-### **Wishlist & Cart_Item**
-- **Wishlist Attributes**: `id`: String (PK), `user_id`: String (FK), `model_id`: String (FK), `created_at`: DateTime 
-  - **Functions**: `moveToCart()`
-- **Cart_Item Attributes**: `id`: String (PK), `user_id`: String (FK), `model_id`: String (FK), `quantity`: Int, `created_at`: DateTime, `updated_at`: DateTime
-  - **Functions**: `updateQuantity(qty: Int)`
-
 ### **Order**
 - **Attributes**:
   - `id`: String (PK)
@@ -231,7 +195,7 @@ Below details exhaustive class abstractions mapping tables directly to objects c
   - `provider_id`: String (FK)
   - `total_amount`: Int
   - `status`: Order_Status
-  - `type`: Order_Type
+  - `type`: Order_Type (`DIGITAL`, `PRINT`)
   - `courier_name`: String
   - `tracking_number`: String
   - `shipping_address`: Json
@@ -276,32 +240,17 @@ Below details exhaustive class abstractions mapping tables directly to objects c
 
 ### **Social & Feed Structures (Post, Post_Like, Post_Comment)**
 - **Post Attributes**: `id`: String (PK), `user_id`: String (FK), `caption`: String, `media_urls`: String[], `is_nsfw`: Boolean, `like_count`: Int, `comment_count`: Int, `created_at`: DateTime, `updated_at`: DateTime
-  - **Functions**: `addLike()`, `removeLike()`, `addComment(content: String)`
 - **Post_Like Attributes**: `id`: String (PK), `user_id`: String (FK), `post_id`: String (FK), `created_at`: DateTime
 - **Post_Comment Attributes**: `id`: String (PK), `user_id`: String (FK), `post_id`: String (FK), `content`: String, `created_at`: DateTime, `updated_at`: DateTime
-  - **Functions**: `editContent(content: String)`
-
-### **Relationships Structures (User_Review, Follow, Collection, Collection_Item)**
-- **User_Review Attributes**: `id`: String, `reviewer_id`: String, `target_user_id`: String, `rating`: Int, `comment`: String, `created_at`: DateTime
-  - **Functions**: `updateReviewData(rating: Int, comment: String)`
-- **Follow Attributes**: `id`: String, `follower_id`: String, `following_id`: String, `created_at`: DateTime
-- **Collection Attributes**: `id`: String (PK), `user_id`: String (FK), `name`: String, `description`: String, `is_public`: Boolean, `created_at`: DateTime, `updated_at`: DateTime
-  - **Functions**: `addItem(model_id: String)`, `removeItem(model_id: String)`
-- **Collection_Item Attributes**: `id`: String (PK), `collection_id`: String (FK), `model_id`: String (FK), `added_at`: DateTime
 
 ### **Platform Tools (Notification, Audit, Stats, Report)**
 - **Notification Attributes**: `id`: String (PK), `user_id`: String (FK), `type`: String, `title`: String, `message`: String, `is_read`: Boolean, `data`: Json, `created_at`: DateTime
-  - **Functions**: `markAsRead()`
 - **Report Attributes**: `id`: String (PK), `reporter_id`: String (FK), `target_type`: Report_Target, `model_id`: String, `post_id`: String, `comment_id`: String, `reason`: String, `status`: Report_Status, `created_at`: DateTime
-  - **Functions**: `reviewReport(status: Report_Status)`
 - **Admin_Audit_Log Attributes**: `id`: String (PK), `admin_id`: String (FK), `action`: Audit_Action, `target_id`: String, `target_type`: String, `reason`: String, `metadata`: Json, `created_at`: DateTime
-- **Stats Attributes**: `id`: String (PK), `period_start`: DateTime, `period_end`: DateTime, `data`: Json, `created_at`: DateTime
-  - **Functions**: `triggerAggregation()`
-
 
 ---
 
-## 4. Total Complete Database Relational Entity Map
+## 5. Total Complete Database Relational Entity Map
 The total relational map describing structural ties between models universally:
 - **User ||--o{ Model**: User creates multiple models (Artist).
 - **User ||--o{ Purchase**: User performs purchases.
