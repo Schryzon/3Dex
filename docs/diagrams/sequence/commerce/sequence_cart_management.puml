@@ -5,17 +5,13 @@ skinparam maxmessagesize 120
 
 actor "User" as U
 participant "Frontend" as FE
-participant "POST /cart/add" as ADD
-participant "DELETE /cart/:id" as DEL
-participant "DELETE /cart/clear" as CLR
-participant "cart.controller" as CC
-database "PostgreSQL" as DB
-participant "MinIO / S3" as S3
+participant "CartController" as CC
+participant "StorageClient" as S3
+database "Database" as DB
 
 U -> FE : click "Add to Cart" on a model
-FE -> ADD : POST /cart/add\n{ modelId }
-ADD -> CC : add_to_cart(req)
-CC -> DB : model.findUnique({ id: modelId })
+FE -> CC : add_to_cart(model_id, session_cookie)
+CC -> DB : model.findUnique({ id: model_id })
 DB --> CC : Model | null
 alt model not found
     CC --> FE : 404 Model not found
@@ -26,23 +22,22 @@ alt model.price == 0
 end
 CC -> DB : cart_Item.upsert({\n  where: user_id_model_id,\n  update: { quantity: 1 },\n  create: { user_id, model_id, quantity: 1 } })
 DB --> CC : Cart_Item include model+artist
-CC -> S3 : presign preview_url if not http
+CC -> S3 : presign_get_url(preview_url)
 S3 --> CC : signed_url
 CC --> FE : 201 Cart_Item
 FE --> U : cart count badge updated
 
 U -> FE : open cart page
-FE -> CC : GET /cart
+FE -> CC : get_cart(session_cookie)
 CC -> DB : cart_Item.updateMany({ user_id, quantity != 1 }, { quantity: 1 })
 CC -> DB : cart_Item.findMany({ user_id })\ninclude model.artist, category
 DB --> CC : Cart_Item[]
-CC -> S3 : presign preview_urls
+CC -> S3 : presign_get_urls(preview_urls)
 CC --> FE : signed Cart_Item[]
 FE --> U : render cart with total price
 
 U -> FE : click remove on one item
-FE -> DEL : DELETE /cart/:id
-DEL -> CC : remove_from_cart(req)
+FE -> CC : remove_from_cart(cart_item_id, session_cookie)
 CC -> DB : cart_Item.findFirst({ id, user_id })
 DB --> CC : Cart_Item | null
 alt not found / not owner
@@ -54,8 +49,7 @@ CC --> FE : { message: "Item removed from cart" }
 FE --> U : item removed, total recalculated
 
 U -> FE : click "Clear Cart"
-FE -> CLR : DELETE /cart/clear
-CLR -> CC : clear_cart(req)
+FE -> CC : clear_cart(session_cookie)
 CC -> DB : cart_Item.deleteMany({ user_id })
 DB --> CC : done
 CC --> FE : { message: "Cart cleared" }

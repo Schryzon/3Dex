@@ -5,13 +5,11 @@ skinparam maxmessagesize 120
 
 actor "Artist/Admin" as U
 participant "Frontend" as FE
-participant "DELETE /models/:id" as API
-participant "model.controller" as MC
-database "PostgreSQL" as DB
+participant "ModelController" as MC
+database "Database" as DB
 
 U -> FE : click "Delete Model" / admin clicks delete with reason
-FE -> API : DELETE /models/:id\n{ reason } (required if ADMIN)
-API -> MC : delete_model(req)
+FE -> MC : delete_model(model_id, reason?)
 MC -> DB : model.findUnique({ id })\ninclude artist
 DB --> MC : Model | null
 alt model not found
@@ -20,7 +18,7 @@ alt model not found
 end
 
 alt user is ADMIN
-    MC -> MC : validate reason not empty
+    MC -> MC : validate_reason_not_empty(reason)
     alt no reason
         MC --> FE : 400 Admins must provide a reason
         FE --> U : prompt for reason

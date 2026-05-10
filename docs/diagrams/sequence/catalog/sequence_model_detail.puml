@@ -5,19 +5,17 @@ skinparam maxmessagesize 120
 
 actor "User" as U
 participant "Frontend" as FE
-participant "GET /models/:id" as API
-participant "model.controller" as MC
-participant "purchase.service" as PS
-participant "storage.service" as SS
-database "PostgreSQL" as DB
+participant "ModelController" as MC
+participant "PurchaseService" as PS
+participant "StorageService" as SS
+database "Database" as DB
 
 U -> FE : click model card in catalog
-FE -> API : GET /models/:id\n[Cookie: optional]
-API -> MC : get_model_detail(req)
+FE -> MC : get_model_detail(model_id, user?)
 MC -> DB : model.findUnique({ id })\ninclude artist, category, tags, reviews _count
 DB --> MC : Model | null
 alt not found
-    MC --> FE : 404
+    MC --> FE : 404 Not Found
     FE --> U : 404 page
 end
 
@@ -37,9 +35,9 @@ else guest
     MC -> MC : isPurchased = false
 end
 
-MC -> SS : presign preview_url
-MC -> SS : presign file_url
-MC -> SS : presign each gallery_url
+MC -> SS : presign_url(preview_url)
+MC -> SS : presign_url(file_url)
+MC -> SS : presign_gallery_urls(gallery_urls)
 MC -> SS : sign_user_urls(artist)
 SS --> MC : all signed URLs
 

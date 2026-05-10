@@ -5,23 +5,21 @@ skinparam maxmessagesize 120
 
 actor "Provider" as P
 participant "Frontend" as FE
-participant "PATCH /print/orders/:id" as API
-participant "print.controller" as PC
-database "PostgreSQL" as DB
+participant "PrintController" as PC
+database "Database" as DB
 
-P -> FE : view incoming jobs\nGET /print/orders/jobs
-FE -> PC : get_provider_jobs(req)
+P -> FE : view incoming jobs
+FE -> PC : get_provider_jobs(session_cookie)
 PC -> DB : order.findMany({ provider_id, type: PRINT_JOB })\ninclude user + items.model
 DB --> PC : Order[]
 PC --> FE : jobs list
 FE --> P : display job cards
 
 P -> FE : click "Accept" on job
-FE -> API : PATCH /print/orders/:id\n{ action: "ACCEPT" }
-API -> PC : manage_print_order(req)
+FE -> PC : manage_print_order(order_id, action: ACCEPT)
 PC -> DB : order.findUnique({ id })\ninclude items
 DB --> PC : Order
-PC -> PC : verify order.provider_id == req.user.id
+PC -> PC : verify_ownership(order.provider_id, req.user.id)
 PC -> DB : order.update({ id })
 PC -> DB : order_Item.updateMany({ order_id }, { print_status: ACCEPTED })
 DB --> PC : done
@@ -29,9 +27,8 @@ PC --> FE : 200 "Order ACCEPTED successfully!"
 FE --> P : job status updated
 
 P -> FE : upload proof photos + click "Ship"
-FE -> API : PATCH /print/orders/:id\n{ action: "SHIP", tracking_number: "JNE12345", proof_urls: [...] }
-API -> PC : manage_print_order(req)
-PC -> PC : validate tracking_number present
+FE -> PC : manage_print_order(order_id, action: SHIP,\n  tracking_number, proof_urls)
+PC -> PC : validate_tracking_number_present(tracking_number)
 PC -> DB : order.update({ tracking_number, proof_urls })
 PC -> DB : order_Item.updateMany({ order_id }, { print_status: SHIPPED })
 DB --> PC : done
@@ -39,8 +36,7 @@ PC --> FE : 200 "Order SHIPPED successfully!"
 FE --> P : status updated to SHIPPED
 
 P -> FE : click "Mark Delivered"
-FE -> API : PATCH /print/orders/:id\n{ action: "COMPLETE" }
-API -> PC : manage_print_order(req)
+FE -> PC : manage_print_order(order_id, action: COMPLETE)
 PC -> DB : order_Item.updateMany({ order_id }, { print_status: DELIVERED })
 DB --> PC : done
 PC --> FE : 200 "Order COMPLETED successfully!"

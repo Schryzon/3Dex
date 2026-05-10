@@ -5,18 +5,15 @@ skinparam maxmessagesize 120
 
 actor "User" as U
 participant "Frontend\n(DexieContext)" as FE
-participant "GET /dexie/tagline" as TAPI
-participant "GET /dexie/picks" as PAPI
-participant "dexie.controller" as DC
-participant "dexie.service" as DS
-participant "embedding.service" as ES
-participant "Gemini Flash API" as GM
-database "PostgreSQL" as DB
+participant "DexieController" as DC
+participant "DexieService" as DS
+participant "EmbeddingService" as ES
+participant "GeminiClient" as GM
+database "Database" as DB
 
 U -> FE : navigate to /catalog/:model_id
 FE -> FE : getContextKey() → { ctx: "catalog", tag: model_id }
-FE -> TAPI : GET /dexie/tagline?ctx=catalog&tag=:model_id\n[Cookie optional]
-TAPI -> DC : get_tagline(req)
+FE -> DC : get_tagline(ctx: catalog, tag: model_id, session?)
 DC -> DS : is_dexie_enabled(user_id)
 DS -> DB : user.findUnique({ select: dexie_enabled })
 DB --> DS : true | false
@@ -26,32 +23,31 @@ alt dexie disabled
 end
 
 DC -> DS : get_dexie_tagline(user_id, "catalog:model_id", context_detail)
-DS -> DS : check per-user cache (1hr TTL)
+DS -> DS : check_cache(user_cache_key, ttl: 1hr)
 alt cache hit
     DS --> DC : cached message
 else cache miss
-    DS -> GM : generateContent(prompt with context_detail)\nmodel: gemini-flash-latest, temp 0.9
+    DS -> GM : generate_content(prompt, model: gemini-flash-latest, temp: 0.9)
     alt Gemini 503 (rate limit)
-        DS -> DS : exponential backoff, retry up to 2x
+        DS -> DS : exponential_backoff_retry(max: 2)
         alt still failing
             DS --> DC : random FALLBACK_MESSAGE
         end
     end
     GM --> DS : generated tagline text
-    DS -> DS : set_cached(user_cache_key, message, 1hr)
-    DS -> DS : set_cached(global_key, message, 6hr) if not user-specific
+    DS -> DS : set_cache(user_cache_key, message, ttl: 1hr)
+    DS -> DS : set_cache(global_key, message, ttl: 6hr)
     DS --> DC : message
 end
 DC --> FE : { enabled: true, message }
-FE -> FE : deduplicate against seenMessages Set
+FE -> FE : deduplicate_against_seen_set(message)
 alt already seen this session
     FE --> U : stay quiet (null message)
 else new message
     FE --> U : display Dexie message bubble
 
     U -> FE : navigate to /
-    FE -> PAPI : GET /dexie/picks?limit=8
-    PAPI -> DC : get_picks(req)
+    FE -> DC : get_picks(limit: 8)
     DC -> DS : get_dexie_picks(user_id, { limit: 8 })
     DS -> DB : wishlist.findMany({ user_id, take: 5 })\ninclude model.tags, model.category
     DS -> DB : purchase.findMany({ user_id, take: 5 })\ninclude model.tags, model.category
@@ -61,11 +57,11 @@ else new message
         DB --> DS : newest models
         DS --> DC : fallback models
     else has taste data
-        DS -> DS : combine into single text string
+        DS -> DS : combine_taste_texts(liked_texts)
         DS -> ES : embed_text(combined_text)
         ES --> DS : query_vector (384 dims)
         DS -> ES : find_similar_models(query_vector, { limit, exclude_ids })
-        ES -> DB : raw SQL: cosine similarity against embedding column
+        ES -> DB : raw SQL cosine similarity against embedding column
         DB --> ES : Model[] sorted by similarity
         ES --> DS : similar models
         DS --> DC : Dexie picks

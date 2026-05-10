@@ -5,16 +5,14 @@ skinparam maxmessagesize 120
 
 actor "Customer" as C
 participant "Frontend" as FE
-participant "POST /models/:id/reviews" as API
-participant "review.controller" as RC
-database "PostgreSQL" as DB
+participant "ReviewController" as RC
+database "Database" as DB
 
 C -> FE : click "Write a Review" on purchased model
-FE -> C : show review form (stars 1-5, comment)
+FE --> C : show review form (stars 1-5, comment)
 C -> FE : submit { rating: 4, comment: "Great model!" }
-FE -> API : POST /models/:id/reviews\n{ rating, comment }\n[Cookie: 3dex_session]
-API -> RC : create_review(req)
-RC -> RC : validate rating between 1-5
+FE -> RC : create_review(model_id, rating, comment, session_cookie)
+RC -> RC : validate_rating(rating, min=1, max=5)
 RC -> DB : purchase.findUnique({\n  user_id_model_id: { user_id, model_id } })
 DB --> RC : Purchase | null
 alt not purchased
