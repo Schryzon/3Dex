@@ -5,31 +5,27 @@ skinparam maxmessagesize 120
 
 actor "User" as U
 participant "Frontend" as FE
-participant "auth.controller" as AC
-participant "GET /auth/me" as ME
-database "PostgreSQL" as DB
-participant "jwt.sign()" as JWT
-participant "storage.service" as SS
+participant "AuthController" as AC
+participant "StorageService" as SS
+database "Database" as DB
 
 U -> FE : app mounts / page refresh
-FE -> ME : GET /auth/me\n[Cookie: 3dex_session]
-ME -> AC : get_me(req)
-AC -> AC : auth.middleware decodes cookie JWT
+FE -> AC : get_me(session_cookie)
+AC -> AC : auth_middleware.decode_cookie_jwt(session_cookie)
 alt no cookie or invalid token
-    AC --> FE : 401
+    AC --> FE : 401 Unauthorized
     FE -> FE : clear AuthContext
     FE --> U : show guest state
 end
 AC -> DB : user.findUnique({ id: token.id })
 DB --> AC : User | null
 alt user deleted
-    AC --> FE : 404
+    AC --> FE : 404 Not Found
     FE --> U : logout + redirect
 end
-AC -> AC : strip password, google_id
-AC -> JWT : sign_token({ id, email, username, role })
-JWT --> AC : fresh_token
-AC -> AC : Set-Cookie: 3dex_session = fresh_token
+AC -> AC : strip_sensitive_fields(password, google_id)
+AC -> AC : sign_token({ id, email, username, role })
+AC -> AC : set_session_cookie(fresh_token)
 AC -> SS : sign_user_urls(safe_user)
 SS --> AC : signed avatar_url, banner_url
 AC --> FE : 200 full user object

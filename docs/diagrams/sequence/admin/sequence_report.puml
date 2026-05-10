@@ -5,15 +5,15 @@ skinparam maxmessagesize 120
 
 actor "User" as U
 participant "Frontend" as FE
-participant "report.controller" as RC
-database "PostgreSQL" as DB
-participant "admin.controller" as AC
+participant "ReportController" as RC
+database "Database" as DB
+participant "AdminController" as AC
 
 U -> FE : click "Report" on model/post/comment
 FE --> U : show report reason form
 U -> FE : select reason + submit
-FE -> RC : POST /reports\n{ target_type: MODEL|POST|COMMENT,\n  reason,\n  [model_id|post_id|comment_id] }
-RC -> RC : validate target_type and reason
+FE -> RC : create_report({ target_type: MODEL|POST|COMMENT,\n  reason, [model_id|post_id|comment_id] })
+RC -> RC : validate_target_type_and_reason()
 RC -> DB : report.create({\n  reporter_id: user_id,\n  target_type, reason,\n  [model_id|post_id|comment_id],\n  status: PENDING })
 DB --> RC : Report
 RC --> FE : 201 Report
@@ -23,17 +23,17 @@ FE --> U : "Report submitted"
 
 actor "Admin" as ADM
 
-ADM -> FE : GET /admin/reports?status=PENDING
-FE -> AC : list_reports(req)
+ADM -> FE : open pending reports
+FE -> AC : list_reports(status: PENDING)
 AC -> DB : report.findMany({ status: PENDING })\ninclude reporter
 DB --> AC : Report[]
 AC --> FE : Report[]
 FE --> ADM : pending reports list
 
 ADM -> FE : click "Resolve" on report
-FE -> AC : PATCH /admin/reports/:id\n{ status: REVIEWED }
+FE -> AC : resolve_report(report_id, status: REVIEWED)
 AC -> DB : report.update({ status: REVIEWED })
 DB --> AC : done
-AC --> FE : 200
+AC --> FE : 200 OK
 FE --> ADM : report removed from queue
 @enduml

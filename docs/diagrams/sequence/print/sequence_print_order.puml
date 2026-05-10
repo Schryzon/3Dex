@@ -5,24 +5,22 @@ skinparam maxmessagesize 120
 
 actor "Customer" as C
 participant "Frontend" as FE
-participant "POST /print/orders" as API
-participant "print.controller" as PC
-database "PostgreSQL" as DB
+participant "PrintController" as PC
+database "Database" as DB
 
-C -> FE : browse providers (GET /print/providers?city=Jakarta&material=PLA)
-FE -> PC : get_providers(req)
+C -> FE : browse providers (city=Jakarta, material=PLA)
+FE -> PC : get_providers(city, material)
 PC -> DB : user.findMany({ role: PROVIDER, account_status: APPROVED })
 DB --> PC : Provider[]
-PC -> PC : filter by material in provider_config.materials
-PC -> PC : sort by location score (city/country match)
+PC -> PC : filter_by_material(providers, material)\n  material in provider_config.materials
+PC -> PC : sort_by_location_score(providers, city)\n  city/country match priority
 PC --> FE : sorted Provider[]
 FE --> C : show provider list with rating, materials, location
 
 C -> FE : select provider + configure print items
 FE --> C : show print config form\n(material, color, scale per model)
 C -> FE : submit order:\n{ provider_id, items: [{model_id, print_config}],\n  shipping_address, courier_name }
-FE -> API : POST /print/orders
-API -> PC : create_print_order(req)
+FE -> PC : create_print_order({ provider_id, items,\n  shipping_address, courier_name })
 PC -> DB : user.findUnique({ id: provider_id })
 DB --> PC : Provider | null
 alt invalid provider

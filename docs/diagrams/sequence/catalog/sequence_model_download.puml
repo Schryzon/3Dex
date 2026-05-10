@@ -5,16 +5,14 @@ skinparam maxmessagesize 120
 
 actor "Customer" as C
 participant "Frontend" as FE
-participant "GET /models/:id/download" as API
-participant "model.controller" as MC
-participant "purchase.service" as PS
-participant "storage.service" as SS
-participant "MinIO / S3" as S3
-database "PostgreSQL" as DB
+participant "ModelController" as MC
+participant "PurchaseService" as PS
+participant "StorageService" as SS
+participant "StorageClient" as S3
+database "Database" as DB
 
 C -> FE : click "Download" on purchased model
-FE -> API : GET /models/:id/download\n[Cookie: 3dex_session]
-API -> MC : download_model(req)
+FE -> MC : download_model(model_id, session_cookie)
 MC -> DB : model.findUnique({ id })
 DB --> MC : Model | null
 alt model not found
@@ -31,12 +29,12 @@ alt no purchase AND not artist AND not ADMIN AND price > 0
     FE --> C : show 403 error
 end
 
-MC -> SS : get_download_url_s3(model.file_url)
-SS -> S3 : presign GET URL (short TTL)
+MC -> SS : get_download_url(model.file_url)
+SS -> S3 : presign_get_url(key, short_ttl)
 S3 --> SS : signed_download_url
 SS --> MC : signed_download_url
 MC --> FE : 200 { download_url, license }
-FE -> S3 : GET signed_download_url
+FE -> S3 : download(signed_download_url)
 S3 --> FE : binary file stream
 FE --> C : file download starts in browser
 @enduml
