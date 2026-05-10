@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Box, Info, Tag, DollarSign, Check, ChevronRight, Layout, Loader2 } from 'lucide-react';
+import { ArrowLeft, Box, Info, Tag, DollarSign, Check, ChevronRight, Layout, Loader2, Sparkles } from 'lucide-react';
 import FileUploader from '@/features/upload/components/FileUploader';
 import MultiFileUploader from '@/features/upload/components/MultiFileUploader';
 import { api } from '@/lib/api';
@@ -20,6 +20,7 @@ export default function UploadPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [currency, setCurrency] = useState<'idr' | 'usd'>('idr');
+    const [isGeneratingDetails, setIsGeneratingDetails] = useState(false);
 
     // Form Data
     const [formData, setFormData] = useState({
@@ -63,6 +64,49 @@ export default function UploadPage() {
                 }
             }
         });
+    };
+
+    const handleGenerateDetails = async () => {
+        if (galleryFiles.length === 0) {
+            toast.error("Please upload at least one preview image in Step 1 first.");
+            return;
+        }
+
+        try {
+            setIsGeneratingDetails(true);
+            const file = galleryFiles[0];
+            
+            // Convert to base64
+            const base64 = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = (error) => reject(error);
+            });
+
+            // Remove data:image/jpeg;base64, prefix
+            const base64Data = base64.split(',')[1];
+
+            const { data } = await api.post('/dexie/generate-model-details', {
+                imageBase64: base64Data,
+                mimeType: file.type
+            });
+
+            setFormData(prev => ({ 
+                ...prev, 
+                title: data.title || prev.title, 
+                description: data.description || prev.description, 
+                price: data.price ? data.price.toString() : prev.price,
+                isFree: data.price ? false : prev.isFree
+            }));
+
+            toast.success("Dēxie filled in the details! ✨");
+        } catch (error: any) {
+            console.error(error);
+            toast.error(error.response?.data?.message || "Failed to generate details.");
+        } finally {
+            setIsGeneratingDetails(false);
+        }
     };
 
     const handlePublish = async () => {
@@ -199,7 +243,7 @@ export default function UploadPage() {
                                         onFilesSelect={setGalleryFiles}
                                         accept=".jpg,.jpeg,.png,.webp"
                                         label="Upload Previews"
-                                        description="JPG, PNG or WEBP (Max 5MB each)"
+                                        description="JPG, PNG or WEBP (Max 5MB). Tip: Use WEBP or 80% compressed JPG for faster loading. Don't worry about aspect ratio, we will fit it automatically without losing details."
                                         maxFiles={5}
                                     />
                                 </div>
@@ -219,9 +263,23 @@ export default function UploadPage() {
 
                     {currentStep === 'details' && (
                         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <div>
-                                <h2 className="text-2xl font-bold mb-2">Asset Information</h2>
-                                <p className="text-gray-400 text-sm">Tell buyers about your amazing creation.</p>
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div>
+                                    <h2 className="text-2xl font-bold mb-2">Asset Information</h2>
+                                    <p className="text-gray-400 text-sm">Tell buyers about your amazing creation.</p>
+                                </div>
+                                <button
+                                    onClick={handleGenerateDetails}
+                                    disabled={isGeneratingDetails}
+                                    className="px-4 py-2.5 bg-gradient-to-r from-blue-600/20 to-yellow-500/20 hover:from-blue-600/30 hover:to-yellow-500/30 border border-blue-500/30 text-white rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-[0_0_15px_rgba(59,130,246,0.15)] disabled:opacity-50"
+                                >
+                                    {isGeneratingDetails ? (
+                                        <Loader2 className="w-4 h-4 animate-spin text-yellow-400" />
+                                    ) : (
+                                        <Sparkles className="w-4 h-4 text-yellow-400" />
+                                    )}
+                                    <span className="text-sm font-medium">Ask Dēxie to fill in the details</span>
+                                </button>
                             </div>
 
                             <div className="space-y-6">

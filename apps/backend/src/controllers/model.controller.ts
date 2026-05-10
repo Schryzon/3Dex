@@ -277,6 +277,44 @@ export async function get_model_detail(req: Request, res: Response) {
   }
 }
 
+export async function get_similar_models(req: Request, res: Response) {
+  const id = String(req.params.id);
+  const limit = Number(req.query.limit) || 4;
+
+  try {
+    // Fetch similar models using pgvector cosine distance (<=>)
+    const similar_raw: any[] = await prisma.$queryRaw`
+      SELECT m.id, m.title, m.price, m.preview_url, m.is_nsfw, m.avg_rating, m.review_count, m.created_at,
+             json_build_object('id', u.id, 'username', u.username, 'avatar_url', u.avatar_url) as artist
+      FROM "Model" m
+      JOIN "User" u ON m.artist_id = u.id
+      WHERE m.id != ${id} 
+        AND m.status = 'APPROVED'
+        AND m.embedding IS NOT NULL
+      ORDER BY m.embedding <=> (SELECT embedding FROM "Model" WHERE id = ${id})
+      LIMIT ${limit};
+    `;
+
+    // Helper to sign URLs
+    const sign_model = async (m: any) => {
+      const model = { ...m };
+      if (model.preview_url && !model.preview_url.startsWith("http")) {
+        model.preview_url = await get_download_url_s3(model.preview_url);
+      }
+      if (model.artist) {
+        model.artist = await sign_user_urls(model.artist);
+      }
+      return model;
+    };
+
+    const models = await Promise.all(similar_raw.map(sign_model));
+
+    res.json({ data: models });
+  } catch (error: any) {
+    console.error("Error in get_similar_models:", error);
+    res.status(500).json({ message: error.message });
+  }
+}
 
 export async function upload_model(req: Request, res: Response) {
   const { title, description, price, file_url, preview_url, gallery_urls, artist_id, category, tags, is_nsfw, license, is_printable } =

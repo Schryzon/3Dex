@@ -89,11 +89,18 @@ export default function CatalogProductCard({
             <Wrapper {...wrapperProps as any}>
                 <div className="group flex bg-[#111] rounded-xl overflow-hidden hover:bg-[#161616] transition-all duration-300 cursor-pointer border border-white/[0.05] hover:border-white/[0.12] hover:shadow-xl hover:shadow-black/40">
                     {/* Thumbnail */}
-                    <div className="relative w-28 h-24 md:w-40 md:h-32 shrink-0 overflow-hidden">
+                    <div className="relative w-28 h-24 md:w-40 md:h-32 shrink-0 overflow-hidden bg-black/50">
+                        {/* Blurred Background Image */}
+                        <img
+                            src={getStorageUrl(image)}
+                            alt=""
+                            className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-50 transition-all duration-500"
+                        />
+                        {/* Foreground Contained Image */}
                         <img
                             src={getStorageUrl(image)}
                             alt={title}
-                            className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${isNsfw ? 'blur-xl scale-110' : ''}`}
+                            className={`relative w-full h-full object-contain transition-all duration-500 group-hover:scale-110 z-0 ${isNsfw ? 'blur-xl scale-110' : ''}`}
                         />
                         <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
                         
@@ -241,11 +248,17 @@ export default function CatalogProductCard({
                         <div className="absolute inset-0 bg-white/5 animate-pulse" />
                     )}
 
+                    {/* Blurred Background Image */}
+                    <img
+                        src={getStorageUrl(image)}
+                        alt=""
+                        className={`absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-50 transition-all duration-700 group-hover:scale-125 ${imageLoaded ? 'block' : 'hidden'}`}
+                    />
+                    {/* Foreground Contained Image */}
                     <img
                         src={getStorageUrl(image)}
                         alt={title}
-                        className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-102 ${imageLoaded ? 'block' : 'hidden'
-                            } ${isNsfw ? 'blur-2xl scale-110' : ''}`}
+                        className={`absolute inset-0 w-full h-full object-contain transition-all duration-700 group-hover:scale-105 z-0 ${imageLoaded ? 'block' : 'hidden'} ${isNsfw ? 'blur-2xl scale-110' : ''}`}
                         onLoad={() => setImageLoaded(true)}
                     />
 

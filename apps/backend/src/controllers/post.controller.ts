@@ -43,7 +43,24 @@ export async function get_feed_posts(req: Auth_Request, res: Response): Promise<
     const limit = Number(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
+    let followingIds: string[] = [];
+    if (req.user) {
+        const following = await prisma.follow.findMany({
+            where: { follower_id: req.user.id },
+            select: { following_id: true }
+        });
+        followingIds = following.map(f => f.following_id);
+    }
+
+    let whereClause: any = {};
+    if (req.user?.role !== 'ADMIN') {
+        whereClause = {
+            user_id: { in: followingIds }
+        };
+    }
+
     const posts = await prisma.post.findMany({
+        where: whereClause,
         orderBy: { created_at: 'desc' },
         take: limit,
         skip,
@@ -81,7 +98,10 @@ export async function get_feed_posts(req: Auth_Request, res: Response): Promise<
         likes: undefined // Remove raw likes array
     }));
 
-    res.json(feed);
+    res.json({
+        posts: feed,
+        following_count: followingIds.length
+    });
 }
 
 /**

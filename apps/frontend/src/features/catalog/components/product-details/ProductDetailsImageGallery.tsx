@@ -38,10 +38,17 @@ export default function ProductDetailsImageGallery({
                     <ModelViewer3D modelUrl={modelFileUrl} />
                 ) : (
                     <>
+                        {/* Blurred Background Image */}
+                        <img
+                            src={images[currentImageIndex]}
+                            alt=""
+                            className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-50"
+                        />
+                        {/* Foreground Contained Image */}
                         <img
                             src={images[currentImageIndex]}
                             alt={title}
-                            className="w-full h-full object-cover"
+                            className="relative w-full h-full object-contain z-0"
                         />
                         {/* Prev / Next arrows — only rendered when there are multiple images */}
                         {images.length > 1 && (

@@ -1,6 +1,6 @@
 # Development Guide - 3Dēx
 
-This document serves as the primary technical reference for the 3Dēx project.
+This document serves as the primary technical reference and architectural blueprint for the 3Dēx project. 
 
 ---
 
@@ -8,7 +8,7 @@ This document serves as the primary technical reference for the 3Dēx project.
 
 1. [Project Overview](#project-overview)
 2. [Tech Stack Overview](#tech-stack-overview)
-3. [Core Principles](#core-principles)
+3. [Core Principles & Coding Philosophy](#core-principles--coding-philosophy)
 4. [Installation Guide](#installation-guide)
 5. [Cloning the Project](#cloning-the-project)
 6. [Project Structure](#project-structure)
@@ -22,7 +22,7 @@ This document serves as the primary technical reference for the 3Dēx project.
 14. [Safe Merging Strategy](#safe-merging-strategy)
 15. [Troubleshooting](#troubleshooting)
 16. [Roadmap: Full Dockerization](#roadmap-full-dockerization)
-17. [Core Rules](#core-rules)
+17. [Core Operational Rules](#core-operational-rules)
 
 ---
 
@@ -35,7 +35,7 @@ Backend: Node.js + Express
 Database: PostgreSQL + Prisma
 ```
 
-This guide details the setup and development processes to ensure consistent implementation and avoid breaking changes.
+This guide details the setup and development processes to ensure consistent implementation, avoid breaking changes, and maintain a highly readable, predictable codebase.
 
 ---
 
@@ -43,27 +43,53 @@ This guide details the setup and development processes to ensure consistent impl
 
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js (React), Tailwind CSS |
-| Backend | Node.js, Express |
-| Database | PostgreSQL |
-| ORM | Prisma |
-| Storage | MinIO (S3 Compatible) |
-| AI / Ecosystem | Google Gemini (Dēxie AI) |
-| Version Control | Git + GitHub |
+| **Frontend** | Next.js (React), Tailwind CSS |
+| **Backend** | Node.js, Express |
+| **Database** | PostgreSQL |
+| **ORM** | Prisma |
+| **Storage** | MinIO (S3 Compatible) |
+| **AI / Ecosystem** | Google Gemini (Dēxie AI) |
+| **Version Control** | Git + GitHub |
 
 ---
 
-## Core Principles
+## Core Principles & Coding Philosophy
 
-### Development Mental Model
+To maintain sanity and determinism in the codebase, we adhere strictly to the following philosophical rules. **Readability > Everything.**
 
+### 1. Flat Logic (Anti-Deep Nesting)
+Avoid stacking conditions. Use early returns and clear branching to minimize indentation depth.
+**Bad:**
+```typescript
+if (user) {
+    if (user.isArtist) {
+        // do something
+    }
+}
+```
+**Good:**
+```typescript
+if (!user) return;
+if (!user.isArtist) return;
+// do something
+```
+
+### 2. Snake_case for System-Level Variables
+While JavaScript leans towards camelCase, we prefer `snake_case` for database fields, API payloads, and system-level configurations to maintain grounded, practical, backend consistency.
+
+### 3. Optimistic Error Handling
+Don't overprotect the code. If a system-level function fails, let it crash or throw visibly so we know exactly where the failure occurred. This is crucial for debugging during development.
+```typescript
+const data = await fetchCriticalData();
+process(data); // If data is malformed, let it throw.
+```
+
+### 4. Development Mental Model
 - Code is shared across the team.
 - Database data is maintained locally and not shared.
 - Storage buckets are local for development purposes.
 - Secrets must never be committed to version control.
-- Features are developed on dedicated branches, not on the master branch.
-
-If you are new to these concepts, this guide will help you follow these practices.
+- Features are developed on dedicated branches, never on master.
 
 ---
 
@@ -95,7 +121,7 @@ Verify: `psql --version`, `pg_isready`
 ---
 
 ### 4. MinIO (Optional for local development)
-MinIO can be run via Docker:
+MinIO can be run via Docker to mock AWS S3 locally:
 ```sh
 docker run -p 9000:9000 -p 9001:9001 minio/minio server /data --console-address ":9001"
 ```
@@ -113,16 +139,16 @@ cd 3Dex
 ## Project Structure
 ```
 3Dex/
-├─ .github/       # CI/CD workflows
-├─ .vscode/       # Workspace settings
+├─ .github/       # CI/CD workflows and Actions
+├─ .vscode/       # Workspace settings (linting, formatting)
 ├─ apps/
-│  ├─ backend/    # Express backend
-│  └─ frontend/   # Next.js frontend
-├─ docs/          # Technical documentation
+│  ├─ backend/    # Express backend (Controllers, Routes, Prisma schema)
+│  └─ frontend/   # Next.js frontend (Pages, Components, Contexts)
+├─ docs/          # Technical documentation (You are here)
 ├─ LICENSE        # Project license
-└─ README.md      # Main documentation
+└─ README.md      # Main documentation pointer
 ```
-Avoid adding redundant folders or storing databases within the repository.
+Avoid adding redundant folders or storing SQLite/database dumps within the repository.
 
 ---
 
@@ -155,7 +181,8 @@ NEXT_PUBLIC_SB_MIDTRANS_CLIENT_KEY=your_sandbox_key_here
 **For Docker Compose Only**.
 Copy `.env.docker.example` to `.env.docker`.
 
-Never commit these files; they are included in `.gitignore`.
+> [!WARNING]
+> Never commit `.env` files. They are included in `.gitignore` by default.
 
 ---
 
@@ -174,8 +201,8 @@ npx prisma generate
 ```
 
 Success indicators:
-- PostgreSQL is running.
-- Prisma connected successfully.
+- PostgreSQL is running without errors.
+- Prisma connected successfully and generated the client.
 
 To stop PostgreSQL: `pg_ctl stop`
 
@@ -188,7 +215,7 @@ To stop PostgreSQL: `pg_ctl stop`
 cd apps/backend
 npm run dev
 ```
-Health check: `http://localhost:4000/health` (Expected: `{ "status": "ok" }`)
+Health check: Visit `http://localhost:4000/health` (Expected: `{ "status": "ok" }`)
 
 ### Frontend
 ```sh
@@ -202,10 +229,10 @@ Access via: `http://localhost:3000`
 
 ## Verification Checklist
 
-- [ ] Frontend loads correctly.
+- [ ] Frontend loads correctly without hydration errors.
 - [ ] Backend `/health` endpoint returns "ok".
-- [ ] No console errors.
-- [ ] Prisma migrations completed successfully.
+- [ ] No red console errors in the browser dev tools.
+- [ ] Prisma migrations applied and Prisma Studio (`npx prisma studio`) can view the schema.
 
 ---
 
@@ -259,7 +286,7 @@ git pull origin dev
 git checkout feature/your-task
 git merge dev
 ```
-Resolve any conflicts locally in the feature branch.
+Resolve any conflicts locally in the feature branch using VS Code's merge editor.
 
 ### Step 3: Merge into Dev and Push
 ```sh
@@ -310,7 +337,7 @@ The project uses GitHub Actions for CI/CD and PM2 for process management on the 
 
 ## Roadmap: Full Dockerization
 
-The project is currently transitioning from a local-first development model to a fully containerized environment.
+The project is currently transitioning from a local-first development model to a fully containerized environment for absolute parity between dev and prod.
 
 ### Status
 
@@ -325,15 +352,15 @@ The project is currently transitioning from a local-first development model to a
 
 1. **Frontend Integration**: Develop an alpine-based image for the Next.js frontend that supports both development (`npm run dev`) and production (`npm run start`) modes.
 2. **MinIO Persistence**: Add a dedicated `minio` service to `docker-compose.yml` to eliminate the need for manual Docker run commands for storage.
-3. **Internal API Resolution**: Configure Docker's internal DNS so the frontend can resolve `api:4000` without exposing ports unnecessarily.
+3. **Internal API Resolution**: Configure Docker's internal DNS so the frontend can resolve `api:4000` without exposing ports unnecessarily to the public internet.
 
 ---
 
-## Core Rules
+## Core Operational Rules
 
-1. Do not code directly on the master branch.
-2. Always branch from the dev branch.
-3. Never commit environment variables (.env).
-4. Dedicate one branch per task.
-5. Do not share local database data.
-6. Consult the team Lead or documentation if issues persist.
+1. **Do not code directly on the master branch.**
+2. **Always branch from the dev branch.**
+3. **Never commit environment variables (.env).**
+4. **Dedicate one branch per task.** (Keep pull requests small and focused)
+5. **Do not share local database data.** (Use seed files if necessary)
+6. **If it breaks, let it crash.** (Do not swallow errors silently. Fix the root cause)

@@ -31,8 +31,8 @@ export interface Post {
 }
 
 export const postService = {
-    async getFeed(page = 1, limit = 10): Promise<Post[]> {
-        return apiClient.get<Post[]>(`/posts/feed?page=${page}&limit=${limit}`);
+    async getFeed(page = 1, limit = 10): Promise<{ posts: Post[], following_count: number }> {
+        return apiClient.get<{ posts: Post[], following_count: number }>(`/posts/feed?page=${page}&limit=${limit}`);
     },
 
     async createPost(data: { caption: string; media_urls: string[]; is_nsfw?: boolean }): Promise<Post> {

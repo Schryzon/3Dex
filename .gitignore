@@ -4,3 +4,7 @@
 node_modules/
 *.log
 *.txt
+
+# Migration Scripts (contain secrets)
+apps/backend/scripts/push_to_remote_db.sh
+apps/backend/scripts/push_to_remote_minio.sh

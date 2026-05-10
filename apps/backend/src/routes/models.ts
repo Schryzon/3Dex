@@ -6,7 +6,8 @@ import {
   download_model,
   delete_model,
   update_model,
-  get_upload_signed_url
+  get_upload_signed_url,
+  get_similar_models
 } from "../controllers/model.controller";
 import { buy_model } from "../controllers/purchase.controller";
 
@@ -99,6 +100,25 @@ router.post(
   validate(buy_model_schema, "body"),
   buy_model
 );
+
+/**
+ * @openapi
+ * /models/{id}/similar:
+ *   get:
+ *     summary: Get similar models using AI embeddings
+ *     tags:
+ *       - Models
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of similar models
+ */
+router.get("/:id/similar", optional_auth, get_similar_models);
 
 /**
  * @openapi

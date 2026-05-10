@@ -3,6 +3,7 @@ import {
     get_tagline,
     get_picks,
     toggle_dexie,
+    generate_details,
 } from "../controllers/dexie.controller";
 import { require_auth, optional_auth } from "../middlewares/auth.middleware";
 
@@ -39,5 +40,17 @@ router.get("/picks", optional_auth, get_picks);
  *       - bearerAuth: []
  */
 router.patch("/toggle", require_auth, toggle_dexie);
+
+/**
+ * @openapi
+ * /dexie/generate-model-details:
+ *   post:
+ *     summary: Generate model details using Gemini Vision
+ *     tags:
+ *       - Dexie
+ *     security:
+ *       - bearerAuth: []
+ */
+router.post("/generate-model-details", require_auth, generate_details);
 
 export default router;

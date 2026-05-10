@@ -41,7 +41,7 @@ export default function CommunityPage() {
         { id: 'other', label: 'Other issue', icon: <HelpCircle className="w-5 h-5 text-gray-400" /> },
     ];
 
-    const { data: realPosts, isLoading } = useQuery({
+    const { data: feedData, isLoading } = useQuery({
         queryKey: ['community-feed'],
         queryFn: () => postService.getFeed()
     });
@@ -52,21 +52,12 @@ export default function CommunityPage() {
         queryFn: () => userService.searchUsers('', 'ARTIST')
     });
 
-    const posts = useMemo(() => realPosts || [], [realPosts]);
+    const posts = useMemo(() => feedData?.posts || [], [feedData]);
+    const followingCount = feedData?.following_count || 0;
 
     // Filter Logic (Algorithm)
-    const filteredPosts = useMemo(() => {
-        if (activeTab === 'all') return posts;
-        if (activeTab === 'explore') {
-            // "Explore" algorithm Show posts with likes > 50 or recently created high-engagement ones
-            return [...posts].sort((a, b) => (b.like_count || 0) - (a.like_count || 0));
-        }
-        if (activeTab === 'following') {
-            // "Following" algorithm In mock mode, show posts from specific users
-            return posts.filter(p => ['GhostMesh', 'NeonForge', 'CyberVoxel'].includes(p.user.username));
-        }
-        return posts;
-    }, [activeTab, posts]);
+    // Removed client-side tabs algorithm since feed is now server-side personalized.
+    const filteredPosts = posts;
 
     const followMutation = useMutation({
         mutationFn: (userId: string) => userService.followUser(userId),
@@ -251,25 +242,7 @@ export default function CommunityPage() {
                         </div>
                     </div>
 
-                    {/* Feed Tabs & Action Bar */}
-                    <div className="flex items-center justify-between border-b border-gray-800/50 pb-1">
-                        <div className="flex gap-6">
-                            {['all', 'explore', 'following'].map((tab) => (
-                                <button
-                                    key={tab}
-                                    onClick={() => setActiveTab(tab as any)}
-                                    className={`relative pb-3 text-sm font-bold capitalize transition-colors ${
-                                        activeTab === tab ? 'text-yellow-400' : 'text-gray-600 hover:text-gray-400'
-                                    }`}
-                                >
-                                    {tab}
-                                    {activeTab === tab && (
-                                        <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.5)]" />
-                                    )}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+                    {/* Removed Feed Tabs - Feed is now personalized globally */}
 
                     {/* Create Post Widget */}
                     {canPost && (
@@ -475,9 +448,16 @@ export default function CommunityPage() {
                                             onClick={() => setSelectedPostId(post.id)}
                                             className="relative w-full aspect-[4/5] sm:aspect-video overflow-hidden bg-[#111] cursor-pointer ring-1 ring-gray-800/20 group/img shadow-inner"
                                         >
+                                            {/* Blurred Background Image */}
                                             <img 
                                                 src={getStorageUrl(post.media_urls[0])} 
-                                                className="w-full h-full object-cover transition-transform duration-700 group-hover/img:scale-105" 
+                                                alt="" 
+                                                className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-50 transition-transform duration-700 group-hover/img:scale-125" 
+                                            />
+                                            {/* Foreground Contained Image */}
+                                            <img 
+                                                src={getStorageUrl(post.media_urls[0])} 
+                                                className="relative w-full h-full object-contain transition-transform duration-700 group-hover/img:scale-105 z-0" 
                                                 alt="Post media" 
                                             />
                                             {/* Hover Overlay */}
@@ -533,16 +513,29 @@ export default function CommunityPage() {
                                     </div>
                                 </div>
                             ))
-                        ) : (
-                            // Empty State
+                        ) : followingCount === 0 && user?.role !== 'ADMIN' ? (
+                            // Empty State: No Following
                             <div className="py-20 flex flex-col items-center justify-center text-center space-y-4 bg-[#0a0a0a] border-2 border-dashed border-gray-900 rounded-[40px]">
-                                <div className="w-20 h-20  rounded-3xl flex items-center justify-center mb-2">
+                                <div className="w-20 h-20 rounded-3xl flex items-center justify-center mb-2 bg-yellow-400/5">
+                                    <Users className="w-10 h-10 text-yellow-500" />
+                                </div>
+                                <div>
+                                    <h4 className="text-xl font-black text-white">Your feed is empty</h4>
+                                    <p className="text-sm text-gray-600 max-w-sm mx-auto mt-2 leading-relaxed">
+                                        You are not following any artists or providers yet. Discover creators from the quick discovery section and follow them to see their posts here!
+                                    </p>
+                                </div>
+                            </div>
+                        ) : (
+                            // Empty State: Following but no posts
+                            <div className="py-20 flex flex-col items-center justify-center text-center space-y-4 bg-[#0a0a0a] border-2 border-dashed border-gray-900 rounded-[40px]">
+                                <div className="w-20 h-20 rounded-3xl flex items-center justify-center mb-2">
                                     <Sparkles className="w-10 h-10 text-gray-700" />
                                 </div>
                                 <div>
-                                    <h4 className="text-xl font-black text-white">No posts yet</h4>
-                                    <p className="text-sm text-gray-600 max-w-xs mx-auto mt-2 leading-relaxed">
-                                        Be the first to share your work with the community and get discovered!
+                                    <h4 className="text-xl font-black text-white">No updates yet</h4>
+                                    <p className="text-sm text-gray-600 max-w-sm mx-auto mt-2 leading-relaxed">
+                                        There are no updates or posts from the artists and providers you are following right now.
                                     </p>
                                 </div>
                             </div>
