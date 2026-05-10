@@ -226,6 +226,58 @@ export default function AboutUsPage() {
                     </div>
                 </section>
 
+                {/* Profit Splits */}
+                <section>
+                    <SectionLabel icon={Scale} label="Profit Splits & Taxation" />
+                    <h2 className="text-3xl font-bold tracking-tight mb-4">Fair and Transparent Revenue Routing</h2>
+                    <p className="text-white/50 mb-8 text-[15px] leading-relaxed max-w-2xl">
+                        To ensure a sustainable ecosystem, revenue is automatically routed and split upon a successful transaction.
+                    </p>
+                    <div className="grid md:grid-cols-2 gap-6">
+                        {/* Digital Sales */}
+                        <div className="p-6 bg-[#111] border border-white/10 rounded-2xl hover:border-violet-500/30 transition-colors">
+                            <h3 className="text-xl font-bold mb-4 text-violet-400">Digital Sales</h3>
+                            <ul className="space-y-3">
+                                <li className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
+                                    <span className="text-white/60">Artist Payout</span>
+                                    <span className="font-bold text-white">85%</span>
+                                </li>
+                                <li className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
+                                    <span className="text-white/60">Platform Operations Fee</span>
+                                    <span className="font-bold text-white">12%</span>
+                                </li>
+                                <li className="flex justify-between items-center text-sm pb-2">
+                                    <span className="text-white/60">Payment Gateway & Taxes</span>
+                                    <span className="font-bold text-white">~3%</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Physical Print */}
+                        <div className="p-6 bg-[#111] border border-white/10 rounded-2xl hover:border-teal-500/30 transition-colors">
+                            <h3 className="text-xl font-bold mb-4 text-teal-400">Physical Print</h3>
+                            <ul className="space-y-3">
+                                <li className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
+                                    <span className="text-white/60">Provider Payout (Labor & Materials)</span>
+                                    <span className="font-bold text-white">75%</span>
+                                </li>
+                                <li className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
+                                    <span className="text-white/60">Artist Print Royalty</span>
+                                    <span className="font-bold text-white">10%</span>
+                                </li>
+                                <li className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
+                                    <span className="text-white/60">Platform Operations Fee</span>
+                                    <span className="font-bold text-white">12%</span>
+                                </li>
+                                <li className="flex justify-between items-center text-sm pb-2">
+                                    <span className="text-white/60">Payment Gateway & Taxes</span>
+                                    <span className="font-bold text-white">~3%</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
                 {/* The Team */}
                 <section id="team">
                     <SectionLabel icon={Users} label="The Team" />

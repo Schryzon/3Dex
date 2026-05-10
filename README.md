@@ -78,7 +78,7 @@ This repository contains both the frontend and backend for the platform.
 The platform bridges the gap between digital artists and hobbyists without hardware, monetizing through a combination of direct sales and print-on-demand fulfillment.
 
 ```mermaid
-graph TD
+graph LR
     %% Define Styles
     classDef artist fill:#3b82f6,stroke:#1d4ed8,stroke-width:2px,color:white;
     classDef customer fill:#10b981,stroke:#047857,stroke-width:2px,color:white;
@@ -88,37 +88,49 @@ graph TD
     classDef money fill:#ecfccb,stroke:#84cc16,stroke-width:2px,color:#3f6212,stroke-dasharray: 5 5;
 
     %% Nodes
-    A[Artist / Creator]:::artist
+    A[Artist]:::artist
     C[Customer]:::customer
     P[Print Provider]:::provider
     DB[(3D Catalog)]:::database
-    Mid[Midtrans Payment Gateway]:::platform
+    Mid[Payment Gateway]:::platform
+    Rev{Split Engine}:::money
+    Treasury[Platform Treasury]:::platform
     
-    %% Flows
-    A -- Uploads Model & Sets Pricing --> DB
-    C -- Browses & Previews --> DB
+    %% Core Interactions
+    A --->|Uploads| DB
+    DB --->|Browses| C
     
-    C -- 1. Buys Digital Download --> Mid
-    C -- 2. Requests Physical Print --> Mid
+    C --->|1. Digital Order| Mid
+    C --->|2. Print Order| Mid
     
-    %% Digital Route
-    Mid -.->|Digital Payment Success| D[Unlock Encrypted Download URL]:::database
-    D -.->|Direct Download| C
+    %% Fulfillment Paths
+    Mid -.->|Digital Unlock| D[Encrypted URL]:::database
+    D -.->|Downloads| C
     
-    %% Physical Route
-    Mid -.->|Print Payment Escrow| Q[Print Job Queue]:::database
-    Q -- Job Assigned --> P
-    P -- Manufactures & Ships Physical Item --> C
+    Mid -.->|Print Job Assigned| P
+    P -.->|Ships Item| C
     
-    %% Revenue Splits
-    Rev{Revenue Split Engine}:::money
-    Mid ==> Rev
+    %% Financial Splits
+    Mid ===>|Gross Processing| Rev
     
-    Rev ==>|Artist Digital Payout 90%| A
-    Rev ==>|Artist Print Royalty %| A
-    Rev ==>|Provider Material & Labor Payout| P
-    Rev ==>|Platform Operations Fee| Platform[3Dēx Platform Treasury]:::platform
+    Rev ===>|Digital: 85%| A
+    Rev ===>|Print: 10% Royalty| A
+    Rev ===>|Print: 75% Labor| P
+    Rev ===>|12% Platform Fee| Treasury
+    Rev ===>|~3% Tax/Gateway Fee| Treasury
 ```
+
+### III. Profit Splits & Taxation
+To ensure a fair and sustainable ecosystem, revenue is automatically routed and split upon a successful transaction:
+- **Digital Sales Split**:
+  - **85%** - Artist Payout.
+  - **12%** - Platform Operations Fee (maintenance, hosting, AI costs).
+  - **~3%** - Payment Gateway Fee & Taxes (Midtrans processing + standard VAT).
+- **Physical Print Split**:
+  - **75%** - Provider Payout (covers 3D printing material, electricity, and labor).
+  - **10%** - Artist Royalty (for licensing the 3D model for physical reproduction).
+  - **12%** - Platform Operations Fee.
+  - **~3%** - Payment Gateway Fee & Taxes.
 
 ---
 
