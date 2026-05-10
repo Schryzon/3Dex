@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-    <img src="https://github.com/Schryzon/3Dex/actions/workflows/deploy.yml/badge.svg" />
+    <img src="https://img.shields.io/website?url=https%3A%2F%2Fapi.3dex.studio%2Fhealth&up_message=passing&down_message=failing&label=Railway%20Deploy&style=flat-square" />
     <img src="https://img.shields.io/github/repo-size/Schryzon/3Dex?style=flat-square&color=gray" />
     <img src="https://img.shields.io/github/stars/Schryzon/3Dex?style=flat-square&color=yellow" />
     <img src="https://img.shields.io/github/forks/Schryzon/3Dex?style=flat-square&color=blue" />
