@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { verify_token } from "../utils/jwt";
+import { clear_auth_cookies } from "../controllers/auth.controller";
 
 export interface Auth_Request extends Request {
   user: Express.Auth_User;
@@ -23,6 +24,7 @@ export function require_auth(
     req.user = payload;
     next();
   } catch {
+    clear_auth_cookies(res);
     return res.status(401).json({ message: "Invalid token!" });
   }
 }

@@ -87,7 +87,10 @@ export async function middleware(request: NextRequest) {
           return NextResponse.redirect(new URL('/dashboard', request.url));
         } catch {
           const res = NextResponse.next();
-          res.cookies.delete('3dex_session');
+          res.cookies.set('3dex_session', '', { 
+            maxAge: 0, 
+            domain: process.env.NEXT_PUBLIC_COOKIE_DOMAIN || undefined 
+          });
           return res;
         }
       }
@@ -117,7 +120,10 @@ export async function middleware(request: NextRequest) {
     console.error('[Middleware] JWT_SECRET present:', !!JWT_SECRET);
     // Invalid/expired token  treat as unauthenticated
     const res = NextResponse.redirect(new URL('/landing', request.url));
-    res.cookies.delete('3dex_session');
+    res.cookies.set('3dex_session', '', { 
+      maxAge: 0, 
+      domain: process.env.NEXT_PUBLIC_COOKIE_DOMAIN || undefined 
+    });
     return res;
   }
 

@@ -4,15 +4,39 @@ import prisma from "../prisma";
 import { sign_token } from "../utils/jwt";
 import { sign_user_urls } from "../services/storage.service";
 
-// Cookie options shared by login and logout endpoints.
-// secure is disabled in development to allow HTTP (localhost).
-const COOKIE_OPTIONS = {
+export const COOKIE_OPTIONS = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: (process.env.COOKIE_SAME_SITE as "lax" | "none" | "strict") || "lax",
     domain: process.env.COOKIE_DOMAIN || undefined,
     // 7 days in milliseconds
     maxAge: 7 * 24 * 60 * 60 * 1000,
+};
+
+export const clear_auth_cookies = (res: Response) => {
+    // Clear standard cookie
+    res.clearCookie("3dex_session", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: (process.env.COOKIE_SAME_SITE as "lax" | "none" | "strict") || "lax",
+        domain: process.env.COOKIE_DOMAIN || undefined,
+    });
+    // Clear legacy/ghost cookie
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: (process.env.COOKIE_SAME_SITE as "lax" | "none" | "strict") || "lax",
+        domain: undefined,
+    });
+    // If a domain was specified (e.g. .3dex.studio), also try clearing without it just in case
+    if (process.env.COOKIE_DOMAIN) {
+        res.clearCookie("3dex_session", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: (process.env.COOKIE_SAME_SITE as "lax" | "none" | "strict") || "lax",
+            domain: undefined,
+        });
+    }
 };
 
 export async function login(req: Request, res: Response) {
@@ -162,19 +186,7 @@ export async function complete_profile(req: any, res: Response) {
 
 // Clear the auth cookie — effectively logs the user out
 export async function logout(req: Request, res: Response) {
-    res.clearCookie("3dex_session", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: (process.env.COOKIE_SAME_SITE as "lax" | "none" | "strict") || "lax",
-        domain: process.env.COOKIE_DOMAIN || undefined,
-    });
-    // Also try to clear any legacy domain-less ghost cookie
-    res.clearCookie("token", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: (process.env.COOKIE_SAME_SITE as "lax" | "none" | "strict") || "lax",
-        domain: undefined,
-    });
+    clear_auth_cookies(res);
     res.json({ message: "Logged out successfully" });
 }
 
@@ -190,7 +202,8 @@ export async function get_me(req: any, res: Response) {
         });
 
         if (!db_user) {
-            return res.status(404).json({ message: "User not found" });
+            clear_auth_cookies(res);
+            return res.status(401).json({ message: "User not found, session invalidated" });
         }
 
         // Remove sensitive info
