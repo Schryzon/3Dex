@@ -77,6 +77,8 @@ export const metadata: Metadata = {
 };
 
 
+import { Suspense } from 'react';
+
 export default function RootLayout({
   children,
 }: {
@@ -87,11 +89,13 @@ export default function RootLayout({
       <body className={`${inter.className} antialiased bg-black text-white`}>
         <ReactQueryProvider>
           <AuthProvider>
-            <DexieProvider>
-              {children}
-              <DexieAssistant />
-              <Toaster position="bottom-right" />
-            </DexieProvider>
+            <Suspense fallback={null}>
+              <DexieProvider>
+                {children}
+                <DexieAssistant />
+                <Toaster position="bottom-right" />
+              </DexieProvider>
+            </Suspense>
           </AuthProvider>
         </ReactQueryProvider>
         <Script
