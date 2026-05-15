@@ -195,7 +195,7 @@ export default function CatalogFilters({
                                     <button
                                         key={option.id}
                                         onClick={() => handlePriceChange(option.id)}
-                                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 active:scale-95 ${filters.price === option.id
+                                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 active:scale-95 cursor-pointer ${filters.price === option.id
                                                 ? 'bg-yellow-400 text-black shadow-[0_0_20px_rgba(250,204,21,0.3)]'
                                                 : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/5'
                                             }`}
@@ -217,7 +217,7 @@ export default function CatalogFilters({
                                     <button
                                         key={option.id}
                                         onClick={() => handleLicenseToggle(option.id)}
-                                        className={`px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-tight transition-all duration-300 active:scale-95 ${filters.licenses.includes(option.id)
+                                        className={`px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-tight transition-all duration-300 active:scale-95 cursor-pointer ${filters.licenses.includes(option.id)
                                                 ? 'bg-white text-black'
                                                 : 'bg-white/5 text-gray-500 hover:bg-white/10 hover:text-gray-300 border border-white/5'
                                             }`}

@@ -226,7 +226,7 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
                   <button
                     key={env.id}
                     onClick={() => setEnvironment(env.id)}
-                    className={`text-left px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                    className={`text-left px-3 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer ${
                       environment === env.id 
                         ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' 
                         : 'text-gray-300 hover:bg-white/10 hover:text-white border border-transparent'
@@ -245,9 +245,12 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
               </label>
               <button
                 onClick={() => setAutoRotate(!autoRotate)}
-                className={`w-8 h-4 rounded-full transition-colors relative ${autoRotate ? 'bg-yellow-500' : 'bg-gray-700'}`}
+                className={`w-8 h-4 rounded-full transition-all duration-300 relative ${autoRotate ? 'bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.3)]' : 'bg-gray-700'}`}
               >
-                <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform ${autoRotate ? 'left-4.5 translate-x-full' : 'left-0.5'}`} style={{ transform: autoRotate ? 'translateX(14px)' : 'translateX(0)' }} />
+                <div 
+                  className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full shadow-sm transition-transform duration-300 ease-out`} 
+                  style={{ transform: autoRotate ? 'translateX(16px)' : 'translateX(0)' }} 
+                />
               </button>
             </div>
             

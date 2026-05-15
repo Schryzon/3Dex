@@ -135,7 +135,7 @@ export default function AppTopbar({
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="p-1.5 text-gray-500 hover:text-white transition-colors"
+                  className="p-1.5 text-gray-500 hover:text-white transition-colors cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -155,7 +155,7 @@ export default function AppTopbar({
                   }
                 }}
                 title={isAiSearch ? "Switch to keyword search" : "Switch to Dēxie AI Search"}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all duration-500 active:scale-90 ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all duration-500 active:scale-90 cursor-pointer ${
                   isAiSearch 
                     ? 'bg-gradient-to-r from-blue-600 to-blue-400 text-white shadow-[0_0_15px_rgba(59,130,246,0.5)]' 
                     : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 border border-white/5'
@@ -186,7 +186,7 @@ export default function AppTopbar({
           </button>
 
           {/* Cart */}
-          <ProtectedLink href={ROUTES.USER.CART} aria-label={`Shopping cart${cartItemsCount > 0 ? `, ${cartItemsCount} items` : ''}`} className="p-2 text-gray-500 hover:text-white relative transition-colors">
+          <ProtectedLink href={ROUTES.USER.CART} aria-label={`Shopping cart${cartItemsCount > 0 ? `, ${cartItemsCount} items` : ''}`} className="p-2 text-gray-500 hover:text-white relative transition-colors cursor-pointer">
             <ShoppingCart className="w-5 h-5" aria-hidden="true" />
             {mounted && cartItemsCount > 0 && (
               <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-yellow-400 text-black text-[10px] font-bold rounded-full flex items-center justify-center">
@@ -250,7 +250,7 @@ export default function AppTopbar({
                       <Package className="w-4 h-4" />
                       <span className="text-sm">My Orders</span>
                     </Link>
-                    <Link href={ROUTES.USER.LIBRARY} className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
+                    <Link href={ROUTES.USER.LIBRARY} className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors cursor-pointer" onClick={() => setAvatarDropdownOpen(false)}>
                       <FolderOpen className="w-4 h-4" />
                       <span className="text-sm">My Library</span>
                     </Link>
@@ -309,7 +309,7 @@ export default function AppTopbar({
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="p-1.5 text-gray-500 hover:text-white transition-colors"
+                  className="p-1.5 text-gray-500 hover:text-white transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -318,7 +318,7 @@ export default function AppTopbar({
               <button
                 type="button"
                 onClick={() => setIsAiSearch(!isAiSearch)}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full transition-all duration-300 ${
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full transition-all duration-300 cursor-pointer ${
                   isAiSearch 
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' 
                     : 'text-gray-500 hover:text-white hover:bg-white/5'
