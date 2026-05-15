@@ -97,12 +97,13 @@ export const productService = {
             if (filters) {
                 if (filters.search) params.append('search', filters.search);
                 if (filters.category && filters.category !== 'all') params.append('category', filters.category);
-                if (filters.minPrice) params.append('min_price', filters.minPrice.toString());
-                if (filters.maxPrice) params.append('max_price', filters.maxPrice.toString());
+                if (filters.minPrice !== undefined) params.append('min_price', filters.minPrice.toString());
+                if (filters.maxPrice !== undefined) params.append('max_price', filters.maxPrice.toString());
                 if (filters.format) filters.format.forEach((f: string) => params.append('format', f));
                 if (filters.license) filters.license.forEach((l: string) => params.append('license', l));
                 if (filters.isNsfw !== undefined) params.append('is_nsfw', filters.isNsfw.toString());
                 if (filters.isPrintable !== undefined) params.append('is_printable', filters.isPrintable.toString());
+                if (filters.isAi !== undefined) params.append('is_ai', filters.isAi.toString());
                 if (filters.sort) params.append('sort', filters.sort);
                 if (filters.artistId) params.append('artist_id', filters.artistId);
                 if (filters.page) params.append('page', filters.page.toString());
