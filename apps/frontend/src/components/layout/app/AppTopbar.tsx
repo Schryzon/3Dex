@@ -53,18 +53,16 @@ export default function AppTopbar({
 }: AppTopbarProps) {
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isAiSearch, setIsAiSearch] = useState(false);
+  const searchParams = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const [isAiSearch, setIsAiSearch] = useState(searchParams.get('ai') === 'true');
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const mobileSearchRef = useRef<HTMLInputElement>(null);
-  const searchParams = useSearchParams();
 
-  // Sync state with URL
+  // Update AI search state when URL changes (e.g. back/forward navigation)
   useEffect(() => {
-    const q = searchParams.get('search') || '';
-    const ai = searchParams.get('ai') === 'true';
-    setSearchQuery(q);
-    setIsAiSearch(ai);
+    setIsAiSearch(searchParams.get('ai') === 'true');
+    setSearchQuery(searchParams.get('search') || '');
   }, [searchParams]);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -126,10 +124,10 @@ export default function AppTopbar({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={isAiSearch ? "Dēxie, find me something like..." : "Search 3D models, textures, and more..."}
-              className={`w-full pl-11 pr-24 py-2 border rounded-full text-white placeholder-gray-500 focus:outline-none focus:ring-1 transition-all text-sm ${
+              className={`w-full pl-11 pr-24 py-2 border rounded-full text-white placeholder-gray-500 focus:outline-none focus:ring-1 transition-all duration-500 text-sm ${
                 isAiSearch 
-                  ? 'bg-gradient-to-r from-blue-600/10 to-yellow-500/10 border-blue-500/40 shadow-[0_0_15px_rgba(59,130,246,0.15)] focus:ring-blue-400/50' 
-                  : 'bg-[#1a1a1a] border-white/[0.06] focus:ring-yellow-500/50 focus:border-yellow-500/50'
+                  ? 'bg-gradient-to-r from-blue-600/20 to-yellow-500/10 border-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.2)] focus:ring-blue-400/50' 
+                  : 'bg-[#1a1a1a] border-white/[0.08] hover:border-white/20 focus:ring-yellow-500/50 focus:border-yellow-500/50 shadow-lg'
               }`}
             />
             <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
@@ -145,16 +143,28 @@ export default function AppTopbar({
               <div className="w-px h-4 bg-white/10 mx-0.5" />
               <button
                 type="button"
-                onClick={() => setIsAiSearch(!isAiSearch)}
+                onClick={() => {
+                  const newState = !isAiSearch;
+                  setIsAiSearch(newState);
+                  // Update URL immediately if search query exists
+                  if (searchQuery.trim()) {
+                    const params = new URLSearchParams(window.location.search);
+                    if (newState) params.set('ai', 'true');
+                    else params.delete('ai');
+                    router.push(`/catalog?${params.toString()}`);
+                  }
+                }}
                 title={isAiSearch ? "Switch to keyword search" : "Switch to Dēxie AI Search"}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full transition-all duration-300 ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all duration-500 active:scale-90 ${
                   isAiSearch 
-                    ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-600/20' 
-                    : 'text-gray-500 hover:text-white hover:bg-white/5'
+                    ? 'bg-gradient-to-r from-blue-600 to-blue-400 text-white shadow-[0_0_15px_rgba(59,130,246,0.5)]' 
+                    : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 border border-white/5'
                 }`}
               >
-                <Sparkles className={`w-3.5 h-3.5 ${isAiSearch ? 'animate-pulse' : ''}`} />
-                {isAiSearch && <span className="text-[10px] font-bold tracking-tight uppercase">AI</span>}
+                <Sparkles className={`w-4 h-4 ${isAiSearch ? 'animate-pulse' : ''}`} />
+                <span className="text-[10px] font-bold tracking-tight uppercase">
+                  {isAiSearch ? 'AI Mode' : 'AI'}
+                </span>
               </button>
             </div>
           </div>
