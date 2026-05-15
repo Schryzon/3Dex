@@ -19,8 +19,8 @@ Dēxie's personality is a carefully balanced fusion of two high-energy character
 ## 🛠️ Technical Architecture
 
 ### 1. Backend (The Brain)
-- **Engine:** `gemini-3.1-flash-lite-preview` via `@google/genai` SDK. Chosen for its extremely high speed and low latency, which is critical for synchronous page-load AI generation.
-- **Safety Settings:** Configured for strict professional standards. `HARM_CATEGORY_SEXUALLY_EXPLICIT` is set to `BLOCK_ONLY_HIGH` (to allow for anatomical 3D model metadata discussion without false positives), while Harassment, Hate Speech, and Dangerous Content are strictly blocked at `BLOCK_LOW_AND_ABOVE`.
+- **Engine:** Google Gemini Flash via `@google/genai` SDK. Chosen for its extremely high speed and low latency.
+- **Safety Settings:** Configured for strict professional standards. `HARM_CATEGORY_SEXUALLY_EXPLICIT` is set to `BLOCK_ONLY_HIGH`.
 - **Context Awareness & Prompt Engineering:**
     - **System Instructions**: The Gemini model is initialized with a strict system instruction dictating her tone, length limits, and formatting rules.
     - **Catalog Detail**: Fetches the actual model name, creator, and category from PostgreSQL to generate specialized comments. (e.g., "Woah! This Cyberpunk Sword by [Artist] is overflowing with dark energy!")
@@ -38,15 +38,25 @@ Dēxie's personality is a carefully balanced fusion of two high-energy character
 
 ---
 
-## 🧠 Personalised Picks (Vector Search)
+---
 
-Dēxie isn't just about taglines; she also powers the recommendation engine.
+## 🧠 Semantic Capabilities (Vector Search)
 
-- **Trigger:** On the homepage or browse pages, a call to `GET /dexie/picks` is made.
-- **Data Aggregation:** The backend fetches the user's last 5 wishlist items and last 5 purchased models.
-- **Embedding Generation:** The titles, tags, and categories of these items are concatenated into a string and embedded using the lightweight `all-MiniLM-L6-v2` model (producing a 384-dimensional vector).
-- **Cosine Similarity:** The system runs a high-performance Cosine Similarity search against the `Model` table's `embedding` column using `pgvector`.
-- **Result:** Dēxie returns the top N similar models the user does not already own, presented as "Dēxie's Top Picks". For unauthenticated guests, she falls back to the newest approved models.
+Dēxie powers the platform's advanced discovery features using `pgvector` and the `all-MiniLM-L6-v2` embedding model.
+
+### 1. Dēxie AI Search (Natural Language)
+Users can toggle the **Sparkles (✨)** icon in the Topbar to enter "AI Mode".
+- **Natural Language Queries**: Instead of keyword matching, users can search with context: *"find me something like that kid from kingdom hearts"* or *"cool weapons for a cyberpunk game"*.
+- **Mechanism**: The query is embedded into a 384-dimensional vector and compared against model embeddings using cosine distance (`<=>`) in PostgreSQL.
+- **Combined Filters**: AI search seamlessly integrates with standard filters (Price, Category, Format, NSFW) within a single raw SQL execution.
+
+### 2. Personalized Picks (Recommendations)
+- **Trigger**: On the homepage or browse pages, Dēxie suggests items based on user history.
+- **Data Aggregation**: The backend fetches the user's last 5 wishlist items and purchases.
+- **Result**: Cosine Similarity identifies models the user does not already own, presented as "Dēxie's Top Picks". For guests, she falls back to trending/newest models.
+
+### 3. NSFW Preference Alignment
+Dēxie respects the user's "Show NSFW" preference stored in their account settings. This preference is embedded in the session JWT, allowing the AI Search and Catalog to automatically filter mature content based on user choice without manual toggles.
 
 ---
 
@@ -66,7 +76,8 @@ Users can toggle Dēxie on/off from their profile settings. This preference is p
 
 ## 🤫 Silent Zones
 Dēxie is programmed to stay completely silent (no API calls made) in the following areas:
-- `/catalog` (Main browse list - to avoid distracting from the grid)
 - `/auth/*` (Login/Register - focus is key here)
 - `/checkout` (Payment gateway - no distractions during transaction)
 - Admin Dashboards
+
+*Note: While Dēxie was previously silent in the `/catalog`, she now maintains a presence there via the **AI Search (Sparkles)** mode.*

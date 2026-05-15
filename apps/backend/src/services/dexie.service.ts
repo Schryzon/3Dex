@@ -298,7 +298,7 @@ Return ONLY a valid JSON object with the keys: "title", "description", "price", 
 
     try {
         const response = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
+            model: "gemini-flash-latest",
             contents: [
                 prompt,
                 {
