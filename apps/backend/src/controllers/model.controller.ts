@@ -235,10 +235,11 @@ export async function list_models(req: Request, res: Response) {
         ...params
       );
 
-      // Count total for pagination
+      // Count total for pagination (parameter indices need to be adjusted since there's no vector here)
+      const count_sql = where_sql.replace(/\$(\d+)/g, (match, p1) => `$${parseInt(p1) - 1}`);
       const count_res = await prisma.$queryRawUnsafe<any[]>(
-        `SELECT COUNT(*)::int as count FROM "Model" m JOIN "User" u ON m.artist_id = u.id ${where_sql}`,
-        ...params.slice(1) // skip the vector
+        `SELECT COUNT(*)::int as count FROM "Model" m JOIN "User" u ON m.artist_id = u.id ${count_sql}`,
+        ...params.slice(1)
       );
       total = count_res[0]?.count || 0;
 

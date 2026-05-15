@@ -74,15 +74,25 @@ export default function CatalogDetailPage() {
 
     // NSFW Access Control & Auto-redirect
     useEffect(() => {
+        // Wait until everything is loaded before checking access
         if (isLoading || isAuthLoading || !product) return;
 
         // Requirement: prevent guests and users with NSFW hidden from seeing NSFW models
         if (product.is_nsfw) {
-            if (!user || !user.show_nsfw) {
-                toast.error(!user 
-                    ? 'Please log in to view mature content.' 
-                    : 'Mature content is hidden in your settings. Please enable it in your profile to view NSFW content.'
-                );
+            // Give it a tiny bit of grace if user is still being calculated (sometimes happens after loading is false)
+            if (!user && !isAuthLoading) {
+                // Wait another tick to be sure
+                const t = setTimeout(() => {
+                    if (!user) {
+                        toast.error('Please log in to view mature content.');
+                        router.push('/catalog');
+                    }
+                }, 100);
+                return () => clearTimeout(t);
+            }
+            
+            if (user && !user.show_nsfw) {
+                toast.error('Mature content is hidden in your settings. Please enable it in your profile to view NSFW content.');
                 router.push('/catalog');
             }
         }

@@ -10,16 +10,17 @@ import { MeshoptDecoder } from 'meshoptimizer';
 
 interface ModelProps {
   url: string;
+  setHasError: (val: boolean) => void;
 }
 
-function Model({ url }: ModelProps) {
+function Model({ url, setHasError }: ModelProps) {
   const gl = useThree((state) => state.gl);
 
   const { scene } = useGLTF(url, true, true, (loader) => {
     // 1. DRACO
     const dracoLoader = require('three-stdlib').DRACOLoader;
     const draco = new dracoLoader();
-    draco.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+    draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
     loader.setDRACOLoader(draco);
 
     // 2. KTX2
@@ -31,6 +32,16 @@ function Model({ url }: ModelProps) {
     // 3. Meshopt
     loader.setMeshoptDecoder(MeshoptDecoder);
   });
+
+  // Catch errors via effect if scene fails to load (though useGLTF usually throws)
+  useEffect(() => {
+    if (!scene) {
+      const timeout = setTimeout(() => {
+        if (!scene) setHasError(true);
+      }, 5000); // 5s timeout for asset loading
+      return () => clearTimeout(timeout);
+    }
+  }, [scene, setHasError]);
 
   // Center and scale the model + scene optimizations
   useMemo(() => {
@@ -52,7 +63,6 @@ function Model({ url }: ModelProps) {
             m.side = THREE.DoubleSide;
 
             // Fix for improperly exported GLTF models (common in game rips)
-            // where base color is #000000, causing textures to multiply to pitch black.
             if (m.map && m.color.r === 0 && m.color.g === 0 && m.color.b === 0) {
               m.color.setHex(0xffffff);
             }
@@ -66,7 +76,7 @@ function Model({ url }: ModelProps) {
     }
   }, [scene]);
 
-  return <primitive object={scene} />;
+  return scene ? <primitive object={scene} /> : null;
 }
 
 interface ProductViewer3DProps {
@@ -79,6 +89,7 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
   const [environment, setEnvironment] = useState<any>('studio');
   const [autoRotate, setAutoRotate] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   const environments = [
     { id: 'studio', label: 'Studio' },
@@ -91,20 +102,17 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
   ];
 
   useEffect(() => {
-    // Detect touch support + small screen for "mobile" classification
     const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     const isSmallScreen = window.innerWidth < 768;
     setIsTouch(hasTouch && isSmallScreen);
   }, []);
 
-  // Check if URL is a valid 3D model format (strip query params for signed URLs)
   const getPathFromUrl = (url: string) => {
     try { return new URL(url).pathname; } catch { return url; }
   };
   const is3DModel = modelUrl && /\.(glb|gltf)/i.test(getPathFromUrl(modelUrl));
 
   if (!is3DModel) {
-    // Fallback to image if not a 3D model
     return (
       <div className="w-full h-full flex items-center justify-center bg-gray-900">
         <img
@@ -125,7 +133,7 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
           antialias: true,
           alpha: true,
           powerPreference: 'high-performance',
-          toneMapping: 7, // NeutralToneMapping (prevents blowout/overexposure on PBR models)
+          toneMapping: 7, 
           toneMappingExposure: 1.0,
           outputColorSpace: 'srgb',
         }}
@@ -147,9 +155,17 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
         {/* Environment for reflections */}
         <Environment preset={environment} />
 
+        {/* Error Fallback inside Canvas */}
+        {hasError && (
+          <mesh position={[0, 0, 0]}>
+            <boxGeometry args={[1, 1, 1]} />
+            <meshStandardMaterial color="red" wireframe opacity={0.5} transparent />
+          </mesh>
+        )}
+
         {/* 3D Model */}
         <Suspense fallback={null}>
-          <Model url={modelUrl} />
+          {!hasError && <Model url={modelUrl} setHasError={setHasError} />}
         </Suspense>
 
         {/* Controls */}

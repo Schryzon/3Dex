@@ -72,8 +72,11 @@ export function get_model_by_id(model_id: string) {
         select: {
           id: true,
           username: true,
+          avatar_url: true,
         },
       },
+      category: true,
+      tags: true,
     },
   });
 }
