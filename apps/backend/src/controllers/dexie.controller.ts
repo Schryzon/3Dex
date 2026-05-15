@@ -137,7 +137,12 @@ export async function get_picks(req: Request, res: Response) {
     }
 
     try {
-        const picks = await get_dexie_picks(user_id ?? "__guest__", { limit, allow_nsfw });
+        const picks = await get_dexie_picks(user_id ?? "__guest__", { 
+            limit, 
+            allow_nsfw,
+            q: req.query.search ? String(req.query.search) : undefined,
+            page: Number(req.query.page ?? 1)
+        });
         res.json({ enabled: true, picks });
     } catch (error: any) {
         console.error("[Dēxie] Picks generation failed:", error.message);
@@ -197,6 +202,24 @@ export async function generate_details(req: Auth_Request, res: Response) {
     } catch (error: any) {
         console.error("[Dēxie Controller] Generate details error:", error);
         res.status(500).json({ message: error.message || "Failed to generate details" });
+    }
+}
+
+/**
+ * GET /dexie/vibe-check/:modelId
+ *
+ * Returns a situational Dēxie summary of model reviews.
+ */
+import { get_model_vibe_check } from "../services/dexie.service";
+
+export async function get_vibe_check(req: Request, res: Response) {
+    const { modelId } = req.params;
+
+    try {
+        const vibe = await get_model_vibe_check(String(modelId));
+        res.json({ vibe });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
     }
 }
 

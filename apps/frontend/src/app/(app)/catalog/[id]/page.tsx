@@ -14,8 +14,10 @@ import { RelatedProducts } from '@/features/catalog/components/product-details';
 import { ProductReviews } from '@/features/catalog/components/reviews';
 import AddToCollectionModal from '@/features/collection/components/AddToCollectionModal';
 import { formatPrice } from '@/lib/utils';
+import { productService } from '@/lib/api/services/product.service';
 import { purchaseService } from '@/lib/api/services/purchase.service';
 import { toast } from 'react-hot-toast';
+import { Sparkles } from 'lucide-react';
 
 // Lazy load 3D viewer for better performance
 const ProductViewer3D = lazy(() => import('@/features/catalog/components/viewer').then(mod => ({ default: mod.ProductViewer3D })));
@@ -43,6 +45,27 @@ export default function CatalogDetailPage() {
     const [isClaiming, setIsClaiming] = useState(false);
     const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
     const [isRevealed, setIsRevealed] = useState(false);
+    const [vibeCheck, setVibeCheck] = useState<string | null>(null);
+    const [isLoadingVibe, setIsLoadingVibe] = useState(false);
+
+    // Fetch Vibe Check
+    useEffect(() => {
+        if (!productId || !product || (product.reviewCount ?? 0) === 0) return;
+
+        const fetchVibe = async () => {
+            setIsLoadingVibe(true);
+            try {
+                const vibe = await productService.getVibeCheck(productId);
+                setVibeCheck(vibe);
+            } catch (err) {
+                console.error("Failed to fetch vibe check:", err);
+            } finally {
+                setIsLoadingVibe(false);
+            }
+        };
+
+        fetchVibe();
+    }, [productId, product]);
     
     // Memoize categories to prevent infinite re-renders in RelatedProducts
     const relatedCategories = useMemo(() => 
@@ -507,6 +530,32 @@ export default function CatalogDetailPage() {
                                     </div>
                                 )}
                             </div>
+
+                            {/* Dēxie's Vibe Check (AI Sentiment Summary) */}
+                            {(product.reviewCount ?? 0) > 0 && (vibeCheck || isLoadingVibe) && (
+                                <div className="relative group/vibe overflow-hidden rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-600/5 to-yellow-500/5 p-4 transition-all duration-500 hover:border-blue-500/40 hover:from-blue-600/10 hover:to-yellow-500/10 shadow-[0_0_20px_rgba(59,130,246,0.03)]">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className="p-1.5 bg-blue-600 rounded-lg shadow-lg shadow-blue-600/20">
+                                            <Sparkles className="w-3.5 h-3.5 text-white animate-pulse" />
+                                        </div>
+                                        <h4 className="text-[11px] font-black uppercase tracking-widest text-blue-400">Dēxie's Vibe Check</h4>
+                                    </div>
+                                    
+                                    {isLoadingVibe ? (
+                                        <div className="flex flex-col gap-1.5">
+                                            <div className="h-3 w-3/4 bg-blue-900/20 rounded animate-pulse" />
+                                            <div className="h-3 w-1/2 bg-blue-900/20 rounded animate-pulse" />
+                                        </div>
+                                    ) : (
+                                        <p className="text-xs text-gray-300 leading-relaxed italic">
+                                            "{vibeCheck}"
+                                        </p>
+                                    )}
+                                    
+                                    {/* Animated background flair */}
+                                    <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-blue-500/10 blur-3xl rounded-full group-hover/vibe:bg-blue-500/20 transition-all" />
+                                </div>
+                            )}
 
                             {/* Specs */}
                             <div className="space-y-3">

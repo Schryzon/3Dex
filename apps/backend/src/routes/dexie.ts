@@ -4,6 +4,7 @@ import {
     get_picks,
     toggle_dexie,
     generate_details,
+    get_vibe_check,
 } from "../controllers/dexie.controller";
 import { require_auth, optional_auth } from "../middlewares/auth.middleware";
 
@@ -52,5 +53,7 @@ router.patch("/toggle", require_auth, toggle_dexie);
  *       - bearerAuth: []
  */
 router.post("/generate-model-details", require_auth, generate_details);
+
+router.get("/vibe-check/:modelId", optional_auth, get_vibe_check);
 
 export default router;

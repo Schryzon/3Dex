@@ -5,12 +5,8 @@ import { ChevronDown, ChevronUp, X, SlidersHorizontal } from 'lucide-react';
 
 // Filter options
 const FILE_FORMATS = [
-    { id: 'blend', label: 'Blender', ext: '.blend' },
-    { id: 'fbx', label: 'FBX', ext: '.fbx' },
-    { id: 'obj', label: 'OBJ', ext: '.obj' },
-    { id: 'max', label: '3ds Max', ext: '.max' },
-    { id: 'maya', label: 'Maya', ext: '.ma/.mb' },
-    { id: 'c4d', label: 'Cinema 4D', ext: '.c4d' },
+    { id: 'glb', label: 'GLB', ext: '.glb' },
+    { id: 'gltf', label: 'glTF', ext: '.gltf' },
 ];
 
 const PRICE_OPTIONS = [
@@ -19,18 +15,16 @@ const PRICE_OPTIONS = [
     { id: 'paid', label: 'Paid' },
 ];
 
-const MODEL_TYPES = [
-    { id: 'animated', label: 'Animated' },
-    { id: 'rigged', label: 'Rigged' },
-    { id: 'lowpoly', label: 'Low Poly' },
-    { id: 'highpoly', label: 'High Poly' },
-    { id: 'pbr', label: 'PBR Ready' },
+const LICENSE_OPTIONS = [
+    { id: 'PERSONAL_USE', label: 'Personal Use' },
+    { id: 'COMMERCIAL_USE', label: 'Commercial Use' },
 ];
 
 export interface FilterState {
     formats: string[];
     price: string;
-    types: string[];
+    licenses: string[];
+    isPrintable: boolean;
     showNsfw: boolean;
 }
 
@@ -48,7 +42,7 @@ export default function CatalogFilters({
     onToggleExpand,
 }: CatalogFiltersProps) {
     const [expandedSections, setExpandedSections] = useState<Set<string>>(
-        new Set(['format', 'price', 'type', 'content'])
+        new Set(['format', 'price', 'license', 'content'])
     );
 
     const toggleSection = (section: string) => {
@@ -74,21 +68,28 @@ export default function CatalogFilters({
         onFilterChange({ ...filters, price: priceId });
     };
 
-    const handleTypeToggle = (typeId: string) => {
-        const newTypes = filters.types.includes(typeId)
-            ? filters.types.filter((t) => t !== typeId)
-            : [...filters.types, typeId];
-        onFilterChange({ ...filters, types: newTypes });
+    const handleLicenseToggle = (licenseId: string) => {
+        const newLicenses = filters.licenses.includes(licenseId)
+            ? filters.licenses.filter((l) => l !== licenseId)
+            : [...filters.licenses, licenseId];
+        onFilterChange({ ...filters, licenses: newLicenses });
     };
 
     const clearAllFilters = () => {
-        onFilterChange({ formats: [], price: 'all', types: [], showNsfw: false });
+        onFilterChange({
+            formats: [],
+            price: 'all',
+            licenses: [],
+            isPrintable: false,
+            showNsfw: false,
+        });
     };
 
     const activeFilterCount =
         filters.formats.length +
         (filters.price !== 'all' ? 1 : 0) +
-        filters.types.length +
+        filters.licenses.length +
+        (filters.isPrintable ? 1 : 0) +
         (filters.showNsfw ? 1 : 0);
 
     const hasActiveFilters = activeFilterCount > 0;
@@ -149,16 +150,16 @@ export default function CatalogFilters({
                                 </button>
                             </span>
                         )}
-                        {filters.types.map((typeId) => {
-                            const type = MODEL_TYPES.find((t) => t.id === typeId);
+                        {filters.licenses.map((licenseId) => {
+                            const license = LICENSE_OPTIONS.find((l) => l.id === licenseId);
                             return (
                                 <span
-                                    key={typeId}
+                                    key={licenseId}
                                     className="flex items-center gap-1 px-2 py-1 bg-[#252525] text-gray-300 text-xs rounded-md"
                                 >
-                                    {type?.label}
+                                    {license?.label}
                                     <button
-                                        onClick={() => handleTypeToggle(typeId)}
+                                        onClick={() => handleLicenseToggle(licenseId)}
                                         className="hover:text-white cursor-pointer"
                                     >
                                         <X className="w-3 h-3" />
@@ -166,6 +167,17 @@ export default function CatalogFilters({
                                 </span>
                             );
                         })}
+                        {filters.isPrintable && (
+                            <span className="flex items-center gap-1 px-2 py-1 bg-[#252525] text-gray-300 text-xs rounded-md">
+                                3D Printable
+                                <button
+                                    onClick={() => onFilterChange({ ...filters, isPrintable: false })}
+                                    className="hover:text-white cursor-pointer"
+                                >
+                                    <X className="w-3 h-3" />
+                                </button>
+                            </span>
+                        )}
                         {filters.showNsfw && (
                             <span className="flex items-center gap-1 px-2 py-1 bg-red-900/30 text-red-400 border border-red-900/50 text-xs rounded-md font-medium">
                                 NSFW Included
@@ -257,44 +269,44 @@ export default function CatalogFilters({
                             )}
                         </div>
 
-                        {/* Model Type Section */}
+                        {/* License Section */}
                         <div>
                             <button
-                                onClick={() => toggleSection('type')}
+                                onClick={() => toggleSection('license')}
                                 className="flex items-center justify-between w-full text-left mb-2 cursor-pointer"
                             >
-                                <h4 className="text-sm font-semibold text-white">Model Type</h4>
-                                {expandedSections.has('type') ? (
+                                <h4 className="text-sm font-semibold text-white">License</h4>
+                                {expandedSections.has('license') ? (
                                     <ChevronUp className="w-4 h-4 text-gray-500" />
                                 ) : (
                                     <ChevronDown className="w-4 h-4 text-gray-500" />
                                 )}
                             </button>
-                            {expandedSections.has('type') && (
+                            {expandedSections.has('license') && (
                                 <div className="flex flex-wrap gap-1.5">
-                                    {MODEL_TYPES.map((type) => (
+                                    {LICENSE_OPTIONS.map((option) => (
                                         <button
-                                            key={type.id}
-                                            onClick={() => handleTypeToggle(type.id)}
-                                            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${filters.types.includes(type.id)
+                                            key={option.id}
+                                            onClick={() => handleLicenseToggle(option.id)}
+                                            className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${filters.licenses.includes(option.id)
                                                     ? 'bg-yellow-400 text-black'
                                                     : 'bg-[#252525] text-gray-400 hover:text-white'
                                                 }`}
                                         >
-                                            {type.label}
+                                            {option.label}
                                         </button>
                                     ))}
                                 </div>
                             )}
                         </div>
 
-                        {/* Content Rating Section */}
+                        {/* Content & Attributes Section */}
                         <div>
                             <button
                                 onClick={() => toggleSection('content')}
                                 className="flex items-center justify-between w-full text-left mb-2 cursor-pointer"
                             >
-                                <h4 className="text-sm font-semibold text-white">Content</h4>
+                                <h4 className="text-sm font-semibold text-white">Attributes</h4>
                                 {expandedSections.has('content') ? (
                                     <ChevronUp className="w-4 h-4 text-gray-500" />
                                 ) : (
@@ -302,7 +314,18 @@ export default function CatalogFilters({
                                 )}
                             </button>
                             {expandedSections.has('content') && (
-                                <div className="flex items-center gap-2 mt-2">
+                                <div className="space-y-3 mt-2">
+                                    <label className="flex items-center gap-2 cursor-pointer group">
+                                        <input
+                                            type="checkbox"
+                                            checked={filters.isPrintable}
+                                            onChange={(e) => onFilterChange({ ...filters, isPrintable: e.target.checked })}
+                                            className="w-4 h-4 rounded border-gray-600 bg-transparent text-yellow-400 focus:ring-yellow-400 focus:ring-offset-0 cursor-pointer"
+                                        />
+                                        <span className="text-sm text-gray-400 group-hover:text-white transition-colors">
+                                            3D Printable
+                                        </span>
+                                    </label>
                                     <label className="flex items-center gap-2 cursor-pointer group">
                                         <input
                                             type="checkbox"
@@ -325,4 +348,4 @@ export default function CatalogFilters({
 }
 
 // Export constants for use in page
-export { FILE_FORMATS, PRICE_OPTIONS, MODEL_TYPES };
+export { FILE_FORMATS, PRICE_OPTIONS, LICENSE_OPTIONS };

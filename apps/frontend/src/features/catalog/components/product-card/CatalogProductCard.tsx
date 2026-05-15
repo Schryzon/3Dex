@@ -348,7 +348,7 @@ export default function CatalogProductCard({
 
                         {/* Three-dot menu (grid view — hidden on mobile) */}
                         {artistId && (
-                            <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} className="max-md:hidden">
+                            <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
                                 <ModelCardMenu
                                     modelId={id}
                                     modelTitle={title}

@@ -170,7 +170,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSkipAuthRedirect(false);
       // Prevent redirecting if the user just successfully logged in
       if (!authService.getStoredUser()) {
-        router.replace(ROUTES.PUBLIC.LANDING);
+        const pathname = window.location.pathname;
+        const isPublicPath =
+          pathname === '/' ||
+          pathname === ROUTES.PUBLIC.LANDING ||
+          pathname.startsWith(ROUTES.PUBLIC.CATALOG) ||
+          pathname.startsWith('/about-us');
+
+        if (!isPublicPath) {
+          router.replace(ROUTES.PUBLIC.LANDING);
+        }
       }
     }
   };

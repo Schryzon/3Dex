@@ -44,7 +44,8 @@ function CatalogContent() {
     const [filters, setFilters] = useState<FilterState>({
         formats: [],
         price: 'all',
-        types: [],
+        licenses: [],
+        isPrintable: false,
         showNsfw: false,
     });
 
@@ -94,9 +95,10 @@ function CatalogContent() {
         search: searchQuery || undefined,
         minPrice: filters.price === 'paid' ? 1 : undefined,
         maxPrice: filters.price === 'free' ? 0 : undefined,
-        // Using 'tags' or 'types' - the backend list_models needs to support this
-        types: filters.types.length > 0 ? filters.types : undefined,
+        license: filters.licenses.length > 0 ? filters.licenses : undefined,
+        isPrintable: filters.isPrintable ? true : undefined,
         isNsfw: filters.showNsfw ? true : undefined,
+        isAi: searchParams.get('ai') === 'true' || undefined,
     };
 
     // Fetch products from API using Infinite Query
@@ -367,10 +369,16 @@ function CatalogContent() {
                         We couldn't find any 3D models matching your request. Try broadening your filters or different keywords.
                     </p>
 
-                    {(filters.formats.length > 0 || filters.types.length > 0 || filters.price !== 'all' || activeCategory !== 'all' || searchQuery) && (
+                    {(filters.formats.length > 0 || filters.licenses.length > 0 || filters.isPrintable || filters.price !== 'all' || activeCategory !== 'all' || searchQuery) && (
                         <button
                             onClick={() => {
-                                setFilters({ formats: [], price: 'all', types: [], showNsfw: false });
+                                setFilters({
+                                    formats: [],
+                                    price: 'all',
+                                    licenses: [],
+                                    isPrintable: false,
+                                    showNsfw: false,
+                                });
                                 setActiveCategory('all');
                                 setLocalSearch('');
                                 if (searchQuery) router.push('/catalog');

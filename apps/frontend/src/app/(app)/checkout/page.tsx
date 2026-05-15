@@ -83,7 +83,7 @@ export default function CheckoutPage() {
     const router = useRouter();
     const queryClient = useQueryClient();
     const { user, isLoading: authLoading, skipAuthRedirect } = useAuth();
-    const { items, total, clearCart } = useCart();
+    const { items, total, clearCart, isLoading: cartLoading } = useCart();
 
     const [isProcessing, setIsProcessing] = useState(false);
     const [checkoutStatus, setCheckoutStatus] = useState<'idle' | 'success' | 'failed' | 'pending'>('idle');
@@ -99,15 +99,15 @@ export default function CheckoutPage() {
     });
 
     useEffect(() => {
-        if (authLoading || skipAuthRedirect) return;
+        if (authLoading || cartLoading || skipAuthRedirect) return;
         if (!user) {
             router.push('/');
         } else if (!items.length && checkoutStatus === 'idle') {
             router.push('/cart');
         }
-    }, [authLoading, user, items.length, checkoutStatus, skipAuthRedirect, router]);
+    }, [authLoading, cartLoading, user, items.length, checkoutStatus, skipAuthRedirect, router]);
 
-    if (authLoading || skipAuthRedirect) {
+    if (authLoading || cartLoading || skipAuthRedirect) {
         return (
             <div className="min-h-screen bg-[#080808] grid place-items-center">
                 <div className="w-5 h-5 rounded-full border-2 border-white/10 border-t-yellow-400 animate-spin" />

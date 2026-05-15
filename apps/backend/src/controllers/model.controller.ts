@@ -25,6 +25,8 @@ export async function list_models(req: Request, res: Response) {
     sort,
     status, // 'APPROVED' | 'PENDING' | 'REJECTED' | 'ALL'
     is_nsfw,
+    license,
+    is_printable,
     page = 1,
     limit = 20
   } = req.query;
@@ -107,17 +109,21 @@ export async function list_models(req: Request, res: Response) {
     where.category_id = String(category_id);
   }
 
-  // 6. Format Filter (Tags)
+  // 6. Format Filter (Column)
   if (format) {
     const formats = Array.isArray(format) ? format : [String(format)];
-    if (!where.AND) where.AND = [];
-    where.AND.push({
-      tags: {
-        some: {
-          name: { in: formats, mode: 'insensitive' }
-        }
-      }
-    });
+    where.file_format = { in: formats.map(f => String(f).toLowerCase()) };
+  }
+
+  // 6.5 License Filter
+  if (license) {
+    const licenses = Array.isArray(license) ? license : [String(license)];
+    where.license = { in: licenses as any };
+  }
+
+  // 6.6 Printable Filter
+  if (is_printable !== undefined) {
+    where.is_printable = is_printable === 'true';
   }
 
   // 7. Types Filter (Tags)

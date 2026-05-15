@@ -13,8 +13,12 @@ export function useProducts(filters?: ModelFilters) {
 export function useInfiniteProducts(filters?: ModelFilters) {
     return useInfiniteQuery({
         queryKey: productKeys.infinite(filters),
-        queryFn: ({ pageParam = 1 }) =>
-            productService.getProducts({ ...filters, page: pageParam as number }),
+        queryFn: ({ pageParam = 1 }) => {
+            if (filters?.isAi) {
+                return productService.getDexiePicks({ ...filters, page: pageParam as number });
+            }
+            return productService.getProducts({ ...filters, page: pageParam as number });
+        },
         getNextPageParam: (lastPage) => {
             if (lastPage?.pagination && lastPage.pagination.page < lastPage.pagination.totalPages) {
                 return lastPage.pagination.page + 1;
