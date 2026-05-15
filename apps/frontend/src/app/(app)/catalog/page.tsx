@@ -307,7 +307,6 @@ function CatalogContent() {
                             authorAvatar={product.artist.avatar_url}
                             isSaved={isInWishlist(product.id)}
                             onSave={() => handleSave(product.id)}
-                            onClick={() => handleProductClick(product.id)}
                             price={product.price}
                             originalPrice={undefined}
                             formats={[product.fileFormat]}

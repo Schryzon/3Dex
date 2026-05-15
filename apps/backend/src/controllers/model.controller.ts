@@ -329,21 +329,34 @@ export async function get_model_detail(req: Request, res: Response) {
     }
     model.isPurchased = isPurchased;
 
+    // Parallelize all URL signing for maximum performance
+    const signing_promises: Promise<any>[] = [];
+
     if (model.preview_url && !model.preview_url.startsWith("http")) {
-      model.preview_url = await get_download_url_s3(model.preview_url);
+      signing_promises.push(get_download_url_s3(model.preview_url).then(url => { model.preview_url = url; }));
     }
+    
     if (model.gallery_urls && model.gallery_urls.length > 0) {
-      model.gallery_urls = await Promise.all(
-        model.gallery_urls.map(async (url: string) => {
-          return url.startsWith("http") ? url : await get_download_url_s3(url);
+      signing_promises.push(Promise.all(
+        model.gallery_urls.map(async (url: string, index: number) => {
+          if (url.startsWith("http")) return url;
+          const signed = await get_download_url_s3(url);
+          model.gallery_urls[index] = signed;
+          return signed;
         })
-      );
+      ));
     }
+    
     if (model.file_url && !model.file_url.startsWith("http")) {
-      model.file_url = await get_download_url_s3(model.file_url);
+      signing_promises.push(get_download_url_s3(model.file_url).then(url => { model.file_url = url; }));
     }
+    
     if (model.artist) {
-      model.artist = await sign_user_urls(model.artist);
+      signing_promises.push(sign_user_urls(model.artist).then(signed_artist => { model.artist = signed_artist; }));
+    }
+
+    if (signing_promises.length > 0) {
+      await Promise.all(signing_promises);
     }
 
     res.json(model);

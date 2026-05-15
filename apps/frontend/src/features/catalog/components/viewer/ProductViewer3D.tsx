@@ -4,7 +4,7 @@ import { useRef, useEffect, Suspense, useState, useMemo } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Environment, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import { Settings, Sun, RotateCw } from 'lucide-react';
+import { Settings, Sun, RotateCw, AlertTriangle } from 'lucide-react';
 import { KTX2Loader } from 'three-stdlib';
 import { MeshoptDecoder } from 'meshoptimizer';
 
@@ -108,9 +108,23 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
   }, []);
 
   const getPathFromUrl = (url: string) => {
-    try { return new URL(url).pathname; } catch { return url; }
+    try { 
+      // Handle potential double slashes or malformed URLs
+      const cleanUrl = url.replace(/([^:]\/)\/+/g, "$1");
+      return new URL(cleanUrl).pathname; 
+    } catch { 
+      return url; 
+    }
   };
-  const is3DModel = modelUrl && /\.(glb|gltf)/i.test(getPathFromUrl(modelUrl));
+  
+  // More robust check: if it's a URL and contains glb/gltf, or if it's a relative path with them.
+  // Also assume it's a 3D model if it's the primary modelUrl and doesn't look like an image.
+  const is3DModel = modelUrl && (
+    /\.(glb|gltf)/i.test(getPathFromUrl(modelUrl)) || 
+    modelUrl.toLowerCase().includes('.glb') || 
+    modelUrl.toLowerCase().includes('.gltf') ||
+    !/\.(jpg|jpeg|png|webp|gif|avif)/i.test(modelUrl.split('?')[0])
+  );
 
   if (!is3DModel) {
     return (
@@ -119,7 +133,16 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
           src={modelUrl}
           alt="Product preview"
           className="max-w-full max-h-full object-contain"
+          onError={(e) => {
+            // If image fails and it was our fallback, show a better error
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+          }}
         />
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500 pointer-events-none">
+           <AlertTriangle className="w-8 h-8 mb-2 opacity-20" />
+           <span className="text-[10px] uppercase tracking-widest opacity-40">Preview Unavailable</span>
+        </div>
       </div>
     );
   }

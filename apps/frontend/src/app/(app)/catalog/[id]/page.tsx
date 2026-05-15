@@ -72,36 +72,12 @@ export default function CatalogDetailPage() {
         product?.category ? [product.category] : [], 
     [product?.category]);
 
-    // NSFW Access Control & Auto-redirect
+    // NSFW Access Control is now handled via the UI overlay to avoid jarring redirects.
     useEffect(() => {
-        // Wait until everything is loaded before checking access
         if (isLoading || isAuthLoading || !product) return;
+    }, [isLoading, isAuthLoading, product]);
 
-        // Requirement: prevent guests and users with NSFW hidden from seeing NSFW models
-        if (product.is_nsfw) {
-            // Give it a tiny bit of grace if user is still being calculated (sometimes happens after loading is false)
-            if (!user && !isAuthLoading) {
-                // Wait another tick to be sure
-                const t = setTimeout(() => {
-                    if (!user) {
-                        toast.error('Please log in to view mature content.');
-                        router.push('/catalog');
-                    }
-                }, 100);
-                return () => clearTimeout(t);
-            }
-            
-            if (user && !user.show_nsfw) {
-                toast.error('Mature content is hidden in your settings. Please enable it in your profile to view NSFW content.');
-                router.push('/catalog');
-            }
-        }
-    }, [isLoading, isAuthLoading, product, user, router]);
 
-    // Prevent rendering if the user is being redirected (to avoid flicker/leaks)
-    if (!isLoading && !isAuthLoading && product?.is_nsfw && (!user || !user.show_nsfw)) {
-        return null;
-    }
 
     const handleAddToCart = async () => {
         if (!isAuthenticated) { showLogin?.(); return; }
