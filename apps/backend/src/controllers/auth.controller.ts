@@ -57,6 +57,7 @@ export async function login(req: Request, res: Response) {
         email: user.email,
         username: user.username,
         role: user.role,
+        show_nsfw: user.show_nsfw,
     });
 
     // Set the JWT as an HTTP-only cookie — JS cannot read this
@@ -107,6 +108,7 @@ export async function google_auth(req: Request, res: Response) {
             email: user.email,
             username: user.username,
             role: user.role,
+            show_nsfw: user.show_nsfw,
         });
 
         // Set the JWT as an HTTP-only cookie
@@ -172,6 +174,7 @@ export async function complete_profile(req: any, res: Response) {
             email: updated.email,
             username: updated.username,
             role: updated.role,
+            show_nsfw: updated.show_nsfw,
         });
 
         // Update the session cookie
@@ -215,6 +218,7 @@ export async function get_me(req: any, res: Response) {
             email: safe_user.email,
             username: safe_user.username,
             role: safe_user.role,
+            show_nsfw: safe_user.show_nsfw,
         });
 
         // Update the session cookie

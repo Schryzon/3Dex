@@ -7,6 +7,7 @@ declare global {
             email: string;
             username: string;
             role: Role;
+            show_nsfw: boolean;
         }
 
         interface Request {
