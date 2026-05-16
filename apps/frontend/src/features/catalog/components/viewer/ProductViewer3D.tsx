@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect, Suspense, useState, useMemo } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Environment, useGLTF, Html, useProgress, Center } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera, Environment, useGLTF, Html, useProgress, Stage } from '@react-three/drei';
 import * as THREE from 'three';
 import { Settings, Sun, RotateCw, AlertTriangle, Loader2 } from 'lucide-react';
 import { KTX2Loader } from 'three-stdlib';
@@ -75,7 +75,6 @@ function Model({ url }: ModelProps) {
     // 1. DRACO
     const dracoLoader = require('three-stdlib').DRACOLoader;
     const draco = new dracoLoader();
-    // Use a reliable public CDN for Draco decoders
     draco.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
     loader.setDRACOLoader(draco);
 
@@ -89,7 +88,6 @@ function Model({ url }: ModelProps) {
     loader.setMeshoptDecoder(MeshoptDecoder);
   });
 
-  // Scene optimizations traversal
   useEffect(() => {
     if (scene) {
       scene.traverse((child) => {
@@ -97,12 +95,9 @@ function Model({ url }: ModelProps) {
           const m = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;
           if (m) {
             m.side = THREE.DoubleSide;
-
-            // Fix for improperly exported GLTF models (common in game rips)
             if (m.map && m.color.r === 0 && m.color.g === 0 && m.color.b === 0) {
               m.color.setHex(0xffffff);
             }
-
             if (!m.map && m.color.r > 0.9 && m.color.g > 0.9 && m.color.b > 0.9) {
               m.color.setHex(0xcccccc);
             }
@@ -181,7 +176,6 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
       <ErrorBoundary fallback={<ErrorFallback />}>
         <Canvas
           shadows
-          camera={{ position: [5, 5, 5], fov: 40 }}
           gl={{
             antialias: true,
             alpha: true,
@@ -191,28 +185,19 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
             outputColorSpace: 'srgb',
           }}
         >
-          <PerspectiveCamera makeDefault position={[5, 5, 5]} />
+          <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={40} />
 
-          {/* Lighting */}
-          <ambientLight intensity={1.2} />
-          <hemisphereLight intensity={0.5} position={[0, 10, 0]} color="#ffffff" groundColor="#444444" />
-          <directionalLight
-            position={[10, 10, 5]}
-            intensity={2.5}
-            castShadow
-            shadow-mapSize-width={1024}
-            shadow-mapSize-height={1024}
-          />
-          <pointLight position={[-10, -10, -5]} intensity={0.5} />
-
-          {/* Environment for reflections */}
-          <Environment preset={environment} />
-
-          {/* 3D Model with auto-centering and scaling */}
+          {/* Stage handles auto-framing, scaling, and lighting */}
           <Suspense fallback={<Loader />}>
-            <Center top>
+            <Stage 
+              environment={environment} 
+              intensity={0.6} 
+              shadows={{ type: 'contact', opacity: 0.7, blur: 2 }} 
+              adjustCamera={1.5} // This value controls the "padding" around the model
+              preset="rembrandt"
+            >
               <Model url={modelUrl} />
-            </Center>
+            </Stage>
           </Suspense>
 
           {/* Controls */}
@@ -220,8 +205,8 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
             enablePan={true}
             enableZoom={true}
             enableRotate={true}
-            minDistance={2}
-            maxDistance={15}
+            minDistance={0.1} // Allow closer zooming
+            maxDistance={50}
             autoRotate={autoRotate}
             autoRotateSpeed={1.0}
             makeDefault
