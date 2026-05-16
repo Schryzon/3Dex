@@ -8,7 +8,7 @@ import {
 } from "../services/model.service";
 import { get_download_url_s3, sign_user_urls } from "../services/storage.service";
 import { get_purchase } from "../services/purchase.service";
-import { embed_and_save_model } from "../services/embedding.service";
+import { embed_and_save_model, embed_text } from "../services/embedding.service";
 import prisma from "../prisma";
 import { Auth_Request } from "../middlewares/auth.middleware";
 
@@ -25,6 +25,9 @@ export async function list_models(req: Request, res: Response) {
     sort,
     status, // 'APPROVED' | 'PENDING' | 'REJECTED' | 'ALL'
     is_nsfw,
+    license,
+    is_printable,
+    is_ai,
     page = 1,
     limit = 20
   } = req.query;
@@ -59,8 +62,17 @@ export async function list_models(req: Request, res: Response) {
       role: 'ARTIST'
     };
     // Secara default, Sembunyikan NSFW untuk user biasa/guest kecuali mereka request tampil
-    if (is_nsfw !== 'true') {
+    // ATAU jika user sudah mengaktifkan preference "show_nsfw" di akun mereka
+    if (is_nsfw === 'true') {
+      // User explicitly requested NSFW
+    } else if (is_nsfw === 'false') {
       where.is_nsfw = false;
+    } else {
+      // Fallback to user preference if available
+      const user_preference = user?.show_nsfw ?? false;
+      if (!user_preference) {
+        where.is_nsfw = false;
+      }
     }
   } else {
     // Untuk admin / owner, sembunyikan jika secara eksplisit request false
@@ -91,10 +103,10 @@ export async function list_models(req: Request, res: Response) {
   }
 
   // 3. Price Range
-  if (min_price || max_price) {
+  if (min_price !== undefined || max_price !== undefined) {
     where.price = {};
-    if (min_price) where.price.gte = Number(min_price);
-    if (max_price) where.price.lte = Number(max_price);
+    if (min_price !== undefined && min_price !== "") where.price.gte = Number(min_price);
+    if (max_price !== undefined && max_price !== "") where.price.lte = Number(max_price);
   }
 
   // 4. Artist Filter
@@ -107,17 +119,21 @@ export async function list_models(req: Request, res: Response) {
     where.category_id = String(category_id);
   }
 
-  // 6. Format Filter (Tags)
+  // 6. Format Filter (Column)
   if (format) {
     const formats = Array.isArray(format) ? format : [String(format)];
-    if (!where.AND) where.AND = [];
-    where.AND.push({
-      tags: {
-        some: {
-          name: { in: formats, mode: 'insensitive' }
-        }
-      }
-    });
+    where.file_format = { in: formats.map(f => String(f).toLowerCase()) };
+  }
+
+  // 6.5 License Filter
+  if (license) {
+    const licenses = Array.isArray(license) ? license : [String(license)];
+    where.license = { in: licenses as any };
+  }
+
+  // 6.6 Printable Filter
+  if (is_printable !== undefined) {
+    where.is_printable = is_printable === 'true';
   }
 
   // 7. Types Filter (Tags)
@@ -153,25 +169,88 @@ export async function list_models(req: Request, res: Response) {
 
   try {
     let raw_models;
-    if (search) {
-      const searchStr = `%${String(search)}%`;
-      // Use raw SQL for better performance/flexibility with ILIKE across multiple fields
-      // or stick to Prisma if we want to keep it simple.
-      // Given pg_trgm is enabled, we could use % but Prisma's contains already does this.
-      raw_models = await prisma.model.findMany({
-        where,
-        orderBy,
-        take,
-        skip,
-        include: {
-          artist: {
-            select: { username: true, id: true, avatar_url: true }
-          },
-          category: true,
-          tags: true
+    let total = 0;
+
+    // AI SEMANTIC SEARCH (Dēxie AI)
+    if (is_ai === 'true' && search) {
+      console.log(`[Dēxie] Semantic search for: "${search}"`);
+      const vector = await embed_text(String(search));
+      const vector_str = `[${vector.join(",")}]`;
+
+      // Build fragments for RAW SQL
+      const fragments: string[] = [];
+      const params: any[] = [vector_str];
+
+      // Base where clauses for APPROVED status and artist role
+      fragments.push("m.status = 'APPROVED'");
+      fragments.push("m.embedding IS NOT NULL");
+      fragments.push("u.role = 'ARTIST'");
+
+      // Apply other filters to the raw query
+      if (category_id) {
+        params.push(String(category_id));
+        fragments.push(`m.category_id = $${params.length}`);
+      }
+      if (artist_id) {
+        params.push(String(artist_id));
+        fragments.push(`m.artist_id = $${params.length}`);
+      }
+      if (min_price !== undefined && min_price !== "") {
+        params.push(Number(min_price));
+        fragments.push(`m.price >= $${params.length}`);
+      }
+      if (max_price !== undefined && max_price !== "") {
+        params.push(Number(max_price));
+        fragments.push(`m.price <= $${params.length}`);
+      }
+      if (is_printable !== undefined) {
+        fragments.push(`m.is_printable = ${is_printable === 'true'}`);
+      }
+      
+      // NSFW Logic in Raw SQL
+      if (is_nsfw === 'true') {
+        // Show all
+      } else if (is_nsfw === 'false') {
+        fragments.push("m.is_nsfw = false");
+      } else {
+        const user_preference = user?.show_nsfw ?? false;
+        if (!user_preference) {
+          fragments.push("m.is_nsfw = false");
         }
-      });
+      }
+
+      const where_sql = fragments.length > 0 ? `WHERE ${fragments.join(" AND ")}` : "";
+
+      // Order by Cosine Distance
+      raw_models = await prisma.$queryRawUnsafe<any[]>(
+        `SELECT m.*, 
+                json_build_object('id', u.id, 'username', u.username, 'avatar_url', u.avatar_url) as artist,
+                c.name as "categoryName", c.slug as "categorySlug"
+         FROM "Model" m
+         JOIN "User" u ON m.artist_id = u.id
+         LEFT JOIN "Category" c ON m.category_id = c.id
+         ${where_sql}
+         ORDER BY m.embedding <=> $1::vector
+         LIMIT ${take} OFFSET ${skip}`,
+        ...params
+      );
+
+      // Count total for pagination (parameter indices need to be adjusted since there's no vector here)
+      const count_sql = where_sql.replace(/\$(\d+)/g, (match, p1) => `$${parseInt(p1) - 1}`);
+      const count_res = await prisma.$queryRawUnsafe<any[]>(
+        `SELECT COUNT(*)::int as count FROM "Model" m JOIN "User" u ON m.artist_id = u.id ${count_sql}`,
+        ...params.slice(1)
+      );
+      total = count_res[0]?.count || 0;
+
+      // Fix mapping (Prisma returns raw snake_case or specific names from raw query)
+      raw_models = raw_models.map(m => ({
+        ...m,
+        category: m.categoryName ? { id: m.category_id, name: m.categoryName, slug: m.categorySlug } : null
+      }));
+
     } else {
+      // Standard Prisma Query
       raw_models = await prisma.model.findMany({
         where,
         orderBy,
@@ -185,6 +264,7 @@ export async function list_models(req: Request, res: Response) {
           tags: true
         }
       });
+      total = await prisma.model.count({ where });
     }
 
     // Helper to sign URLs
@@ -193,8 +273,6 @@ export async function list_models(req: Request, res: Response) {
       if (model.preview_url && !model.preview_url.startsWith("http")) {
         model.preview_url = await get_download_url_s3(model.preview_url);
       }
-      // Note: We sign file_url too so frontend can use it (e.g. for viewer)
-      // Ideally we should restrict this for paid models, but mimicking existing behavior for now
       if (model.file_url && !model.file_url.startsWith("http")) {
         model.file_url = await get_download_url_s3(model.file_url);
       }
@@ -206,8 +284,6 @@ export async function list_models(req: Request, res: Response) {
 
     const models = await Promise.all(raw_models.map(sign_model));
 
-    const total = await prisma.model.count({ where });
-
     res.json({
       data: models,
       meta: {
@@ -218,6 +294,7 @@ export async function list_models(req: Request, res: Response) {
       }
     });
   } catch (error: any) {
+    console.error("[Search Error]", error);
     res.status(500).json({ message: error.message });
   }
 }
@@ -252,21 +329,34 @@ export async function get_model_detail(req: Request, res: Response) {
     }
     model.isPurchased = isPurchased;
 
+    // Parallelize all URL signing for maximum performance
+    const signing_promises: Promise<any>[] = [];
+
     if (model.preview_url && !model.preview_url.startsWith("http")) {
-      model.preview_url = await get_download_url_s3(model.preview_url);
+      signing_promises.push(get_download_url_s3(model.preview_url).then(url => { model.preview_url = url; }));
     }
+    
     if (model.gallery_urls && model.gallery_urls.length > 0) {
-      model.gallery_urls = await Promise.all(
-        model.gallery_urls.map(async (url: string) => {
-          return url.startsWith("http") ? url : await get_download_url_s3(url);
+      signing_promises.push(Promise.all(
+        model.gallery_urls.map(async (url: string, index: number) => {
+          if (url.startsWith("http")) return url;
+          const signed = await get_download_url_s3(url);
+          model.gallery_urls[index] = signed;
+          return signed;
         })
-      );
+      ));
     }
+    
     if (model.file_url && !model.file_url.startsWith("http")) {
-      model.file_url = await get_download_url_s3(model.file_url);
+      signing_promises.push(get_download_url_s3(model.file_url).then(url => { model.file_url = url; }));
     }
+    
     if (model.artist) {
-      model.artist = await sign_user_urls(model.artist);
+      signing_promises.push(sign_user_urls(model.artist).then(signed_artist => { model.artist = signed_artist; }));
+    }
+
+    if (signing_promises.length > 0) {
+      await Promise.all(signing_promises);
     }
 
     res.json(model);

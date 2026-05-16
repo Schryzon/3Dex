@@ -50,12 +50,14 @@ export interface ModelFilters {
     maxPrice?: number;
     format?: string[];
     types?: string[];
+    license?: string[];
     isPrintable?: boolean;
     sort?: string;
     artistId?: string;
     page?: number;
     limit?: number;
     isNsfw?: boolean;
+    isAi?: boolean;
 }
 
 export interface PublicAnalyticsStats {

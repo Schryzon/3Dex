@@ -168,7 +168,7 @@ export function DexieAssistant() {
                     e.stopPropagation();
                     setIsDismissed(true);
                   }}
-                  className="p-1 text-zinc-600 hover:text-white transition-colors"
+                  className="p-1 text-zinc-600 hover:text-white transition-colors cursor-pointer"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -177,7 +177,7 @@ export function DexieAssistant() {
             
             <div 
                onClick={(e) => { e.stopPropagation(); setIsMinimized(true); }}
-               className="mt-3 pt-2 border-t border-white/5 text-[10px] text-zinc-500 text-center font-bold tracking-widest uppercase hover:text-blue-400 transition-colors md:hidden"
+               className="mt-3 pt-2 border-t border-white/5 text-[10px] text-zinc-500 text-center font-bold tracking-widest uppercase hover:text-blue-400 transition-colors md:hidden cursor-pointer"
             >
                Minimize
             </div>
@@ -194,7 +194,7 @@ export function DexieAssistant() {
           >
              <button
                onClick={() => setIsDismissed(true)}
-               className="absolute -top-1 -left-1 z-10 h-4 w-4 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+               className="absolute -top-1 -left-1 z-10 h-4 w-4 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg cursor-pointer"
              >
                <X className="h-2.5 w-2.5" />
              </button>

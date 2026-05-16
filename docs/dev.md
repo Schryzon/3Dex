@@ -110,11 +110,12 @@ Verify: `node -v`, `npm -v`
 
 ---
 
-### 3. PostgreSQL
-- Windows: [postgresql.org/download/windows/](https://www.postgresql.org/download/windows/)
-- Linux: `sudo apt install postgresql postgresql-contrib`
-
 Verify: `psql --version`, `pg_isready`
+
+> [!IMPORTANT]
+> **pgvector Extension Required**: For Dēxie AI Search to function, your PostgreSQL instance MUST have the `pgvector` extension installed.
+> - Windows: Follow [pgvector windows instructions](https://github.com/pgvector/pgvector#windows).
+> - Linux: `sudo apt install postgresql-15-pgvector` (or your version).
 
 *Note: Verification depends on whether PostgreSQL is installed as a service.*
 
@@ -204,6 +205,14 @@ Success indicators:
 - PostgreSQL is running without errors.
 - Prisma connected successfully and generated the client.
 
+### AI Search Maintenance (Dēxie)
+After setting up the database and uploading/seeding models, you must generate vectors for AI search:
+```bash
+cd apps/backend
+npm run reindex
+```
+This script uses `MiniLM` to embed all approved models for semantic search.
+
 To stop PostgreSQL: `pg_ctl stop`
 
 ---
@@ -233,6 +242,8 @@ Access via: `http://localhost:3000`
 - [ ] Backend `/health` endpoint returns "ok".
 - [ ] No red console errors in the browser dev tools.
 - [ ] Prisma migrations applied and Prisma Studio (`npx prisma studio`) can view the schema.
+- [ ] **AI Search**: Running `npm run reindex` completes without errors and "Sparkles" mode works in the catalog.
+- [ ] **NSFW Filters**: Changing user preference in profile correctly blurs/hides models in catalog.
 
 ---
 

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Box, Info, Tag, DollarSign, Check, ChevronRight, Layout, Loader2, Sparkles } from 'lucide-react';
+import { ArrowLeft, Box, Info, Tag, DollarSign, Check, ChevronRight, Layout, Loader2, Sparkles, HelpCircle } from 'lucide-react';
 import FileUploader from '@/features/upload/components/FileUploader';
 import MultiFileUploader from '@/features/upload/components/MultiFileUploader';
 import { api } from '@/lib/api';
@@ -97,7 +97,9 @@ export default function UploadPage() {
                 title: data.title || prev.title, 
                 description: data.description || prev.description, 
                 price: data.price ? data.price.toString() : prev.price,
-                isFree: data.price ? false : prev.isFree
+                isFree: data.price ? false : prev.isFree,
+                category: data.category || prev.category,
+                tags: data.tags ? data.tags.join(', ') : prev.tags
             }));
 
             toast.success("Dēxie filled in the details! ✨");
@@ -354,8 +356,14 @@ export default function UploadPage() {
                                                 onChange={(e) => setFormData({ ...formData, isPrintable: e.target.checked })}
                                                 className="w-5 h-5 rounded border-gray-700 bg-black text-yellow-500 focus:ring-yellow-500 focus:ring-offset-gray-900 cursor-pointer"
                                             />
-                                            <label htmlFor="printable-checkbox" className="text-sm font-medium text-gray-300 cursor-pointer">
+                                            <label htmlFor="printable-checkbox" className="flex items-center gap-2 text-sm font-medium text-gray-300 cursor-pointer group">
                                                 Ready for 3D Printing
+                                                <div className="relative group/tooltip">
+                                                    <HelpCircle className="w-3.5 h-3.5 text-gray-500 group-hover/tooltip:text-gray-300 transition-colors" />
+                                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-[10px] text-gray-200 rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-10 border border-gray-700 shadow-xl">
+                                                        Check this if your model is manifold and optimized for slicing
+                                                    </div>
+                                                </div>
                                             </label>
                                         </div>
                                     </div>

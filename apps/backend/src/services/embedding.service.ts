@@ -89,6 +89,7 @@ export async function find_similar_models(
         limit?: number;
         exclude_ids?: string[];
         allow_nsfw?: boolean;
+        skip?: number;
     } = {}
 ): Promise<{ id: string; title: string; preview_url: string | null; price: number; similarity: number }[]> {
     const { limit = 8, exclude_ids = [], allow_nsfw = false } = options;
@@ -98,6 +99,8 @@ export async function find_similar_models(
         ? `AND id NOT IN (${exclude_ids.map((_, i) => `$${i + 3}`).join(",")})`
         : "";
     const nsfw_filter = allow_nsfw ? "" : `AND is_nsfw = false`;
+
+    const skip = options.skip || 0;
 
     const rows = await prisma.$queryRawUnsafe<
         { id: string; title: string; preview_url: string | null; price: number; similarity: number }[]
@@ -110,9 +113,10 @@ export async function find_similar_models(
            ${nsfw_filter}
            ${excluded}
          ORDER BY embedding <=> $1::vector
-         LIMIT $2`,
+         LIMIT $2 OFFSET $3`,
         vector_str,
         limit,
+        skip,
         ...exclude_ids
     );
 

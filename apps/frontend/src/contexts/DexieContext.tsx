@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useAuth } from "@/features/auth";
 import api from "@/lib/api/client";
 
@@ -25,12 +25,14 @@ export function DexieProvider({ children }: { children: React.ReactNode }) {
   const [message, setMessage] = useState<string | null>(null);
   const [enabled, setEnabled] = useState(true);
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { user, isAuthenticated } = useAuth();
 
   // Deduce context key from the current URL
   const getContextKey = () => {
-    // 1. Dēxie stays silent on the catalog browse list page
-    if (pathname === "/catalog") return null;
+    // 1. Dēxie stays silent on the catalog browse list page or during AI Search
+    const isAiMode = searchParams.get('ai') === 'true';
+    if (pathname === "/catalog" || isAiMode) return null;
 
     // 2. Specific 3D model detail page
     const detailMatch = pathname.match(/^\/catalog\/([^\/]+)$/);

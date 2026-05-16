@@ -82,11 +82,8 @@ export default function CatalogProductCard({
 
     // List View - Compact horizontal card
     if (viewMode === 'list') {
-        const Wrapper = onClick ? 'div' : Link;
-        const wrapperProps = onClick ? { onClick } : { href: `/catalog/${id}` };
-
         return (
-            <Wrapper {...wrapperProps as any}>
+            <Link href={`/catalog/${id}`}>
                 <div className="group flex bg-[#111] rounded-xl overflow-hidden hover:bg-[#161616] transition-all duration-300 cursor-pointer border border-white/[0.05] hover:border-white/[0.12] hover:shadow-xl hover:shadow-black/40">
                     {/* Thumbnail */}
                     <div className="relative w-28 h-24 md:w-40 md:h-32 shrink-0 overflow-hidden bg-black/50">
@@ -227,16 +224,13 @@ export default function CatalogProductCard({
                         </div>
                     )}
                 </div>
-            </Wrapper>
+            </Link>
         );
     }
 
     // Grid View - Original card design
-    const GridWrapper = onClick ? 'div' : Link;
-    const gridWrapperProps = onClick ? { onClick } : { href: `/catalog/${id}` };
-
     return (
-        <GridWrapper {...gridWrapperProps as any}>
+        <Link href={`/catalog/${id}`}>
             <div
                 className="group relative rounded-xl overflow-hidden bg-[#0c0c0c] cursor-pointer transition-all duration-500 border border-white/[0.04] hover:border-yellow-400/30 hover:shadow-2xl hover:shadow-yellow-400/5"
                 onMouseEnter={() => setIsHovered(true)}
@@ -348,7 +342,7 @@ export default function CatalogProductCard({
 
                         {/* Three-dot menu (grid view — hidden on mobile) */}
                         {artistId && (
-                            <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} className="max-md:hidden">
+                            <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
                                 <ModelCardMenu
                                     modelId={id}
                                     modelTitle={title}
@@ -431,6 +425,6 @@ export default function CatalogProductCard({
                     </div>
                 </div>
             </div>
-        </GridWrapper>
+        </Link>
     );
 }

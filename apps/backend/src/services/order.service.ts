@@ -85,7 +85,7 @@ export async function create_order(user_id: string, items: CheckoutLine[]) {
         },
     });
 
-    const snap_response = await create_snap_transaction(order.id, total_amount);
+    const snap_response = await create_snap_transaction(`${order.id}-${Date.now()}`, total_amount);
 
     await prisma.order.update({
         where: { id: order.id },

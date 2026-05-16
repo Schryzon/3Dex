@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/features/auth';
 import { useCart } from '@/features/cart';
@@ -106,19 +106,21 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <main className={`flex-1 min-w-0 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'lg:ml-64' : 'lg:ml-16'}`}>
 
         {/* Topbar Component */}
-        <AppTopbar
-          user={user}
-          isLoggedIn={isLoggedIn}
-          mounted={mounted}
-          cartItemsCount={cartItems.length}
-          notificationsCount={unreadCount}
-          isAvatarDropdownOpen={isAvatarDropdownOpen}
-          setAvatarDropdownOpen={setAvatarDropdownOpen}
-          setMobileOpen={setMobileOpen}
-          handleLogout={handleLogout}
-          showLogin={showLogin}
-          showRegister={showRegister}
-        />
+        <Suspense fallback={<div className="h-16 bg-[#0a0a0a] border-b border-white/5 w-full animate-pulse" />}>
+          <AppTopbar
+            user={user}
+            isLoggedIn={isLoggedIn}
+            mounted={mounted}
+            cartItemsCount={cartItems.length}
+            notificationsCount={unreadCount}
+            isAvatarDropdownOpen={isAvatarDropdownOpen}
+            setAvatarDropdownOpen={setAvatarDropdownOpen}
+            setMobileOpen={setMobileOpen}
+            handleLogout={handleLogout}
+            showLogin={showLogin}
+            showRegister={showRegister}
+          />
+        </Suspense>
 
         {/* Content Wrapper */}
         <div className="relative">

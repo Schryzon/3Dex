@@ -12,7 +12,8 @@
     "setup": "powershell scripts/setup.ps1",
     "pull": "powershell scripts/pull.ps1",
     "push": "powershell scripts/push.ps1",
-    "register-models": "npx ts-node scripts/worker.ts register-models"
+    "register-models": "npx ts-node scripts/worker.ts register-models",
+    "reindex": "npx ts-node scripts/reindex.ts"
   },
   "keywords": [],
   "author": "",

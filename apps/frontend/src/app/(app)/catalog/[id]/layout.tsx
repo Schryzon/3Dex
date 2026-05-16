@@ -1,19 +1,23 @@
 import { Metadata } from 'next';
 
 type Props = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export async function generateMetadata(
   { params }: Props
 ): Promise<Metadata> {
-  const id = params.id;
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+  const { id } = await params;
+  const API_BASE_URL = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
   
   try {
-    const res = await fetch(`${API_BASE_URL}/models/${id}`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${API_BASE_URL}/models/${id}`, { 
+      next: { revalidate: 3600 },
+      headers: { 'Accept': 'application/json' }
+    });
     
     if (!res.ok) {
+      console.error(`Metadata fetch failed: ${res.status} for ${id} at ${API_BASE_URL}`);
       return {
         title: 'Model Not Found | 3Dēx',
       };

@@ -97,12 +97,13 @@ export const productService = {
             if (filters) {
                 if (filters.search) params.append('search', filters.search);
                 if (filters.category && filters.category !== 'all') params.append('category', filters.category);
-                if (filters.minPrice) params.append('min_price', filters.minPrice.toString());
-                if (filters.maxPrice) params.append('max_price', filters.maxPrice.toString());
+                if (filters.minPrice !== undefined) params.append('min_price', filters.minPrice.toString());
+                if (filters.maxPrice !== undefined) params.append('max_price', filters.maxPrice.toString());
                 if (filters.format) filters.format.forEach((f: string) => params.append('format', f));
-                if (filters.types) filters.types.forEach((t: string) => params.append('types', t));
+                if (filters.license) filters.license.forEach((l: string) => params.append('license', l));
                 if (filters.isNsfw !== undefined) params.append('is_nsfw', filters.isNsfw.toString());
-                if (filters.isPrintable !== undefined) params.append('isPrintable', filters.isPrintable.toString());
+                if (filters.isPrintable !== undefined) params.append('is_printable', filters.isPrintable.toString());
+                if (filters.isAi !== undefined) params.append('is_ai', filters.isAi.toString());
                 if (filters.sort) params.append('sort', filters.sort);
                 if (filters.artistId) params.append('artist_id', filters.artistId);
                 if (filters.page) params.append('page', filters.page.toString());
@@ -193,4 +194,31 @@ export const productService = {
         const response = await apiClient.get<any[]>(API_ENDPOINTS.USERS.LIBRARY);
         return response.map(mapModel);
     },
+    
+    async getDexiePicks(filters?: ModelFilters): Promise<PaginatedResponse<Model>> {
+        const params = new URLSearchParams();
+        if (filters?.search) params.append('search', filters.search);
+        if (filters?.limit) params.append('limit', filters.limit.toString());
+        if (filters?.page) params.append('page', filters.page.toString());
+        
+        const response = await apiClient.get<any>(`/dexie/picks?${params.toString()}`);
+        if (!response || !response.picks) {
+            return { data: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } };
+        }
+        
+        return {
+            data: response.picks.map(mapModel),
+            pagination: {
+                page: filters?.page || 1,
+                limit: filters?.limit || 20,
+                total: response.picks.length, // Placeholder since we don't have total for picks yet
+                totalPages: 1 // Simple single page for now
+            }
+        };
+    },
+
+    async getVibeCheck(modelId: string): Promise<string | null> {
+        const response = await apiClient.get<any>(`/dexie/vibe-check/${modelId}`);
+        return response.vibe || null;
+    }
 };

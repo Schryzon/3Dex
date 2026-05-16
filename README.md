@@ -59,7 +59,10 @@ This repository contains both the frontend and backend for the platform.
 - Secure File Storage (MinIO/S3 Presigned URLs)
 - Client-Side 3D Previews (Optimized interactive canvas)
 - Order Management & Payment Integration (Midtrans Sandbox / Production)
-- **Dēxie AI Assistant** (Emu x Ako persona, contextual situational AI)
+- **AI-Powered Discovery (Dēxie AI)**:
+    - **Semantic Search**: Natural language model discovery using `pgvector` and `MiniLM` embeddings.
+    - **Contextual Assistant**: Situation-aware taglines using Google Gemini.
+    - **Smart Recommendations**: Personalised "Dēxie's Picks" based on user history.
 
 ---
 
@@ -137,10 +140,10 @@ To ensure a fair and sustainable ecosystem, revenue is automatically routed and 
 ## Tech Stack
 - Frontend: Next.js, React, React Query, Tailwind CSS
 - Backend: Node.js, Express
-- Database: PostgreSQL
+- Database: PostgreSQL with **pgvector** extension
 - ORM: Prisma
 - Storage: MinIO (S3 Compatible)
-- **AI Ecosystem:** Google Gemini (Generative AI)
+- **AI Ecosystem:** Google Gemini & Transformers.js (MiniLM)
 - Version Control: Git & GitHub
 
 ---

@@ -87,7 +87,10 @@ export async function middleware(request: NextRequest) {
           return NextResponse.redirect(new URL('/dashboard', request.url));
         } catch {
           const res = NextResponse.next();
-          res.cookies.delete('3dex_session');
+          res.cookies.set('3dex_session', '', { 
+            maxAge: 0, 
+            domain: process.env.NEXT_PUBLIC_COOKIE_DOMAIN || undefined 
+          });
           return res;
         }
       }
@@ -97,9 +100,16 @@ export async function middleware(request: NextRequest) {
 
   const token = request.cookies.get('3dex_session')?.value;
 
-  // No token not logged in redirect to /landing
+  // No token? In development or cross-port setups, the middleware might not see the cookie
+  // even if the user is authenticated. We'll let the request through and let the 
+  // client-side AppLayout guard handle the redirection to prevent "false positive" kicks.
   if (!token) {
-    return NextResponse.redirect(new URL('/landing', request.url));
+    // If it's a role-gated route, we should be stricter, but for general auth routes, we soften.
+    const allowedRoles = getRoleGate(pathname);
+    if (allowedRoles) {
+      return NextResponse.redirect(new URL('/landing', request.url));
+    }
+    return NextResponse.next();
   }
 
   if (!JWT_SECRET) {
@@ -117,7 +127,10 @@ export async function middleware(request: NextRequest) {
     console.error('[Middleware] JWT_SECRET present:', !!JWT_SECRET);
     // Invalid/expired token  treat as unauthenticated
     const res = NextResponse.redirect(new URL('/landing', request.url));
-    res.cookies.delete('3dex_session');
+    res.cookies.set('3dex_session', '', { 
+      maxAge: 0, 
+      domain: process.env.NEXT_PUBLIC_COOKIE_DOMAIN || undefined 
+    });
     return res;
   }
 

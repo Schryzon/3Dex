@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Search,
   ShoppingCart,
@@ -17,7 +17,8 @@ import {
   Settings,
   LogOut,
   X,
-  ShieldCheck
+  ShieldCheck,
+  Sparkles
 } from 'lucide-react';
 import UserAvatar from '@/components/common/UserAvatar';
 import ProtectedLink from '@/components/common/ProtectedLink';
@@ -52,17 +53,28 @@ export default function AppTopbar({
 }: AppTopbarProps) {
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const searchParams = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const [isAiSearch, setIsAiSearch] = useState(searchParams.get('ai') === 'true');
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const mobileSearchRef = useRef<HTMLInputElement>(null);
+
+  // Update AI search state when URL changes (e.g. back/forward navigation)
+  useEffect(() => {
+    setIsAiSearch(searchParams.get('ai') === 'true');
+    setSearchQuery(searchParams.get('search') || '');
+  }, [searchParams]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const q = searchQuery.trim();
-    if (q) {
-      router.push(`/catalog?search=${encodeURIComponent(q)}`);
-      setMobileSearchOpen(false);
-    }
+    const params = new URLSearchParams();
+    if (q) params.set('search', q);
+    if (isAiSearch) params.set('ai', 'true');
+    
+    const queryString = params.toString();
+    router.push(`/catalog${queryString ? `?${queryString}` : ''}`);
+    setMobileSearchOpen(false);
   };
 
   useEffect(() => {
@@ -111,18 +123,50 @@ export default function AppTopbar({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search 3D models, textures, and more..."
-              className="w-full pl-11 pr-9 py-2 bg-[#1a1a1a] border border-white/[0.06] rounded-full text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all text-sm"
+              placeholder={isAiSearch ? "Dēxie, find me something like..." : "Search 3D models, textures, and more..."}
+              className={`w-full pl-11 pr-24 py-2 border rounded-full text-white placeholder-gray-500 focus:outline-none focus:ring-1 transition-all duration-500 text-sm ${
+                isAiSearch 
+                  ? 'bg-gradient-to-r from-blue-600/20 to-yellow-500/10 border-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.2)] focus:ring-blue-400/50' 
+                  : 'bg-[#1a1a1a] border-white/[0.08] hover:border-white/20 focus:ring-yellow-500/50 focus:border-yellow-500/50 shadow-lg'
+              }`}
             />
-            {searchQuery && (
+            <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="p-1.5 text-gray-500 hover:text-white transition-colors cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+              <div className="w-px h-4 bg-white/10 mx-0.5" />
               <button
                 type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                onClick={() => {
+                  const newState = !isAiSearch;
+                  setIsAiSearch(newState);
+                  // Update URL immediately if search query exists
+                  if (searchQuery.trim()) {
+                    const params = new URLSearchParams(window.location.search);
+                    if (newState) params.set('ai', 'true');
+                    else params.delete('ai');
+                    router.push(`/catalog?${params.toString()}`);
+                  }
+                }}
+                title={isAiSearch ? "Switch to keyword search" : "Switch to Dēxie AI Search"}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all duration-500 active:scale-90 cursor-pointer ${
+                  isAiSearch 
+                    ? 'bg-gradient-to-r from-blue-600 to-blue-400 text-white shadow-[0_0_15px_rgba(59,130,246,0.5)]' 
+                    : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 border border-white/5'
+                }`}
               >
-                <X className="w-3.5 h-3.5" />
+                <Sparkles className={`w-4 h-4 ${isAiSearch ? 'animate-pulse' : ''}`} />
+                <span className="text-[10px] font-bold tracking-tight uppercase">
+                  {isAiSearch ? 'AI Mode' : 'AI'}
+                </span>
               </button>
-            )}
+            </div>
           </div>
         </form>
 
@@ -142,7 +186,7 @@ export default function AppTopbar({
           </button>
 
           {/* Cart */}
-          <ProtectedLink href={ROUTES.USER.CART} aria-label={`Shopping cart${cartItemsCount > 0 ? `, ${cartItemsCount} items` : ''}`} className="p-2 text-gray-500 hover:text-white relative transition-colors">
+          <ProtectedLink href={ROUTES.USER.CART} aria-label={`Shopping cart${cartItemsCount > 0 ? `, ${cartItemsCount} items` : ''}`} className="p-2 text-gray-500 hover:text-white relative transition-colors cursor-pointer">
             <ShoppingCart className="w-5 h-5" aria-hidden="true" />
             {mounted && cartItemsCount > 0 && (
               <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-yellow-400 text-black text-[10px] font-bold rounded-full flex items-center justify-center">
@@ -206,7 +250,7 @@ export default function AppTopbar({
                       <Package className="w-4 h-4" />
                       <span className="text-sm">My Orders</span>
                     </Link>
-                    <Link href={ROUTES.USER.LIBRARY} className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors" onClick={() => setAvatarDropdownOpen(false)}>
+                    <Link href={ROUTES.USER.LIBRARY} className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-white/[0.04] hover:text-white transition-colors cursor-pointer" onClick={() => setAvatarDropdownOpen(false)}>
                       <FolderOpen className="w-4 h-4" />
                       <span className="text-sm">My Library</span>
                     </Link>
@@ -253,18 +297,37 @@ export default function AppTopbar({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search 3D models, textures..."
-              className="w-full pl-10 pr-9 py-2.5 bg-[#1a1a1a] border border-white/[0.08] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-yellow-500/50 transition-all text-sm"
+              placeholder={isAiSearch ? "Dēxie AI Search..." : "Search 3D models..."}
+              className={`w-full pl-10 pr-24 py-2.5 border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-1 transition-all text-sm ${
+                isAiSearch 
+                  ? 'bg-gradient-to-r from-blue-600/10 to-yellow-500/10 border-blue-500/40 focus:ring-blue-400/50' 
+                  : 'bg-[#1a1a1a] border-white/[0.08] focus:ring-yellow-500/50'
+              }`}
             />
-            {searchQuery && (
+            <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="p-1.5 text-gray-500 hover:text-white transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+              <div className="w-px h-4 bg-white/10 mx-0.5" />
               <button
                 type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                onClick={() => setIsAiSearch(!isAiSearch)}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                  isAiSearch 
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' 
+                    : 'text-gray-500 hover:text-white hover:bg-white/5'
+                }`}
               >
-                <X className="w-4 h-4" />
+                <Sparkles className={`w-3.5 h-3.5 ${isAiSearch ? 'animate-pulse' : ''}`} />
+                {isAiSearch && <span className="text-[10px] font-bold tracking-tight uppercase">AI</span>}
               </button>
-            )}
+            </div>
           </form>
         </div>
       )}
