@@ -185,15 +185,13 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
             outputColorSpace: 'srgb',
           }}
         >
-          <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={40} />
-
           {/* Stage handles auto-framing, scaling, and lighting */}
           <Suspense fallback={<Loader />}>
             <Stage 
               environment={environment} 
               intensity={0.6} 
               shadows={{ type: 'contact', opacity: 0.7, blur: 2 }} 
-              adjustCamera={1.5} // This value controls the "padding" around the model
+              adjustCamera={1.0} // Tight framing
               preset="rembrandt"
             >
               <Model url={modelUrl} />
@@ -205,8 +203,8 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
             enablePan={true}
             enableZoom={true}
             enableRotate={true}
-            minDistance={0.1} // Allow closer zooming
-            maxDistance={50}
+            minDistance={0.01} // Very close zoom allowed
+            maxDistance={20}   // Prevent zooming out too far
             autoRotate={autoRotate}
             autoRotateSpeed={1.0}
             makeDefault
