@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect, Suspense, useState, useMemo } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Environment, useGLTF, Html, useProgress, Stage } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera, Environment, useGLTF, Html, useProgress, Stage, Center } from '@react-three/drei';
 import * as THREE from 'three';
 import { Settings, Sun, RotateCw, AlertTriangle, Loader2 } from 'lucide-react';
 import { KTX2Loader } from 'three-stdlib';
@@ -191,10 +191,12 @@ export default function ProductViewer3D({ modelUrl }: ProductViewer3DProps) {
               environment={environment} 
               intensity={0.6} 
               shadows={{ type: 'contact', opacity: 0.7, blur: 2 }} 
-              adjustCamera={1.0} // Tight framing
+              adjustCamera={1.0} 
               preset="rembrandt"
             >
-              <Model url={modelUrl} />
+              <Center>
+                <Model url={modelUrl} />
+              </Center>
             </Stage>
           </Suspense>
 
