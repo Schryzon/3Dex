@@ -1,13 +1,13 @@
 import { Metadata } from 'next';
 
 type Props = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export async function generateMetadata(
   { params }: Props
 ): Promise<Metadata> {
-  const id = params.id;
+  const { id } = await params;
   const API_BASE_URL = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
   
   try {
