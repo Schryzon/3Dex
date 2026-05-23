@@ -1,0 +1,36 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Reaches checkout summary page;
+
+|Frontend|
+:GET /models/:id/license OR /cart/licenses;
+
+|Database|
+:Fetch License records for all models in order;
+
+|Backend|
+:Return license details for each model;
+
+|Frontend|
+:Display license terms per model (FREE, PERSONAL, COMMERCIAL, EXCLUSIVE);
+:Show usage restrictions and attributions required;
+
+|User|
+:Reviews all license terms;
+if (agrees to all terms?) then (yes)
+  :Checks "I agree" checkbox;
+  |Frontend|
+  :Enable "Continue to Payment" button;
+else (no)
+  :Leaves checkout;
+  stop
+endif
+
+|Frontend|
+:Proceed to payment flow;
+stop
+@enduml

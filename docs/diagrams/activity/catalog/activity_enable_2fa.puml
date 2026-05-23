@@ -1,0 +1,47 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Opens Security Settings;
+:Clicks "Enable 2FA";
+
+|Frontend|
+:POST /auth/2fa/setup;
+
+|Backend|
+:Generate TOTP secret (otplib);
+:Create QR code URI (otpauth://);
+
+|Frontend|
+:Display QR code;
+:Show manual entry key;
+
+|User|
+:Scans QR code with authenticator app;
+:Enters 6-digit OTP to confirm;
+
+|Frontend|
+:POST /auth/2fa/verify { otp };
+
+|Backend|
+:Validate OTP against secret;
+if (OTP invalid?) then (yes)
+  :Return 400 Invalid OTP;
+  |Frontend|
+  :Show "Invalid code" error;
+  stop
+endif
+
+|Database|
+:Update user { totp_secret, two_fa_enabled: true };
+
+|Backend|
+:Return 200 OK with backup codes;
+
+|Frontend|
+:Show backup codes modal;
+:Display "2FA enabled" confirmation;
+stop
+@enduml

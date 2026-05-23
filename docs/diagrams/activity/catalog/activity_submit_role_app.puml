@@ -1,0 +1,39 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Opens "Become an Artist/Provider" page;
+:Fills application form (reason, portfolio_url, role requested);
+
+|Frontend|
+:POST /role-applications { requested_role, reason, portfolio_url };
+
+|Backend|
+:Validate requested_role in [ARTIST, PROVIDER];
+if (invalid role?) then (yes)
+  :Return 400 Bad Request;
+  stop
+endif
+
+:Check existing pending application;
+|Database|
+:Lookup Role_Application by user_id and status=PENDING;
+
+|Backend|
+if (pending application exists?) then (yes)
+  :Return 409 Application already pending;
+  stop
+endif
+
+|Database|
+:Create Role_Application { user_id, requested_role, reason, portfolio_url, status: PENDING };
+
+|Backend|
+:Return 201 Created;
+
+|Frontend|
+:Show "Application submitted - pending admin review" message;
+stop
+@enduml

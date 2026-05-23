@@ -1,0 +1,72 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Visits Artist or Provider profile page;
+
+|Frontend|
+:GET /users/:id/reviews/eligibility;
+
+|Backend|
+:Check if reviewer_id == target user_id;
+if (self-review?) then (yes)
+  :Return eligible: false (SELF);
+  stop
+endif
+
+|Database|
+:Check User_Review for existing review (reviewer_id, target_user_id);
+if (already reviewed?) then (yes)
+  |Backend|
+  :Return eligible: false (ALREADY_REVIEWED);
+  |Frontend|
+  :Hide rating form;
+  stop
+endif
+
+|Database|
+:Check for completed transaction;
+note right: Artist: Purchase from artist\nProvider: Completed PRINT_JOB Order
+
+|Backend|
+if (transaction exists?) then (yes)
+  :Return eligible: true;
+  |Frontend|
+  :Show star rating form;
+else (no)
+  :Return eligible: false (NO_TRANSACTION);
+  |Frontend|
+  :Show "Complete a transaction first" notice;
+  stop
+endif
+
+|User|
+:Selects star rating (1-5) and writes comment;
+:Clicks "Submit Review";
+
+|Frontend|
+:POST /users/:id/reviews { rating, comment };
+
+|Backend|
+:Validate rating integer 1-5;
+if (invalid?) then (yes)
+  :Return 400 Bad Request;
+  stop
+endif
+
+|Database|
+:Create User_Review record;
+
+|Database|
+:Recalculate avg rating and review count for target user;
+:Update User record { rating, review_count };
+
+|Backend|
+:Return 200 OK;
+
+|Frontend|
+:Review appears on target's public profile;
+stop
+@enduml

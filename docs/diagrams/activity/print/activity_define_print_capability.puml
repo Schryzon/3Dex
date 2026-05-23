@@ -1,0 +1,39 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|Provider|
+start
+:Opens Provider Settings;
+:Fills print capability form;
+note right: Fields: materials[], layer_heights[],\nbuild_volume, max_print_size,\nprice_per_gram, supported_colors[]
+
+|Frontend|
+:POST /print/providers/capability { materials, layer_heights, build_volume, price_per_gram, supported_colors };
+
+|Backend|
+:Verify user role is PROVIDER;
+if (not provider?) then (yes)
+  :Return 403 Forbidden;
+  stop
+endif
+
+:Validate materials array not empty;
+if (empty materials?) then (yes)
+  :Return 400 Bad Request;
+  stop
+endif
+
+:Validate price_per_gram > 0;
+
+|Database|
+:Upsert Provider_Config record for user;
+
+|Backend|
+:Return 200 OK with updated config;
+
+|Frontend|
+:Show "Capability profile updated" confirmation;
+:Provider becomes discoverable in print provider search;
+stop
+@enduml

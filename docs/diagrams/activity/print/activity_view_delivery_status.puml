@@ -1,0 +1,49 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Navigates to /orders/:id or /orders;
+
+|Frontend|
+:GET /orders/:id;
+
+|Database|
+:Fetch Order with Order_Items and Provider details;
+
+|Backend|
+if (order not found?) then (yes)
+  :Return 404 Not Found;
+  stop
+endif
+
+if (user is not order owner AND not provider AND not admin?) then (yes)
+  :Return 403 Forbidden;
+  stop
+endif
+
+:Return order details;
+
+|Frontend|
+:Display order summary (items, quantities, totals);
+:Display current delivery status badge;
+:Display tracking number and carrier (if shipped);
+:Display estimated delivery date;
+:Display proof photos (if uploaded by provider);
+
+|User|
+if (delivery received?) then (yes)
+  :Clicks "Confirm Delivery";
+  |Frontend|
+  :PATCH /orders/:id { action: CONFIRM_DELIVERY };
+  |Database|
+  :Update Order { status: COMPLETED };
+  |Backend|
+  :Trigger payout to provider;
+  :Return 200 OK;
+  |Frontend|
+  :Show "Order completed" status;
+endif
+stop
+@enduml

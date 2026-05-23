@@ -1,0 +1,44 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Opens profile settings;
+
+|Frontend|
+:PATCH /users/:id/profile { fields };
+
+|Backend|
+:Validate user authorization;
+if (unauthorized?) then (yes)
+  :Return 403 Forbidden;
+  stop
+endif
+
+:Parse allowed fields (display_name, bio, etc.);
+
+|Database|
+if (avatarKey or bannerKey provided?) then (yes)
+  |MinIO|
+  :Validate keys in storage;
+  |Database|
+  :Update avatar_url / banner_url;
+endif
+
+:Update user record;
+
+|Backend|
+:Sign fresh JWT;
+:Set-Cookie 3dex_session;
+
+|MinIO|
+:Presign new avatar/banner URLs;
+
+|Backend|
+:Return 200 OK;
+
+|Frontend|
+:Refresh UI state;
+stop
+@enduml

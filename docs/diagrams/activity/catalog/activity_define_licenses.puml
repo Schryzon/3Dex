@@ -1,0 +1,40 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|Artist|
+start
+:Selects license type (FREE, PERSONAL, COMMERCIAL, EXCLUSIVE);
+
+|Frontend|
+:POST /models/:id/licenses { license_type, price };
+
+|Backend|
+:Verify user is the model owner;
+if (not owner?) then (yes)
+  :Return 403 Forbidden;
+  stop
+endif
+
+:Validate license_type is valid enum;
+if (invalid?) then (yes)
+  :Return 400 Bad Request;
+  stop
+endif
+
+:Validate price >= 0;
+if (price < 0?) then (yes)
+  :Return 400 Price invalid;
+  stop
+endif
+
+|Database|
+:Upsert License record { model_id, license_type, price };
+
+|Backend|
+:Return 200 OK with license details;
+
+|Frontend|
+:Display updated license badge and price on model page;
+stop
+@enduml

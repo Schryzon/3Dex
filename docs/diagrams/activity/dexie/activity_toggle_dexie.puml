@@ -1,0 +1,50 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Opens user settings;
+:Navigates to "Dexie AI" preferences;
+
+|Frontend|
+:GET /users/me/dexie-status;
+
+|Backend|
+:Return current dexie_enabled flag;
+
+|Frontend|
+if (dexie currently enabled?) then (yes)
+  :Show "Dexie is ON" indicator;
+else (no)
+  :Show "Dexie is OFF" indicator;
+endif
+
+|User|
+:Clicks toggle switch;
+
+|Frontend|
+:PATCH /users/me { dexie_enabled: <new_value> };
+
+|Backend|
+:Validate dexie_enabled is boolean;
+if (invalid?) then (yes)
+  :Return 400 Bad Request;
+  stop
+endif
+
+|Database|
+:Update User record { dexie_enabled };
+
+|Backend|
+:Return 200 OK;
+
+|Frontend|
+:Update toggle state;
+if (dexie now ON?) then (yes)
+  :Enable personalised picks and contextual taglines;
+else (no)
+  :Disable Dexie features across the platform;
+endif
+stop
+@enduml

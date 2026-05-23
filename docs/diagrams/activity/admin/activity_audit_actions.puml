@@ -1,0 +1,48 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|Admin|
+start
+:Navigates to /admin/audit-log;
+
+|Frontend|
+:GET /admin/audit-log { page, filters };
+note right: Filters: action_type, admin_id,\ntarget_type, date_range
+
+|Backend|
+:Verify requestor is ADMIN;
+if (not admin?) then (yes)
+  :Return 403 Forbidden;
+  stop
+endif
+
+|Database|
+:Query Admin_Audit_Log with filters;
+:Include admin username and target details;
+:Order by created_at DESC;
+
+|Backend|
+:Return paginated audit entries;
+
+|Frontend|
+:Render audit log table;
+:Display: timestamp, admin, action, target, reason;
+
+|Admin|
+:Reviews specific entry;
+:Clicks entry for detail view;
+
+|Frontend|
+:GET /admin/audit-log/:id;
+
+|Database|
+:Fetch full audit entry with metadata;
+
+|Backend|
+:Return 200 OK with full entry;
+
+|Frontend|
+:Show audit detail panel;
+stop
+@enduml

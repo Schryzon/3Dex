@@ -1,0 +1,49 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User or Guest|
+start
+:Navigates to /profile/:username;
+
+|Frontend|
+:GET /users/:username;
+
+|Database|
+:Lookup user by username;
+
+|Backend|
+if (user not found?) then (yes)
+  :Return 404 Not Found;
+  |Frontend|
+  :Show "Profile not found" page;
+  stop
+endif
+
+|MinIO|
+:Presign avatar_url & banner_url;
+
+|Database|
+:Count followers and following;
+:Fetch pinned models (if artist);
+:Fetch recent posts (if artist/provider);
+:Fetch average rating and review count;
+
+|Backend|
+:Compile profile response;
+:Return 200 OK;
+
+|Frontend|
+:Render avatar, banner, bio, social links;
+:Render follower/following counts;
+:Render model grid (if artist);
+:Render recent posts (if artist/provider);
+:Render rating stars and review count;
+
+|User or Guest|
+if (authenticated AND viewing other profile?) then (yes)
+  :Shows Follow/Unfollow button;
+  :Can navigate to Rate, Report actions;
+endif
+stop
+@enduml

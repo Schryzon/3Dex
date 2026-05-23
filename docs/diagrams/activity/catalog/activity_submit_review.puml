@@ -1,0 +1,47 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|Customer|
+start
+:Submits review form { rating, comment };
+
+|Frontend|
+:POST /models/:id/reviews;
+
+|Backend|
+:Validate rating (1-5);
+if (invalid?) then (yes)
+  :Return 400 Bad Request;
+  stop
+endif
+
+|Database|
+:Lookup purchase record;
+
+|Backend|
+if (not purchased?) then (yes)
+  :Return 403 Forbidden;
+  stop
+endif
+
+|Database|
+:Create review record;
+
+|Backend|
+if (duplicate review P2002?) then (yes)
+  :Return 409 Conflict;
+  stop
+endif
+
+|Database|
+:Aggregate average & count for model;
+:Update Model record (avg_rating, review_count);
+
+|Backend|
+:Return 201 Created;
+
+|Frontend|
+:Review appears on model page;
+stop
+@enduml

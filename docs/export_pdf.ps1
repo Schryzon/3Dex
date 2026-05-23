@@ -73,9 +73,9 @@ Write-Host "[*] Compiling unified document: 3dex_complete_architecture.pdf..." -
 try {
     # Combine all files into a single high-quality PDF, placing the cover page before the TOC
     if (Test-Path $CoverFile) {
-        & pandoc $AllFiles -o $CombinedPDF --pdf-engine=$PdfEngine --toc --number-sections -V geometry:margin=1in -V colorlinks:true -V header-includes="\usepackage{graphicx} \usepackage{fontspec}" -B $CoverFile
+        & pandoc $AllFiles -o $CombinedPDF --pdf-engine=$PdfEngine --toc --number-sections -V geometry:margin=1in -V colorlinks:true -V header-includes="\usepackage{graphicx} \usepackage{fontspec} \let\oldtoc\tableofcontents \renewcommand{\tableofcontents}{\oldtoc\clearpage}" -B $CoverFile
     } else {
-        & pandoc $AllFiles -o $CombinedPDF --pdf-engine=$PdfEngine --toc --number-sections -V geometry:margin=1in -V colorlinks:true -V header-includes="\usepackage{graphicx} \usepackage{fontspec}"
+        & pandoc $AllFiles -o $CombinedPDF --pdf-engine=$PdfEngine --toc --number-sections -V geometry:margin=1in -V colorlinks:true -V header-includes="\usepackage{graphicx} \usepackage{fontspec} \let\oldtoc\tableofcontents \renewcommand{\tableofcontents}{\oldtoc\clearpage}"
     }
     Write-Host "[+] Complete Architecture PDF exported successfully to: $CombinedPDF" -ForegroundColor Green
 }
@@ -99,7 +99,7 @@ foreach ($Category in $Categories) {
         $OutFile = Join-Path $OutputDir "3dex_$($Category.Name).pdf"
         Write-Host "  - Compiling $($Category.Name)..." -ForegroundColor Blue
         try {
-            & pandoc $Category.Files -o $OutFile --pdf-engine=$PdfEngine --toc --number-sections -V geometry:margin=1in -V colorlinks:true
+            & pandoc $Category.Files -o $OutFile --pdf-engine=$PdfEngine --toc --number-sections -V geometry:margin=1in -V colorlinks:true -V header-includes="\usepackage{graphicx} \usepackage{fontspec} \let\oldtoc\tableofcontents \renewcommand{\tableofcontents}{\oldtoc\clearpage}"
             Write-Host "  [+] Exported: $OutFile" -ForegroundColor Green
         }
         catch {

@@ -1,0 +1,37 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|<<external>> Delivery service|
+start
+:Shipment status changes;
+
+|Backend|
+:POST /webhooks/delivery { order_id, tracking_number, carrier, status, estimated_delivery };
+
+:Validate webhook signature;
+if (signature invalid?) then (yes)
+  :Return 403 Forbidden;
+  stop
+endif
+
+|Database|
+:Lookup Order by order_id;
+
+|Backend|
+if (order not found?) then (yes)
+  :Return 404 Not Found;
+  stop
+endif
+
+|Database|
+:Update Order { tracking_number, carrier, delivery_status, estimated_delivery };
+
+|Backend|
+:Create Notification for customer { type: DELIVERY_UPDATE };
+:Return 200 OK;
+
+|Frontend|
+:Customer views updated delivery status on /orders/:id;
+stop
+@enduml

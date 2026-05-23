@@ -1,0 +1,34 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|<<system>> Time|
+start
+:Weekly cron job fires (every Monday 00:00 UTC);
+
+|Backend (Cron)|
+:GET /internal/cron/best-model-week;
+:Define period_start (7 days ago) and period_end (now);
+
+|Database|
+:Aggregate Purchase records in period;
+:Group by model_id;
+:Count purchases per model;
+:Order by purchase_count DESC;
+:Pick top model;
+
+|Backend (Cron)|
+if (top model found?) then (yes)
+  |Database|
+  :Upsert Weekly_Featured record { model_id, week_start, week_end };
+  
+  |Backend (Cron)|
+  :Log successful update;
+else (no)
+  :Log "No purchases this week - skipping update";
+endif
+
+|Frontend|
+:Homepage "Model of the Week" card reflects new model;
+stop
+@enduml

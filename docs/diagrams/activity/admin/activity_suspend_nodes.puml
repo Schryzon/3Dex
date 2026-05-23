@@ -1,0 +1,38 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|Admin|
+start
+:Views flagged user or content report;
+:Decides node is malicious (spam bot, scammer, repeat abuser);
+
+|Frontend|
+:POST /admin/users/:id/suspend { reason, duration_days };
+
+|Backend|
+:Validate user is not already SUSPENDED;
+if (already suspended?) then (yes)
+  :Return 409 Conflict;
+  stop
+endif
+
+:Validate reason is provided;
+if (empty reason?) then (yes)
+  :Return 400 Bad Request;
+  stop
+endif
+
+|Database|
+:Update User { account_status: SUSPENDED, suspended_until };
+:Write Admin_Audit_Log { action: SUSPEND_USER, target_user_id, reason };
+:Invalidate all active sessions for target user;
+
+|Backend|
+:Return 200 OK;
+
+|Frontend|
+:User marked as SUSPENDED in admin panel;
+:Suspended user receives access denied on next request;
+stop
+@enduml

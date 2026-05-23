@@ -1,0 +1,30 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Opens Account Settings;
+:Toggles "Show NSFW Content" switch;
+
+|Frontend|
+:PATCH /users/me { show_nsfw: true/false };
+
+|Backend|
+:Validate request body contains show_nsfw boolean;
+if (invalid?) then (yes)
+  :Return 400 Bad Request;
+  stop
+endif
+
+|Database|
+:Update User record { show_nsfw };
+
+|Backend|
+:Return 200 OK;
+
+|Frontend|
+:Update local user preference in AuthContext;
+:Refresh current page feed if on catalog;
+stop
+@enduml
