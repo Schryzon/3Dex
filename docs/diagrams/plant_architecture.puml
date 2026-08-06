@@ -1,0 +1,75 @@
+@startuml plant_architecture
+!theme plain
+skinparam componentStyle uml2
+skinparam BackgroundColor white
+skinparam defaultFontSize 14
+
+' Node Styling
+skinparam node {
+    BackgroundColor White
+    BorderColor Black
+    BorderThickness 1.5
+    FontSize 16
+    FontStyle bold
+}
+skinparam component {
+    BackgroundColor #F9F9F9
+    BorderColor Black
+    BorderThickness 1
+}
+skinparam database {
+    BackgroundColor White
+    BorderColor Black
+}
+skinparam actor {
+    BackgroundColor White
+    BorderColor Black
+}
+
+title System Architecture Diagram
+
+actor "<&person>\nClient / End User" as user
+
+node "Client Tier (Next.js Application)" as frontend {
+    component "<size:24><&monitor></size>\nUser Interface\n(React, TailwindCSS)" as webApp
+    component "<size:24><&box></size>\n3D Graphics Engine\n(React Three Fiber)" as r3f
+    component "<size:24><&layers></size>\nState Management\n(Zustand, React Query)" as state
+}
+
+node "Application Tier (Node.js API)" as backend {
+    component "<size:24><&cog></size>\nRESTful Services\n(Express.js)" as express
+    component "<size:24><&lock-locked></size>\nAuthentication & Security\n(JWT, bcrypt)" as auth
+    component "<size:24><&lightbulb></size>\nSemantic Processing Engine\n(Transformers.js)" as localAi
+    component "<size:24><&list></size>\nObject-Relational Mapping\n(Prisma ORM)" as orm
+}
+
+node "Data Tier (Containerized)" as data {
+    database "<size:24><&hard-drive></size>\nVector-Enabled RDBMS\n(PostgreSQL + pgvector)" as postgres
+    database "<size:24><&folder></size>\nObject Storage Service\n(MinIO)" as minio
+}
+
+node "Third-Party Integration Services" as external {
+    component "<size:24><&star></size>\nGenerative AI Service\n(Google Gemini API)" as gemini
+    component "<size:24><&credit-card></size>\nPayment Gateway\n(Midtrans API)" as midtrans
+    component "<size:24><&cloud-download></size>\nModel Repository\n(Hugging Face Hub)" as hf
+}
+
+' Connections
+user .down.> webApp : HTTPS Request/Response
+webApp -right-> r3f : Renders Model
+webApp -left-> state : Manages Data
+
+webApp =down=> express : REST API Calls
+
+express -down-> auth : Validates
+express -down-> localAi : Embeds Text/Image
+express -down-> orm : Executes Queries
+
+orm =down=> postgres : SQL
+express =down=> minio : S3 Protocol
+
+express .right.> gemini : GenAI Operations
+express .right.> midtrans : Transaction Processing
+localAi .right.> hf : Fetches Weights
+
+@enduml

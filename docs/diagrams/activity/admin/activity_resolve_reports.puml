@@ -1,0 +1,53 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Submit abuse report;
+
+|Frontend|
+:POST /reports { target_type, reason, target_id };
+
+|Backend|
+:Validate target_type in [MODEL, POST, COMMENT];
+:Validate reason not empty;
+if (invalid?) then (yes)
+  :Return 400 Bad Request;
+  stop
+endif
+
+|Database|
+:Create Report (status: PENDING);
+
+|Backend|
+:Return 201 Created;
+
+|Frontend|
+:Show "Report submitted" notification;
+
+|Admin|
+:Reviews report (GET /admin/reports);
+:Makes decision;
+
+|Frontend|
+fork
+  |Admin|
+  :Clicks "Resolve";
+  |Frontend|
+  :PATCH /admin/reports/:id { status: REVIEWED };
+  |Database|
+  :Update Report status to REVIEWED;
+fork again
+  |Admin|
+  :Clicks "Dismiss";
+  |Frontend|
+  :PATCH /admin/reports/:id { status: DISMISSED };
+  |Database|
+  :Update Report status to DISMISSED;
+end fork
+
+|Frontend|
+:Report closed in UI;
+stop
+@enduml

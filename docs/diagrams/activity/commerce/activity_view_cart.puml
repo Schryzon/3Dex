@@ -1,0 +1,54 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Navigates to /cart;
+
+|Frontend|
+:GET /cart;
+
+|Database|
+:Fetch Cart_Item records for user;
+:Join model details (title, price, preview_url);
+
+|MinIO|
+:Presign preview_urls for all cart items;
+
+|Backend|
+:Compute subtotal;
+:Return 200 OK { items[], subtotal };
+
+|Frontend|
+:Render cart items list;
+:Display subtotal and "Proceed to Checkout" button;
+
+|User|
+fork
+  :Adjusts item quantity;
+  |Frontend|
+  :PATCH /cart/:item_id { quantity };
+  |Database|
+  :Update Cart_Item quantity;
+  |Frontend|
+  :Re-render totals;
+fork again
+  :Removes an item;
+  |Frontend|
+  :DELETE /cart/:item_id;
+  |Database|
+  :Delete Cart_Item;
+  |Frontend|
+  :Remove item card;
+fork again
+  :Adds a new model (from catalog);
+  |Frontend|
+  :POST /cart { model_id };
+  |Database|
+  :Upsert Cart_Item;
+  |Frontend|
+  :Update cart badge count;
+end fork
+stop
+@enduml

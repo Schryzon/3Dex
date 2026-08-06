@@ -1,0 +1,43 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Navigates to a post and clicks "Comment";
+
+|Frontend|
+:Validates user is authenticated;
+if (not authenticated?) then (yes)
+  :Redirect to /login;
+  stop
+endif
+
+:Displays comment input field;
+
+|User|
+:Types comment text and submits;
+
+|Frontend|
+:POST /posts/:post_id/comments { content };
+
+|Backend|
+:Validate content not empty and within length limit;
+if (invalid?) then (yes)
+  :Return 400 Bad Request;
+  stop
+endif
+
+|Database|
+:Create Post_Comment record { post_id, user_id, content };
+
+|Backend|
+:Return 201 Created with comment data;
+
+|Frontend|
+:Append new comment to thread;
+
+|Database|
+:Create Notification for post owner;
+stop
+@enduml

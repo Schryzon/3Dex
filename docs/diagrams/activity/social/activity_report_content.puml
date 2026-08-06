@@ -1,0 +1,47 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Clicks "Report" on content or user;
+
+|Frontend|
+:Opens report modal;
+:User selects report category (SPAM, NSFW, ABUSIVE, ILLEGAL);
+:User writes optional description;
+
+|User|
+:Confirms and submits report;
+
+|Frontend|
+:POST /reports { target_type, target_id, reason, description };
+
+|Backend|
+:Validate target_type in [MODEL, POST, COMMENT, USER];
+:Validate reason is non-empty;
+if (invalid?) then (yes)
+  :Return 400 Bad Request;
+  stop
+endif
+
+:Check for duplicate report from same user;
+|Database|
+:Lookup existing Report by (reporter_id, target_id, target_type);
+
+|Backend|
+if (duplicate exists?) then (yes)
+  :Return 409 Already reported;
+  stop
+endif
+
+|Database|
+:Create Report record { status: PENDING };
+
+|Backend|
+:Return 201 Created;
+
+|Frontend|
+:Show "Report submitted - our team will review it" toast;
+stop
+@enduml

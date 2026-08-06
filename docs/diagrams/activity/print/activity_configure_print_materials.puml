@@ -1,0 +1,39 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Selects provider and model for printing;
+:Opens print configuration panel;
+
+|Frontend|
+:GET /print/providers/:id/capability;
+
+|Database|
+:Fetch Provider_Config for provider;
+
+|Backend|
+:Return materials[], colors[], layer_heights[], price_per_gram;
+
+|Frontend|
+:Render configuration form with provider's options;
+
+|User|
+:Selects material (e.g. PLA, PETG, ABS);
+:Selects color;
+:Selects layer height (quality);
+:Enters quantity;
+
+|Frontend|
+:Compute estimated price = weight_grams * price_per_gram * quantity;
+:Display cost estimate;
+
+|User|
+:Confirms configuration;
+
+|Frontend|
+:Store configuration as { material, color, layer_height, quantity } in order payload;
+:Enable "Submit Print Order" button;
+stop
+@enduml

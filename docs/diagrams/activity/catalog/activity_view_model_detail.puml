@@ -1,0 +1,55 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User or Guest|
+start
+:Navigates to /models/:id;
+
+|Frontend|
+:GET /models/:id;
+
+|Database|
+:Lookup model by id;
+
+|Backend|
+if (model not found?) then (yes)
+  :Return 404 Not Found;
+  |Frontend|
+  :Redirect to /catalog;
+  stop
+endif
+
+if (model status != APPROVED AND not owner AND not admin?) then (yes)
+  :Return 403 Forbidden;
+  |Frontend|
+  :Show access denied;
+  stop
+endif
+
+|MinIO|
+:Presign preview_url & file_url;
+
+|Database|
+:Fetch review summary (avg_rating, review_count);
+:Fetch artist profile;
+
+|Backend|
+:Compile full model detail object;
+:Return 200 OK;
+
+|Frontend|
+:Render 3D model viewer (GLB);
+:Render metadata (title, description, tags);
+:Render license & price info;
+:Render reviews section;
+:Render artist profile card;
+
+|User or Guest|
+if (authenticated?) then (yes)
+  :May add to cart, wishlist, or download;
+else (no)
+  :Prompted to register on action;
+endif
+stop
+@enduml

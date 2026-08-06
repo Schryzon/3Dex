@@ -1,0 +1,35 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Opens account settings;
+:Edits shipping address fields;
+
+|Frontend|
+:PATCH /users/me/shipping { street, city, province, postal_code, country };
+
+|Backend|
+:Validate all required fields are present;
+if (missing fields?) then (yes)
+  :Return 400 Bad Request;
+  stop
+endif
+
+:Validate postal_code format;
+if (invalid format?) then (yes)
+  :Return 400 Invalid postal code;
+  stop
+endif
+
+|Database|
+:Upsert Shipping_Address record for user;
+
+|Backend|
+:Return 200 OK;
+
+|Frontend|
+:Show "Address saved" confirmation toast;
+stop
+@enduml

@@ -1,0 +1,32 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Clicks wishlist heart;
+
+|Frontend|
+:POST /wishlist { model_id };
+
+|Database|
+:Lookup wishlist record;
+
+|Backend|
+if (already in wishlist?) then (yes)
+  |Database|
+  :Delete wishlist record;
+  |Backend|
+  :Return { wishlisted: false };
+  |Frontend|
+  :Icon turns grey;
+else (no)
+  |Database|
+  :Create wishlist record;
+  |Backend|
+  :Return { wishlisted: true };
+  |Frontend|
+  :Icon turns filled;
+endif
+stop
+@enduml

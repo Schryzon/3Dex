@@ -1,0 +1,42 @@
+@startuml
+skinparam activityArrowThickness 2
+skinparam roundcorner 10
+
+|User|
+start
+:Opens Social Settings;
+:Clicks "Connect Platform" (e.g. Instagram);
+
+|Frontend|
+:Redirect to platform OAuth consent;
+
+|External Platform|
+:User grants access;
+:Return OAuth access token;
+
+|Frontend|
+:POST /users/me/social { platform, access_token };
+
+|Backend|
+:Validate platform is supported (INSTAGRAM, TWITTER, etc.);
+if (unsupported platform?) then (yes)
+  :Return 400 Bad Request;
+  stop
+endif
+
+:Exchange token, fetch platform profile URL;
+if (token invalid?) then (yes)
+  :Return 401 Auth failed;
+  stop
+endif
+
+|Database|
+:Upsert Social_Link record { user_id, platform, profile_url };
+
+|Backend|
+:Return 200 OK;
+
+|Frontend|
+:Show linked platform badge on profile;
+stop
+@enduml
