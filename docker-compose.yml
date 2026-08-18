@@ -26,7 +26,7 @@ services:
     command: sh -c "npx prisma migrate deploy && node dist/server.js"
 
   minio:
-    image: minio/minio
+    image: minio/minio:RELEASE.2025-01-20T14-49-07Z
     container_name: 3dex-minio
     restart: always
     ports:
