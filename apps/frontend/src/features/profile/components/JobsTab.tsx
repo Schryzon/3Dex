@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { printService, PrintJob } from '@/lib/api/services/print.service';
-import { Loader2, Package, Check, X, Truck, Box, Camera, Image as ImageIcon, Upload, Plus } from 'lucide-react';
+import { Loader2, Package, Check, X, Truck, Box, Camera, Image as ImageIcon, Upload, Plus, ExternalLink } from 'lucide-react';
 import { apiClient } from '@/lib/api/client';
 import Link from 'next/link';
 
@@ -184,15 +184,30 @@ export default function JobsTab() {
 
                             {job.shipping_address && (
                                 <div className="mt-4 text-sm text-gray-400 border-t border-gray-800 pt-3">
-                                    <p className="font-semibold text-gray-300 mb-1">Shipping to:</p>
-                                    <p>{job.shipping_address.label || job.shipping_address.location}</p>
-                                    {(job.shipping_address.city || job.shipping_address.country) && (
-                                        <p>
-                                            {job.shipping_address.city}{job.shipping_address.city && job.shipping_address.country ? ', ' : ''}{job.shipping_address.country}
+                                    <div className="flex items-center justify-between mb-1">
+                                        <p className="font-semibold text-gray-300">Shipping to:</p>
+                                        {(job.shipping_address.lat || job.shipping_address.label) && (
+                                            <a
+                                                href={job.shipping_address.lat && job.shipping_address.lng ? `https://www.google.com/maps/search/?api=1&query=${job.shipping_address.lat},${job.shipping_address.lng}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(job.shipping_address.label || '')}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-1 text-xs text-yellow-400 hover:text-yellow-300 transition-colors"
+                                            >
+                                                <span>View on Maps</span>
+                                                <ExternalLink className="w-3 h-3" />
+                                            </a>
+                                        )}
+                                    </div>
+                                    <p className="text-white font-medium">{job.shipping_address.label || job.shipping_address.street || job.shipping_address.location || 'Address specified'}</p>
+                                    {(job.shipping_address.city || job.shipping_address.province || job.shipping_address.country) && (
+                                        <p className="text-xs text-zinc-500 mt-0.5">
+                                            {[job.shipping_address.city, job.shipping_address.province, job.shipping_address.postal_code, job.shipping_address.country].filter(Boolean).join(', ')}
                                         </p>
                                     )}
                                     {job.shipping_address.notes && (
-                                        <p className="mt-1 italic text-xs text-gray-500">Note: {job.shipping_address.notes}</p>
+                                        <p className="mt-1.5 italic text-xs text-gray-400 bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/5">
+                                            Note: {job.shipping_address.notes}
+                                        </p>
                                     )}
                                 </div>
                             )}

@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { printService } from '@/lib/api/services';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { getStorageUrl } from '@/lib/utils/storage';
-import { LayoutDashboard, Package, Clock, CheckCircle, Truck, XCircle, AlertCircle, Info } from 'lucide-react';
+import { LayoutDashboard, Package, Clock, CheckCircle, Truck, XCircle, AlertCircle, Info, ExternalLink, MapPin } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -156,22 +156,41 @@ export default function ProviderDashboardPage() {
 
                                         {/* Actions & Shipping */}
                                         <div className="space-y-6">
-                                            <div className="bg-yellow-500/5 border border-yellow-500/10 rounded-xl p-4">
-                                                <h4 className="text-xs font-bold text-yellow-500 uppercase mb-3 flex items-center gap-2">
-                                                    <Info className="w-3.5 h-3.5" />
-                                                    Shipping Details
-                                                </h4>
-                                                <p className="text-sm text-gray-300 leading-relaxed">
+                                             <div className="bg-yellow-500/5 border border-yellow-500/10 rounded-xl p-4">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <h4 className="text-xs font-bold text-yellow-500 uppercase flex items-center gap-2">
+                                                        <Info className="w-3.5 h-3.5" />
+                                                        Shipping Details
+                                                    </h4>
+                                                    {job.shipping_address && (job.shipping_address.lat || job.shipping_address.label) && (
+                                                        <a
+                                                            href={job.shipping_address.lat && job.shipping_address.lng ? `https://www.google.com/maps/search/?api=1&query=${job.shipping_address.lat},${job.shipping_address.lng}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(job.shipping_address.label || '')}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-1 text-xs text-yellow-400 hover:text-yellow-300 font-medium"
+                                                        >
+                                                            <span>Maps</span>
+                                                            <ExternalLink className="w-3 h-3" />
+                                                        </a>
+                                                    )}
+                                                </div>
+                                                <div className="text-sm text-gray-300 leading-relaxed">
                                                     {job.shipping_address ? (
-                                                        <>
-                                                            {job.shipping_address.street}, {job.shipping_address.city}<br />
-                                                            {job.shipping_address.state}, {job.shipping_address.zipCode}<br />
-                                                            {job.shipping_address.country}
-                                                        </>
+                                                        <div className="space-y-1">
+                                                            <p className="font-medium text-white">{job.shipping_address.label || job.shipping_address.street || 'Address provided'}</p>
+                                                            {(job.shipping_address.city || job.shipping_address.province || job.shipping_address.country) && (
+                                                                <p className="text-xs text-zinc-400">
+                                                                    {[job.shipping_address.city, job.shipping_address.province, job.shipping_address.postal_code, job.shipping_address.country].filter(Boolean).join(', ')}
+                                                                </p>
+                                                            )}
+                                                            {job.shipping_address.notes && (
+                                                                <p className="text-xs italic text-zinc-500 mt-1">Note: {job.shipping_address.notes}</p>
+                                                            )}
+                                                        </div>
                                                     ) : (
                                                         'No address provided'
                                                     )}
-                                                </p>
+                                                </div>
                                                 {job.tracking_number && (
                                                     <div className="mt-3 pt-3 border-t border-yellow-500/10">
                                                         <p className="text-xs text-gray-500">Tracking Number:</p>
