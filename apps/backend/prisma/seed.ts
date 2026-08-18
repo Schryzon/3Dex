@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
+import * as bcrypt from "bcrypt";
 
 fs.writeFileSync('seed_debug.log', 'Seed script started\n');
 
@@ -17,6 +18,8 @@ async function main() {
     console.log('🌱 Starting seed...')
     console.log('DB URL (Effective):', connectionString ? connectionString.replace(/:[^:]*@/, ':****@') : 'UNDEFINED');
 
+    const hashedPassword = await bcrypt.hash('password123', 10);
+
     const p = prisma as any;
 
     // 1. Create Artist
@@ -27,7 +30,7 @@ async function main() {
         create: {
             email: artistEmail,
             username: '3DexArtist',
-            password: 'password123', // In real app, hash this!
+            password: hashedPassword,
             role: 'ARTIST',
         },
     })
@@ -152,7 +155,7 @@ async function main() {
             email: providerEmail,
             username: '3DexProvider',
             display_name: 'Pro Prints',
-            password: 'password123',
+            password: hashedPassword,
             role: 'PROVIDER',
             provider_config: {
                 materials: ['PLA', 'ABS', 'Resin'],
@@ -174,7 +177,7 @@ async function main() {
             email: customerEmail,
             username: '3DexFan',
             display_name: 'Fan Boy',
-            password: 'password123',
+            password: hashedPassword,
             role: 'CUSTOMER',
         },
     })
