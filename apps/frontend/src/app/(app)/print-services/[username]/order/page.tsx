@@ -14,6 +14,8 @@ import { useAuth } from '@/features/auth';
 import ModelLibrarySelector from '@/features/print/components/ModelLibrarySelector';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import LocationPicker, { LocationAddress } from '@/components/common/LocationPicker';
+
 export default function PlaceOrderPage() {
     const params = useParams();
     const router = useRouter();
@@ -37,7 +39,7 @@ export default function PlaceOrderPage() {
     const [isModelSelectorOpen, setModelSelectorOpen] = useState(false);
 
     // Shipping
-    const [shippingLocation, setShippingLocation] = useState('');
+    const [shippingAddress, setShippingAddress] = useState<LocationAddress>({ label: '' });
     const [shippingNotes, setShippingNotes] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
@@ -98,7 +100,7 @@ export default function PlaceOrderPage() {
     };
 
     const handleSubmit = async () => {
-        if (!provider || selectedModels.length === 0 || !shippingLocation) return;
+        if (!provider || selectedModels.length === 0 || !shippingAddress.label.trim()) return;
 
         setSubmitting(true);
         try {
@@ -116,9 +118,7 @@ export default function PlaceOrderPage() {
                 provider_id: provider.id,
                 items: finalItems,
                 shipping_address: {
-                    label: shippingLocation,
-                    city: '', // Structured but blank for now as per plan
-                    country: '',
+                    ...shippingAddress,
                     notes: shippingNotes
                 }
             });
@@ -315,12 +315,12 @@ export default function PlaceOrderPage() {
                              <div className="space-y-4 mb-8">
                                 <div className="space-y-2">
                                     <label className="text-[11px] font-medium text-zinc-500 tracking-wide mb-2 block">Delivery Location</label>
-                                    <textarea
-                                        value={shippingLocation}
-                                        onChange={(e) => setShippingLocation(e.target.value)}
-                                        placeholder="City, Province, and specific delivery point..."
-                                        rows={3}
-                                        className="w-full bg-[#0a0a0a] border border-white/5 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400/50 outline-none transition-all resize-none placeholder:text-zinc-700 font-medium"
+                                    <LocationPicker
+                                        value={shippingAddress}
+                                        onChange={setShippingAddress}
+                                        placeholder="Search delivery address or landmark..."
+                                        show_map={true}
+                                        country_restriction="id"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -329,7 +329,7 @@ export default function PlaceOrderPage() {
                                         type="text"
                                         value={shippingNotes}
                                         onChange={(e) => setShippingNotes(e.target.value)}
-                                        placeholder="Special handling or notes..."
+                                        placeholder="Special handling or delivery notes..."
                                         className="w-full bg-[#0a0a0a] border border-white/5 rounded-xl px-4 py-3 text-sm text-white focus:border-yellow-400/50 outline-none transition-all placeholder:text-zinc-700 font-medium"
                                     />
                                 </div>
@@ -352,7 +352,7 @@ export default function PlaceOrderPage() {
 
                             <button
                                 onClick={handleSubmit}
-                                disabled={submitting || selectedModels.length === 0 || !shippingLocation}
+                                disabled={submitting || selectedModels.length === 0 || !shippingAddress.label.trim()}
                                 className="w-full group py-4 bg-white hover:bg-zinc-100 disabled:opacity-20 disabled:cursor-not-allowed text-black font-semibold uppercase tracking-wider rounded-2xl transition-all shadow-xl active:scale-[0.98] flex items-center justify-center gap-2 overflow-hidden relative"
                             >
                                 {submitting ? (

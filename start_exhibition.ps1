@@ -9,13 +9,13 @@ if (-not $IP) { $IP = "127.0.0.1" }
 Write-Host "Detected Local Network IP: $IP" -ForegroundColor Cyan
 
 # 2. Setup Environment Variables
-$frontendEnv = "apps/frontend/.env.local"
-$backendEnv = "apps/backend/.env"
-$dockerEnv = ".env.docker"
+$frontendEnv = "$PSScriptRoot/apps/frontend/.env.local"
+$backendEnv = "$PSScriptRoot/apps/backend/.env"
+$dockerEnv = "$PSScriptRoot/.env.docker"
 
-if (-not (Test-Path $frontendEnv)) { Copy-Item "apps/frontend/.env.local.example" $frontendEnv }
-if (-not (Test-Path $backendEnv)) { Copy-Item "apps/backend/.env.example" $backendEnv }
-if (-not (Test-Path $dockerEnv)) { Copy-Item ".env.docker.example" $dockerEnv }
+if (-not (Test-Path $frontendEnv)) { Copy-Item "$PSScriptRoot/apps/frontend/.env.local.example" $frontendEnv }
+if (-not (Test-Path $backendEnv)) { Copy-Item "$PSScriptRoot/apps/backend/.env.example" $backendEnv }
+if (-not (Test-Path $dockerEnv)) { Copy-Item "$PSScriptRoot/.env.docker.example" $dockerEnv }
 
 Write-Host "Injecting local IP and configuring Database/MinIO secrets into .env files..."
 $FE_Content = Get-Content $frontendEnv | Foreach-Object {
@@ -69,6 +69,13 @@ docker exec -it 3dex-api npm run seed
 Write-Host "`nStarting Next.js Frontend bound to 0.0.0.0..." -ForegroundColor Green
 Write-Host "You can access the web app on this machine at: http://localhost:3000"
 Write-Host "Others on the Wi-Fi network can access it at: http://$($IP):3000" -ForegroundColor Yellow
-Set-Location apps/frontend
-npm install
-npx next dev -H 0.0.0.0
+
+Push-Location "$PSScriptRoot/apps/frontend"
+try {
+    npm install
+    npx next dev -H 0.0.0.0
+}
+finally {
+    Pop-Location
+}
+

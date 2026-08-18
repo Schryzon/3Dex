@@ -54,6 +54,7 @@ import ModelGrid from '@/features/model/components/ModelGrid';
 import { useCollections } from '@/features/collection/hooks/useCollections';
 import { useWishlist } from '@/features/catalog/hooks/useWishlist';
 import { formatPrice } from '@/lib/utils';
+import LocationPicker from '@/components/common/LocationPicker';
 
 
 function UploadsTab({ userId }: { userId?: string }) {
@@ -1073,16 +1074,13 @@ function ProfileContent() {
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm text-gray-400 mb-2 font-medium">Location</label>
-                                                    <div className="relative">
-                                                        <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                                                        <input
-                                                            type="text"
-                                                            value={formData.location}
-                                                            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                                            placeholder="Jakarta, Indonesia"
-                                                            className="w-full bg-black/50 text-white pl-12 pr-4 py-3 rounded-xl border border-gray-800 focus:border-yellow-400 focus:outline-none transition-all"
-                                                        />
-                                                    </div>
+                                                    <LocationPicker
+                                                        value={formData.location}
+                                                        onChange={(addr) => setFormData({ ...formData, location: addr.label })}
+                                                        placeholder="Search city, province, or area..."
+                                                        show_map={true}
+                                                        country_restriction="id"
+                                                    />
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm text-gray-400 mb-2 font-medium">Phone Number</label>
