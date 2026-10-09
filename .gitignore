@@ -13,3 +13,7 @@ minio_backup/
 backups/
 _temp_restore/
 *.zip
+
+# TeX build artifacts
+docs/diagrams/tex/build/
+*.aux

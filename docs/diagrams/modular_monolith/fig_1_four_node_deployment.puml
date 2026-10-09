@@ -1,0 +1,102 @@
+@startuml fig_1_four_node_deployment
+!theme plain
+skinparam componentStyle uml2
+skinparam BackgroundColor white
+skinparam defaultFontSize 13
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+skinparam shadowing false
+skinparam roundcorner 8
+
+skinparam node {
+    BackgroundColor #F8F9FA
+    BorderColor #2B2D42
+    BorderThickness 1.5
+    FontSize 14
+    FontStyle bold
+}
+
+skinparam component {
+    BackgroundColor #FFFFFF
+    BorderColor #4A5568
+    BorderThickness 1
+}
+
+skinparam database {
+    BackgroundColor #FFFFFF
+    BorderColor #2B2D42
+    BorderThickness 1.5
+}
+
+skinparam actor {
+    BackgroundColor #FFFFFF
+    BorderColor #2B2D42
+}
+
+title Figure 1: 3Dex Four-Node Deployment Topology & Modular Monolith Application Layer
+
+actor "End User / Browser\n(WebGL Client)" as User_Client
+
+node "Node 1: Frontend Infrastructure (Next.js Application)" as Frontend_Node {
+    component "UI Engine & Router\n(React 19 / App Router)" as Ui_Engine
+    component "WebGL Rendering Canvas\n(Three.js / React Three Fiber)" as Webgl_Engine
+    component "Client State Management\n(Zustand / TanStack Query)" as Client_State
+}
+
+node "Node 2: Backend Infrastructure (Modular Monolith)" as Backend_Node {
+    component "API Gateway & RBAC Middleware\n(Express.js / Node.js 20)" as Api_Router
+    
+    package "Core Monolithic Business Modules" as Business_Modules {
+        component "Authentication Module\n(JWT, OAuth, RBAC)" as Mod_Auth
+        component "Catalog Module\n(Metadata, Filters, Search)" as Mod_Catalog
+        component "Commerce Module\n(Cart, Orders, Billing)" as Mod_Commerce
+        component "Community Module\n(Posts, Follows, Reviews)" as Mod_Community
+        component "Dexie AI Module\n(Semantic Search, Recs)" as Mod_Dexie
+        component "Notification Module\n(System Alerts, Events)" as Mod_Notif
+        component "Print Workflow Module\n(Provider Queue, Slicing)" as Mod_Print
+        component "Administration Module\n(Moderation, Audit Logs)" as Mod_Admin
+    }
+}
+
+node "Node 3: Database Infrastructure" as Database_Node {
+    database "PostgreSQL Relational DB\n(Prisma ORM Managed)" as Relational_Db
+    database "pgvector Extension\n(HNSW High-Dim Index)" as Vector_Db
+}
+
+node "Node 4: Object Storage Infrastructure" as Storage_Node {
+    database "MinIO S3 Object Storage\n(.glb 3D Assets, Media Blobs)" as Minio_Storage
+}
+
+node "External Integration Services" as External_Services {
+    component "Midtrans Payment Gateway\n(Snap / Webhooks)" as Gateway_Midtrans
+    component "Google Gemini API\n(Flash Contextual Prompts)" as Gemini_Service
+}
+
+' Client interactions
+User_Client -down-> Ui_Engine : HTTPS Traffic
+Ui_Engine -right-> Webgl_Engine : 3D Scene Composition
+Ui_Engine -left-> Client_State : Client State Mutation
+
+' Tier interactions
+Ui_Engine =down=> Api_Router : HTTP / REST API Requests
+Api_Router -down-> Mod_Auth
+Api_Router -down-> Mod_Catalog
+Api_Router -down-> Mod_Commerce
+Api_Router -down-> Mod_Community
+Api_Router -down-> Mod_Dexie
+Api_Router -down-> Mod_Notif
+Api_Router -down-> Mod_Print
+Api_Router -down-> Mod_Admin
+
+' Database connections
+Business_Modules =down=> Relational_Db : Prisma Client / TCP 5432
+Mod_Dexie =down=> Vector_Db : Vector Cosine Similarity Queries
+
+' Object storage connections
+Mod_Catalog =down=> Minio_Storage : Asset Upload / Presigned URLs
+Mod_Commerce =down=> Minio_Storage : Time-Limited Download URLs
+
+' External connections
+Mod_Commerce .right.> Gateway_Midtrans : Checkout & Webhook Handlers
+Mod_Dexie .right.> Gemini_Service : Situational AI Text Completion
+
+@enduml

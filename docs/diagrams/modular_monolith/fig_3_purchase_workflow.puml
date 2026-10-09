@@ -1,0 +1,74 @@
+@startuml fig_3_purchase_workflow
+!theme plain
+skinparam BackgroundColor white
+skinparam defaultFontSize 12
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+skinparam shadowing false
+skinparam roundcorner 6
+
+skinparam sequence {
+    ArrowColor #2B2D42
+    ActorBorderColor #2B2D42
+    LifeLineBorderColor #4A5568
+    LifeLineBackgroundColor #EDF2F7
+    ParticipantBorderColor #2B2D42
+    ParticipantBackgroundColor #FFFFFF
+    BoxBorderColor #2B2D42
+    BoxBackgroundColor #F8F9FA
+}
+
+title Figure 3: Customer Purchase & Digital Delivery Workflow (In-Process Execution)
+
+actor "Customer" as User
+participant "Frontend Node\n(Next.js Client)" as Frontend
+
+box "Backend Node: Modular Monolith Runtime" #F4F6F8
+    participant "Catalog\nModule" as Mod_Catalog
+    participant "Commerce\nModule" as Mod_Commerce
+    participant "Payment\nHandler" as Payment_Sub
+    participant "Prisma ORM\nData Layer" as Data_Layer
+    participant "Storage\nService" as Storage_Sub
+end box
+
+participant "Midtrans\nGateway" as Midtrans
+database "PostgreSQL\nDatabase" as Postgres
+database "MinIO\nObject Store" as Minio
+
+User -> Frontend : 1. Selects 3D Model & Clicks "Purchase"
+Frontend -> Mod_Commerce : 2. POST /api/commerce/checkout {model_id, license_tier}
+
+note over Mod_Catalog, Mod_Commerce #E2E8F0
+  In-Process Function Call (Zero Network Latency):
+  Commerce module invokes Catalog directly in memory
+  to verify asset state, ownership, and pricing.
+end note
+
+Mod_Commerce -> Mod_Catalog : 3. validate_asset_and_pricing(model_id, license_tier)
+Mod_Catalog --> Mod_Commerce : 4. Return {is_active: true, price: 150000, artist_id: ...}
+
+Mod_Commerce -> Payment_Sub : 5. create_payment_intent(order_details)
+Payment_Sub -> Midtrans : 6. HTTPS POST /snap/v1/transactions (Create Snap Token)
+Midtrans --> Payment_Sub : 7. Return {snap_token, redirect_url}
+Payment_Sub --> Mod_Commerce : 8. In-process return snap token
+Mod_Commerce --> Frontend : 9. Response {snap_token}
+
+User -> Frontend : 10. Completes Payment in Snap Popup
+Midtrans -> Payment_Sub : 11. HTTPS POST /api/webhooks/midtrans (payment_success)
+
+group Unified Database Transaction (ACID Boundary)
+    Payment_Sub -> Mod_Commerce : 12. handle_payment_settlement(order_id)
+    Mod_Commerce -> Data_Layer : 13. execute_transaction()
+    Data_Layer -> Postgres : 14. BEGIN TRANSACTION;\nUPDATE "Order" SET status = 'PAID';\nINSERT INTO "Purchase" (user_id, model_id, license);\nUPDATE "User" SET balance = balance + net_share WHERE id = artist_id;\nCOMMIT;
+    Postgres --> Data_Layer : 15. Transaction Confirmed
+    Data_Layer --> Mod_Commerce : 16. Settlement Confirmed
+end
+
+Mod_Commerce -> Storage_Sub : 17. generate_presigned_download_url(model_id, user_id)
+Storage_Sub -> Minio : 18. S3 Sign: GetObject (model_key, expires_in=3600)
+Minio --> Storage_Sub : 19. Signed URL string
+Storage_Sub --> Mod_Commerce : 20. Return Signed URL
+
+Mod_Commerce --> Frontend : 21. Event / Status: Purchase Confirmed + Signed URL
+Frontend --> User : 22. Display "Download Unlocked" & Direct File Link
+
+@enduml

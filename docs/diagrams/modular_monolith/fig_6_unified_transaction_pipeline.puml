@@ -1,0 +1,48 @@
+@startuml fig_6_unified_transaction_pipeline
+!theme plain
+skinparam BackgroundColor white
+skinparam defaultFontSize 12
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+skinparam shadowing false
+skinparam roundcorner 6
+
+skinparam activity {
+    BackgroundColor #FFFFFF
+    BorderColor #2B2D42
+    BorderThickness 1.2
+    ArrowColor #2B2D42
+}
+
+skinparam partition {
+    BackgroundColor #F8F9FA
+    BorderColor #2B2D42
+    BorderThickness 1.5
+    FontStyle bold
+}
+
+title Figure 6: Unified Relational Transaction Pipeline (Single PostgreSQL ACID Boundary)
+
+start
+
+partition "Single PostgreSQL Transaction Context (BEGIN ... COMMIT)" {
+    :1. Create Order Entity\n**INSERT INTO Order** (user_id, status='PENDING');
+    
+    :2. Create Order Items\n**INSERT INTO OrderItem** (order_id, model_id, license_tier);
+    
+    :3. Ledger Payment Settlement\n**INSERT INTO Payment** & **UPDATE User** balance;
+    
+    :4. Provision Digital Authorization\n**INSERT INTO Purchase** (user_id, model_id, access_token);
+    
+    if (Physical 3D Print Ordered?) then (yes)
+        :5. Enqueue Physical Print Job\n**INSERT INTO PrintJob** (order_id, provider_id, specs);
+    else (no / digital asset only)
+        :Bypass Physical Production Queue;
+    endif
+    
+    :COMMIT TRANSACTION\n(Atomic All-or-Nothing Guarantee);
+}
+
+:Emit Time-Limited Signed MinIO Download URL;
+stop
+
+@enduml

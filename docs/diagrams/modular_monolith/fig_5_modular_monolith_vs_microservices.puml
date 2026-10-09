@@ -1,0 +1,74 @@
+@startuml fig_5_modular_monolith_vs_microservices
+!theme plain
+skinparam componentStyle uml2
+skinparam BackgroundColor white
+skinparam defaultFontSize 11
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+skinparam shadowing false
+skinparam roundcorner 6
+
+title Figure 5: Structural Comparison: Modular Monolith (3Dex) vs. Microservices Architecture
+
+package "3Dex Architecture: Modular Monolith" as Monolith_Arch #F8FAFC {
+    node "Single Backend Application Process / Container" as Mono_Process #FFFFFF {
+        component "Auth Module" as M_A
+        component "Catalog Module" as M_B
+        component "Commerce Module" as M_C
+        component "Community Module" as M_D
+        component "Dexie AI Module" as M_E
+        component "Print Module" as M_F
+        component "Admin Module" as M_G
+        
+        M_C -right-> M_B : In-memory\nMethod Call
+        M_C -down-> M_F : In-memory\nMethod Call
+        M_E -left-> M_B : In-memory\nMethod Call
+    }
+    
+    database "Single Central Database\n(PostgreSQL + pgvector)" as Mono_Db #FFFFFF
+    
+    Mono_Process =down=> Mono_Db : Direct Connection Pool / ACID Transactions
+    
+    note bottom of Mono_Process
+      [Characteristics of 3Dex Modular Monolith]
+      * Shared Runtime: 1 OS Process & 1 CI/CD Pipeline
+      * Inter-Module Comm: In-Process Function Invocations
+      * Latency: Sub-millisecond (zero network hop)
+      * Data Boundary: Single Relational DB with Foreign Keys
+      * Transactionality: Native ACID via BEGIN / COMMIT
+    end note
+}
+
+package "Alternative Architecture: Distributed Microservices" as Micro_Arch #F8FAFC {
+    node "Auth Service\n(Container 1)" as S_A #FFFFFF
+    node "Catalog Service\n(Container 2)" as S_B #FFFFFF
+    node "Commerce Service\n(Container 3)" as S_C #FFFFFF
+    node "Dexie AI Service\n(Container 4)" as S_E #FFFFFF
+    node "Print Service\n(Container 5)" as S_F #FFFFFF
+    
+    database "Auth DB" as DB_A #FFFFFF
+    database "Catalog DB" as DB_B #FFFFFF
+    database "Commerce DB" as DB_C #FFFFFF
+    database "Vector DB" as DB_E #FFFFFF
+    database "Print DB" as DB_F #FFFFFF
+    
+    S_A =down=> DB_A
+    S_B =down=> DB_B
+    S_C =down=> DB_C
+    S_E =down=> DB_E
+    S_F =down=> DB_F
+    
+    S_C .right.> S_B : gRPC / REST (Network Hop)
+    S_C .down.> S_F : Event Bus / Kafka (Network Hop)
+    S_E .left.> S_B : gRPC / REST (Network Hop)
+    
+    note bottom of Micro_Arch
+      [Characteristics of Microservices]
+      * Decoupled Runtime: N Independent Deployments & Pipelines
+      * Inter-Module Comm: Remote RPC / REST / Message Queues
+      * Latency: Network Serialization Overhead & Retries
+      * Data Boundary: Database-per-Service (Isolated Schemas)
+      * Transactionality: Distributed Sagas & Eventual Consistency
+    end note
+}
+
+@enduml

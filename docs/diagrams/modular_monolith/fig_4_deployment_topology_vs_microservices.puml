@@ -1,0 +1,80 @@
+@startuml fig_4_deployment_topology_vs_microservices
+!theme plain
+skinparam componentStyle uml2
+skinparam BackgroundColor white
+skinparam defaultFontSize 12
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+skinparam shadowing false
+skinparam roundcorner 6
+
+skinparam node {
+    BackgroundColor #FFFFFF
+    BorderColor #2B2D42
+    BorderThickness 1.5
+    FontSize 13
+    FontStyle bold
+}
+
+skinparam package {
+    BackgroundColor #F8F9FA
+    BorderColor #4A5568
+    BorderThickness 1.2
+    FontSize 13
+}
+
+skinparam component {
+    BackgroundColor #FFFFFF
+    BorderColor #4A5568
+    BorderThickness 1
+}
+
+skinparam database {
+    BackgroundColor #FFFFFF
+    BorderColor #2B2D42
+    BorderThickness 1.5
+}
+
+title Figure 4: Physical Infrastructure Topology vs. Logical Application Boundary
+
+node "Node 1: Frontend Container\n(Independently Deployed)" as N1 {
+    component "Next.js Web Client\n(Port 3000)" as C_Web
+}
+
+node "Node 2: Backend Monolithic Container\n(Single Deployable Unit)" as N2 {
+    package "Modular Monolith Codebase (deploy.tar / Docker Image)" as Monolith_Unit {
+        component "Auth Module" as M1
+        component "Catalog Module" as M2
+        component "Commerce Module" as M3
+        component "Community Module" as M4
+        component "Dexie AI Module" as M5
+        component "Notification Module" as M6
+        component "Print Module" as M7
+        component "Admin Module" as M8
+    }
+}
+
+node "Node 3: Relational DB Node\n(State Infrastructure)" as N3 {
+    database "PostgreSQL 16\n(Port 5432)" as DB_Postgres
+}
+
+node "Node 4: Object Storage Node\n(Blob Infrastructure)" as N4 {
+    database "MinIO S3 Server\n(Port 9000)" as DB_Minio
+}
+
+' Links
+C_Web ==down==> N2 : REST API (Port 5000)\n[Network Boundary]
+N2 ==down==> DB_Postgres : SQL Protocol\n[Network Boundary]
+N2 ==right==> DB_Minio : S3 Protocol\n[Network Boundary]
+
+' Boundary Annotations
+note bottom of N2
+  CRITICAL ARCHITECTURAL DISTINCTION:
+  Although 3Dex runs across 4 distinct infrastructure nodes,
+  the backend business modules (Auth, Catalog, Commerce, etc.)
+  CANNOT be deployed or scaled independently.
+  Modifying one module requires rebuilding & redeploying
+  the ENTIRE Backend Container (Single Artifact).
+  --> Infrastructure is Distributed, Application is Monolithic.
+end note
+
+@enduml

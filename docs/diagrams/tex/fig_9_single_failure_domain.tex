@@ -1,0 +1,79 @@
+\documentclass[tikz,border=12pt]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,fit,backgrounds,calc}
+
+\renewcommand{\familydefault}{\sfdefault}
+\definecolor{cborder}{HTML}{1E293B}
+\definecolor{cbg}{HTML}{F8FAFC}
+\definecolor{cbox}{HTML}{FFFFFF}
+\definecolor{cgray}{HTML}{64748B}
+\definecolor{cred}{HTML}{DC2626}
+\definecolor{credlight}{HTML}{FEF2F2}
+\definecolor{cgreen}{HTML}{059669}
+\definecolor{cgreenlight}{HTML}{ECFDF5}
+
+\begin{document}
+\begin{tikzpicture}[
+    font=\small,
+    >=Stealth,
+    node distance=0.8cm and 1.0cm,
+    flow/.style={
+        ->,
+        line width=0.9pt,
+        draw=cred,
+        dashed
+    }
+]
+
+    % Pane A Inner Nodes
+    \node[draw=cred, fill=white, rounded corners=4pt, line width=0.8pt, text width=4.5cm, inner sep=8pt] (crash_source) {
+        \textbf{\color{cred} Dexie AI Fatal OOM}\\[3pt]
+        \scriptsize Uncaught Exception / Node Crash\\
+        \tiny Process Exits with Code 1
+    };
+
+    \node[draw=cred, fill=white, rounded corners=4pt, line width=0.8pt, text width=6.8cm, right=2.4cm of crash_source, inner sep=8pt] (all_dead) {
+        \textbf{\color{cred} Total Backend Blackout}\\[3pt]
+        \scriptsize Auth: Offline $\cdot$ Catalog: Offline $\cdot$ Commerce: Offline\\
+        \tiny Print: Offline $\cdot$ Community: Offline $\cdot$ Admin: Offline
+    };
+
+    \draw[flow] (crash_source) -- (all_dead) node[midway, above=2pt, font=\tiny, text=cred] {Fatal Process Crash};
+
+    % Pane A Background Box
+    \begin{scope}[on background layer]
+        \node[draw=cred, fill=credlight!20, rounded corners=6pt, line width=1pt,
+              fit=(crash_source) (all_dead),
+              inner xsep=14pt, inner ysep=20pt] (mono_fail) {};
+    \end{scope}
+
+    \node[anchor=north west, font=\bfseries\footnotesize, text=cred] at (mono_fail.north west) [xshift=10pt, yshift=-7pt] {
+        Scenario A: 3Dex Modular Monolith (Shared Runtime Blast Radius = 100\%)
+    };
+
+    % Pane B Inner Nodes placed cleanly with generous vertical gap (2.4cm)
+    \node[draw=cred, fill=white, rounded corners=4pt, line width=0.8pt, text width=4.5cm, below=2.4cm of crash_source, inner sep=8pt] (iso_crash) {
+        \textbf{\color{cred} Dexie AI Pod [CRASHED]}\\[3pt]
+        \scriptsize AI Recommendations Degraded\\
+        \tiny Crash Isolated to Specific Pod
+    };
+
+    \node[draw=cgreen, fill=white, rounded corners=4pt, line width=0.8pt, text width=6.8cm, right=2.4cm of iso_crash, inner sep=8pt] (healthy_svcs) {
+        \textbf{\color{cgreen} Core Business Domains [ONLINE]}\\[3pt]
+        \scriptsize Auth: Operational $\cdot$ Catalog: Operational $\cdot$ Commerce: Operational\\
+        \tiny Customers can authenticate, browse, and checkout normally
+    };
+
+    % Pane B Background Box
+    \begin{scope}[on background layer]
+        \node[draw=cgreen, fill=cgreenlight!20, rounded corners=6pt, line width=1pt,
+              fit=(iso_crash) (healthy_svcs),
+              inner xsep=14pt, inner ysep=20pt] (micro_fail) {};
+    \end{scope}
+
+    \node[anchor=north west, font=\bfseries\footnotesize, text=cgreen] at (micro_fail.north west) [xshift=10pt, yshift=-7pt] {
+        Scenario B: Microservices (Isolated Fault Domains)
+    };
+
+\end{tikzpicture}
+\end{document}

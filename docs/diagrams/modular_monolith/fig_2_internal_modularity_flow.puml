@@ -1,0 +1,98 @@
+@startuml fig_2_internal_modularity_flow
+!theme plain
+skinparam componentStyle uml2
+skinparam BackgroundColor white
+skinparam defaultFontSize 12
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+skinparam shadowing false
+skinparam roundcorner 6
+
+skinparam frame {
+    BackgroundColor #F8F9FA
+    BorderColor #2B2D42
+    BorderThickness 1.5
+    FontSize 14
+    FontStyle bold
+}
+
+skinparam component {
+    BackgroundColor #FFFFFF
+    BorderColor #4A5568
+    BorderThickness 1
+}
+
+skinparam database {
+    BackgroundColor #FFFFFF
+    BorderColor #2B2D42
+    BorderThickness 1.5
+}
+
+title Figure 2: Internal Backend Modularity & In-Process Request Dispatch Pipeline
+
+actor "Client / User" as Client
+
+package "Presentation Tier" {
+    component "Frontend Node\n(Next.js App Router)" as Frontend
+}
+
+frame "Backend Node: Modular Monolithic Boundary (Single OS Process)" as Backend_Monolith {
+    component "HTTP Ingress & Router\n(Express.js Routes)" as Ingress
+    component "Authentication Middleware\n(JWT Claims & RBAC Guard)" as Middleware
+    
+    package "Domain-Driven Business Modules (In-Memory Isolation)" as Modules {
+        component "Authentication Module\n(Identity & Credentials)" as M_Auth
+        component "Catalog Module\n(3D Asset Index & Search)" as M_Catalog
+        component "Commerce Module\n(Order Ledger & Checkout)" as M_Commerce
+        component "Community Module\n(Social Feeds & Reviews)" as M_Community
+        component "Dexie AI Module\n(Vector Similarity & Recs)" as M_Dexie
+        component "Print Module\n(Job Dispatch & Specs)" as M_Print
+        component "Notification Module\n(Alerts & Activity Feeds)" as M_Notif
+        component "Admin Module\n(Audit Trails & Governance)" as M_Admin
+    }
+    
+    component "Shared Data Access Layer\n(Prisma Client ORM & MinIO Client)" as Data_Access
+}
+
+package "Persistence Infrastructure" {
+    database "PostgreSQL 16\n(+ pgvector extension)" as Postgres_Db
+    database "MinIO Object Store\n(S3 Asset Buckets)" as Minio_Store
+}
+
+' External flow
+Client -down-> Frontend : HTTPS (User Actions)
+Frontend =down=> Ingress : HTTP / REST API Calls (JSON)
+
+' Internal in-process flow
+Ingress -down-> Middleware : Request Hand-off
+Middleware -down-> M_Auth : Validate Token / Roles
+
+' In-process dispatching
+Middleware ..> M_Catalog : In-process dispatch
+Middleware ..> M_Commerce : In-process dispatch
+Middleware ..> M_Community : In-process dispatch
+Middleware ..> M_Dexie : In-process dispatch
+Middleware ..> M_Print : In-process dispatch
+Middleware ..> M_Notif : In-process dispatch
+Middleware ..> M_Admin : In-process dispatch
+
+' Intra-module in-memory collaboration (Zero Network Latency)
+M_Commerce -right-> M_Catalog : In-memory Query (Validate SKU & License)
+M_Commerce -down-> M_Notif : Local Event Dispatch (Order Placed)
+M_Print -up-> M_Notif : Local Event Dispatch (Job Status Changed)
+M_Dexie -left-> M_Catalog : In-memory Metadata Enrichment
+
+' Persistence Flow
+Modules =down=> Data_Access : Local Method Invocations
+Data_Access =down=> Postgres_Db : Structured SQL & Vector Embeddings
+Data_Access =down=> Minio_Store : Blob Put/Get & Presigned URL Generation
+
+note right of Backend_Monolith
+  Key Architectural Property:
+  All 8 domain modules execute within
+  the SAME Node.js runtime process.
+  Communication between modules occurs
+  via in-process function calls, eliminating
+  network latency and serialization overhead.
+end note
+
+@enduml

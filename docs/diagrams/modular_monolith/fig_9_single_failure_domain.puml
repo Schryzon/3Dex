@@ -1,0 +1,84 @@
+@startuml fig_9_single_failure_domain
+!theme plain
+skinparam componentStyle uml2
+skinparam BackgroundColor white
+skinparam defaultFontSize 12
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+skinparam shadowing false
+skinparam roundcorner 6
+
+skinparam package {
+    BackgroundColor #F8F9FA
+    BorderColor #2B2D42
+    BorderThickness 1.5
+    FontSize 13
+    FontStyle bold
+}
+
+skinparam node {
+    BackgroundColor #FFFFFF
+    BorderColor #2B2D42
+    BorderThickness 1.2
+}
+
+skinparam component {
+    BackgroundColor #FFFFFF
+    BorderColor #4A5568
+    BorderThickness 1
+}
+
+title Figure 9: Shared Runtime Blast Radius: Single Failure Domain in 3Dex Modular Monolith
+
+package "Scenario A: 3Dex Modular Monolith (Shared OS Process Blast Radius)" as Monolith_Failure {
+    node "Backend Node (Single Node.js Process Runtime)" as Node_Crash #FFF1F2 {
+        component "Dexie AI Engine\n[Fatal OOM / Event Loop Freeze]" as F_Trigger #E11D48
+        
+        component "Auth Module [CRASHED]" as F_Auth #FECDD3
+        component "Catalog Module [CRASHED]" as F_Cat #FECDD3
+        component "Commerce Module [CRASHED]" as F_Com #FECDD3
+        component "Community Module [CRASHED]" as F_Soc #FECDD3
+        component "Print Module [CRASHED]" as F_Prt #FECDD3
+        component "Admin Module [CRASHED]" as F_Adm #FECDD3
+        
+        F_Trigger .down.> F_Auth : Process Exit
+        F_Trigger .down.> F_Cat : Process Exit
+        F_Trigger .down.> F_Com : Process Exit
+        F_Trigger .down.> F_Soc : Process Exit
+        F_Trigger .down.> F_Prt : Process Exit
+        F_Trigger .down.> F_Adm : Process Exit
+    }
+    
+    note bottom of Node_Crash
+      Blast Radius = 100% of Backend
+      Because all 8 business modules run inside the same OS process,
+      an uncaught exception or fatal memory exhaustion in any single module
+      terminates the entire application server. All features go offline simultaneously.
+    end note
+}
+
+package "Scenario B: Microservices Architecture (Isolated Fault Domains)" as Micro_Failure {
+    node "Dexie AI Service [CRASHED]" as M_Dex_Dead #E11D48 {
+        component "Crash Isolated to Container" as Sub_Dead #FECDD3
+    }
+
+    node "Auth Service [ONLINE]" as M_Auth_Alive #ECFDF5 {
+        component "Operational & Serving" as Sub_Auth #A7F3D0
+    }
+
+    node "Commerce Service [ONLINE]" as M_Com_Alive #ECFDF5 {
+        component "Operational & Serving" as Sub_Com #A7F3D0
+    }
+
+    node "Catalog Service [ONLINE]" as M_Cat_Alive #ECFDF5 {
+        component "Operational & Serving" as Sub_Cat #A7F3D0
+    }
+    
+    note bottom of M_Dex_Dead
+      Fault Isolation:
+      Dexie crash degrades AI recommendations gracefully.
+      Core authentication, model catalog, and purchasing
+      remain fully functional and accessible to users.
+    end note
+}
+
+@enduml

@@ -1,0 +1,78 @@
+\documentclass[tikz,border=12pt]{standalone}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,fit,backgrounds,calc}
+
+\renewcommand{\familydefault}{\sfdefault}
+\definecolor{cborder}{HTML}{1E293B}
+\definecolor{cbg}{HTML}{F8FAFC}
+\definecolor{cbox}{HTML}{FFFFFF}
+\definecolor{cgray}{HTML}{64748B}
+\definecolor{cred}{HTML}{DC2626}
+\definecolor{credlight}{HTML}{FEF2F2}
+\definecolor{cgreen}{HTML}{059669}
+\definecolor{cgreenlight}{HTML}{ECFDF5}
+
+\begin{document}
+\begin{tikzpicture}[
+    font=\small,
+    >=Stealth,
+    node distance=0.8cm and 1.0cm,
+    flow/.style={
+        ->,
+        line width=1pt,
+        draw=cborder
+    }
+]
+
+    % Pane A Inner Nodes
+    \node[draw=cborder, fill=white, rounded corners=4pt, line width=0.8pt, text width=5.2cm, inner sep=8pt] (rep1) {
+        \textbf{Backend Replica 1 [95\% CPU]}\\[3pt]
+        \scriptsize \color{cred} Dexie AI Engine: 90\% CPU (Surge)\\
+        \scriptsize \color{cgray} Auth + Catalog + Commerce: 5\% CPU (Idle)
+    };
+
+    \node[draw=cborder, fill=white, rounded corners=4pt, line width=0.8pt, text width=5.2cm, right=2.2cm of rep1, inner sep=8pt] (rep2) {
+        \textbf{Backend Replica 2 [Autoscaled]}\\[3pt]
+        \scriptsize \color{cred} Dexie AI Engine: Replicated\\
+        \scriptsize \color{cgray} Auth + Catalog + Commerce: Unnecessarily Duplicated
+    };
+
+    \draw[flow, draw=cred] (rep1) -- (rep2) node[midway, above=2pt, font=\tiny, text=cred] {Autoscale Trigger};
+
+    % Pane A Background Box
+    \begin{scope}[on background layer]
+        \node[draw=cred, fill=credlight!20, rounded corners=6pt, line width=1pt,
+              fit=(rep1) (rep2),
+              inner xsep=14pt, inner ysep=20pt] (mono_pane) {};
+    \end{scope}
+
+    \node[anchor=north west, font=\bfseries\footnotesize, text=cred] at (mono_pane.north west) [xshift=10pt, yshift=-7pt] {
+        Monolithic Coarse-Grained Scaling (Asymmetric Load Inefficiency)
+    };
+
+    % Pane B Inner Nodes placed cleanly with generous vertical gap (2.4cm)
+    \node[draw=cborder, fill=white, rounded corners=4pt, line width=0.8pt, text width=4.0cm, below=2.4cm of rep1, inner sep=8pt] (light_svcs) {
+        \textbf{Light Services [1x]}\\[3pt]
+        \scriptsize Auth / Catalog / Commerce\\
+        \tiny 128 MB RAM $\cdot$ Low CPU
+    };
+
+    \node[draw=cgreen, fill=white, rounded corners=4pt, line width=0.8pt, text width=7.0cm, right=1.6cm of light_svcs, inner sep=8pt] (dex_cluster) {
+        \textbf{\color{cgreen} Dexie AI Service Cluster [3x Autoscaled]}\\[3pt]
+        \scriptsize Pod 1 $\cdot$ Pod 2 $\cdot$ Pod 3 on GPU Nodes\\
+        \tiny Resources allocated strictly where demand spikes
+    };
+
+    % Pane B Background Box
+    \begin{scope}[on background layer]
+        \node[draw=cgreen, fill=cgreenlight!20, rounded corners=6pt, line width=1pt,
+              fit=(light_svcs) (dex_cluster),
+              inner xsep=14pt, inner ysep=20pt] (micro_pane) {};
+    \end{scope}
+
+    \node[anchor=north west, font=\bfseries\footnotesize, text=cgreen] at (micro_pane.north west) [xshift=10pt, yshift=-7pt] {
+        Microservices Targeted Scaling (Granular Cloud Efficiency)
+    };
+
+\end{tikzpicture}
+\end{document}

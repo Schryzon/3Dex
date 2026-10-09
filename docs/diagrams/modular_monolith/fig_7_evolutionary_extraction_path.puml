@@ -1,0 +1,73 @@
+@startuml fig_7_evolutionary_extraction_path
+!theme plain
+skinparam componentStyle uml2
+skinparam BackgroundColor white
+skinparam defaultFontSize 12
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+skinparam shadowing false
+skinparam roundcorner 6
+
+skinparam package {
+    BackgroundColor #F8F9FA
+    BorderColor #2B2D42
+    BorderThickness 1.5
+    FontSize 13
+    FontStyle bold
+}
+
+skinparam component {
+    BackgroundColor #FFFFFF
+    BorderColor #4A5568
+    BorderThickness 1
+}
+
+skinparam node {
+    BackgroundColor #FFFFFF
+    BorderColor #2B2D42
+    BorderThickness 1.2
+}
+
+title Figure 7: Evolutionary Architecture: Bounded Context Extraction from Monolith to Microservices
+
+package "Phase 1: Present State (3Dex Modular Monolith)" as Phase1 {
+    frame "Single Backend Codebase with Clean Facade Boundaries" as Monolith_Box #FFFFFF {
+        component "[Facade: Auth]\nAuthentication Module" as M_Auth
+        component "[Facade: Catalog]\nCatalog Module" as M_Catalog
+        component "[Facade: Commerce]\nCommerce Module" as M_Commerce
+        component "[Facade: Community]\nCommunity Module" as M_Community
+        component "[Facade: Dexie]\nDexie AI Module" as M_Dexie
+        component "[Facade: Print]\nPrint Module" as M_Print
+        component "[Facade: Notif]\nNotification Module" as M_Notif
+        component "[Facade: Admin]\nAdmin Module" as M_Admin
+    }
+}
+
+package "Phase 2: Future Evolution (Target Independent Services)" as Phase2 {
+    node "Auth Service (Microservice)\n[Identity & OAuth Boundary]" as S_Auth
+    node "Catalog Service (Microservice)\n[High-Read CDN & Metadata]" as S_Catalog
+    node "Commerce Service (Microservice)\n[Orders & Payment Settlement]" as S_Commerce
+    node "Dexie AI Service (Microservice)\n[High-Compute GPU/Vector Cluster]" as S_Dexie
+    node "Print Service (Microservice)\n[Asynchronous Job Queue & IoT]" as S_Print
+    
+    frame "Residual Core Monolith\n(Community, Notif, Admin)" as S_Residual #F1F5F9 {
+        component "Community & Feeds" as R_Comm
+        component "Notification Dispatch" as R_Notif
+        component "Admin Operations" as R_Admin
+    }
+}
+
+' Evolutionary transitions
+M_Auth =down=> S_Auth : 1. Extract Identity Provider\n(Independent Auth Service)
+M_Catalog =down=> S_Catalog : 2. Extract Read Catalog\n(Independent Scale for Search)
+M_Commerce =down=> S_Commerce : 3. Extract Commerce\n(Isolated Financial Security)
+M_Dexie =down=> S_Dexie : 4. Extract Dexie AI Engine\n(Scale on GPU Nodes)
+M_Print =down=> S_Print : 5. Extract Print Fulfillment\n(Decoupled Hardware Polling)
+
+note bottom of Phase2
+  Architectural Principle:
+  Because 3Dex maintains strict modular boundaries at the application layer,
+  individual domains can be incrementally carved out into standalone microservices
+  without requiring a full rewrite of the business logic.
+end note
+
+@enduml

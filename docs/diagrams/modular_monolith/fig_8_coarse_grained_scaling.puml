@@ -1,0 +1,72 @@
+@startuml fig_8_coarse_grained_scaling
+!theme plain
+skinparam componentStyle uml2
+skinparam BackgroundColor white
+skinparam defaultFontSize 12
+skinparam defaultFontName "Segoe UI", "Arial", sans-serif
+skinparam shadowing false
+skinparam roundcorner 6
+
+skinparam package {
+    BackgroundColor #F8F9FA
+    BorderColor #2B2D42
+    BorderThickness 1.5
+    FontSize 13
+    FontStyle bold
+}
+
+skinparam node {
+    BackgroundColor #FFFFFF
+    BorderColor #2B2D42
+    BorderThickness 1.2
+}
+
+skinparam component {
+    BackgroundColor #FFFFFF
+    BorderColor #4A5568
+    BorderThickness 1
+}
+
+title Figure 8: Coarse-Grained Scaling Dynamics: Resource Inefficiency Under Asymmetric Load
+
+package "Current Monolith Behavior: Coarse-Grained Scaling" as Mono_Scaling {
+    node "Backend Node (Replica 1)\n[CPU: 95% - High Load]" as Rep1 #FFF5F5 {
+        component "Auth (Idle: 5%)" as A1 #EDF2F7
+        component "Catalog (Normal: 15%)" as C1 #EDF2F7
+        component "Commerce (Idle: 5%)" as M1 #EDF2F7
+        component "Dexie AI Engine (HEAVY LOAD: 90% CPU)" as D1 #FEB2B2
+    }
+
+    node "Backend Node (Replica 2 - Autoscaled)\n[Duplicated Entire Monolith]" as Rep2 #FFF5F5 {
+        component "Auth (Idle: 5%)" as A2 #EDF2F7
+        component "Catalog (Normal: 15%)" as C2 #EDF2F7
+        component "Commerce (Idle: 5%)" as M2 #EDF2F7
+        component "Dexie AI Engine (HEAVY LOAD: 90% CPU)" as D2 #FEB2B2
+    }
+    
+    Rep1 -right-> Rep2 : Autoscaler triggers full replica\ndue to Dexie AI CPU bottleneck
+}
+
+package "Target Microservices Alternative: Granular Targeted Scaling" as Micro_Scaling {
+    node "Lightweight Services (1 Replica Each)" as Micro_Light #FFFFFF {
+        component "Auth Service\n(Consumes 128 MB)" as S_Auth
+        component "Catalog Service\n(Consumes 256 MB)" as S_Cat
+        component "Commerce Service\n(Consumes 128 MB)" as S_Com
+    }
+    
+    node "Dexie AI Service (Targeted Autoscale Cluster)" as Dexie_Cluster #F0FFF4 {
+        component "Dexie Pod 1\n(High GPU/CPU)" as DP1
+        component "Dexie Pod 2\n(High GPU/CPU)" as DP2
+        component "Dexie Pod 3\n(High GPU/CPU)" as DP3
+    }
+}
+
+note bottom of Mono_Scaling
+  The Monolithic Scalability Tradeoff:
+  Because the runtime is unified, a surge in Dexie AI vector computations
+  forces the orchestrator to scale the ENTIRE backend container.
+  This incurs unnecessary memory allocations and duplicate DB connection pools
+  for completely idle modules (Auth, Commerce, Community).
+end note
+
+@enduml
