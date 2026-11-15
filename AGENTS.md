@@ -20,6 +20,7 @@ For detailed architectural diagrams and trade-off analyses, refer to [modular_mo
 
 - `apps/frontend/`: Next.js web application, UI components, Zustand stores, R3F viewer canvases.
 - `apps/backend/`: Express.js application, modular business domains, middleware, Prisma client bindings.
+- `docs/charter/`: Formal PMBOK Project Charter XeLaTeX sources (`project_charter_id.tex`, `project_charter_en.tex`) and automated build script (`export_charter.ps1`).
 - `docs/diagrams/`: PlantUML specifications (`.puml`), diagram compiler (`plantuml.jar`), and automated build scripts (`export.ps1`).
 - `docs/diagrams/exports/`: Compiled PNG and SVG diagram artifacts.
 - `docs/diagrams/modular_monolith/`: Dedicated modular monolith architectural diagram suite.
@@ -94,6 +95,11 @@ AI agents generating or modifying code within this repository must adhere to the
   Generate PDF documentation via XeLaTeX:
   ```powershell
   powershell -ExecutionPolicy Bypass -File docs/export_pdf.ps1
+  ```
+- **Project Charter Compilation (Indonesian & English)**:
+  Run three-pass XeLaTeX compilation and preview generation for both bilingual Project Charter PDFs (`docs/output/3Dex_Project_Charter_ID.pdf` and `docs/output/3Dex_Project_Charter_EN.pdf`):
+  ```powershell
+  powershell -ExecutionPolicy Bypass -File docs/charter/export_charter.ps1
   ```
 
 ---
