@@ -6,7 +6,6 @@
 \usepackage{fontspec}
 \setmainfont{Times New Roman}
 \setsansfont{Arial}
-\setmonofont{Consolas}
 
 \usepackage[top=2.2cm, bottom=2.2cm, left=2.3cm, right=2.3cm, headheight=28pt]{geometry}
 \setlength{\emergencystretch}{2.5em}
@@ -31,6 +30,9 @@
 
 \usepackage[colorlinks=true,linkcolor=brandblue,urlcolor=brandblue,citecolor=brandblue]{hyperref}
 
+% Disable monospace font globally per document standard
+\renewcommand{\texttt}[1]{#1}
+
 % ==============================================================================
 % CORPORATE COLOR PALETTE
 % ==============================================================================
@@ -40,44 +42,46 @@
 \definecolor{accentorange}{HTML}{D95D1E}
 \definecolor{accentred}{HTML}{991B1B}
 \definecolor{accentgreen}{HTML}{166534}
-\definecolor{lightslate}{HTML}{F1F5F9}
-\definecolor{softblue}{HTML}{EFF6FF}
+\definecolor{tableheadergray}{HTML}{E5E5E5}
+\definecolor{lightslate}{HTML}{F2F2F2}
+\definecolor{softblue}{HTML}{F5F5F5}
 \definecolor{softamber}{HTML}{FFFBEB}
 \definecolor{softred}{HTML}{FEF2F2}
 \definecolor{softgreen}{HTML}{F0FDF4}
-\definecolor{bordergray}{HTML}{CBD5E1}
-\definecolor{mutedtext}{HTML}{475569}
+\definecolor{bordergray}{HTML}{CCCCCC}
+\definecolor{mutedtext}{HTML}{555555}
 
 % ==============================================================================
-% CUSTOM COLUMN TYPES & SPACING
+% CUSTOM COLUMN TYPES & SPACING (Vertically Centered Cells)
 % ==============================================================================
-\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
-\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
-\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+\renewcommand{\tabularxcolumn}[1]{m{#1}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}m{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}m{#1}}
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcommand{\thdr}[1]{\centering\arraybackslash\textbf{#1}}
 
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{6pt}
 \renewcommand{\arraystretch}{1.28}
 
 % ==============================================================================
-% SECTION STYLING (Clean Corporate / Word-like Hierarchy)
+% SECTION STYLING (Clean Black Hierarchy, Zero Blue Section Lines)
 % ==============================================================================
 \renewcommand{\contentsname}{TABLE OF CONTENTS}
 \renewcommand{\figurename}{Figure}
 \renewcommand{\tablename}{Table}
 
 \titleformat{\section}
-  {\sffamily\large\bfseries\color{brandnavy}}
+  {\sffamily\large\bfseries\color{black}}
   {\thesection.}{0.6em}{}
-  [\vspace{-0.4em}{\color{brandblue}\rule{\textwidth}{1.2pt}}]
 
 \titleformat{\subsection}
-  {\sffamily\normalsize\bfseries\color{accentteal}}
+  {\sffamily\normalsize\bfseries\color{black}}
   {\thesubsection}{0.6em}{}
 
 \titleformat{\subsubsection}
-  {\sffamily\small\bfseries\color{brandnavy}}
+  {\sffamily\small\bfseries\color{black}}
   {\thesubsubsection}{0.6em}{}
 
 \titlespacing*{\section}{0pt}{14pt}{6pt}
@@ -90,7 +94,7 @@
 \pagestyle{fancy}
 \fancyhf{}
 \fancyhead[L]{\sffamily\scriptsize\color{mutedtext}PT SCHRYZON DIGITAL NUSANTARA | 3D\={e}x Commercial Platform}
-\fancyhead[R]{\sffamily\scriptsize\color{mutedtext}Document ID: \texttt{SDN-3DEX-PC-001} (v1.0)}
+\fancyhead[R]{\sffamily\scriptsize\color{mutedtext}Document ID: SDN-3DEX-PC-001 (v1.0)}
 \fancyfoot[L]{\sffamily\scriptsize\color{mutedtext}\textit{Confidential Commercial Document | Proprietary Client IP (Krea3D Corp)}}
 \fancyfoot[R]{\sffamily\scriptsize\color{mutedtext}Page \thepage\ of \pageref{LastPage}}
 \renewcommand{\headrulewidth}{0.5pt}
@@ -149,7 +153,7 @@
 % ------------------------------------------------------------------------------
 \pagestyle{empty}
 
-% OFFICIAL CORPORATE LETTERHEAD
+% OFFICIAL CORPORATE LETTERHEAD (BLUE LETTERHEAD ON PAGE 1 RETAINED PER SPEC)
 \noindent
 \begin{minipage}[c]{2.05cm}
   \centering
@@ -175,8 +179,8 @@
 {\renewcommand{\arraystretch}{1.12}%
 \noindent
 \begin{tabularx}{\textwidth}{@{} L{2.2cm} L{0.3cm} Y R{4.7cm} @{}}
-Ref. No. & : & \texttt{009/PC-INIT/SDN-3DEX/I/2026} & Mataram, January 5, 2026 \\
-Enclosures & : & 1 (One) Project Charter v1.0 Dossier (Appendices A to E) & \\
+Ref. No. & : & 009/PC-INIT/SDN-3DEX/I/2026 & Mataram, January 5, 2026 \\
+Enclosures & : & 1 (One) Project Charter v1.0 Dossier (Appendices A to D) & \\
 Subject & : & Transmittal and Authorization Request for Project Charter v1.0: Commercial 3D Asset Marketplace \& Integrated Print Ecosystem (``3D\={e}x'') & \\
 \end{tabularx}}
 
@@ -195,17 +199,22 @@ South Jakarta 12930, Indonesia
 \noindent
 Dear Mr. Hendra Wijaya and Ms. Rina Kusumawardhani,
 
-Pursuant to the executed Memorandum of Understanding (\texttt{MoU/\allowbreak KREA3D-SDN/\allowbreak XII/\allowbreak 2025}) dated December 18, 2025, and the subsequent Project Discovery and Requirements Alignment sessions between the executive leadership of PT Kreasi Tiga Dimensi Indonesia (Krea3D Corp) and the engineering team of PT Schryzon Digital Nusantara, we formally submit the attached Project Charter v1.0 for the development of the proprietary commercial platform 3D\={e}x.
+Pursuant to the executed Memorandum of Understanding (MoU/\allowbreak KREA3D-\allowbreak SDN/\allowbreak XII/\allowbreak 2025) dated December 18, 2025, and the subsequent Project Discovery and Requirements Alignment sessions between the executive leadership of PT Kreasi Tiga Dimensi Indonesia (Krea3D Corp) and the engineering team of PT Schryzon Digital Nusantara, we formally submit the attached Project Charter v1.0 for the development of the proprietary commercial platform 3D\={e}x.
 
 As a private commercial software and web engineering firm, PT Schryzon Digital Nusantara is architecting 3D\={e}x strictly as a closed-source, proprietary turnkey enterprise software asset owned exclusively by Krea3D Corp (non-open-source). The platform consolidates digital 3D asset commerce, interactive in-browser WebGL geometry inspection, a creator community feed, AI-driven semantic discovery (D\={e}xie), and an automated end-to-end physical 3D printing fulfillment workflow within a single unified system.
 
 The enclosed Project Charter has been structured in strict alignment with the PMBOK\textsuperscript{\textregistered} Guide 6th Edition (Process 4.1 \textit{Develop Project Charter} and Process 13.1 \textit{Identify Stakeholders}) using a Hybrid Lifecycle (Predictive Initiation paired with Agile Extreme Programming / XP iterations). Below is the executive summary of parameters submitted for formal authorization:
 
-\vspace{4pt}
+\clearpage
+
+% Switch all links/text outside Page 1 to black
+\hypersetup{linkcolor=black,urlcolor=black,citecolor=black}
+
+\vspace*{2pt}
 \noindent
 \begin{tabularx}{\textwidth}{| L{4.8cm} | Y |}
 \hline
-\rowcolor{brandnavy} \color{white}\textbf{Project Parameter} & \color{white}\textbf{Charter v1.0 Baseline Specification} \\
+\rowcolor{tableheadergray} \thdr{Project Parameter} & \thdr{Charter v1.0 Baseline Specification} \\
 \hline
 Project Title & Commercial 3D Asset Marketplace \& Digital-to-Physical Print Platform (``3D\={e}x'') \\
 \hline
@@ -261,7 +270,7 @@ Date: January 5, 2026 & & Authorization Date: \rule{3.2cm}{0.4pt} \\
 \end{figure}
 \vspace{-8pt}
 \begin{center}
-    {\sffamily\Large\bfseries\color{brandnavy} PROJECT CHARTER V1.0: 3D\={E}X COMMERCIAL PLATFORM} \\
+    {\sffamily\Large\bfseries\color{black} PROJECT CHARTER V1.0: 3D\={E}X COMMERCIAL PLATFORM} \\
     {\small\color{mutedtext} Formal Project Authorization Document per PMBOK\textsuperscript{\textregistered} Guide 6th Edition (Process 4.1 \textit{Develop Project Charter})}
 \end{center}
 \vspace{6pt}
@@ -284,8 +293,8 @@ PT Kreasi Tiga Dimensi Indonesia (Krea3D Corp), a commercial additive manufactur
 \subsection{Business Justification and Proprietary Licensing Model}
 To solve these business pain points, PT Kreasi Tiga Dimensi Indonesia commissioned PT Schryzon Digital Nusantara (3D\={e}x Studio) to engineer a proprietary, closed-source commercial web application titled 3D\={e}x. All source code, database schemas, UI design assets, and deployment artifacts remain exclusive intellectual property of the client. The IDR 148,500,000 capital investment is justified by:
 \begin{itemize}[leftmargin=1.5em, itemsep=2pt]
-    \item Capturing dual-stream platform revenue via digital model commissions and integrated physical 3D print service fees under a single commercial domain (\texttt{https://3dex.studio}).
-    \item Reducing pre-production specification handoff overhead by up to $85\%$ via standardized digital order parameters and automated \texttt{.glb} delivery to verified print providers.
+    \item Capturing dual-stream platform revenue via digital model commissions and integrated physical 3D print service fees under a single commercial domain (https://3dex.studio).
+    \item Reducing pre-production specification handoff overhead by up to $85\%$ via standardized digital order parameters and automated .glb delivery to verified print providers.
     \item Driving customer conversion and retention through real-time WebGL in-browser inspection and context-aware AI recommendations (D\={e}xie).
 \end{itemize}
 
@@ -301,15 +310,15 @@ Project objectives are formulated using the SMART (\textit{Specific, Measurable,
 \caption{SMART Measurable Project Objectives}
 \begin{tabularx}{\textwidth}{| C{1.0cm} | L{3.2cm} | L{3.2cm} | Y |}
 \hline
-\rowcolor{brandnavy} \color{white}\textbf{ID} & \color{white}\textbf{Objective Area} & \color{white}\textbf{Measurable Target} & \color{white}\textbf{Verification Method \& Time-Bound Deadline} \\
+\rowcolor{tableheadergray} \thdr{ID} & \thdr{Objective Area} & \thdr{Measurable Target} & \thdr{Verification Method \& Time-Bound Deadline} \\
 \hline
-O-1 & Catalog Speed \& WebGL Inspection & Catalog load $\le 3.0\text{ s}$; WebGL \texttt{.glb} initialization $\le 5.0\text{ s}$ & Verified via Lighthouse and browser profiling on assets $< 50\text{ MB}$ during Phase 5 QA (Week 15). \\
+O-1 & Catalog Speed \& WebGL Inspection & Catalog load $\le 3.0\text{ s}$; WebGL .glb initialization $\le 5.0\text{ s}$ & Verified via Lighthouse and browser profiling on assets $< 50\text{ MB}$ during Phase 5 QA (Week 15). \\
 \hline
-O-2 & Digital-to-Physical Handoff Time & Reduce print order handoff from $48\text{ hours}$ to $\le 5\text{ minutes}$ & Measured from customer print submission to automatic Provider \texttt{.glb} access during Week 14 UAT. \\
+O-2 & Digital-to-Physical Handoff Time & Reduce print order handoff from $48\text{ hours}$ to $\le 5\text{ minutes}$ & Measured from customer print submission to automatic Provider .glb access during Week 14 UAT. \\
 \hline
 O-3 & Payment Gateway Reliability & Midtrans Snap webhook settlement accuracy $\ge 99.5\%$ (0 duplicates) & Validated via idempotency replay tests and atomic order-status audits in Release 1 (Week 7) and UAT. \\
 \hline
-O-4 & AI Discovery Latency \& Uplift & \texttt{pgvector} cosine search latency $\le 500\text{ ms}$; conversion uplift $\ge 25\%$ & Monitored via \texttt{/dexie/picks} 384-dim query telemetry and 30-day post-launch sales conversion tracking. \\
+O-4 & AI Discovery Latency \& Uplift & pgvector cosine search latency $\le 500\text{ ms}$; conversion uplift $\ge 25\%$ & Monitored via /dexie/picks 384-dim query telemetry and 30-day post-launch sales conversion tracking. \\
 \hline
 O-5 & Real-Time Governance \& Analytics & Daily sales reports \& admin audit logs available 24/7 ($\ge 99.5\%$ uptime) & Verified across Artist Revenue and Admin Audit Dashboards prior to final handover on Day 106. \\
 \hline
@@ -317,7 +326,7 @@ O-5 & Real-Time Governance \& Analytics & Daily sales reports \& admin audit log
 \end{table}
 
 \textit{Project Success Criteria:}
-The project is deemed successful if: (1) all deliverables across Releases 1 through 5 pass 100\% of User Acceptance Testing (UAT) scenarios across all five actor roles; (2) the platform operates live in production at \texttt{https://3dex.studio} on or before Day 106 (April 20, 2026); and (3) total expenditure stays within the Sponsor-approved budget ceiling of IDR 148,500,000.
+The project is deemed successful if: (1) all deliverables across Releases 1 through 5 pass 100\% of User Acceptance Testing (UAT) scenarios across all five actor roles; (2) the platform operates live in production at https://3dex.studio on or before Day 106 (April 20, 2026); and (3) total expenditure stays within the Sponsor-approved budget ceiling of IDR 148,500,000.
 
 \clearpage
 % ==============================================================================
@@ -329,19 +338,21 @@ The project is deemed successful if: (1) all deliverables across Releases 1 thro
 The platform supports five distinct Role-Based Access Control (RBAC) actors backed by eight cohesive internal business modules:
 \begin{enumerate}[leftmargin=1.5em, itemsep=3pt]
     \item \textit{Guest:} Browse landing pages, public catalog, and artist profiles without authentication; inspect 3D topology interactively via the embedded WebGL viewer; register as a Customer (local or Google OAuth 2.0) and apply for Artist or Provider roles.
-    \item \textit{Customer:} Manage profile, 2FA security, and visibility settings (NSFW/D\={e}xie toggle); search via keyword or semantic AI filters; manage shopping cart and wishlist; complete checkout via Midtrans Snap; access time-limited signed digital downloads; submit physical 3D print requests (scale, material, infill, color, provider choice); track live 5-stage print status; rate models/counterparties; follow artists and curate collections.
-    \item \textit{Artist:} Inherit all Customer capabilities plus a dedicated Artist Sales Dashboard; upload \texttt{.glb/.gltf} models with metadata, WebP previews, and dual licensing (free/paid, personal/commercial); publish portfolio posts with render imagery; track sales revenue and request payouts.
-    \item \textit{Provider:} Inherit all Customer capabilities plus a Provider Job Queue Dashboard; accept or reject incoming print orders; download customer-authorized \texttt{.glb} production files; advance order states (\texttt{PENDING} $\rightarrow$ \texttt{ACCEPTED} $\rightarrow$ \texttt{PROCESSING} $\rightarrow$ \texttt{SHIPPED} $\rightarrow$ \texttt{DELIVERED}) with courier tracking numbers and proof-of-work photo uploads.
-    \item \textit{Admin:} Access platform-wide statistics; execute KYC-lite verification for Artist and Provider applications; moderate newly uploaded 3D assets (assisted by NSFW detection); resolve user abuse reports; warn/ban malicious accounts; inspect immutable \texttt{Admin\_Audit\_Log} records.
+    \item \textit{Customer:} Manage profile, 2FA security, and visibility settings (NSFW/D\={e}xie toggle); search via keyword or semantic AI filters; manage shopping cart and wishlist; complete checkout via Midtrans Snap; access time-limited signed digital downloads; submit physical 3D print requests (scale, material, infill, color, provider choice) with pricing calculated via client-side mesh volume and bounding-box estimation rather than real G-code slicing; track live 5-stage print status and confirm delivery; rate models/counterparties; follow artists and curate collections.
+    \item \textit{Artist:} Inherit all Customer capabilities plus a dedicated Artist Sales Dashboard; upload .glb/.gltf models with metadata, WebP previews, and dual licensing (free/paid, personal/commercial); publish portfolio posts with render imagery; track sales revenue and request payouts.
+    \item \textit{Provider:} Inherit all Customer capabilities plus a Provider Job Queue Dashboard; accept or reject incoming print orders; download customer-authorized .glb production files; advance order states (PENDING $\rightarrow$ ACCEPTED $\rightarrow$ PROCESSING $\rightarrow$ SHIPPED $\rightarrow$ DELIVERED) with courier tracking numbers and proof-of-work photo uploads.
+    \item \textit{Admin:} Access platform-wide statistics; execute KYC-lite verification for Artist and Provider applications; moderate newly uploaded 3D assets (assisted by NSFW detection); resolve user abuse reports; warn/ban malicious accounts; inspect immutable Admin\_Audit\_Log records.
 \end{enumerate}
 
 \subsection{High-Level Non-Functional Requirements}
 \begin{itemize}[leftmargin=1.5em, itemsep=2pt]
-    \item \textit{4-Node Modular Monolith Architecture:} Clean infrastructure separation across Frontend Node (Next.js App Router, React 19, Three.js), Backend Node (Express.js 8-module monolith), Database Node (PostgreSQL 16 + \texttt{pgvector} + Prisma ORM), and Object Storage Node (MinIO S3).
-    \item \textit{Security:} \texttt{httpOnly} cookie-based JWT with refresh token rotation, \textit{bcrypt} password hashing ($\ge 10$ to $12$ rounds), and short-TTL MinIO presigned GET/PUT URLs.
-    \item \textit{Transactional Integrity:} Multi-table mutations across orders, payments, purchase entitlements, and print jobs must run inside single atomic Prisma \texttt{\$transaction} blocks with idempotent Midtrans webhook handling.
+    \item \textit{4-Node Modular Monolith Architecture:} Clean infrastructure separation across Frontend Node (Next.js App Router, React 19, Three.js), Backend Node (Express.js 8-module monolith), Database Node (PostgreSQL 16 + pgvector + Prisma ORM), and Object Storage Node (MinIO S3).
+    \item \textit{Security:} httpOnly cookie-based JWT with refresh token rotation, \textit{bcrypt} password hashing ($\ge 10$ to $12$ rounds), and short-TTL MinIO presigned GET/PUT URLs.
+    \item \textit{Transactional Integrity \& 3D Print Escrow Balance Hold:} Multi-table mutations across orders, payments, purchase entitlements, and print jobs must run inside single atomic Prisma database transaction blocks with idempotent Midtrans webhook handling. For upfront physical 3D print payments settled via Midtrans, the database enforces a temporary balance hold (\textit{simple ledger/escrow}): funds are held upon payment and released for Provider payout only after the order transitions to DELIVERED and is confirmed by the Customer (or refunded if rejected by the workshop).
     \item \textit{Usability:} Responsive dark-theme design system across desktop and mobile viewports with non-intrusive D\={e}xie AI contextual assistance.
 \end{itemize}
+
+\clearpage
 
 % ==============================================================================
 % SECTION 4: PROJECT DESCRIPTION, SCOPE BOUNDARIES & DELIVERABLES
@@ -349,7 +360,7 @@ The platform supports five distinct Role-Based Access Control (RBAC) actors back
 \section{Project Description, Scope Boundaries, and Key Deliverables}
 
 \subsection{Architecture Overview and Commercial Asset Pillars}
-3D\={e}x is engineered as an in-process Modular Monolith spanning eight isolated domain modules (\texttt{Auth}, \texttt{Catalog}, \texttt{Commerce}, \texttt{Community}, \texttt{Dexie}, \texttt{Notification}, \texttt{Print}, and \texttt{Admin}) deployed across four infrastructure nodes:
+3D\={e}x is engineered as an in-process Modular Monolith spanning eight isolated domain modules (Auth, Catalog, Commerce, Community, Dexie, Notification, Print, and Admin) deployed across four infrastructure nodes. Print pricing utilizes client-side mesh volume and bounding-box geometry estimation inside the Frontend Node WebGL runtime, while the Backend Print Module handles Print Specifications and Job Queue state orchestration without executing server-side G-code slicing.
 
 \begin{figure}[H]
     \centering
@@ -365,12 +376,14 @@ The commercial catalog organizes digital goods and physical fulfillment into thr
         \includegraphics[width=0.30\textwidth, height=2.6cm, keepaspectratio]{c:/Users/nyoma/Downloads/3Dex/apps/frontend/public/category-3d-models.jpg} &
         \includegraphics[width=0.30\textwidth, height=2.6cm, keepaspectratio]{c:/Users/nyoma/Downloads/3Dex/apps/frontend/public/category-3d-print.jpg} &
         \includegraphics[width=0.30\textwidth, height=2.6cm, keepaspectratio]{c:/Users/nyoma/Downloads/3Dex/apps/frontend/public/category-textures.jpg} \\
-        {\footnotesize (a) Digital 3D Models (\texttt{.glb/.gltf})} &
+        {\footnotesize (a) Digital 3D Models (.glb/.gltf)} &
         {\footnotesize (b) Physical 3D Print Services} &
         {\footnotesize (c) PBR Textures \& Materials} \\
     \end{tabular}
     \caption{Three Commercial Marketplace Verticals on the 3D\={e}x Platform}
 \end{figure}
+
+\clearpage
 
 \subsection{Scope Boundaries (In-Scope vs. Out-of-Scope)}
 
@@ -379,20 +392,20 @@ The commercial catalog organizes digital goods and physical fulfillment into thr
 \caption{Project Scope Boundaries Matrix}
 \begin{tabularx}{\textwidth}{| Y | Y |}
 \hline
-\rowcolor{accentgreen} \color{white}\textbf{In Scope} & \color{white}\textbf{Out of Scope} \\
+\rowcolor{tableheadergray} \thdr{In Scope} & \thdr{Out of Scope} \\
 \hline
 \begin{itemize}[leftmargin=1.1em, itemsep=2pt, topsep=2pt]
     \item Full-stack web platform built with Next.js App Router and Express.js TypeScript supporting 5 RBAC actor roles.
-    \item Interactive WebGL/Three.js browser viewer (orbit, pan, zoom) for \texttt{.glb/.gltf} assets.
-    \item Catalog filtering, keyword search, and semantic AI discovery (``D\={e}xie's Picks'') via \texttt{all-MiniLM-L6-v2}, \texttt{pgvector}, and Google Gemini API.
-    \item Cart, wishlist, dual-licensing, Midtrans Snap checkout, idempotent webhook processing, and signed MinIO S3 downloads.
-    \item Physical 3D print request flow (scale, material, infill, color), Provider Dashboard, 5-stage tracking, proof photos, and courier tracking input.
+    \item Interactive WebGL/Three.js browser viewer (orbit, pan, zoom) for .glb/.gltf assets.
+    \item Catalog filtering, keyword search, and semantic AI discovery (``D\={e}xie's Picks'') via all-MiniLM-L6-v2, pgvector, and Google Gemini API.
+    \item Cart, wishlist, dual-licensing, Midtrans Snap checkout, idempotent webhook processing, automated expired checkout cancellation via an internal cron scheduler, and signed MinIO S3 downloads.
+    \item Physical 3D print request flow (scale, material, infill, color with client-side mesh volume / bounding-box pricing estimation rather than real G-code slicing), database-driven temporary balance hold (\textit{simple ledger/escrow}) released upon Customer DELIVERED confirmation, Provider Dashboard, 5-stage tracking, proof photos, and courier tracking input.
     \item Community feed, follow/like/comment, verified reviews, collections, notifications, Admin moderation, and Audit Logs.
 \end{itemize}
 &
 \begin{itemize}[leftmargin=1.1em, itemsep=2pt, topsep=2pt]
     \item Native iOS/Android mobile applications or React Native Augmented Reality (AR) clients.
-    \item Server-side automated G-code slicing engine or IoT remote control of physical 3D printer farms.
+    \item Real server-side automated G-code slicing engine or IoT remote control of physical 3D printer farms.
     \item Direct integration with external corporate ERP systems, tax filing portals (e-Faktur), or general ledger accounting software.
     \item Procurement of physical 3D printer hardware, filament/resin stock, or logistics fleet vehicles for print providers.
     \item Migration of legacy off-platform transaction histories or external user databases prior to launch.
@@ -409,15 +422,15 @@ The commercial catalog organizes digital goods and physical fulfillment into thr
 \caption{Summary of Key Project Deliverables (D1 to D5)}
 \begin{tabularx}{\textwidth}{| C{1.3cm} | L{4.2cm} | Y | C{2.3cm} |}
 \hline
-\rowcolor{brandnavy} \color{white}\textbf{ID} & \color{white}\textbf{Key Deliverable} & \color{white}\textbf{Technical Components Delivered} & \color{white}\textbf{Target Date} \\
+\rowcolor{tableheadergray} \thdr{ID} & \thdr{Key Deliverable} & \thdr{Technical Components Delivered} & \thdr{Target Date} \\
 \hline
 D1 & Architecture, UI Prototype \& Core Foundation & User Story backlog, Dark-Mode Design System, Prisma PostgreSQL schema, JWT + Google OAuth 2.0, MinIO S3 connectivity, GitHub CI/CD pipeline. & Week 3 (Day 18) \\
 \hline
-D2 & Release 1: Core Marketplace \& Payments & Public catalog, WebGL 3D viewer, \texttt{.glb} upload flow, Cart \& Wishlist, Midtrans Snap checkout + webhook, MinIO signed downloads, Admin model queue. & Week 7 (Day 48) \\
+D2 & Release 1: Core Marketplace \& Payments & Public catalog, WebGL 3D viewer, .glb upload flow, Cart \& Wishlist, Midtrans Snap checkout + webhook, MinIO signed downloads, Admin model queue. & Week 7 (Day 48) \\
 \hline
 D3 & Release 2: Community \& Social Ecosystem & Artist portfolio feed, Follow graph, Like \& Comment engine, Verified reviews, Curated collections, Notification center, Content reporting workflow. & Week 10 (Day 72) \\
 \hline
-D4 & Release 3: D\={e}xie AI \& Print Fulfillment & \texttt{all-MiniLM-L6-v2} + \texttt{pgvector} similarity search, Gemini Pro/Flash taglines \& ``D\={e}xie's Picks'', Print request flow, Provider Dashboard \& 5-stage tracking. & Week 13 (Day 94) \\
+D4 & Release 3: D\={e}xie AI \& Print Fulfillment & all-MiniLM-L6-v2 + pgvector similarity search, Gemini Pro/Flash taglines \& ``D\={e}xie's Picks'', Print request flow (\textit{bounding-box}), Ledger/escrow hold, Provider Dashboard \& 5-stage tracking. & Week 13 (Day 94) \\
 \hline
 D5 & Final Release: Admin, QA, Dockerization \& Training & Artist \& Admin Analytics Dashboards, KYC-lite verification, NSFW detection, Admin Audit Log, Full Dockerization, UAT Report, User \& Ops Manuals. & Week 15 (Day 106) \\
 \hline
@@ -435,9 +448,9 @@ D5 & Final Release: Admin, QA, Dockerization \& Training & Artist \& Admin Analy
 \begin{table}[H]
 \centering
 \caption{High-Level Project Risks and Mitigation Plan}
-\begin{tabularx}{\textwidth}{| C{1.2cm} | L{4.0cm} | C{1.9cm} | C{1.7cm} | Y |}
+\begin{tabularx}{\textwidth}{| C{1.15cm} | L{3.9cm} | C{1.9cm} | C{1.7cm} | Y |}
 \hline
-\rowcolor{accentred} \color{white}\textbf{ID} & \color{white}\textbf{Risk Description} & \color{white}\textbf{Likelihood / Impact} & \color{white}\textbf{Severity} & \color{white}\textbf{Mitigation Strategy} \\
+\rowcolor{tableheadergray} \thdr{ID} & \thdr{Risk Description} & \thdr{Likelihood / Impact} & \thdr{Severity} & \thdr{Mitigation Strategy} \\
 \hline
 R-01 & Breaking changes or quota limits on external APIs (Midtrans Snap, Google Gemini, OAuth) & Medium / High & \badge{accentred}{HIGH} & Isolate external integrations behind service adapter layers and implement exponential backoff with cached fallback responses. \\
 \hline
@@ -445,11 +458,13 @@ R-02 & Scope creep exceeding the fixed 106-day contract window & Medium / High &
 \hline
 R-03 & Merge conflicts across shared main/dev repository branches & High / Medium & \badge{accentorange}{MEDIUM} & Enforce daily Continuous Integration (minimum one integration per working day) with automated CI build checks on all Pull Requests. \\
 \hline
-R-04 & Browser memory/load degradation from oversized \texttt{.glb} geometry files ($> 50\text{ MB}$) & Medium / Medium & \badge{accentorange}{MEDIUM} & Enforce MinIO upload size limits, render lightweight WebP thumbnails in catalog grids, and lazy-load WebGL canvas bundles. \\
+R-04 & Browser memory/load degradation from oversized .glb geometry files ($> 50\text{ MB}$) & Medium / Medium & \badge{accentorange}{MEDIUM} & Enforce MinIO upload size limits, render lightweight WebP thumbnails in catalog grids, and lazy-load WebGL canvas bundles. \\
 \hline
 R-05 & Silent logic defects introduced by AI-assisted code generation (4GT/5GT) & Medium / Medium & \badge{accentorange}{MEDIUM} & Require mandatory human peer review, pair programming on critical modules (payment \& AI), and phase-end QA regression testing. \\
 \hline
 R-06 & Delayed stakeholder feedback from the On-Site Customer during release demos & Low / High & \badge{accentgreen}{LOW} & Lock bi-weekly Sprint Demo calendar dates in advance with a dedicated Krea3D Corp Product Owner representative. \\
+\hline
+R-07 & Payment or fulfillment dispute on physical 3D print orders if a workshop rejects the job or goods arrive damaged in transit & Medium / High & \badge{accentred}{HIGH} & Enforce a database-status-backed temporary balance hold (\textit{simple ledger/escrow}) on upfront Midtrans payments: funds remain held and are released for Provider payout only after the order reaches DELIVERED status and is confirmed by the Customer (or refunded if rejected). \\
 \hline
 \end{tabularx}
 \end{table}
@@ -461,8 +476,8 @@ R-06 & Delayed stakeholder feedback from the On-Site Customer during release dem
         \item Krea3D Corp supplies sandbox and production credentials for Midtrans Snap, Google Cloud OAuth, and Gemini API prior to Phase 2 kickoff.
         \item Initial model categories, standard print materials (PLA, ABS, Resin SLA, TPU, Nylon SLS), and seed Print Provider profiles are supplied in structured format prior to UAT.
         \item End users access the platform via modern WebGL 2.0-capable browsers (Chrome 90+, Firefox 88+, Edge 90+, or Safari 15+).
+        \item \textit{Engineering Capacity Basis:} The 106 person-days figure represents the cumulative effective engineering effort of the four-person student development team working on a distributed, part-time schedule (approximately 15 to 20 hours per week per person) across the 106-calendar-day (15-week) project window, rather than simultaneous full-time capacity.
     \end{enumerate}
-    \pagebreak
     \item \textit{Project Constraints:}
     \begin{enumerate}[leftmargin=1.5em, itemsep=1pt]
         \item \textit{Schedule Constraint:} End-to-end delivery must complete within exactly 106 calendar days (January 5, 2026 to April 20, 2026).
@@ -483,15 +498,15 @@ The 15-week (106-day) delivery timeline spans January 5, 2026 through April 20, 
 \caption{Summary Milestone Schedule}
 \begin{tabularx}{\textwidth}{| C{1.1cm} | L{4.2cm} | C{2.9cm} | Y |}
 \hline
-\rowcolor{accentteal} \color{white}\textbf{ID} & \color{white}\textbf{Key Milestone} & \color{white}\textbf{Target Date} & \color{white}\textbf{Completion Criteria} \\
+\rowcolor{tableheadergray} \thdr{ID} & \thdr{Key Milestone} & \thdr{Target Date} & \thdr{Completion Criteria} \\
 \hline
 M1 & Charter Sign-Off \& Foundation Release (D1) & Jan 22, 2026 (Week 3 / Day 18) & Charter approved; JWT/OAuth auth, RBAC middleware, PostgreSQL schema, MinIO S3, and CI/CD live. \\
 \hline
-M2 & Release 1: Core Marketplace \& Payments (D2) & Feb 21, 2026 (Week 7 / Day 48) & Public catalog, WebGL 3D viewer, \texttt{.glb} upload, cart, and Midtrans Snap sandbox checkout verified. \\
+M2 & Release 1: Core Marketplace \& Payments (D2) & Feb 21, 2026 (Week 7 / Day 48) & Public catalog, WebGL 3D viewer, .glb upload, cart, and Midtrans Snap sandbox checkout verified. \\
 \hline
 M3 & Release 2: Community \& Social Layer (D3) & Mar 17, 2026 (Week 10 / Day 72) & Artist portfolio feed, follow graph, likes/comments, verified reviews, collections, and notifications live. \\
 \hline
-M4 & Release 3: D\={e}xie AI \& Print Fulfillment (D4) & Apr 8, 2026 (Week 13 / Day 94) & \texttt{pgvector} semantic search, D\={e}xie recommendations, print ordering, and Provider Dashboard live. \\
+M4 & Release 3: D\={e}xie AI \& Print Fulfillment (D4) & Apr 8, 2026 (Week 13 / Day 94) & pgvector semantic search, D\={e}xie recommendations, print ordering (\textit{bounding-box}) with escrow hold, and Provider Dashboard live. \\
 \hline
 M5 & Final Release, UAT Pass \& Handover (D5) & Apr 20, 2026 (Week 15 / Day 106) & Admin audit logs, NSFW check, Docker deployment, 100\% UAT sign-off, training, and handover executed. \\
 \hline
@@ -503,14 +518,14 @@ M5 & Final Release, UAT Pass \& Handover (D5) & Apr 20, 2026 (Week 15 / Day 106)
 % ==============================================================================
 \section{Preapproved Financial Resources}
 
-Derived from Three-Point PERT and Parametric estimation techniques, the Sponsor-approved project budget ceiling is IDR 148,500,000. Full mathematical derivations appear in Appendix C.
+Derived from Three-Point PERT and Parametric estimation techniques, the Sponsor-approved project budget ceiling is IDR 148,500,000. Full mathematical derivations and the part-time capacity basis for the 106 person-days estimate appear in Appendix C.
 
 \begin{table}[H]
 \centering
 \caption{Preapproved Financial Resources Summary}
 \begin{tabularx}{\textwidth}{| L{5.4cm} | Y | R{3.3cm} | C{1.5cm} |}
 \hline
-\rowcolor{brandnavy} \color{white}\textbf{Budget Component} & \color{white}\textbf{Estimation Basis} & \color{white}\textbf{Amount (IDR)} & \color{white}\textbf{Share} \\
+\rowcolor{tableheadergray} \thdr{Budget Component} & \thdr{Estimation Basis} & \thdr{Amount (IDR)} & \thdr{Share} \\
 \hline
 Software Engineering Labor & 106 person-days $\times$ IDR 1,000,000 & IDR 106,000,000 & 71.38\% \\
 \hline
@@ -524,7 +539,7 @@ Technical Documentation, User Training \& UAT & Handover Manuals \& Client Works
 \hline
 Risk Contingency Reserve & 10\% of Baseline Cost Subtotal & IDR 13,500,000 & 9.09\% \\
 \hline
-\rowcolor{softblue} \textbf{TOTAL PREAPPROVED BUDGET} & \textbf{Maximum Contract Ceiling} & \textbf{IDR 148,500,000} & \textbf{100.00\%} \\
+\rowcolor{lightslate} \textbf{TOTAL PREAPPROVED BUDGET} & \textbf{Maximum Contract Ceiling} & \textbf{IDR 148,500,000} & \textbf{100.00\%} \\
 \hline
 \end{tabularx}
 \end{table}
@@ -537,7 +552,7 @@ Risk Contingency Reserve & 10\% of Baseline Cost Subtotal & IDR 13,500,000 & 9.0
 Stakeholder identification (PMBOK Process 13.1) spans nine core stakeholder groups across client leadership, the engineering vendor, platform end users, third-party API operators, and academic quality assurance:
 \begin{itemize}[leftmargin=1.5em, itemsep=2pt]
     \item \textit{Client Enterprise (PT Kreasi Tiga Dimensi Indonesia):} Ir. Hendra Wijaya, S.T., M.B.A. (Executive Sponsor) and Rina Kusumawardhani, S.Ds., M.M. (On-Site Customer / Product Owner).
-    \item \textit{Engineering Vendor (PT Schryzon Digital Nusantara):} I Nyoman Widiyasa Jayananda (Project Manager / Backend Lead), I Kadek Mahesa Permana Putra (Frontend / UI-UX / QA Lead), Thoriq Abdillah Falian Kusuma (Integration Lead), and Ni Putu Ayu Dian Sulastri (Business Analyst).
+    \item \textit{Engineering Vendor (PT Schryzon Digital Nusantara):} I Nyoman Widiyasa Jayananda (Project Manager / Backend Lead), I Kadek Mahesa Permana Putra (Frontend / UI-UX / QA Lead), Abdurrahman Karim (Integration Lead), and Fido Priasa Setyono Putra (Business Analyst).
     \item \textit{Ecosystem \& Oversight:} 3D Artists, Customers/Buyers, 3D Print Providers, Platform Admins, Third-Party API Vendors (Midtrans, Google Cloud/Gemini), and Course Lecturer Santi Ika Murpratiwi, S.Kom., M.T. (PM methodology evaluator).
 \end{itemize}
 The full Stakeholder Register and Power/Interest Grid are provided in Appendix A.
@@ -559,7 +574,7 @@ All interim increments and final deliverables are governed by a three-tier appro
 % ==============================================================================
 \section{Project Exit Criteria}
 
-\begin{itemize}[leftmargin=1.5em, itemsep=2pt]
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt, topsep=2pt, partopsep=0pt]
     \item \textit{Normal Project Closure Criteria:} Deliverables D1 to D5 are formally delivered, 100\% of UAT scenarios pass with zero open critical/high severity defects, the production system operates live on client infrastructure, proprietary source repositories and operational manuals are handed over, and both parties sign the final Handover Certificate.
     \item \textit{Early Termination Criteria:} The project may be terminated prior to Day 106 if: (1) the Executive Sponsor issues a written cancellation notice due to strategic business pivots; (2) prolonged \textit{force majeure} prevents continued execution; or (3) projected costs exceed the IDR 148,500,000 budget ceiling (including the 10\% contingency reserve) without an approved budget addendum.
 \end{itemize}
@@ -567,18 +582,19 @@ All interim increments and final deliverables are governed by a three-tier appro
 % ==============================================================================
 % SECTION 11: PROJECT MANAGER: RESPONSIBILITY & AUTHORITY
 % ==============================================================================
+\vspace{-4pt}
 \section{Project Manager: Appointment, Responsibilities, and Authority}
 
 This Charter formally appoints:
-\begin{center}
-    I Nyoman Widiyasa Jayananda (\texttt{F1D02410053}) \\
+\begin{quote}\centering\vspace{-4pt}
+    I Nyoman Widiyasa Jayananda (F1D02410053) \\
     \textit{Project Manager \& Lead Backend Architect, PT Schryzon Digital Nusantara}
-\end{center}
+\end{quote}\vspace{-4pt}
 
 \textit{Core Responsibilities:} Lead XP/PXP iteration planning, allocate engineering tasks, govern the 4-node Modular Monolith architecture and PostgreSQL security, enforce daily CI/CD integration, manage project risks and schedules, and deliver regular progress briefings to the Sponsor.
 
 \textit{Granted Authority Level:}
-\begin{enumerate}[leftmargin=1.5em, itemsep=1pt]
+\begin{enumerate}[leftmargin=1.5em, itemsep=1pt, topsep=2pt, partopsep=0pt]
     \item Direct daily task assignments, bi-weekly sprint schedules, and engineering priorities across the four-person project team.
     \item Authorize operational spending within the IDR 135,000,000 baseline budget and request drawdown of the IDR 13,500,000 contingency reserve upon Sponsor approval for risk mitigation.
     \item Enforce technical design standards, code ownership policies, and the Phase 5 feature freeze to safeguard the Day 106 delivery commitment.
@@ -587,33 +603,36 @@ This Charter formally appoints:
 % ==============================================================================
 % SECTION 12: SPONSOR AUTHORITY & FORMAL CHARTER SIGN-OFF
 % ==============================================================================
+\vspace{-4pt}
 \section{Sponsor Name, Authority, and Formal Charter Authorization}
 
 \textit{Executive Project Sponsor:} Ir. Hendra Wijaya, S.T., M.B.A. (Chief Executive Officer, PT Kreasi Tiga Dimensi Indonesia), supported by Rina Kusumawardhani, S.Ds., M.M. acting as On-Site Customer Representative.
 
 \textit{Sponsor Authority:} Authorizes this Project Charter v1.0, approves the IDR 148,500,000 contract budget, adjudicates scope change requests and early termination triggers, assigns client UAT representatives, and signs final product acceptance.
 
-\vspace{10pt}
+\vspace{3pt}
 \noindent
+{\renewcommand{\arraystretch}{1.06}\small
 \begin{tabularx}{\textwidth}{| L{3.9cm} | L{3.8cm} | Y | C{2.5cm} |}
 \hline
-\rowcolor{brandnavy} \color{white}\textbf{Signatory Role} & \color{white}\textbf{Full Name} & \color{white}\textbf{Title / Organization} & \color{white}\textbf{Signature} \\
+\rowcolor{tableheadergray} \thdr{Signatory Role} & \thdr{Full Name} & \thdr{Title / Organization} & \thdr{Signature} \\
 \hline
-Executive Project Sponsor & Ir. Hendra Wijaya, S.T., M.B.A. & CEO, PT Kreasi Tiga Dimensi Indonesia & \vspace{1.2cm} \\
+Executive Project Sponsor & Ir. Hendra Wijaya, S.T., M.B.A. & CEO, PT Kreasi Tiga Dimensi Indonesia & \vspace{0.65cm} \\
 \hline
-On-Site Customer / PO & Rina Kusumawardhani, S.Ds., M.M. & VP Operations, PT Kreasi Tiga Dimensi Indonesia & \vspace{1.2cm} \\
+On-Site Customer / PO & Rina Kusumawardhani, S.Ds., M.M. & VP Operations, PT Kreasi Tiga Dimensi Indonesia & \vspace{0.65cm} \\
 \hline
-Project Manager & I Nyoman Widiyasa Jayananda & Project Manager, PT Schryzon Digital Nusantara & \vspace{1.2cm} \\
+Project Manager & I Nyoman Widiyasa Jayananda & Project Manager, PT Schryzon Digital Nusantara & \vspace{0.65cm} \\
 \hline
-\end{tabularx}
+\end{tabularx}}
 
-\vspace{12pt}
+\vspace{4pt}
 \noindent
+{\small
 \begin{tabularx}{\textwidth}{| Y |}
 \hline
-\rowcolor{softblue} \textbf{Change Control \& Intellectual Property Governance Note:} This document establishes the authorized scope, schedule, and financial baseline for 3D\={e}x Project Charter v1.0. Any post-authorization feature or ceiling modification requires a formal Change Request countersigned by the Executive Project Sponsor and Project Manager. All source code, schemas, and engineering artifacts remain closed-source proprietary intellectual property of PT Kreasi Tiga Dimensi Indonesia. \\
+\rowcolor{lightslate} \textbf{Change Control \& Intellectual Property Governance Note:} This document establishes the authorized scope, schedule, and financial baseline for 3D\={e}x Project Charter v1.0. Any post-authorization feature or ceiling modification requires a formal Change Request countersigned by the Executive Project Sponsor and Project Manager. All source code, schemas, and engineering artifacts remain closed-source proprietary intellectual property of PT Kreasi Tiga Dimensi Indonesia. \\
 \hline
-\end{tabularx}
+\end{tabularx}}
 
 \clearpage
 
@@ -632,7 +651,7 @@ In alignment with PMBOK\textsuperscript{\textregistered} Guide 6th Edition Proce
 \footnotesize
 \begin{tabularx}{\textwidth}{| L{2.7cm} | L{2.7cm} | L{3.6cm} | C{1.9cm} | Y |}
 \hline
-\rowcolor{brandnavy} \color{white}\textbf{Stakeholder} & \color{white}\textbf{Project Role} & \color{white}\textbf{Primary Interest} & \color{white}\textbf{Power / Interest} & \color{white}\textbf{Engagement Strategy} \\
+\rowcolor{tableheadergray} \thdr{Stakeholder} & \thdr{Project Role} & \thdr{Primary Interest} & \thdr{Power / Interest} & \thdr{Engagement Strategy} \\
 \hline
 Ir. Hendra Wijaya (Krea3D Corp) & Owner \& Executive Sponsor & Revenue growth, commercial ROI, schedule \& budget control & High / High & \textit{Manage Closely:} Engage on charter approval, scope changes, and final handover. \\
 \hline
@@ -644,9 +663,9 @@ Course Lecturer (Santi Ika Murpratiwi) & Academic Supervisor \& Evaluator & PMBO
 \hline
 3D Digital Artists & Content Supply End Users & Fair monetization, dual licensing control, sales analytics & Low / High & \textit{Keep Informed:} Invite to UAT sessions for model upload and Artist Dashboard. \\
 \hline
-3D Printing Providers & Physical Production Partners & Accurate print specs, clean job queue, automatic \texttt{.glb} access & Low / High & \textit{Keep Informed:} Involve in Provider Dashboard UAT and shipment tracking validation. \\
+3D Printing Providers & Physical Production Partners & Accurate print specs, clean job queue, automatic .glb access, escrow protection & Low / High & \textit{Keep Informed:} Involve in Provider Dashboard UAT and shipment tracking validation. \\
 \hline
-End Customers & Asset Buyers \& Print Requesters & Smooth WebGL inspection, secure payment, accurate AI picks & Low / Medium & \textit{Monitor:} Track beta UX feedback and catalog page-load telemetry. \\
+End Customers & Asset Buyers \& Print Requesters & Smooth WebGL inspection, secure payment (escrow), accurate AI picks & Low / Medium & \textit{Monitor:} Track beta UX feedback and catalog page-load telemetry. \\
 \hline
 Platform Administrators & Trust \& Safety Moderators & Proactive approval queue, NSFW filter, complete audit logs & Medium / Medium & \textit{Keep Informed:} Conduct dedicated KYC-lite and moderation training prior to go-live. \\
 \hline
@@ -662,52 +681,52 @@ Third-Party Vendors (Midtrans, Google, Cloud) & Payment, AI \& Hosting Operators
 \begin{tikzpicture}[font=\sffamily\footnotesize]
     % Grid boxes (13.6cm x 8.4cm -> 6.8cm x 4.2cm per quadrant)
     \fill[lightslate] (0,4.2) rectangle (6.8,8.4);
-    \fill[accentteal!15] (6.8,4.2) rectangle (13.6,8.4);
+    \fill[accentteal!10] (6.8,4.2) rectangle (13.6,8.4);
     \fill[softamber] (0,0) rectangle (6.8,4.2);
-    \fill[softblue] (6.8,0) rectangle (13.6,4.2);
+    \fill[lightslate] (6.8,0) rectangle (13.6,4.2);
 
-    \draw[brandnavy, line width=1pt] (0,0) rectangle (13.6,8.4);
-    \draw[brandnavy, line width=0.9pt] (6.8,0) -- (6.8,8.4);
-    \draw[brandnavy, line width=0.9pt] (0,4.2) -- (13.6,4.2);
+    \draw[black, line width=1pt] (0,0) rectangle (13.6,8.4);
+    \draw[black, line width=0.9pt] (6.8,0) -- (6.8,8.4);
+    \draw[black, line width=0.9pt] (0,4.2) -- (13.6,4.2);
 
-    \node[anchor=north west, align=left, font=\sffamily\footnotesize, text=accentteal] at (0.25, 8.2) {\textbf{KEEP SATISFIED}\\{\scriptsize (High Power, Lower Interest)}};
-    \node[anchor=north west, align=left, font=\sffamily\footnotesize, text=brandnavy] at (7.05, 8.2) {\textbf{MANAGE CLOSELY}\\{\scriptsize (High Power, High Interest)}};
-    \node[anchor=north west, align=left, font=\sffamily\footnotesize, text=accentorange] at (0.25, 4.0) {\textbf{MONITOR}\\{\scriptsize (Lower Power, Lower Interest)}};
-    \node[anchor=north west, align=left, font=\sffamily\footnotesize, text=brandblue] at (7.05, 4.0) {\textbf{KEEP INFORMED}\\{\scriptsize (Lower Power, High Interest)}};
+    \node[anchor=north west, align=left, font=\sffamily\footnotesize, text=black] at (0.25, 8.2) {\textbf{KEEP SATISFIED}\\{\scriptsize (High Power, Lower Interest)}};
+    \node[anchor=north west, align=left, font=\sffamily\footnotesize, text=black] at (7.05, 8.2) {\textbf{MANAGE CLOSELY}\\{\scriptsize (High Power, High Interest)}};
+    \node[anchor=north west, align=left, font=\sffamily\footnotesize, text=black] at (0.25, 4.0) {\textbf{MONITOR}\\{\scriptsize (Lower Power, Lower Interest)}};
+    \node[anchor=north west, align=left, font=\sffamily\footnotesize, text=black] at (7.05, 4.0) {\textbf{KEEP INFORMED}\\{\scriptsize (Lower Power, High Interest)}};
 
-    \draw[-{Stealth[length=3mm]}, line width=1.1pt, brandnavy] (-0.65, 0.2) -- (-0.65, 8.2) node[midway, sloped, above=4pt, font=\sffamily\small\bfseries] {POWER};
-    \draw[-{Stealth[length=3mm]}, line width=1.1pt, brandnavy] (0.2, -0.55) -- (13.4, -0.55) node[midway, below=4pt, font=\sffamily\small\bfseries] {INTEREST};
+    \draw[-{Stealth[length=3mm]}, line width=1.1pt, black] (-0.65, 0.2) -- (-0.65, 8.2) node[midway, sloped, above=4pt, font=\sffamily\small\bfseries, text=black] {POWER};
+    \draw[-{Stealth[length=3mm]}, line width=1.1pt, black] (0.2, -0.55) -- (13.4, -0.55) node[midway, below=4pt, font=\sffamily\small\bfseries, text=black] {INTEREST};
 
     % Manage Closely
     \fill[accentorange] (11.2, 6.7) circle (5pt);
-    \node[below=2pt, font=\sffamily\scriptsize\bfseries] at (11.2, 6.7) {Ir. Hendra (Sponsor)};
+    \node[below=2pt, font=\sffamily\scriptsize\bfseries, text=black] at (11.2, 6.7) {Ir. Hendra (Sponsor)};
 
     \fill[accentorange] (9.1, 5.4) circle (5pt);
-    \node[below=2pt, font=\sffamily\scriptsize\bfseries] at (9.1, 5.4) {Rina K. (On-Site Customer)};
+    \node[below=2pt, font=\sffamily\scriptsize\bfseries, text=black] at (9.1, 5.4) {Rina K. (On-Site Customer)};
 
     % Keep Satisfied
     \fill[accentteal] (4.7, 6.6) circle (5pt);
-    \node[below=2pt, font=\sffamily\scriptsize\bfseries] at (4.7, 6.6) {Lecturer (Santi Ika M.)};
+    \node[below=2pt, font=\sffamily\scriptsize\bfseries, text=black] at (4.7, 6.6) {Lecturer (Santi Ika M.)};
 
     \fill[accentteal] (2.4, 5.3) circle (5pt);
-    \node[below=2pt, font=\sffamily\scriptsize\bfseries] at (2.4, 5.3) {API Vendors (Midtrans/Google)};
+    \node[below=2pt, font=\sffamily\scriptsize\bfseries, text=black] at (2.4, 5.3) {API Vendors (Midtrans/Google)};
 
     % Keep Informed
-    \fill[brandblue] (11.2, 2.75) circle (5pt);
-    \node[below=2pt, font=\sffamily\scriptsize\bfseries] at (11.2, 2.75) {3D\={e}x Engineering Team};
+    \fill[brandnavy] (11.2, 2.75) circle (5pt);
+    \node[below=2pt, font=\sffamily\scriptsize\bfseries, text=black] at (11.2, 2.75) {3D\={e}x Engineering Team};
 
-    \fill[brandblue] (8.7, 1.9) circle (5pt);
-    \node[below=2pt, font=\sffamily\scriptsize\bfseries] at (8.7, 1.9) {3D Artists};
+    \fill[brandnavy] (8.7, 1.9) circle (5pt);
+    \node[below=2pt, font=\sffamily\scriptsize\bfseries, text=black] at (8.7, 1.9) {3D Artists};
 
-    \fill[brandblue] (11.2, 1.05) circle (5pt);
-    \node[below=2pt, font=\sffamily\scriptsize\bfseries] at (11.2, 1.05) {Print Providers};
+    \fill[brandnavy] (11.2, 1.05) circle (5pt);
+    \node[below=2pt, font=\sffamily\scriptsize\bfseries, text=black] at (11.2, 1.05) {Print Providers};
 
     % Monitor
     \fill[mutedtext] (4.7, 2.3) circle (5pt);
-    \node[below=2pt, font=\sffamily\scriptsize\bfseries] at (4.7, 2.3) {End Customers};
+    \node[below=2pt, font=\sffamily\scriptsize\bfseries, text=black] at (4.7, 2.3) {End Customers};
 
     \fill[mutedtext] (2.3, 1.15) circle (5pt);
-    \node[below=2pt, font=\sffamily\scriptsize\bfseries] at (2.3, 1.15) {Platform Admins};
+    \node[below=2pt, font=\sffamily\scriptsize\bfseries, text=black] at (2.3, 1.15) {Platform Admins};
 \end{tikzpicture}
 \caption{Stakeholder Power / Interest Grid Mapping}
 \end{figure}
@@ -718,7 +737,7 @@ Third-Party Vendors (Midtrans, Google, Cloud) & Payment, AI \& Hosting Operators
 \small
 \begin{tabularx}{\textwidth}{| L{3.6cm} | L{3.0cm} | Y |}
 \hline
-\rowcolor{accentteal} \color{white}\textbf{Strategic Quadrant} & \color{white}\textbf{Cadence} & \color{white}\textbf{Primary Channels \& Governance Artifacts} \\
+\rowcolor{tableheadergray} \thdr{Strategic Quadrant} & \thdr{Cadence} & \thdr{Primary Channels \& Governance Artifacts} \\
 \hline
 Manage Closely & Weekly / Per Phase & Planning Game sessions, bi-weekly sprint demos, Change Request sign-offs, BAST. \\
 \hline
@@ -754,28 +773,28 @@ The 3D\={e}x project adopts a Hybrid Lifecycle:
     \draw[bordergray] (5.10, 0.2) rectangle (15.70, 5.2);
     \foreach \w in {1,...,15} {
         \pgfmathsetmacro{\xpos}{5.10 + (\w - 0.5) * (10.60 / 15)}
-        \node[font=\sffamily\scriptsize\bfseries, text=brandnavy] at (\xpos, 5.45) {W\w};
+        \node[font=\sffamily\scriptsize\bfseries, text=black] at (\xpos, 5.45) {W\w};
         \draw[bordergray!60, dashed] ({5.10 + \w * (10.60/15)}, 0.2) -- ({5.10 + \w * (10.60/15)}, 5.2);
     }
-    \node[anchor=west, font=\sffamily\scriptsize\bfseries, text=mutedtext] at (0, 5.45) {Phase / Activity (Weeks $\rightarrow$)};
+    \node[anchor=west, font=\sffamily\scriptsize\bfseries, text=black] at (0, 5.45) {Phase / Activity (Weeks $\rightarrow$)};
 
-    \node[anchor=west] at (0, 4.65) {Phase 1: Initiation, Auth \& Core};
+    \node[anchor=west, text=black] at (0, 4.65) {Phase 1: Initiation, Auth \& Core};
     \fill[accentteal, rounded corners=2pt] (5.14, 4.45) rectangle (7.22, 4.85);
     \node[white, font=\sffamily\tiny\bfseries] at (6.18, 4.65) {D1-18};
 
-    \node[anchor=west] at (0, 3.85) {Phase 2: Core Marketplace \& Midtrans};
+    \node[anchor=west, text=black] at (0, 3.85) {Phase 2: Core Marketplace \& Midtrans};
     \fill[accentorange, rounded corners=2pt] (7.00, 3.65) rectangle (10.05, 4.05);
     \node[white, font=\sffamily\tiny\bfseries] at (8.525, 3.85) {D19-48};
 
-    \node[anchor=west] at (0, 3.05) {Phase 3: Community \& Social Layer};
-    \fill[brandblue, rounded corners=2pt] (9.85, 2.85) rectangle (12.17, 3.25);
+    \node[anchor=west, text=black] at (0, 3.05) {Phase 3: Community \& Social Layer};
+    \fill[mutedtext, rounded corners=2pt] (9.85, 2.85) rectangle (12.17, 3.25);
     \node[white, font=\sffamily\tiny\bfseries] at (11.01, 3.05) {D49-72};
 
-    \node[anchor=west] at (0, 2.25) {Phase 4: D\={e}xie AI \& Print Ecosystem};
+    \node[anchor=west, text=black] at (0, 2.25) {Phase 4: D\={e}xie AI \& Print Ecosystem};
     \fill[accentorange!85!black, rounded corners=2pt] (12.17, 2.05) rectangle (14.29, 2.45);
     \node[white, font=\sffamily\tiny\bfseries] at (13.23, 2.25) {D73-94};
 
-    \node[anchor=west] at (0, 1.45) {Phase 5: Admin, UAT \& Handover};
+    \node[anchor=west, text=black] at (0, 1.45) {Phase 5: Admin, UAT \& Handover};
     \fill[accentgreen, rounded corners=2pt] (14.29, 1.25) rectangle (15.66, 1.65);
     \node[white, font=\sffamily\tiny\bfseries] at (14.975, 1.45) {D95-106};
 
@@ -792,71 +811,71 @@ The 3D\={e}x project adopts a Hybrid Lifecycle:
 
 {\footnotesize
 \setlength{\tabcolsep}{4.2pt}
-\begin{longtable}{| C{1.60cm} | C{1.40cm} | L{5.65cm} | L{4.00cm} | C{0.80cm} | C{1.05cm} |}
+\begin{longtable}{| C{1.85cm} | C{1.35cm} | L{5.55cm} | L{3.90cm} | C{0.80cm} | C{1.05cm} |}
 \caption{Complete 3D\={e}x Platform User Story Register} \\
 \hline
-\rowcolor{brandnavy} \color{white}\textbf{ID} & \color{white}\textbf{Actor} & \color{white}\textbf{I want to...} & \color{white}\textbf{So that...} & \color{white}\textbf{Prio} & \color{white}\textbf{Est. (d)} \\
+\rowcolor{tableheadergray} \thdr{ID} & \thdr{Actor} & \thdr{I want to...} & \thdr{So that...} & \thdr{Prio} & \thdr{Est. (Pd)} \\
 \hline
 \endfirsthead
 \hline
-\rowcolor{brandnavy} \color{white}\textbf{ID} & \color{white}\textbf{Actor} & \color{white}\textbf{I want to...} & \color{white}\textbf{So that...} & \color{white}\textbf{Prio} & \color{white}\textbf{Est. (d)} \\
+\rowcolor{tableheadergray} \thdr{ID} & \thdr{Actor} & \thdr{I want to...} & \thdr{So that...} & \thdr{Prio} & \thdr{Est. (Pd)} \\
 \hline
 \endhead
 \hline
 \endfoot
-\texttt{US-GST-01} & Guest & Browse the public catalog and interact with the WebGL 3D viewer & I can evaluate asset topology before registering & 1 & 5 \\
+US-GST-01 & Guest & Browse the public catalog and interact with the WebGL 3D viewer & I can evaluate asset topology before registering & 1 & 5 \\
 \hline
-\texttt{US-GST-02} & Guest & Register a new account via local email or Google OAuth 2.0 & I can access personalized cart and wishlist tools & 1 & 4 \\
+US-GST-02 & Guest & Register a new account via local email or Google OAuth 2.0 & I can access personalized cart and wishlist tools & 1 & 4 \\
 \hline
-\texttt{US-CUS-01} & Customer & Manage profile, 2FA security, and NSFW visibility & I can tailor browsing and secure my account & 1 & 4 \\
+US-CUS-01 & Customer & Manage profile, 2FA security, and NSFW visibility & I can tailor browsing and secure my account & 1 & 4 \\
 \hline
-\texttt{US-CUS-02} & Customer & Search models using keyword and AI semantic filters & I can discover assets quickly by high-level intent & 1 & 5 \\
+US-CUS-02 & Customer & Search models using keyword and AI semantic filters & I can discover assets quickly by high-level intent & 1 & 5 \\
 \hline
-\texttt{US-CUS-03} & Customer & Assemble a cart and complete checkout via Midtrans Snap & I can securely purchase digital models via local methods & 1 & 7 \\
+US-CUS-03 & Customer & Assemble a cart and complete checkout via Midtrans Snap & I can securely purchase digital models via local methods & 1 & 7 \\
 \hline
-\texttt{US-CUS-04} & Customer & Receive time-limited signed download links after payment & I can immediately download purchased files & 1 & 4 \\
+US-CUS-04 & Customer & Receive time-limited signed download links after payment & I can immediately download purchased files & 1 & 4 \\
 \hline
-\texttt{US-CUS-05} & Customer & Submit a print job request with material/scale/infill specs & I can have a purchased model physically manufactured & 1 & 6 \\
+US-CUS-05 & Customer & Submit a print job request with material/scale/infill specs (mesh volume pricing) & I can have a purchased model printed with escrow protection & 1 & 6 \\
 \hline
-\texttt{US-CUS-06} & Customer & Track print job status and shipping in real-time & I remain informed on physical production progress & 2 & 4 \\
+US-CUS-06 & Customer & Track print job status and confirm DELIVERED status in real-time & I remain informed on delivery and release escrow payout & 2 & 4 \\
 \hline
-\texttt{US-CUS-07} & Customer & Submit ratings and written reviews on purchased assets & I contribute to platform quality signals & 2 & 4 \\
+US-CUS-07 & Customer & Submit ratings and written reviews on purchased assets & I contribute to platform quality signals & 2 & 4 \\
 \hline
-\texttt{US-CUS-08} & Customer & Follow creators and engage with social portfolio posts & I can build a network and track favorite artists & 3 & 5 \\
+US-CUS-08 & Customer & Follow creators and engage with social portfolio posts & I can build a network and track favorite artists & 3 & 5 \\
 \hline
-\texttt{US-CUS-09} & Customer & Receive activity notifications and organize curated collections & I can track community updates and organize interests & 3 & 3 \\
+US-CUS-09 & Customer & Receive activity notifications and organize curated collections & I can track community updates and organize interests & 3 & 3 \\
 \hline
-\texttt{US-DEX-01} & Customer & Receive personalized model recommendations from D\={e}xie AI & I find relevant assets without manual searching & 2 & 5 \\
+US-DEX-01 & Customer & Receive personalized model recommendations from D\={e}xie AI & I find relevant assets without manual searching & 2 & 5 \\
 \hline
-\texttt{US-ART-01} & Artist & Upload 3D models (\texttt{.glb/.gltf}) with dual-licensing options & I can monetize creative work for private/commercial use & 1 & 7 \\
+US-ART-01 & Artist & Upload 3D models (.glb/.gltf) with dual-licensing options & I can monetize creative work for private/commercial use & 1 & 7 \\
 \hline
-\texttt{US-ART-02} & Artist & Designate models as free or premium with custom pricing & I control commercial availability per asset & 1 & 4 \\
+US-ART-02 & Artist & Designate models as free or premium with custom pricing & I control commercial availability per asset & 1 & 4 \\
 \hline
-\texttt{US-ART-03} & Artist & Publish portfolio posts with render images and captions & I can showcase work and drive storefront traffic & 2 & 5 \\
+US-ART-03 & Artist & Publish portfolio posts with render images and captions & I can showcase work and drive storefront traffic & 2 & 5 \\
 \hline
-\texttt{US-ART-04} & Artist & View revenue analytics and request earning payouts & I can monitor store performance and withdraw earnings & 2 & 3 \\
+US-ART-04 & Artist & View revenue analytics and request earning payouts & I can monitor store performance and withdraw earnings & 2 & 3 \\
 \hline
-\texttt{US-PRV-01} & Provider & Manage incoming print orders and accept/reject jobs & I can efficiently govern my workshop queue & 1 & 4 \\
+US-PRV-01 & Provider & Manage incoming print orders and accept/reject jobs & I can efficiently govern my workshop queue & 1 & 4 \\
 \hline
-\texttt{US-PRV-02} & Provider & Download customer-authorized raw \texttt{.glb} files for printing & I receive exact 3D source geometry for manufacturing & 1 & 4 \\
+US-PRV-02 & Provider & Download customer-authorized raw .glb files for printing & I receive exact 3D source geometry for manufacturing & 1 & 4 \\
 \hline
-\texttt{US-PRV-03} & Provider & Input courier tracking numbers and proof-of-work photos & Customers receive verified proof of shipment & 1 & 4 \\
+US-PRV-03 & Provider & Input courier tracking numbers and proof-of-work photos & Customers confirm delivery prior to escrow balance release & 1 & 4 \\
 \hline
-\texttt{US-ADM-01} & Admin & Moderate Artist and Provider role applications (KYC-lite) & Only verified partners receive elevated privileges & 1 & 3 \\
+US-ADM-01 & Admin & Moderate Artist and Provider role applications (KYC-lite) & Only verified partners receive elevated privileges & 1 & 3 \\
 \hline
-\texttt{US-ADM-02} & Admin & Review and approve/reject newly uploaded 3D models & Content quality and standards are enforced before listing & 1 & 3 \\
+US-ADM-02 & Admin & Review and approve/reject newly uploaded 3D models & Content quality and standards are enforced before listing & 1 & 3 \\
 \hline
-\texttt{US-ADM-03} & Admin & Handle abuse reports and resolve community disputes & Platform safety and trust are preserved & 1 & 4 \\
+US-ADM-03 & Admin & Handle abuse reports and resolve community disputes & Platform safety and trust are preserved & 1 & 4 \\
 \hline
-\texttt{US-ADM-04} & Admin & View platform-wide transaction and health statistics & Operational performance can be monitored continuously & 2 & 2 \\
+US-ADM-04 & Admin & View platform-wide transaction and health statistics & Operational performance can be monitored continuously & 2 & 2 \\
 \hline
-\texttt{US-ADM-05} & Admin & Inspect permanent audit logs of administrative actions & Moderation remains transparent and fully traceable & 2 & 2 \\
+US-ADM-05 & Admin & Inspect permanent audit logs of administrative actions & Moderation remains transparent and fully traceable & 2 & 2 \\
 \hline
-\texttt{US-ADM-06} & Admin & Warn, suspend, or ban malicious user accounts & Community rules and safety compliance are enforced & 1 & 3 \\
+US-ADM-06 & Admin & Warn, suspend, or ban malicious user accounts & Community rules and safety compliance are enforced & 1 & 3 \\
 \hline
-\texttt{US-SYS-01} & System Team & Execute full regression testing and performance benchmarks & Platform remains responsive and production-ready & 2 & 2 \\
+US-SYS-01 & System Team & Execute full regression testing and performance benchmarks & Platform remains responsive and production-ready & 2 & 2 \\
 \hline
-\rowcolor{softblue} \multicolumn{5}{|r|}{\textbf{Total Estimated Story Effort (26 User Stories across 5 Phases)}} & \textbf{106} \\
+\rowcolor{lightslate} \multicolumn{5}{|r|}{\textbf{Total Estimated Story Effort (26 User Stories across 5 Phases, Part-Time Team)}} & \textbf{106} \\
 \hline
 \end{longtable}
 }
@@ -879,12 +898,15 @@ To establish an objective financial baseline prior to coding, two PMBOK\textsupe
     \item \textit{Parametric Estimation:} Multiplies total expected engineering effort ($E_{\text{total}} = 106.0\text{ person-days}$) by PT Schryzon Digital Nusantara's commercial engineering rate of IDR 1,000,000 per person-day, combined with infrastructure hosting, QA/UI design, training, and a 10\% risk reserve.
 \end{enumerate}
 
+\textit{Effort Capacity Note (106 Person-Days vs. 106 Calendar Days):}
+The 106 person-days figure represents the cumulative effective engineering effort of the four-person student development team working on a distributed, part-time schedule (approximately 15 to 20 hours per week per person) across the 106-calendar-day (15-week) project timeline, rather than full-time simultaneous capacity.
+
 \begin{table}[H]
 \centering
 \caption{PERT Effort and Parametric Engineering Cost Breakdown by Phase}
-\begin{tabularx}{\textwidth}{| Y | C{0.85cm} | C{0.85cm} | C{0.85cm} | C{1.55cm} | C{1.05cm} | R{3.2cm} |}
+\begin{tabularx}{\textwidth}{| Y | C{0.85cm} | C{0.85cm} | C{0.85cm} | C{1.65cm} | C{1.05cm} | R{3.2cm} |}
 \hline
-\rowcolor{brandnavy} \color{white}\textbf{Development Phase / Module} & \color{white}\textbf{$O$} & \color{white}\textbf{$M$} & \color{white}\textbf{$P$} & \color{white}\textbf{$E$ (Days)} & \color{white}\textbf{$\sigma$} & \color{white}\textbf{Cost (Parametric)} \\
+\rowcolor{tableheadergray} \thdr{Development Phase / Module} & \thdr{$O$} & \thdr{$M$} & \thdr{$P$} & \thdr{$E$ (Pd)} & \thdr{$\sigma$} & \thdr{Cost (Parametric)} \\
 \hline
 Phase 1: Foundation, DB \& Auth & 8 & 11 & 14 & 11.0 & 1.00 & IDR 11,000,000 \\
 \hline
@@ -896,7 +918,7 @@ Phase 4: D\={e}xie AI \& Print Ecosystem & 20 & 27 & 34 & 27.0 & 2.33 & IDR 27,0
 \hline
 Phase 5: Admin, Regression QA \& Release & 9 & 12 & 15 & 12.0 & 1.00 & IDR 12,000,000 \\
 \hline
-\rowcolor{softblue} \textbf{Total Engineering Effort (PERT)} & \textbf{81} & \textbf{106} & \textbf{131} & \textbf{106.0} & \textbf{8.33} & \textbf{IDR 106,000,000} \\
+\rowcolor{lightslate} \textbf{Total Engineering Effort (PERT)} & \textbf{81} & \textbf{106} & \textbf{131} & \textbf{106.0} & \textbf{8.33} & \textbf{IDR 106,000,000} \\
 \hline
 \end{tabularx}
 \end{table}
@@ -908,9 +930,9 @@ Phase 5: Admin, Regression QA \& Release & 9 & 12 & 15 & 12.0 & 1.00 & IDR 12,00
 \caption{Detailed Approved Budget Schedule (Sponsor Approved)}
 \begin{tabularx}{\textwidth}{| L{5.2cm} | Y | R{3.2cm} | C{1.5cm} |}
 \hline
-\rowcolor{accentteal} \color{white}\textbf{Cost Component} & \color{white}\textbf{Line-Item Details} & \color{white}\textbf{Amount (IDR)} & \color{white}\textbf{Share} \\
+\rowcolor{tableheadergray} \thdr{Cost Component} & \thdr{Line-Item Details} & \thdr{Amount (IDR)} & \thdr{Share} \\
 \hline
-1. Software Engineering Labor & 106 person-days $\times$ IDR 1,000,000 (4 Engineers) & IDR 106,000,000 & 71.38\% \\
+1. Software Engineering Labor & 106 person-days $\times$ IDR 1,000,000 (4 Part-Time Engineers) & IDR 106,000,000 & 71.38\% \\
 \hline
 2. Cloud VPS, MinIO S3, DB \& APIs & 12-Month Production Hosting (FE/\allowbreak BE/\allowbreak PGVector/\allowbreak MinIO), SSL, Gemini \& Midtrans & IDR 16,500,000 & 11.11\% \\
 \hline
@@ -920,9 +942,9 @@ Phase 5: Admin, Regression QA \& Release & 9 & 12 & 15 & 12.0 & 1.00 & IDR 12,00
 \hline
 \rowcolor{lightslate} \textbf{Baseline Cost Subtotal} & \textbf{Total Planned Direct Costs} & \textbf{IDR 135,000,000} & \textbf{90.91\%} \\
 \hline
-5. Risk Contingency Reserve & 10\% of Subtotal for Risks R-01 through R-06 & IDR 13,500,000 & 9.09\% \\
+5. Risk Contingency Reserve & 10\% of Subtotal for Risks R-01 through R-07 & IDR 13,500,000 & 9.09\% \\
 \hline
-\rowcolor{softblue} \textbf{TOTAL APPROVED BUDGET} & \textbf{Fixed Ceiling, PT Kreasi Tiga Dimensi Indonesia} & \textbf{IDR 148,500,000} & \textbf{100.00\%} \\
+\rowcolor{lightslate} \textbf{TOTAL APPROVED BUDGET} & \textbf{Fixed Ceiling, PT Kreasi Tiga Dimensi Indonesia} & \textbf{IDR 148,500,000} & \textbf{100.00\%} \\
 \hline
 \end{tabularx}
 \end{table}
@@ -930,7 +952,7 @@ Phase 5: Admin, Regression QA \& Release & 9 & 12 & 15 & 12.0 & 1.00 & IDR 12,00
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[font=\sffamily\footnotesize]
-    \node[anchor=west, font=\sffamily\small\bfseries, text=brandnavy] at (0, 3.3) {Budget Composition Visualization (Total IDR 148,500,000)};
+    \node[anchor=west, font=\sffamily\small\bfseries, text=black] at (0, 3.3) {Budget Composition Visualization (Total IDR 148,500,000)};
 
     \fill[brandnavy] (0, 2.2) rectangle (10.35, 2.9);
     \fill[brandblue] (10.35, 2.2) rectangle (11.96, 2.9);
@@ -943,19 +965,19 @@ Phase 5: Admin, Regression QA \& Release & 9 & 12 & 15 & 12.0 & 1.00 & IDR 12,00
     \node[white, font=\sffamily\tiny\bfseries] at (13.84, 2.55) {9.1\%};
 
     \fill[brandnavy] (0, 1.3) rectangle (0.35, 1.65);
-    \node[anchor=west] at (0.48, 1.48) {Engineering Labor (71.38\% / IDR 106.0M)};
+    \node[anchor=west, text=black] at (0.48, 1.48) {Engineering Labor (71.38\% / IDR 106.0M)};
 
     \fill[brandblue] (7.6, 1.3) rectangle (7.95, 1.65);
-    \node[anchor=west] at (8.08, 1.48) {Cloud, MinIO, DB \& APIs 12 Mo (11.11\% / IDR 16.5M)};
+    \node[anchor=west, text=black] at (8.08, 1.48) {Cloud, MinIO, DB \& APIs 12 Mo (11.11\% / IDR 16.5M)};
 
     \fill[accentorange] (0, 0.7) rectangle (0.35, 1.05);
-    \node[anchor=west] at (0.48, 0.88) {UI/UX, WebGL \& QA (5.05\% / IDR 7.5M)};
+    \node[anchor=west, text=black] at (0.48, 0.88) {UI/UX, WebGL \& QA (5.05\% / IDR 7.5M)};
 
     \fill[accentteal] (7.6, 0.7) rectangle (7.95, 1.05);
-    \node[anchor=west] at (8.08, 0.88) {Training, Docs \& UAT (3.37\% / IDR 5.0M)};
+    \node[anchor=west, text=black] at (8.08, 0.88) {Training, Docs \& UAT (3.37\% / IDR 5.0M)};
 
     \fill[accentred] (0, 0.1) rectangle (0.35, 0.45);
-    \node[anchor=west] at (0.48, 0.28) {Risk Contingency Reserve 10\% (9.09\% / IDR 13.5M)};
+    \node[anchor=west, text=black] at (0.48, 0.28) {Risk Contingency Reserve 10\% (9.09\% / IDR 13.5M)};
 \end{tikzpicture}
 \caption{3D\={e}x Commercial Project Budget Allocation}
 \end{figure}
@@ -974,17 +996,17 @@ Phase 5: Admin, Regression QA \& Release & 9 & 12 & 15 & 12.0 & 1.00 & IDR 12,00
 \caption{Core Team Roster, XP Roles, and Ownership Domains}
 \begin{tabularx}{\textwidth}{| L{4.2cm} | C{2.3cm} | L{3.2cm} | Y |}
 \hline
-\rowcolor{brandnavy} \color{white}\textbf{Team Member} & \color{white}\textbf{ID / NIM} & \color{white}\textbf{XP Role} & \color{white}\textbf{Primary Ownership Domain} \\
+\rowcolor{tableheadergray} \thdr{Team Member} & \thdr{ID / NIM} & \thdr{XP Role} & \thdr{Primary Ownership Domain} \\
 \hline
-I Nyoman Widiyasa Jayananda (\texttt{Schryzon}) & \texttt{F1D02410053} & PM / Tracker \& Programmer & Express.js Backend Architecture, Prisma PostgreSQL/\texttt{pgvector}, MinIO S3, D\={e}xie AI, CI/CD, Docker \& SysAdmin. \\
+I Nyoman Widiyasa Jayananda (Schryzon) & F1D02410053 & PM / Tracker \& Programmer & Express.js Backend Architecture, Prisma PostgreSQL/pgvector, MinIO S3, D\={e}xie AI, CI/CD, Docker \& SysAdmin. \\
 \hline
-I Kadek Mahesa Permana Putra (\texttt{Vuxyn}) & \texttt{F1D02410052} & Programmer \& Tester (QA Lead) & Next.js App Router Frontend, Dark-Mode Design System, Three.js WebGL Viewer, Regression \& Performance QA. \\
+I Kadek Mahesa Permana Putra (Vuxyn) & F1D02410052 & Programmer \& Tester (QA Lead) & Next.js App Router Frontend, Dark-Mode Design System, Three.js WebGL Viewer, Regression \& Performance QA. \\
 \hline
-Thoriq Abdillah Falian Kusuma (\texttt{ganijack}) & \texttt{F1D02410098} & Programmer & Frontend-Backend Binding, Google OAuth 2.0 Flow, Midtrans Snap Integration, Print Fulfillment \& Notifications. \\
+Abdurrahman Karim & F1D02410031 & Programmer & Frontend-Backend Binding, Google OAuth 2.0 Flow, Midtrans Snap Integration, Print Fulfillment (Escrow) \& Notifications. \\
 \hline
-Ni Putu Ayu Dian Sulastri & \texttt{F1D02510021} & Customer Liaison / Analyst & Business Analysis, Charter/UML Documentation, UAT Coordination \& Client Training Delivery. \\
+Fido Priasa Setyono Putra & F1D02410048 & Customer Liaison / Analyst & Business Analysis, Charter/UML Documentation, UAT Coordination \& Client Training Delivery. \\
 \hline
-Rina Kusumawardhani (Krea3D Corp) & \texttt{KREA3D-PO} & On-Site Customer & User Story prioritization during Planning Game, Sprint Demo validation, and UAT acceptance. \\
+Rina Kusumawardhani (Krea3D Corp) & KREA3D-PO & On-Site Customer & User Story prioritization during Planning Game, Sprint Demo validation, and UAT acceptance. \\
 \hline
 \end{tabularx}
 \end{table}
@@ -992,99 +1014,50 @@ Rina Kusumawardhani (Krea3D Corp) & \texttt{KREA3D-PO} & On-Site Customer & User
 \subsection{Hardware, Software, and Infrastructure Inventory}
 \begin{itemize}[leftmargin=1.5em, itemsep=2pt]
     \item \textit{Engineering Hardware:} 4 Development Workstations (Ryzen 6800H / Core i7 equivalent, 16 to 32 GB RAM, WebGL 2.0-capable GPU) for local compilation and 3D rendering verification.
-    \item \textit{Software \& Tooling:} VS Code / Antigravity IDE, Private GitHub Repository with GitHub Actions CI/CD, Docker \& Docker Compose, Node.js 20 LTS, PostgreSQL 16 + \texttt{pgvector}, MinIO S3 Server, XeLaTeX \& PlantUML.
+    \item \textit{Software \& Tooling:} VS Code / Antigravity IDE, Private GitHub Repository with GitHub Actions CI/CD, Docker \& Docker Compose, Node.js 20 LTS, PostgreSQL 16 + pgvector, MinIO S3 Server, XeLaTeX \& PlantUML.
     \item \textit{Testing \& Production Infrastructure (4 Nodes):} Cloud VPS Cluster (Frontend Node, Backend Modular Monolith Node, PostgreSQL 16 Node, MinIO S3 Storage Node), plus Midtrans Snap and Google Gemini API credentials.
 \end{itemize}
 
 \subsection{Responsibility Assignment Matrix (RACI Matrix)}
-Legend: \textbf{R} = \textit{Responsible}, \textbf{A} = \textit{Accountable} (strictly one Accountable per row), \textbf{C} = \textit{Consulted}, \textbf{I} = \textit{Informed}.
+Legend: \textbf{R} = \textit{Responsible}, \textbf{A} = \textit{Accountable} (strictly one single Accountable per row), \textbf{C} = \textit{Consulted}, \textbf{I} = \textit{Informed}. Under strict RACI governance, every activity assigns a pure \textbf{A} separate from \textbf{R} executors without mixing \textit{A/R} in the same cell.
 
 \begin{table}[H]
 \centering
 \caption{RACI Matrix Across 14 Core Project Domains}
 \footnotesize
-\begin{tabularx}{\textwidth}{| Y | C{1.6cm} | C{1.6cm} | C{1.6cm} | C{1.6cm} | C{1.6cm} |}
+\begin{tabularx}{\textwidth}{| Y | C{1.55cm} | C{1.55cm} | C{1.55cm} | C{1.55cm} | C{1.85cm} |}
 \hline
-\rowcolor{accentteal} \color{white}\textbf{Project Activity / Domain} & \color{white}\textbf{Jay (PM/BE)} & \color{white}\textbf{Mahesa (FE/QA)} & \color{white}\textbf{Thoriq (Integ.)} & \color{white}\textbf{Dian (BA/Doc)} & \color{white}\textbf{Rina (Cust.)} \\
+\rowcolor{tableheadergray} \thdr{Project Activity / Domain} & \thdr{Jay (PM/BE)} & \thdr{Mahesa (FE/QA)} & \thdr{Karim (Integ.)} & \thdr{Fido (BA/Doc)} & \thdr{Rina (Cust.)} \\
 \hline
-1. Project Charter v1.0 Authoring & \textbf{A/R} & C & C & R & C \\
+1. Project Charter v1.0 Authoring & \textbf{A} & C & C & R & C \\
 \hline
 2. User Story Writing \& Prioritization & R & C & C & R & \textbf{A} \\
 \hline
-3. DB Schema Design \& Prisma Migrations & \textbf{A/R} & I & C & C & I \\
+3. DB Schema Design \& Prisma Migrations & \textbf{A} & I & R & C & I \\
 \hline
-4. Modular Monolith REST API Build & \textbf{A/R} & C & R & I & I \\
+4. Modular Monolith REST API Build & \textbf{A} & C & R & I & I \\
 \hline
-5. UI/UX Design System \& WebGL Viewer & C & \textbf{A/R} & C & I & C \\
+5. UI/UX Design System \& WebGL Viewer & C & \textbf{A} & R & I & C \\
 \hline
-6. JWT Auth \& Google OAuth 2.0 Flow & C & I & \textbf{A/R} & I & I \\
+6. JWT Auth \& Google OAuth 2.0 Flow & \textbf{A} & I & R & I & I \\
 \hline
-7. Midtrans Snap Payment Gateway & R & I & \textbf{A/R} & I & C \\
+7. Midtrans Snap Payment Gateway & \textbf{A} & I & R & I & C \\
 \hline
-8. MinIO S3 Object Storage (\texttt{.glb}) & \textbf{A/R} & I & C & I & I \\
+8. MinIO S3 Object Storage (.glb) & \textbf{A} & I & R & I & I \\
 \hline
-9. D\={e}xie AI Engine (\texttt{pgvector}/Gemini) & \textbf{A/R} & C & I & I & C \\
+9. D\={e}xie AI Engine (pgvector/Gemini) & \textbf{A} & R & I & I & C \\
 \hline
-10. Print Request \& Provider Dashboard & C & C & \textbf{A/R} & C & C \\
+10. Print Request \& Provider Dashboard & \textbf{A} & C & R & C & C \\
 \hline
-11. Community Feed, Reviews \& Notif & R & C & \textbf{A/R} & I & I \\
+11. Community Feed, Reviews \& Notif & \textbf{A} & C & R & I & I \\
 \hline
-12. Admin Dashboard, Moderation \& Audit & \textbf{A/R} & C & R & C & I \\
+12. Admin Dashboard, Moderation \& Audit & \textbf{A} & C & R & C & I \\
 \hline
-13. Regression, Performance \& UAT & C & \textbf{A/R} & C & R & R \\
+13. Regression, Performance \& UAT & C & \textbf{A} & R & R & C \\
 \hline
-14. Release Demo, Training \& Handover & R & R & R & R & \textbf{A} \\
-\hline
-\end{tabularx}
-\end{table}
-
-\clearpage
-
-% ==============================================================================
-% APPENDIX E: CHARTER VERIFICATION CHECKLIST & USE CASE DIAGRAM
-% ==============================================================================
-\section{Charter Verification Checklist and System Use Case Diagram}
-
-\subsection{Pre-Submission Quality Checklist (PMBOK 6 / UNRAM PPL Standard)}
-
-\begin{table}[H]
-\centering
-\caption{Project Charter v1.0 Self-Verification Checklist}
-\begin{tabularx}{\textwidth}{| C{0.9cm} | Y | C{2.7cm} | C{2.2cm} |}
-\hline
-\rowcolor{brandnavy} \color{white}\textbf{No} & \color{white}\textbf{Project Charter Quality Verification Item} & \color{white}\textbf{Section Ref.} & \color{white}\textbf{Status} \\
-\hline
-1 & Client business problems articulated clearly and measurably (not merely technical solutions) & Section 1 & \badge{accentgreen}{PASSED} \\
-\hline
-2 & Quantitative SMART objectives and explicit project success criteria defined & Section 2 & \badge{accentgreen}{PASSED} \\
-\hline
-3 & Explicit In-Scope and Out-of-Scope boundary lists documented & Section 4.2 & \badge{accentgreen}{PASSED} \\
-\hline
-4 & Key deliverables (D1 to D5) structured per iterative release cycle & Section 4.3 & \badge{accentgreen}{PASSED} \\
-\hline
-5 & Dated milestone schedule aligned with Hybrid XP/PXP iterations & Section 6 \& App. B & \badge{accentgreen}{PASSED} \\
-\hline
-6 & Budget backed by PERT/Parametric calculations and 10\% risk contingency reserve & Section 7 \& App. C & \badge{accentgreen}{PASSED} \\
-\hline
-7 & Stakeholder Register (Process 13.1) and Power/Interest Grid included & Appendix A & \badge{accentgreen}{PASSED} \\
-\hline
-8 & XP roles, equipment list, and RACI Matrix enforce one Accountable per activity & Appendix D & \badge{accentgreen}{PASSED} \\
-\hline
-9 & High-level risks, assumptions, and constraints logged in Risk Register \& Assumption Log & Section 5 & \badge{accentgreen}{PASSED} \\
-\hline
-10 & Sponsor, Project Manager, and formal countersignature blocks included & Letter \& Sec. 12 & \badge{accentgreen}{PASSED} \\
+14. Release Demo, Training \& Handover & \textbf{A} & R & R & R & C / Approver \\
 \hline
 \end{tabularx}
 \end{table}
-
-\clearpage
-\subsection{Unified System Use Case Diagram}
-The Use Case Diagram below maps the complete interaction boundaries across all human actors and external systems (\textit{Guest, Customer, Artist, Provider, Admin, D\={e}xie AI, Midtrans, Delivery Service, Time}) covered within this Charter.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{c:/Users/nyoma/Downloads/3Dex/docs/diagrams/final_ucd_exported.png}
-    \caption{Unified System Use Case Diagram for the 3D\={e}x Commercial Platform}
-\end{figure}
 
 \end{document}
