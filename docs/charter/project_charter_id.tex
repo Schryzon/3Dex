@@ -21,6 +21,9 @@
 \usepackage{float}
 \usepackage{enumitem}
 \usepackage{titlesec}
+\usepackage[titles]{tocloft}
+\setlength{\cftbeforesecskip}{3.5pt}
+\setlength{\cftbeforesubsecskip}{0.5pt}
 \usepackage{fancyhdr}
 \usepackage{lastpage}
 \usepackage{amsmath}
@@ -34,7 +37,7 @@
 \renewcommand{\texttt}[1]{#1}
 
 % ==============================================================================
-% CORPORATE COLOR PALETTE
+% CORPORATE COLOR PALETTE (Achromatic Neutral Gray Tables; Page 1 Blue Letterhead)
 % ==============================================================================
 \definecolor{brandnavy}{HTML}{0F172A}
 \definecolor{brandblue}{HTML}{1640CA}
@@ -52,7 +55,7 @@
 \definecolor{mutedtext}{HTML}{555555}
 
 % ==============================================================================
-% CUSTOM COLUMN TYPES & SPACING (Vertically Centered Cells)
+% CUSTOM COLUMN TYPES & SPACING (Vertically & Horizontally Centered Table Headers)
 % ==============================================================================
 \renewcommand{\tabularxcolumn}[1]{m{#1}}
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}m{#1}}
@@ -62,8 +65,8 @@
 \newcommand{\thdr}[1]{\centering\arraybackslash\textbf{#1}}
 
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{6pt}
-\renewcommand{\arraystretch}{1.28}
+\setlength{\parskip}{5.5pt}
+\renewcommand{\arraystretch}{1.26}
 
 % ==============================================================================
 % SECTION STYLING (Clean Black Hierarchy, Zero Blue Section Lines)
@@ -84,9 +87,9 @@
   {\sffamily\small\bfseries\color{black}}
   {\thesubsubsection}{0.6em}{}
 
-\titlespacing*{\section}{0pt}{14pt}{6pt}
-\titlespacing*{\subsection}{0pt}{10pt}{4pt}
-\titlespacing*{\subsubsection}{0pt}{8pt}{2pt}
+\titlespacing*{\section}{0pt}{13pt}{5pt}
+\titlespacing*{\subsection}{0pt}{9pt}{4pt}
+\titlespacing*{\subsubsection}{0pt}{7pt}{2pt}
 
 % ==============================================================================
 % HEADER & FOOTER CONFIGURATION
@@ -144,6 +147,22 @@
   \tikz[baseline=(char.base)]{\node[fill=#1, text=white, rounded corners=2pt, inner xsep=5pt, inner ysep=2pt, font=\sffamily\scriptsize\bfseries] (char) {#2};}%
 }
 
+% Browser mockup frame helper matching lecturer benchmark style
+\newcommand{\browserframe}[3][13.6cm]{%
+\begin{tikzpicture}
+  \node[inner sep=0pt, outer sep=0pt] (img) {\includegraphics[width=#1]{#3}};
+  \coordinate (NW) at (img.north west);
+  \coordinate (NE) at (img.north east);
+  \coordinate (SE) at (img.south east);
+  \fill[brandnavy] ([yshift=0.52cm]NW) -- ([yshift=0.52cm]NE) -- (NE) -- (NW) -- cycle;
+  \fill[accentred!85!white] ([xshift=0.28cm, yshift=0.26cm]NW) circle (2.3pt);
+  \fill[accentorange!85!white] ([xshift=0.52cm, yshift=0.26cm]NW) circle (2.3pt);
+  \fill[accentgreen!85!white] ([xshift=0.76cm, yshift=0.26cm]NW) circle (2.3pt);
+  \node[anchor=center, font=\sffamily\scriptsize, text=white] at ([yshift=0.26cm]$(NW)!0.5!(NE)$) {#2};
+  \draw[brandnavy, line width=0.9pt] ([yshift=0.52cm]NW) rectangle (SE);
+\end{tikzpicture}%
+}
+
 % ==============================================================================
 % DOCUMENT START
 % ==============================================================================
@@ -166,7 +185,7 @@
   \setlength{\baselineskip}{11.5pt}%
   {\sffamily\Large\bfseries\color{brandnavy} PT SCHRYZON DIGITAL NUSANTARA}\\[2pt]
   {\sffamily\small\bfseries\color{brandblue} 3D\={E}X SOFTWARE \& WEB ENGINEERING STUDIO}\\[2pt]
-  {\footnotesize\color{mutedtext} Pengembangan Perangkat Lunak Komersial, Aplikasi Web Full-Stack, dan Infrastruktur Cloud Terpadu}\\[1.5pt]
+  {\footnotesize\color{mutedtext} Pengembangan Perangkat Lunak Komersial, Aplikasi Web Terpadu, dan Layanan Cloud}\\[1.5pt]
   {\footnotesize\color{mutedtext} Jl. Majapahit No. 62, Gedung Cyber Nusantara Lt. 3, Mataram, Nusa Tenggara Barat 83125}\\[1.5pt]
   {\footnotesize\color{mutedtext} Telp: (0370) 641-889 | Email: \href{mailto:3dexweb@gmail.com}{3dexweb@gmail.com} | Situs Web: \href{https://3dex.studio}{https://3dex.studio}}
 \end{minipage}
@@ -190,7 +209,7 @@ Perihal & : & Penyampaian dan Permohonan Pengesahan Project Charter Pengembangan
 \noindent
 \textbf{Kepada Yth.} \\
 Ir. Hendra Wijaya, S.T., M.B.A. (Direktur Utama / \textit{Executive Project Sponsor}) \\
-Rina Kusumawardhani, S.Ds., M.M. (\textit{VP Operations \& On-Site Customer Representative}) \\
+Rina Kusumawardhani, S.Ds., M.M. (\textit{VP Operations} \& \textit{On-Site Customer Representative}) \\
 PT Kreasi Tiga Dimensi Indonesia (Krea3D Corp) \\
 Kawasan Industri Terpadu Blok C-14, Jl. Jend. Sudirman Kav. 48 \\
 Jakarta Selatan 12930
@@ -200,11 +219,11 @@ Jakarta Selatan 12930
 \noindent
 Dengan hormat,
 
-Menindaklanjuti penandatanganan Nota Kesepahaman (\textit{Memorandum of Understanding}) Nomor MoU/\allowbreak KREA3D-\allowbreak SDN/\allowbreak XII/\allowbreak 2025 tertanggal 18 Desember 2025 serta hasil rapat penjajakan kebutuhan bisnis (\textit{Project Discovery \& Alignment Meeting}) antara manajemen PT Kreasi Tiga Dimensi Indonesia (Krea3D Corp) dan tim rekayasa PT Schryzon Digital Nusantara, bersama surat ini kami menyampaikan dokumen resmi Draf Project Charter v1.0 untuk proyek pengembangan platform perangkat lunak komersial tertutup (\textit{proprietary turnkey web software}) bernama 3D\={e}x.
+Menindaklanjuti penandatanganan Nota Kesepahaman (\textit{Memorandum of Understanding}) Nomor MoU/\allowbreak KREA3D-\allowbreak SDN/\allowbreak XII/\allowbreak 2025 tertanggal 18 Desember 2025 serta hasil pertemuan penjajakan kebutuhan bersama Bapak dan Ibu Rina Kusumawardhani, bersama surat ini kami menyampaikan dokumen resmi Project Charter v1.0 untuk pengembangan platform komersial tertutup bernama 3D\={e}x.
 
-Sebagai perusahaan jasa pengembangan perangkat lunak dan rekayasa sistem web profesional, PT Schryzon Digital Nusantara merancang 3D\={e}x bukan sebagai proyek kode terbuka (\textit{non-open-source}), melainkan sebagai aset intelektual komersial milik Krea3D Corp yang mengintegrasikan perdagangan aset digital 3D, pratinjau geometri melalui \textit{WebGL 3D Viewer} interaktif langsung di \textit{browser}, \textit{community feed} kreator, mesin rekomendasi cerdas berbasis AI (D\={e}xie), serta alur pemenuhan jasa cetak 3D fisik secara \textit{end-to-end} dalam satu ekosistem terpadu.
+Sebagai mitra pengembang perangkat lunak profesional, PT Schryzon Digital Nusantara merancang 3D\={e}x sebagai aset intelektual eksklusif milik Krea3D Corp (bukan proyek kode terbuka) yang menyatukan penjualan model 3D digital, pratinjau model interaktif langsung di \textit{browser}, ruang komunitas kreator, rekomendasi pencarian cerdas berbasis AI (D\={e}xie), serta pemesanan jasa cetak 3D fisik yang aman dalam satu ekosistem terpadu.
 
-Dokumen Project Charter terlampir disusun mengikuti standar PMBOK\textsuperscript{\textregistered} Guide Edisi 6 (Proses 4.1 \textit{Develop Project Charter} dan Proses 13.1 \textit{Identify Stakeholders}) dengan pendekatan siklus hidup Hybrid (Inisiasi Prediktif dan Iterasi Extreme Programming / XP). Ringkasan parameter utama proyek yang dimohonkan pengesahannya adalah sebagai berikut:
+Dokumen terlampir memuat tujuan proyek, ruang lingkup, hasil serahan, jadwal pelaksanaan, estimasi anggaran, risiko utama, sketsa awal antarmuka, serta pembagian peran dan wewenang sesuai standar PMBOK\textsuperscript{\textregistered} Guide Edisi 6 dengan pendekatan siklus hidup Hybrid. Ringkasan parameter proyek yang dimohonkan pengesahannya adalah sebagai berikut:
 
 \clearpage
 
@@ -219,26 +238,26 @@ Dokumen Project Charter terlampir disusun mengikuti standar PMBOK\textsuperscrip
 \hline
 Nama Proyek & Platform Marketplace Aset 3D \& Ekosistem Cetak Fisik Terpadu ``3D\={e}x'' \\
 \hline
-Status Kepemilikan Perangkat Lunak & Perangkat Lunak Komersial Tertutup (\textit{Proprietary Enterprise License}), Hak Kekayaan Intelektual penuh milik PT Kreasi Tiga Dimensi Indonesia \\
+Kepemilikan Perangkat Lunak & Perangkat Lunak Komersial Tertutup; Hak Kekayaan Intelektual penuh milik PT Kreasi Tiga Dimensi Indonesia \\
 \hline
-Perusahaan Pelaksana & PT Schryzon Digital Nusantara (3D\={e}x Software \& Web Engineering Studio) \\
+Perusahaan Pelaksana & PT Schryzon Digital Nusantara (3D\={e}x Studio) \\
 \hline
 Project Manager & I Nyoman Widiyasa Jayananda \\
 \hline
 Durasi \& Jadwal Pelaksanaan & 106 Hari Kalender / 15 Minggu (5 Januari 2026 s.d. 20 April 2026) dalam 5 Fase Rilis \\
 \hline
-Metodologi Pengembangan & Hybrid: Inisiasi Prediktif + Iterasi Agile Extreme Programming (XP / PXP) + Akselerasi 4GT/5GT \\
+Metodologi Pengembangan & Hybrid (Inisiasi Prediktif + Iterasi \textit{Agile Extreme Programming} XP / PXP) \\
 \hline
 Total Anggaran Disetujui & Rp 148.500.000 (Termasuk Cadangan Risiko 10\% sebesar Rp 13.500.000) \\
 \hline
 \end{tabularx}
 \vspace{6pt}
 
-Melalui pengesahan Project Charter ini, Executive Project Sponsor memberikan mandat resmi kepada Project Manager untuk mengalokasikan sumber daya tim rekayasa, mengoperasikan infrastruktur komputasi, serta mengeksekusi iterasi pengembangan sesuai batasan lingkup (\textit{in-scope/out-of-scope}), jadwal milestone, dan anggaran yang telah disepakati.
+Kami mohon Bapak berkenan menelaah dokumen terlampir. Apabila disetujui, kami mohon pengesahan pada bagian akhir dokumen agar tim pengembang dapat memulai pekerjaan sesuai jadwal yang disepakati. Kami juga terbuka untuk mendiskusikan penyesuaian sebelum dokumen disahkan.
 
-Demikian surat pengantar dan permohonan pengesahan ini kami sampaikan. Atas perhatian, kepercayaan, serta kerja sama Bapak dan Ibu dalam mewujudkan transformasi ekosistem industri 3D nasional, kami ucapkan terima kasih.
+Atas perhatian, kepercayaan, serta kerja sama Bapak dan Ibu dalam mewujudkan platform ekosistem 3D nasional ini, kami ucapkan terima kasih.
 
-\vspace{10pt}
+\vspace{8pt}
 
 % KOLOM PENGESAHAN DUA PIHAK PADA HALAMAN SURAT
 \noindent
@@ -248,18 +267,89 @@ PT Schryzon Digital Nusantara & & PT Kreasi Tiga Dimensi Indonesia \\
 Pelaksana Proyek / \textit{Software Engineering Vendor} & & Pemilik Proyek / \textit{Executive Project Sponsor} \\
 & & \\
 & & \\
-& & \\
 \underline{I Nyoman Widiyasa Jayananda} & & \underline{Ir. Hendra Wijaya, S.T., M.B.A.} \\
-Project Manager \& Lead Backend Architect & & Direktur Utama / Executive Sponsor \\
+Project Manager & & Direktur Utama / \textit{Executive Sponsor} \\
 Tanggal: 5 Januari 2026 & & Tanggal Pengesahan: \rule{3.2cm}{0.4pt} \\
 \end{tabularx}
+
+\vspace{10pt}
+\noindent
+\textbf{Tembusan:} \\
+1. Rina Kusumawardhani, S.Ds., M.M., \textit{VP Operations} PT Kreasi Tiga Dimensi Indonesia \\
+2. Dosen Pengampu Mata Kuliah Proyek Perangkat Lunak, Teknik Informatika Universitas Mataram
+
+\clearpage
+
+% ------------------------------------------------------------------------------
+% INFORMASI DOKUMEN, RIWAYAT REVISI & DAFTAR DISTRIBUSI
+% ------------------------------------------------------------------------------
+\pagestyle{fancy}
+\phantomsection
+\addcontentsline{toc}{section}{Informasi Dokumen}
+\section*{Informasi Dokumen}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{| L{4.6cm} | Y |}
+\hline
+\rowcolor{tableheadergray} \thdr{Atribut Dokumen} & \thdr{Keterangan} \\
+\hline
+Judul Dokumen & Project Charter v1.0: Platform Komersial 3D\={e}x \\
+\hline
+Nomor Dokumen & SDN-3DEX-PC-001 \\
+\hline
+Klien / Sponsor & PT Kreasi Tiga Dimensi Indonesia (Krea3D Corp), Ir. Hendra Wijaya, S.T., M.B.A. \\
+\hline
+Penyusun & PT Schryzon Digital Nusantara (Tim Rekayasa 3D\={e}x) \\
+\hline
+Standar Acuan & PMBOK\textsuperscript{\textregistered} Guide Edisi 6, Proses 4.1 \textit{Develop Project Charter} dan 13.1 \textit{Identify Stakeholders} \\
+\hline
+Tanggal Terbit & 5 Januari 2026 (Versi 1.0) \\
+\hline
+Status Dokumen & Menunggu Persetujuan Sponsor \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection*{Riwayat Revisi}
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{| C{1.6cm} | C{3.1cm} | Y | C{3.5cm} |}
+\hline
+\rowcolor{tableheadergray} \thdr{Versi} & \thdr{Tanggal} & \thdr{Keterangan Perubahan} & \thdr{Penyusun} \\
+\hline
+0.1 & 18 Desember 2025 & Draf awal setelah wawancara dan penjajakan kebutuhan bersama klien & Tim 3D\={e}x \\
+\hline
+0.9 & 29 Desember 2025 & Penyelarasan ruang lingkup, jadwal, estimasi PERT paruh waktu, dan alur \textit{escrow} & Project Manager \& Analyst \\
+\hline
+1.0 & 5 Januari 2026 & Versi final untuk persetujuan Sponsor dilengkapi sketsa antarmuka awal & Project Manager \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection*{Daftar Distribusi}
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{| L{4.8cm} | L{4.8cm} | Y |}
+\hline
+\rowcolor{tableheadergray} \thdr{Nama / Pihak} & \thdr{Peran} & \thdr{Keperluan} \\
+\hline
+Ir. Hendra Wijaya, S.T., M.B.A. & \textit{Executive Sponsor} (Krea3D Corp) & Persetujuan resmi proyek \\
+\hline
+Rina Kusumawardhani, S.Ds., M.M. & \textit{On-Site Customer} / Perwakilan Pengguna & Telaah fitur dan validasi rilis \\
+\hline
+Santi Ika Murpratiwi, S.Kom., M.T. & Dosen Pengampu PPL (UNRAM) & Evaluasi kaidah manajemen dan informasi \\
+\hline
+Tim Pengembang 3D\={e}x (4 Personil) & Pelaksana Teknis (PT SDN) & Acuan kerja dan kontrol lingkup \\
+\hline
+\end{tabularx}
+\end{table}
 
 \clearpage
 
 % ------------------------------------------------------------------------------
 % DAFTAR ISI
 % ------------------------------------------------------------------------------
-\pagestyle{fancy}
 \tableofcontents
 \clearpage
 
@@ -273,9 +363,9 @@ Tanggal: 5 Januari 2026 & & Tanggal Pengesahan: \rule{3.2cm}{0.4pt} \\
 \vspace{-8pt}
 \begin{center}
     {\sffamily\Large\bfseries\color{black} PROJECT CHARTER V1.0: PLATFORM KOMERSIAL 3D\={E}X} \\
-    {\small\color{mutedtext} Dokumen Resmi Pengesahan Proyek Berdasarkan PMBOK\textsuperscript{\textregistered} Guide Edisi 6 (Proses 4.1 \textit{Develop Project Charter})}
+    {\small\color{mutedtext} Dokumen Pengesahan Proyek Berdasarkan PMBOK\textsuperscript{\textregistered} Guide Edisi 6 (Proses 4.1 \textit{Develop Project Charter})}
 \end{center}
-\vspace{6pt}
+\vspace{4pt}
 
 % ==============================================================================
 % BAGIAN 1: TUJUAN & JUSTIFIKASI BISNIS PROYEK
@@ -283,21 +373,21 @@ Tanggal: 5 Januari 2026 & & Tanggal Pengesahan: \rule{3.2cm}{0.4pt} \\
 \section{Tujuan dan Justifikasi Bisnis Proyek}
 
 \subsection{Latar Belakang Masalah Bisnis Klien}
-PT Kreasi Tiga Dimensi Indonesia (Krea3D Corp), sebagai perusahaan penyedia solusi manufaktur aditif dan perdagangan konten digital kreatif di Indonesia, mengidentifikasi hambatan struktural dalam rantai nilai ekonomi kreator 3D yang menghambat pertumbuhan pendapatan perusahaan. Sebelum proyek ini diinisiasi, operasional bisnis digital-ke-fisik klien menghadapi empat permasalahan bisnis utama:
+PT Kreasi Tiga Dimensi Indonesia (Krea3D Corp), penyedia layanan perdagangan konten kreatif digital dan manufaktur aditif di Indonesia, mengidentifikasi hambatan operasional dalam alur penjualan aset digital hingga pencetakan fisik. Sebelum proyek dimulai, proses bisnis klien menghadapi empat masalah utama:
 
-\begin{enumerate}[leftmargin=1.5em, itemsep=3pt]
-    \item Fragmentasi Saluran Bisnis dan Hilangnya Konversi Penjualan: Kreator 3D mitra Krea3D Corp terpaksa memasarkan aset di platform terpisah, memamerkan portofolio di galeri \textit{online} eksternal, serta bertransaksi jasa cetak fisik melalui aplikasi pesan instan. Terputusnya alur ini menyebabkan tingkat pembatalan niat beli pelanggan (\textit{drop-off rate}) mencapai $\pm 35\%$ ketika pembeli kesulitan menemukan mitra \textit{Print Provider} yang kompatibel dengan berkas yang baru dibeli.
-    \item Proses Penawaran Cetak 3D yang Lambat dan Manual: Staf operasional dan mitra penyedia jasa cetak (\textit{3D Print Providers}) menerima permintaan cetak melalui obrolan informal dan lembar kerja manual (\textit{spreadsheet}). Proses klarifikasi skala model, jenis filamen/resin, kepadatan \textit{infill}, dan pengiriman berkas mentah memakan waktu rata-rata 48 jam sebelum produksi dimulai, sehingga antrean pesanan menumpuk pada akhir pekan.
-    \item Ketidakpastian Kualitas Geometri Akibat Pratinjau 2D Statis: Pelanggan korporasi maupun individu sering meragukan kualitas topologi, ketebalan dinding (\textit{manifold integrity}), dan detail \textit{polygon mesh} karena katalog lama hanya menampilkan gambar tangkapan layar 2D. Hal ini memicu tingginya tingkat komplain pasca-cetak dan pengembalian dana.
-    \item Kelelahan Pengambilan Keputusan (\textit{Decision Fatigue}) pada Katalog Besar: Pelanggan yang mencari aset spesifik untuk kebutuhan gim, arsitektur, atau prototipe industri kesulitan menavigasi ribuan aset menggunakan pencarian kata kunci konvensional, yang menurunkan nilai rata-rata transaksi (\textit{Average Order Value}).
+\begin{enumerate}[leftmargin=1.5em, itemsep=2pt]
+    \item Saluran Jual dan Cetak Terpisah: Kreator menjual model di situs terpisah, memamerkan portofolio di galeri luar, dan menerima pesanan cetak melalui pesan instan. Akibatnya sekitar 35\% pembeli batal melanjutkan pesanan cetak karena kesulitan mencari mitra pencetak yang sesuai.
+    \item Penawaran Cetak Lambat dan Manual: Staf operasional dan bengkel mitra mengonfirmasi ukuran model, bahan cetak, dan pengiriman berkas secara manual melalui obrolan dan lembar hitung. Proses ini memakan waktu rata-rata 48 jam sebelum produksi dimulai.
+    \item Keraguan Pembeli terhadap Pratinjau 2D: Pembeli sering ragu pada kualitas bentuk model karena katalog lama hanya menampilkan foto statis 2D, sehingga memicu keluhan dan pengembalian dana pasca-cetak.
+    \item Pencarian Sulit pada Katalog Besar: Pencarian kata kunci biasa menyulitkan pelanggan menemukan model spesifik dari ribuan aset, yang menghambat konversi penjualan.
 \end{enumerate}
 
 \subsection{Justifikasi Bisnis dan Model Komersial Tertutup}
-Untuk menjawab masalah bisnis tersebut, PT Kreasi Tiga Dimensi Indonesia menugaskan PT Schryzon Digital Nusantara (3D\={e}x Studio) untuk membangun perangkat lunak komersial tertutup (\textit{proprietary closed-source web platform}) bernama 3D\={e}x. Seluruh kode sumber, skema basis data, aset desain, dan konfigurasi infrastruktur merupakan properti intelektual eksklusif klien. Investasi sebesar Rp 148.500.000 dijustifikasi melalui proyeksi nilai bisnis berikut:
+Untuk mengatasi keempat masalah tersebut, Krea3D Corp menugaskan PT Schryzon Digital Nusantara membangun platform web komersial tertutup bernama 3D\={e}x dengan hak milik penuh di tangan klien. Nilai investasi Rp 148.500.000 dijustifikasi melalui proyeksi manfaat berikut:
 \begin{itemize}[leftmargin=1.5em, itemsep=2pt]
-    \item Konsolidasi komisi penjualan aset digital (\textit{royalty fee}), biaya layanan cetak 3D fisik terintegrasi, dan penawaran akun kreator/mitra terverifikasi dalam satu platform terpusat (https://3dex.studio).
-    \item Eliminasi biaya komunikasi pra-produksi manual hingga $85\%$ melalui formulir spesifikasi cetak terstruktur dan pengiriman otomatis berkas .glb ke mitra \textit{Print Provider} yang terverifikasi.
-    \item Peningkatan retensi pengguna dan konversi penjualan melalui pengalaman inspeksi \textit{WebGL 3D Viewer} secara langsung di \textit{browser} serta asisten rekomendasi berbasis AI (D\={e}xie).
+    \item Menyatukan pendapatan komisi aset digital dan biaya layanan cetak 3D dalam satu platform bisnis resmi (https://3dex.studio).
+    \item Memangkas waktu administrasi pemesanan cetak hingga 85\% melalui formulir standar dan pengiriman berkas model otomatis ke mitra pencetak terverifikasi.
+    \item Meningkatkan minat beli melalui pratinjau model 3D interaktif langsung di \textit{browser} dan asisten rekomendasi cerdas berbasis AI (D\={e}xie).
 \end{itemize}
 
 % ==============================================================================
@@ -305,32 +395,31 @@ Untuk menjawab masalah bisnis tersebut, PT Kreasi Tiga Dimensi Indonesia menugas
 % ==============================================================================
 \section{Tujuan Terukur (SMART) dan Kriteria Sukses Proyek}
 
-Seluruh sasaran proyek dirumuskan secara kuantitatif mengikuti kaidah SMART (\textit{Specific, Measurable, Achievable, Relevant, Time-bound}) untuk menjamin keterukuran keberhasilan proyek pada saat serah terima:
+Sasaran proyek dirumuskan secara terukur agar keberhasilannya dapat diverifikasi secara objektif saat serah terima:
 
 \begin{table}[H]
 \centering
-{\renewcommand{\arraystretch}{1.14}\small
+{\renewcommand{\arraystretch}{1.15}\small
 \caption{Tujuan Proyek Terukur Berdasarkan Kerangka SMART}
-\begin{tabularx}{\textwidth}{| C{1.0cm} | L{3.2cm} | L{3.2cm} | Y |}
+\begin{tabularx}{\textwidth}{| C{1.0cm} | L{3.3cm} | L{3.6cm} | Y |}
 \hline
-\rowcolor{tableheadergray} \thdr{Kode} & \thdr{Area Tujuan} & \thdr{Target Terukur} & \thdr{Metode Pengukuran \& Tenggat (Time-bound)} \\
+\rowcolor{tableheadergray} \thdr{Kode} & \thdr{Area Tujuan} & \thdr{Target Terukur} & \thdr{Cara Pengukuran \& Tenggat} \\
 \hline
-O-1 & Kecepatan Akses \& Inspeksi 3D & Waktu muat katalog $\le 3,0\text{ detik}$; inisialisasi WebGL 3D Viewer $\le 5,0\text{ detik}$ & Diukur melalui uji kinerja Lighthouse dan DevTools pada aset .glb berukuran $< 50\text{ MB}$ saat Fase 5 (Minggu ke-15). \\
+O-1 & Kecepatan Akses \& Pratinjau 3D & Katalog terbuka $\le 3$ detik; penampil 3D siap $\le 5$ detik & Diuji menggunakan peramban standar pada model $< 50$ MB sebelum rilis akhir (Minggu 15). \\
 \hline
-O-2 & Efisiensi Alur Cetak Digital-ke-Fisik & Waktu \textit{handoff} pesanan cetak turun dari $48\text{ jam}$ menjadi $\le 5\text{ menit}$ & Diukur dari waktu pelanggan mengirimkan konfigurasi cetak hingga mitra Provider menerima berkas .glb dan parameter cetak pada UAT Minggu ke-14. \\
+O-2 & Kecepatan Alur Cetak 3D & Penerusan pesanan cetak turun dari 48 jam menjadi $\le 5$ menit & Diukur sejak pelanggan memesan hingga mitra cetak menerima berkas dan detail cetak (Minggu 14). \\
 \hline
-O-3 & Keandalan Transaksi Pembayaran & Akurasi sinkronisasi \textit{webhook} Midtrans Snap $\ge 99,5\%$ (0 transaksi ganda) & Diverifikasi melalui pengujian idempotensi \textit{webhook} dan rekonsiliasi status pesanan PAID pada Rilis 1 (Minggu ke-7) dan UAT. \\
+O-3 & Keandalan Pembayaran & Pencatatan transaksi berhasil $\ge 99,5\%$ (nol tagihan ganda) & Diverifikasi melalui uji coba pembayaran Midtrans dan pencocokan status lunas sejak Rilis 1. \\
 \hline
-O-4 & Rekomendasi Cerdas AI (D\={e}xie) & Latensi pencarian vektor pgvector $\le 500\text{ ms}$; peningkatan konversi $\ge 25\%$ & Diukur melalui log latensi API /dexie/picks (384 dimensi) serta pelacakan konversi 30 hari pasca-rilis produksi. \\
+O-4 & Pencarian Cerdas AI (D\={e}xie) & Hasil rekomendasi muncul $\le 0,5$ detik; konversi naik $\ge 25\%$ & Diukur dari waktu respons pencarian cerdas serta pemantauan penjualan 30 hari pasca-rilis. \\
 \hline
-O-5 & Tata Kelola \& Pelaporan Otomatis & Laporan penjualan harian \& \textit{audit log} admin tersedia \textit{real-time} 24/7 & Diukur dengan ketersediaan dasbor analitik seniman/admin ($\ge 99,5\%$ \textit{uptime}) pada saat serah terima akhir Minggu ke-15. \\
+O-5 & Pelaporan \& Tata Kelola Admin & Laporan penjualan dan catatan audit tersedia 24 jam penuh & Diukur dari ketersediaan dasbor seniman dan admin ($\ge 99,5\%$ aktif) pada serah terima Minggu 15. \\
 \hline
 \end{tabularx}}
 \end{table}
 
-\vspace{-4pt}
-\noindent Kriteria Sukses Proyek (\textit{Project Success Criteria}):
-Proyek dinyatakan berhasil apabila: (1) seluruh fitur pada Rilis 1 hingga Rilis 5 lulus 100\% skenario pengujian \textit{User Acceptance Testing} (UAT) yang disaksikan dan disetujui oleh perwakilan pengguna dan Sponsor; (2) aplikasi berjalan stabil pada lingkungan produksi (https://3dex.studio) paling lambat pada Hari ke-106 (20 April 2026); dan (3) total realisasi biaya pengembangan tidak melampaui plafon anggaran yang disetujui sebesar Rp 148.500.000.
+Kriteria Sukses Proyek (\textit{Project Success Criteria}):
+Proyek dinyatakan berhasil apabila: (1) seluruh fitur pada Rilis 1 hingga Rilis 5 lulus 100\% uji penerimaan pengguna (\textit{User Acceptance Testing} / UAT) oleh perwakilan Krea3D Corp; (2) sistem beroperasi stabil pada domain produksi paling lambat Hari ke-106 (20 April 2026); dan (3) total biaya proyek tidak melampaui anggaran disetujui sebesar Rp 148.500.000.
 
 \clearpage
 
@@ -339,53 +428,52 @@ Proyek dinyatakan berhasil apabila: (1) seluruh fitur pada Rilis 1 hingga Rilis 
 % ==============================================================================
 \section{Kebutuhan Tingkat Tinggi (\textit{High-Level Requirements})}
 
-\subsection{Kebutuhan Fungsional Tingkat Tinggi}
-Sistem harus melayani lima peran aktor yang terisolasi melalui \textit{Role-Based Access Control} (RBAC) dengan delapan modul bisnis internal:
-\begin{enumerate}[leftmargin=1.5em, itemsep=3pt]
-    \item \textit{Guest:} Menjelajahi beranda, katalog publik, dan profil kreator tanpa autentikasi; melakukan inspeksi geometri 3D interaktif melalui \textit{WebGL 3D Viewer}; mendaftar akun Customer (lokal atau Google OAuth 2.0) serta mengajukan aplikasi peningkatan peran sebagai \textit{Artist} atau \textit{Provider}.
-    \item \textit{Customer:} Mengelola profil, keamanan akun (2FA), dan preferensi visibilitas konten (NSFW/D\={e}xie); mencari aset menggunakan filter konvensional maupun semantik AI; mengelola keranjang dan \textit{wishlist}; menyelesaikan pembayaran melalui Midtrans Snap; mengunduh berkas berlisensi melalui \textit{presigned download URL}; mengajukan pesanan cetak fisik (skala, material, \textit{infill}, warna, pemilihan Provider) dengan kalkulasi estimasi biaya berbasis volume \textit{mesh} dan \textit{bounding-box} di sisi klien (bukan \textit{G-code slicing} riil); melacak status cetak secara \textit{real-time}; serta memberikan ulasan, mengikuti kreator, dan menyusun koleksi kurasi.
-    \item \textit{Artist (3D Creator):} Memperoleh seluruh kapabilitas Customer ditambah dasbor analitik penjualan; mengunggah berkas model .glb/.gltf beserta metadata, gambar pratinjau, dan skema lisensi ganda (gratis/berbayar, penggunaan pribadi/komersial); memublikasikan unggahan portofolio di \textit{community feed}; serta memantau pendapatan dan mengajukan penarikan dana.
-    \item \textit{Print Provider:} Memperoleh seluruh kapabilitas Customer ditambah Provider Dashboard untuk mengelola antrean pekerjaan cetak; menerima atau menolak pesanan masuk; mengunduh berkas sumber .glb pelanggan setelah pesanan diterima; serta memperbarui siklus status produksi (PENDING $\rightarrow$ ACCEPTED $\rightarrow$ PROCESSING $\rightarrow$ SHIPPED $\rightarrow$ DELIVERED) dilengkapi unggahan foto bukti kerja dan nomor resi kurir.
-    \item \textit{Administrator (Admin):} Mengakses dasbor statistik platform secara menyeluruh; melakukan verifikasi KYC-lite atas pengajuan akun \textit{Artist} dan \textit{Provider}; meninjau dan menyetujui/menolak model baru sebelum tayang publik (didukung deteksi NSFW); menangani laporan penyalahgunaan; menindak akun pelanggar; serta meninjau \textit{Admin Audit Log} yang bersifat permanen.
+\subsection{Kebutuhan Pengguna dan Hak Akses Peran}
+Platform memisahkan hak akses ke dalam lima peran utama agar alur bisnis dan pengawasan berjalan tertib:
+\begin{enumerate}[leftmargin=1.5em, itemsep=2pt]
+    \item \textit{Guest} (Pengunjung): Dapat menelusuri katalog publik, melihat profil kreator, menginspeksi model 3D secara interaktif di \textit{browser}, serta mendaftar akun (email atau Google).
+    \item \textit{Customer} (Pembeli): Dapat mencari aset dengan kata kunci maupun bantuan AI, mengelola keranjang serta \textit{wishlist}, membayar melalui Midtrans, mengunduh aset berlisensi secara aman, memesan cetak fisik lengkap dengan pemilihan bengkel mitra serta pelacakan status 5 tahap, memberi ulasan, dan mengikuti kreator.
+    \item \textit{Artist} (Kreator 3D): Memiliki fitur pembeli ditambah kemampuan mengunggah model 3D dengan pilihan lisensi gratis/berbayar (pribadi/komersial), memajang portofolio di lini masa komunitas, memantau statistik penjualan, dan menarik penghasilan.
+    \item \textit{Print Provider} (Mitra Jasa Cetak): Memiliki dasbor antrean cetak untuk menerima atau menolak pesanan masuk, mengunduh berkas 3D resmi pesanan, mengunggah foto hasil cetak, serta memasukkan nomor resi pengiriman.
+    \item \textit{Admin} (Pengelola Platform): Mengakses statistik transaksi menyeluruh, memverifikasi pengajuan akun kreator dan mitra cetak, meninjau model baru sebelum tayang publik, menangani laporan pelanggaran, serta memeriksa catatan audit permanen.
 \end{enumerate}
 
-\subsection{Kebutuhan Non-Fungsional Tingkat Tinggi}
+\subsection{Kebutuhan Kualitas Sistem dan Perlindungan Transaksi}
 \begin{itemize}[leftmargin=1.5em, itemsep=2pt]
-    \item Arsitektur Monolit Modular 4-Node: Pemisahan fisik antara Node Frontend (Next.js App Router, React 19, Three.js/WebGL), Node Backend (Express.js monolit modular 8 domain), Node Basis Data (PostgreSQL 16 + ekstensi pgvector + Prisma ORM), dan Node Penyimpanan Objek (MinIO S3-compatible).
-    \item Keamanan Sistem: Autentikasi berbasis JWT pada \textit{httpOnly cookie} dengan rotasi \textit{refresh token}, \textit{hashing password} menggunakan \textit{bcrypt} ($\ge 10$ hingga $12$ \textit{salt rounds}), serta pengiriman aset digital melalui \textit{MinIO Presigned GET/PUT URL} berbatas waktu.
-    \item Keandalan Transaksi \& Kebijakan Penahanan Saldo (\textit{Escrow} Cetak 3D): Seluruh mutasi relasional lintas tabel (pesanan, pembayaran, hak kepemilikan model, dan pekerjaan cetak) wajib dijalankan dalam satu blok transaksi basis data atomik Prisma dengan \textit{handler} \textit{webhook} Midtrans yang bersifat idempoten. Khusus transaksi cetak 3D fisik yang dibayar di awal via Midtrans, sistem menerapkan mekanisme penahanan saldo sementara (\textit{simple ledger/escrow}) berbasis status basis data: dana ditahan dari pencairan dan baru diteruskan kepada Provider setelah pesanan berstatus DELIVERED dan dikonfirmasi oleh Customer (atau dikembalikan kepada Customer apabila pesanan ditolak oleh Provider).
-    \item Usabilitas \& Pengalaman Pengguna: Antarmuka responsif tema gelap (\textit{dark mode}) yang konsisten di layar desktop maupun seluler, dengan panduan asisten AI D\={e}xie yang tidak mengganggu alur utama.
+    \item Keamanan Akses \& Berkas Digital: Akun dilindungi verifikasi kata sandi terenkripsi, opsi keamanan dua langkah (2FA), serta tautan unduhan berkas berbatas waktu khusus bagi pembeli resmi.
+    \item Keandalan Pembayaran \& Penahanan Saldo (\textit{Escrow} Cetak 3D): Setiap transaksi pembayaran tercatat otomatis tanpa risiko penggandaan. Khusus pesanan cetak fisik yang dibayar di muka via Midtrans, sistem menahan sementara pencairan dana mitra (\textit{simple ledger/escrow}) dan baru melepasnya setelah pesanan berstatus DELIVERED serta dikonfirmasi oleh Customer (atau dikembalikan jika pesanan ditolak).
+    \item Pengalaman Pengguna: Antarmuka tema gelap yang responsif di desktop maupun ponsel dengan bantuan asisten AI D\={e}xie yang dapat diaktifkan sesuai kebutuhan.
 \end{itemize}
 
-\clearpage
+\noindent Sketsa dan gambaran awal antarmuka sistem disajikan pada Lampiran A.
 
 % ==============================================================================
 % BAGIAN 4: DESKRIPSI, BATAS LINGKUP & DELIVERABLE UTAMA
 % ==============================================================================
 \section{Deskripsi Proyek, Batas Lingkup, dan Deliverable Utama}
 
-\subsection{Gambaran Arsitektur dan Domain Aset Platform}
-Platform 3D\={e}x diimplementasikan sebagai Monolit Modular pada sisi aplikasi backend yang terdistribusi pada empat simpul infrastruktur utama, sehingga seluruh komunikasi antarmodul bisnis (Auth, Catalog, Commerce, Community, Dexie, Notification, Print, dan Admin) berlangsung secara \textit{in-process} dengan latensi minimal namun tetap menjaga batas domain yang tegas. Untuk alur cetak 3D, penentuan estimasi biaya cetak dihitung melalui pendekatan volume \textit{mesh} dan \textit{bounding-box} langsung pada sisi klien (Frontend Node / WebGL), sementara \textit{Print Module} di Backend Node mengelola spesifikasi cetak (\textit{Print Spec}) serta antrean pekerjaan (\textit{Job Queue}) tanpa menjalankan \textit{G-code slicing} riil di sisi server.
+\subsection{Gambaran Platform dan Pilar Layanan}
+Platform 3D\={e}x dibangun sebagai sistem aplikasi terpadu yang memisahkan empat bagian utama agar mudah dikelola dan aman: (1) antarmuka web pengguna di \textit{browser}; (2) pusat layanan bisnis terintegrasi (akun, katalog, transaksi, komunitas, AI, notifikasi, cetak 3D, dan moderasi admin); (3) basis data terpusat; serta (4) penyimpanan berkas media dan model 3D. Untuk pemesanan cetak fisik, perkiraan biaya cetak dihitung otomatis di sisi halaman web berdasarkan estimasi ukuran dan volume model (\textit{bounding-box}), sedangkan bagian belakang backend hanya mengelola spesifikasi cetak (\textit{Print Spec}) dan antrean kerja (\textit{Job Queue}) tanpa memproses jalur mesin cetak (\textit{G-code slicing}) di server.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.96\textwidth]{c:/Users/nyoma/Downloads/3Dex/docs/diagrams/exports/tex/fig_1_four_node_deployment.pdf}
-    \caption{Arsitektur 4-Node Infrastruktur dan 8 Modul Bisnis Monolit Modular 3D\={e}x}
+    \includegraphics[width=0.92\textwidth]{c:/Users/nyoma/Downloads/3Dex/docs/diagrams/exports/tex/fig_1_four_node_deployment.pdf}
+    \caption{Gambaran Arsitektur 4 Komponen Utama Platform 3D\={e}x}
 \end{figure}
 
-Platform ini mengorganisasikan katalog komersial ke dalam tiga pilar kategori aset dan layanan utama sebagaimana ditampilkan pada aset antarmuka berikut:
+Layanan komersial platform dikelompokkan menjadi tiga pilar produk dan jasa utama sebagai berikut:
 
 \begin{figure}[H]
     \centering
     \begin{tabular}{@{} C{0.31\textwidth} C{0.31\textwidth} C{0.31\textwidth} @{}}
-        \includegraphics[width=0.30\textwidth, height=2.6cm, keepaspectratio]{c:/Users/nyoma/Downloads/3Dex/apps/frontend/public/category-3d-models.jpg} &
-        \includegraphics[width=0.30\textwidth, height=2.6cm, keepaspectratio]{c:/Users/nyoma/Downloads/3Dex/apps/frontend/public/category-3d-print.jpg} &
-        \includegraphics[width=0.30\textwidth, height=2.6cm, keepaspectratio]{c:/Users/nyoma/Downloads/3Dex/apps/frontend/public/category-textures.jpg} \\
+        \includegraphics[width=0.29\textwidth, height=2.4cm, keepaspectratio]{c:/Users/nyoma/Downloads/3Dex/apps/frontend/public/category-3d-models.jpg} &
+        \includegraphics[width=0.29\textwidth, height=2.4cm, keepaspectratio]{c:/Users/nyoma/Downloads/3Dex/apps/frontend/public/category-3d-print.jpg} &
+        \includegraphics[width=0.29\textwidth, height=2.4cm, keepaspectratio]{c:/Users/nyoma/Downloads/3Dex/apps/frontend/public/category-textures.jpg} \\
         {\footnotesize (a) Model 3D Digital (.glb/.gltf)} &
         {\footnotesize (b) Layanan Cetak 3D Fisik} &
-        {\footnotesize (c) Tekstur \& Material PBR} \\
+        {\footnotesize (c) Tekstur \& Material} \\
     \end{tabular}
-    \caption{Tiga Pilar Kategori Layanan dan Produk Komersial pada Platform 3D\={e}x}
+    \caption{Tiga Pilar Layanan Komersial Platform 3D\={e}x}
 \end{figure}
 
 \clearpage
@@ -394,50 +482,52 @@ Platform ini mengorganisasikan katalog komersial ke dalam tiga pilar kategori as
 
 \begin{table}[H]
 \centering
-\caption{Pemetaan Batas Ruang Lingkup Proyek 3D\={e}x}
+\caption{Matriks Batas Ruang Lingkup Proyek 3D\={e}x}
 \begin{tabularx}{\textwidth}{| Y | Y |}
 \hline
 \rowcolor{tableheadergray} \thdr{Dalam Lingkup (\textit{In Scope})} & \thdr{Di Luar Lingkup (\textit{Out of Scope})} \\
 \hline
 \begin{itemize}[leftmargin=1.1em, itemsep=2pt, topsep=2pt]
-    \item Aplikasi web penuh berbasis Next.js App Router dan Express.js TypeScript dengan RBAC 5 peran.
-    \item \textit{WebGL 3D Viewer} / Three.js interaktif (rotasi, pan, zoom, inspeksi topologi) langsung di \textit{browser} untuk format .glb/.gltf.
-    \item Manajemen katalog, \textit{keyword search}, serta pencarian semantik dan rekomendasi ``D\={e}xie's Picks'' menggunakan all-MiniLM-L6-v2, pgvector, dan Google Gemini API.
-    \item Sistem keranjang, \textit{wishlist}, lisensi ganda, \textit{checkout} Midtrans Snap, \textit{webhook} idempoten, pembatalan otomatis \textit{expired checkout} via \textit{internal cron scheduler}, dan \textit{presigned download URL} via MinIO S3.
-    \item Alur pesanan cetak fisik (konfigurasi skala, material, \textit{infill}, warna dengan kalkulasi biaya berbasis estimasi volume \textit{mesh}/\textit{bounding-box} di sisi klien), penahanan saldo sementara (\textit{simple ledger/escrow}) hingga status DELIVERED dikonfirmasi Customer, Provider Dashboard, pelacakan 5 tahap, foto bukti kerja, dan nomor resi.
-    \item Fitur komunitas (\textit{portfolio feed}, ikuti kreator, suka, komentar, koleksi, notifikasi) serta dasbor moderasi Admin dan \textit{Audit Log}.
+    \item Situs web lengkap untuk 5 peran pengguna (Pengunjung, Pembeli, Kreator, Mitra Cetak, Admin).
+    \item Penampil 3D interaktif langsung di \textit{browser} (putar, geser, perbesar model).
+    \item Katalog aset, filter pencarian, dan asisten rekomendasi cerdas AI D\={e}xie.
+    \item Keranjang, \textit{wishlist}, lisensi ganda, pembayaran Midtrans otomatis, pembatalan otomatis pesanan kedaluwarsa oleh penjadwal sistem, serta unduhan berkas berbatas waktu.
+    \item Pemesanan cetak 3D (skala, bahan, kepadatan, warna, estimasi harga sisi klien), penahanan saldo \textit{escrow} hingga status DELIVERED, dasbor mitra cetak, pelacakan 5 tahap, foto bukti kerja, dan nomor resi.
+    \item Lini masa komunitas, ulasan transaksi, koleksi, notifikasi, dan dasbor moderasi Admin.
 \end{itemize}
 &
 \begin{itemize}[leftmargin=1.1em, itemsep=2pt, topsep=2pt]
-    \item Aplikasi seluler asli (\textit{native} Android/iOS atau React Native dengan fitur \textit{Augmented Reality} lokal).
-    \item \textit{Server-side G-code slicing engine} riil maupun pengendalian jarak jauh perangkat keras pencetak 3D (\textit{IoT printer farm control}).
-    \item Integrasi perangkat lunak akuntansi eksternal, pelaporan pajak otomatis (e-Faktur/ERP), dan manajemen pembukuan korporasi klien.
-    \item Pengadaan perangkat keras mesin cetak 3D, bahan filamen/resin, maupun armada logistik fisik milik mitra Provider.
-    \item Migrasi data transaksi historis atau basis data pengguna dari sistem lama di luar lingkungan kontrak ini.
-    \item Integrasi API kurir pengiriman berbayar untuk pembaruan otomatis tanpa input manual resi dari Provider.
+    \item Aplikasi seluler asli (Android/iOS) atau fitur \textit{Augmented Reality} khusus ponsel.
+    \item Mesin pemotong lintasan cetak (\textit{server-side G-code slicing engine}) atau kendali mesin cetak jarak jauh (IoT).
+    \item Integrasi sistem akuntansi eksternal perusahaan maupun pelaporan pajak (e-Faktur/ERP).
+    \item Pengadaan mesin cetak 3D, bahan baku filamen/resin, maupun armada pengiriman mitra.
+    \item Migrasi riwayat transaksi atau data pengguna dari sistem lama sebelum platform diluncurkan.
+    \item Integrasi layanan pelacakan otomatis kurir eksternal berbayar tanpa input nomor resi oleh mitra.
 \end{itemize} \\
 \hline
 \end{tabularx}
 \end{table}
 
+Permintaan di luar daftar lingkup di atas ditangani melalui pengajuan perubahan tertulis yang disetujui Sponsor dan Project Manager beserta penyesuaian waktu dan biaya.
+
 \subsection{Deliverable Utama per Fase Rilis}
 
 \begin{table}[H]
 \centering
-\caption{Daftar Deliverable Utama Proyek per Fase Rilis}
-\begin{tabularx}{\textwidth}{| C{1.3cm} | L{4.2cm} | Y | C{2.3cm} |}
+\caption{Daftar Hasil Serahan Utama Proyek (D1 s.d. D5)}
+\begin{tabularx}{\textwidth}{| C{1.2cm} | L{4.5cm} | Y | C{2.3cm} |}
 \hline
-\rowcolor{tableheadergray} \thdr{Kode} & \thdr{Deliverable Utama} & \thdr{Komponen Teknis yang Diserahkan} & \thdr{Target Rilis} \\
+\rowcolor{tableheadergray} \thdr{Kode} & \thdr{Deliverable Utama} & \thdr{Ringkasan Hasil yang Diserahkan} & \thdr{Target Rilis} \\
 \hline
-D1 & Rancangan Arsitektur, Prototipe UI \& Fondasi Inti & Spesifikasi \textit{User Story}, \textit{Design System} Tema Gelap, Skema Prisma PostgreSQL, Autentikasi JWT + Google OAuth 2.0, Koneksi MinIO S3, Pipeline CI/CD GitHub. & Minggu ke-3 (Hari 18) \\
+D1 & Fondasi, Sketsa UI \& Akses Akun & Daftar kebutuhan pengguna, sketsa antarmuka tema gelap, sistem login email dan Google, manajemen peran, dan penyimpanan aset 3D. & Minggu ke-3 (Hari 18) \\
 \hline
-D2 & Rilis 1: \textit{Core Marketplace} \& Pembayaran & Katalog publik, \textit{WebGL 3D Viewer}, Unggah model .glb, Keranjang \& \textit{Wishlist}, \textit{Checkout} Midtrans Snap + \textit{Webhook}, \textit{Presigned download URL} MinIO, Antrean moderasi model. & Minggu ke-7 (Hari 48) \\
+D2 & Rilis 1: Marketplace Inti \& Pembayaran & Katalog publik, penampil 3D interaktif, unggah aset kreator, keranjang, \textit{wishlist}, checkout Midtrans, dan antrean persetujuan model. & Minggu ke-7 (Hari 48) \\
 \hline
-D3 & Rilis 2: Ekosistem Komunitas \& Sosial & \textit{Portfolio feed} kreator, Sistem Ikuti (\textit{Follow}), Suka \& Komentar, Ulasan terverifikasi transaksi, Koleksi kurasi, Pusat Notifikasi, Mekanisme pelaporan konten. & Minggu ke-10 (Hari 72) \\
+D3 & Rilis 2: Komunitas \& Interaksi Sosial & Portofolio kreator di lini masa, fitur ikuti kreator, suka, komentar, ulasan pembeli resmi, koleksi pribadi, notifikasi, dan pelaporan konten. & Minggu ke-10 (Hari 72) \\
 \hline
-D4 & Rilis 3: Asisten AI D\={e}xie \& Alur Cetak 3D & Mesin vektor all-MiniLM-L6-v2 + pgvector, Integrasi Gemini Pro/Flash (\textit{tagline} kontekstual \& ``D\={e}xie's Picks''), Formulir konfigurasi cetak (\textit{bounding-box}), \textit{Escrow} saldo cetak, Provider Dashboard \& pelacakan 5 tahap. & Minggu ke-13 (Hari 94) \\
+D4 & Rilis 3: Asisten AI \& Cetak 3D (\textit{Escrow}) & Pencarian cerdas dan rekomendasi D\={e}xie, formulir pemesanan cetak fisik (estimasi dimensi model), jaminan saldo \textit{escrow}, dasbor mitra, dan pelacakan 5 tahap. & Minggu ke-13 (Hari 94) \\
 \hline
-D5 & Rilis Final: Tata Kelola Admin, QA, Kontainerisasi \& Pelatihan & Dasbor Analitik Penjualan \& Admin, Verifikasi KYC-lite, Deteksi NSFW, \textit{Admin Audit Log}, Kontainerisasi Docker penuh, Laporan UAT, Manual Pengguna \& Dokumentasi Teknis. & Minggu ke-15 (Hari 106) \\
+D5 & Rilis Final: Moderasi Admin, UAT \& Pelatihan & Statistik penjualan kreator dan admin, verifikasi mitra, catatan audit, hasil uji penerimaan 100\% UAT, manual pengguna, dan pelatihan staf klien. & Minggu ke-15 (Hari 106) \\
 \hline
 \end{tabularx}
 \end{table}
@@ -446,48 +536,48 @@ D5 & Rilis Final: Tata Kelola Admin, QA, Kontainerisasi \& Pelatihan & Dasbor An
 % BAGIAN 5: RISIKO PROYEK & ASSUMPTION LOG
 % ==============================================================================
 \clearpage
-\section{Risiko Proyek Secara Keseluruhan dan Assumption Log}
+\section{Risiko Proyek dan Assumption Log}
 
 \subsection{Register Risiko Tingkat Tinggi}
 
 \begin{table}[H]
 \centering
-\caption{Identifikasi Risiko Utama dan Strategi Mitigasi Proyek}
+\caption{Identifikasi Risiko Utama dan Langkah Mitigasi}
 \begin{tabularx}{\textwidth}{| C{1.15cm} | L{3.9cm} | C{1.9cm} | C{1.7cm} | Y |}
 \hline
-\rowcolor{tableheadergray} \thdr{ID} & \thdr{Deskripsi Risiko} & \thdr{Peluang / Dampak} & \thdr{Tingkat} & \thdr{Strategi Mitigasi} \\
+\rowcolor{tableheadergray} \thdr{ID} & \thdr{Deskripsi Risiko} & \thdr{Peluang / Dampak} & \thdr{Tingkat} & \thdr{Langkah Mitigasi} \\
 \hline
-R-01 & Perubahan spesifikasi API pihak ketiga (Midtrans Snap, Google Gemini, atau OAuth) selama masa pengembangan & Sedang / Tinggi & \badge{accentred}{TINGGI} & Menerapkan lapisan abstraksi (\textit{service adapter}) terisolasi pada backend serta menyediakan perilaku cadangan (\textit{fallback message} / retry eksponensial) saat kuota API terbatas. \\
+R-01 & Perubahan kebijakan atau batas kuota layanan pihak ketiga (Midtrans, Google AI, atau Login Google) & Sedang / Tinggi & \badge{accentred}{TINGGI} & Memisahkan integrasi eksternal pada lapisan layanan khusus serta menyiapkan pesan cadangan dan percobaan ulang otomatis saat layanan sibuk. \\
 \hline
-R-02 & Pembengkakan ruang lingkup (\textit{scope creep}) dari permintaan fitur tambahan di luar jadwal 106 hari & Sedang / Tinggi & \badge{accentred}{TINGGI} & Memberlakukan pengendalian perubahan formal melalui persetujuan Sponsor dan aktivasi protokol \textit{feature freeze} ketat mulai Hari ke-95 (Fase 5). \\
+R-02 & Penambahan permintaan fitur baru di luar batas jadwal 106 hari (\textit{scope creep}) & Sedang / Tinggi & \badge{accentred}{TINGGI} & Menerapkan persetujuan perubahan tertulis bersama Sponsor dan mengunci perubahan fitur mulai Hari ke-95 (Fase 5). \\
 \hline
-R-03 & Konflik integrasi kode antaranggota tim pada cabang repositori utama (\textit{main/dev}) & Tinggi / Sedang & \badge{accentorange}{SEDANG} & Kebijakan \textit{Continuous Integration} harian (integrasi minimal 1 kali per hari kerja) dan pemeriksaan otomatis CI/CD pada setiap \textit{Pull Request}. \\
+R-03 & Kendala penggabungan pekerjaan antaranggota tim pengembang & Tinggi / Sedang & \badge{accentorange}{SEDANG} & Mewajibkan penggabungan kode setiap hari kerja disertai pemeriksaan otomatis sebelum pembaruan diterima. \\
 \hline
-R-04 & Penurunan performa \textit{browser} akibat ukuran berkas geometri .glb yang sangat besar ($> 50\text{ MB}$) & Sedang / Sedang & \badge{accentorange}{SEDANG} & Validasi batas ukuran unggahan pada MinIO, pembuatan gambar pratinjau WebP terpisah untuk halaman katalog, dan pemuatan WebGL secara \textit{lazy loading}. \\
+R-04 & Halaman katalog terasa lambat bila pengguna mengunggah berkas model 3D berukuran sangat besar ($> 50$ MB) & Sedang / Sedang & \badge{accentorange}{SEDANG} & Membatasi ukuran berkas unggahan, menampilkan gambar pratinjau ringan pada halaman daftar katalog, dan memuat model 3D hanya saat halaman detail dibuka. \\
 \hline
-R-05 & Bug tersembunyi akibat penggunaan alat bantu akselerasi kode AI (4GT/5GT) & Sedang / Sedang & \badge{accentorange}{SEDANG} & Kewajiban peninjauan kode manusia (\textit{peer code review}), \textit{pair programming} pada modul kritis (pembayaran \& AI), dan pengujian regresi QA pada akhir tiap fase. \\
+R-05 & Kesalahan logika program selama percepatan pengembangan & Sedang / Sedang & \badge{accentorange}{SEDANG} & Mewajibkan pemeriksaan silang antaranggota tim pada modul penting (pembayaran dan AI) serta uji menyeluruh tiap akhir fase. \\
 \hline
-R-06 & Keterlambatan umpan balik dari perwakilan pengguna (\textit{On-Site Customer}) saat demo rilis & Rendah / Tinggi & \badge{accentgreen}{RENDAH} & Menjadwalkan sesi demo iterasi tetap setiap 2 minggu sekali dan menunjuk satu perwakilan pengguna penuh waktu dari Krea3D Corp. \\
+R-06 & Keterlambatan tanggapan klien saat evaluasi rilis berkala & Rendah / Tinggi & \badge{accentgreen}{RENDAH} & Menjadwalkan sesi demo tetap setiap 2 minggu dengan penunjukan Ibu Rina Kusumawardhani sebagai perwakilan tetap klien. \\
 \hline
-R-07 & Sengketa transaksi cetak 3D fisik apabila pesanan ditolak mitra Print Provider atau hasil cetak rusak dalam pengiriman & Sedang / Tinggi & \badge{accentred}{TINGGI} & Menerapkan penahanan saldo sementara (\textit{simple ledger/escrow}) berbasis status basis data atas pembayaran awal Midtrans: dana ditahan dan baru dapat dicairkan oleh Provider setelah pesanan berstatus DELIVERED dan dikonfirmasi oleh Customer (atau dikembalikan bila ditolak). \\
+R-07 & Sengketa pesanan cetak 3D apabila mitra menolak pesanan atau hasil cetak rusak di perjalanan & Sedang / Tinggi & \badge{accentred}{TINGGI} & Menerapkan penahanan saldo sementara (\textit{simple ledger/escrow}) berbasis status pesanan: dana ditahan dari pencairan dan baru diserahkan ke mitra setelah status DELIVERED dikonfirmasi Customer (atau dikembalikan bila ditolak). \\
 \hline
 \end{tabularx}
 \end{table}
 
-\subsection{Assumption Log (Keluaran Proses 4.1)}
+\subsection{Asumsi dan Kendala Proyek (Assumption Log)}
 \begin{itemize}[leftmargin=1.5em, itemsep=2pt]
     \item Asumsi Proyek (\textit{Assumptions}):
     \begin{enumerate}[leftmargin=1.5em, itemsep=1pt]
-        \item Klien (PT Kreasi Tiga Dimensi Indonesia) menyediakan kredensial lingkungan \textit{sandbox} dan produksi untuk Midtrans Snap, Google Cloud OAuth, serta kunci API Google Gemini sebelum Fase 2 dimulai.
-        \item Data awal kategori model, daftar material cetak standar (PLA, ABS, Resin SLA, TPU, Nylon SLS), serta daftar mitra penyedia cetak awal tersedia dalam format terstruktur sebelum pengujian UAT.
-        \item \textit{End User} mengakses platform melalui \textit{browser} modern dengan dukungan WebGL 2.0 aktif (Chrome 90+, Firefox 88+, Edge 90+, atau Safari 15+).
-        \item Basis Kapasitas Usaha Tim Pengembang: Angka 106 \textit{person-days} merupakan akumulasi estimasi usaha efektif tim pengembang mahasiswa (4 personil) yang bekerja secara terdistribusi/paruh waktu (\textit{part-time} sekitar 15 hingga 20 jam per minggu per personil) sepanjang rentang 106 hari kalender proyek (15 minggu), bukan kapasitas kerja penuh waktu (\textit{full-time}) simultan.
+        \item Krea3D Corp menyediakan kredensial layanan pembayaran (Midtrans), login Google, dan layanan AI Google sebelum Fase 2 dimulai.
+        \item Data awal kategori model, jenis bahan cetak standar (PLA, ABS, Resin SLA, TPU, Nylon SLS), serta profil awal mitra cetak tersedia sebelum masa uji penerimaan (UAT).
+        \item Pengguna mengakses platform menggunakan \textit{browser} modern pada perangkat desktop atau ponsel dengan dukungan tampilan 3D aktif.
+        \item Basis Kapasitas Usaha Tim Pengembang: Angka 106 \textit{person-days} merupakan akumulasi estimasi usaha efektif tim pengembang mahasiswa (4 personil) yang bekerja secara terdistribusi dan paruh waktu (\textit{part-time} sekitar 15 hingga 20 jam per minggu per personil) sepanjang rentang 106 hari kalender proyek (15 minggu), bukan kapasitas kerja penuh waktu (\textit{full-time}) simultan.
     \end{enumerate}
     \item Kendala Proyek (\textit{Constraints}):
     \begin{enumerate}[leftmargin=1.5em, itemsep=1pt]
-        \item Kendala Waktu: Seluruh pengembangan hingga rilis produksi dan serah terima wajib diselesaikan dalam batas 106 hari kalender (5 Januari 2026 s.d. 20 April 2026).
-        \item Kendala Biaya: Total biaya proyek bersifat kontrak tetap (\textit{fixed-ceiling budget}) sebesar Rp 148.500.000 tanpa penambahan biaya di luar cadangan risiko 10\% yang telah disetujui.
-        \item Kendala Komersial: Kode sumber dan artefak sistem bersifat tertutup (\textit{proprietary}), dilarang dipublikasikan ke repositori terbuka dengan lisensi \textit{copyleft} tanpa izin tertulis Sponsor.
+        \item Kendala Waktu: Seluruh pekerjaan hingga peluncuran dan serah terima wajib tuntas dalam batas 106 hari kalender (5 Januari 2026 s.d. 20 April 2026).
+        \item Kendala Biaya: Total biaya proyek bersifat kontrak tetap maksimal Rp 148.500.000 termasuk cadangan risiko 10\%.
+        \item Kendala Kerahasiaan: Seluruh kode sumber dan aset sistem merupakan hak milik tertutup Krea3D Corp dan dilarang dipublikasikan secara terbuka tanpa izin tertulis Sponsor.
     \end{enumerate}
 \end{itemize}
 
@@ -496,49 +586,52 @@ R-07 & Sengketa transaksi cetak 3D fisik apabila pesanan ditolak mitra Print Pro
 % ==============================================================================
 \section{Ringkasan Jadwal Milestone}
 
-Proyek dijadwalkan selama 15 minggu (106 hari kalender) mulai tanggal 5 Januari 2026 hingga 20 April 2026. Detail Gantt Chart dan daftar seluruh 26 \textit{User Story} dijabarkan pada Lampiran B.
+Proyek berjalan selama 15 minggu (106 hari kalender) mulai 5 Januari 2026 hingga 20 April 2026. Bagan Gantt, rencana iterasi mingguan, dan alokasi usaha 106 \textit{person-days} dijabarkan pada Lampiran C.
 
 \begin{table}[H]
 \centering
 \caption{Ringkasan Milestone Utama Proyek 3D\={e}x}
-\begin{tabularx}{\textwidth}{| C{1.1cm} | L{4.2cm} | C{2.9cm} | Y |}
+\begin{tabularx}{\textwidth}{| C{1.1cm} | L{4.3cm} | C{2.9cm} | Y |}
 \hline
 \rowcolor{tableheadergray} \thdr{Kode} & \thdr{Milestone Utama} & \thdr{Tanggal Target} & \thdr{Kriteria Pencapaian} \\
 \hline
-M1 & Pengesahan Charter \& Rilis Fondasi (D1) & 22 Januari 2026 (Minggu 3 / Hari 18) & Charter disetujui Sponsor; autentikasi JWT/OAuth, RBAC, PostgreSQL, MinIO S3, dan CI/CD beroperasi. \\
+M1 & Charter Disetujui \& Fondasi (D1) & 22 Januari 2026 (Minggu 3 / Hari 18) & Charter disahkan Sponsor; login pengguna, hak akses peran, dan penyimpanan awal beroperasi. \\
 \hline
-M2 & Rilis 1: \textit{Core Marketplace} \& Pembayaran (D2) & 21 Februari 2026 (Minggu 7 / Hari 48) & Katalog publik, WebGL 3D Viewer, unggah .glb, keranjang, dan pembayaran Midtrans Snap tervalidasi. \\
+M2 & Rilis 1: Marketplace \& Pembayaran (D2) & 21 Februari 2026 (Minggu 7 / Hari 48) & Katalog publik, penampil 3D, unggah model kreator, keranjang, dan pembayaran Midtrans teruji. \\
 \hline
-M3 & Rilis 2: Komunitas \& Interaksi Sosial (D3) & 17 Maret 2026 (Minggu 10 / Hari 72) & \textit{Portfolio feed} kreator, \textit{follow}, suka/komentar, ulasan, koleksi, dan sistem notifikasi selesai. \\
+M3 & Rilis 2: Komunitas \& Sosial (D3) & 17 Maret 2026 (Minggu 10 / Hari 72) & Lini masa portofolio, fitur ikuti, ulasan transaksi, koleksi, dan pusat notifikasi berfungsi. \\
 \hline
-M4 & Rilis 3: Integrasi D\={e}xie AI \& Ekosistem Cetak (D4) & 8 April 2026 (Minggu 13 / Hari 94) & Pencarian vektor pgvector, rekomendasi D\={e}xie AI, formulir cetak (\textit{bounding-box}) dengan \textit{escrow}, dan Provider Dashboard beroperasi. \\
+M4 & Rilis 3: Asisten AI \& Cetak 3D (D4) & 8 April 2026 (Minggu 13 / Hari 94) & Rekomendasi AI D\={e}xie, pemesanan cetak (\textit{bounding-box}) dengan jaminan \textit{escrow}, dan dasbor mitra aktif. \\
 \hline
-M5 & Rilis Final, Lulus UAT \& Serah Terima (D5) & 20 April 2026 (Minggu 15 / Hari 106) & Audit Admin, deteksi NSFW, Dockerisasi produksi, kelulusan 100\% UAT, pelatihan, dan BAST ditandatangani. \\
+M5 & Rilis Final, Lulus UAT \& Serah Terima (D5) & 20 April 2026 (Minggu 15 / Hari 106) & Dasbor Admin, pengujian lengkap UAT 100\% lulus, pelatihan klien, dan berita acara serah terima disahkan. \\
 \hline
 \end{tabularx}
 \end{table}
 
+\clearpage
 % ==============================================================================
 % BAGIAN 7: SUMBER DAYA KEUANGAN YANG DISETUJUI
 % ==============================================================================
 \section{Sumber Daya Keuangan yang Disetujui}
 
-Berdasarkan metode estimasi Three-Point PERT dan Parametric Estimation, total plafon anggaran yang disetujui oleh Sponsor untuk proyek ini adalah sebesar Rp 148.500.000. Rincian dasar perhitungan matematis PERT serta penjelasan basis usaha efektif 106 \textit{person-days} disajikan pada Lampiran C.
+Plafon anggaran kontrak proyek ditetapkan sebesar Rp 148.500.000 menggunakan teknik estimasi Three-Point (PERT) dan Parametric. Rincian perhitungan matematis PERT serta klarifikasi kapasitas paruh waktu disajikan pada Lampiran C.
 
+\vspace{-4pt}
 \begin{table}[H]
 \centering
+{\renewcommand{\arraystretch}{1.12}\small
 \caption{Ringkasan Anggaran Proyek yang Disetujui Sponsor}
 \begin{tabularx}{\textwidth}{| L{5.4cm} | Y | R{3.3cm} | C{1.5cm} |}
 \hline
 \rowcolor{tableheadergray} \thdr{Komponen Anggaran} & \thdr{Basis Perhitungan} & \thdr{Estimasi Biaya} & \thdr{Porsi} \\
 \hline
-Tenaga Rekayasa Perangkat Lunak & 106 \textit{person-days} $\times$ Rp 1.000.000 & Rp 106.000.000 & 71,38\% \\
+Tenaga Pengembang Perangkat Lunak & 106 \textit{person-days} $\times$ Rp 1.000.000 (Paruh Waktu) & Rp 106.000.000 & 71,38\% \\
 \hline
-Infrastruktur Server, MinIO S3, DB \& API (12 Bln) & Paket Cloud VPS, Penyimpanan \& API & Rp 16.500.000 & 11,11\% \\
+Server, Hosting \& Layanan API (12 Bulan) & Paket Server Produksi, Penyimpanan File \& API & Rp 16.500.000 & 11,11\% \\
 \hline
-Desain Sistem UI/UX, WebGL \& QA Regresi & Paket Desain \& Pengujian Sistem & Rp 7.500.000 & 5,05\% \\
+Desain Antarmuka, Uji 3D \& QA Regresi & Paket Desain Tema Gelap \& Pengujian Mutu & Rp 7.500.000 & 5,05\% \\
 \hline
-Dokumentasi, Pelatihan Pengguna \& Workshop UAT & Paket Serah Terima \& Transfer Ilmu & Rp 5.000.000 & 3,37\% \\
+Dokumentasi, Pelatihan \& Lokakarya UAT & Manual Pengguna/Admin \& Transfer Ilmu & Rp 5.000.000 & 3,37\% \\
 \hline
 \rowcolor{lightslate} \textbf{Subtotal Biaya Dasar Proyek} & \textbf{Total Biaya Langsung} & \textbf{Rp 135.000.000} & \textbf{90,91\%} \\
 \hline
@@ -546,131 +639,287 @@ Cadangan Risiko (\textit{Risk Contingency Reserve}) & 10\% dari Subtotal Biaya D
 \hline
 \rowcolor{lightslate} \textbf{TOTAL ANGGARAN DISETUJUI SPONSOR} & \textbf{Plafon Kontrak Maksimal} & \textbf{Rp 148.500.000} & \textbf{100,00\%} \\
 \hline
-\end{tabularx}
+\end{tabularx}}
 \end{table}
 
 % ==============================================================================
 % BAGIAN 8: DAFTAR STAKEHOLDER KUNCI
 % ==============================================================================
+\vspace{-4pt}
 \section{Daftar Stakeholder Kunci}
 
-Identifikasi awal pemangku kepentingan (Proses 13.1 PMBOK 6) mencakup sembilan kelompok pemangku kepentingan utama dari sisi klien, vendor pengembang, pengguna ekosistem, mitra pihak ketiga, dan penilai mutu akademik:
-\begin{itemize}[leftmargin=1.5em, itemsep=2pt]
-    \item Pihak Klien (PT Kreasi Tiga Dimensi Indonesia): Ir. Hendra Wijaya, S.T., M.B.A. (\textit{Executive Sponsor}) dan Rina Kusumawardhani, S.Ds., M.M. (\textit{On-Site Customer / Product Owner Representative}).
-    \item Pihak Pelaksana (PT Schryzon Digital Nusantara): I Nyoman Widiyasa Jayananda (\textit{Project Manager / Backend Lead}), I Kadek Mahesa Permana Putra (\textit{Frontend / UI-UX / QA Lead}), Abdurrahman Karim (\textit{Integration Lead}), dan Fido Priasa Setyono Putra (\textit{Business Analyst}).
-    \item \textit{End User} \& Ekosistem: Kreator/Seniman 3D (\textit{Artists}), Pembeli/Konsumen (\textit{End Customers}), Mitra Jasa Cetak 3D (\textit{3D Print Providers}), Administrator Platform, Penyedia Layanan Pihak Ketiga (Midtrans, Google Cloud/Gemini), serta Dosen Pengampu PPL Universitas Mataram (Santi Ika Murpratiwi, S.Kom., M.T.) selaku pengawas kaidah manajemen proyek.
+Identifikasi pemangku kepentingan (Proses 13.1 PMBOK 6) mencakup kelompok utama dari sisi klien, tim pelaksana, pengguna platform, penyedia layanan pihak ketiga, dan penilai mutu akademik:
+\begin{itemize}[leftmargin=1.5em, itemsep=1.5pt, topsep=2pt]
+    \item Pihak Klien (PT Kreasi Tiga Dimensi Indonesia): Ir. Hendra Wijaya, S.T., M.B.A. (\textit{Executive Sponsor}) dan Rina Kusumawardhani, S.Ds., M.M. (\textit{On-Site Customer} / Perwakilan Pengguna).
+    \item Pihak Pelaksana (PT Schryzon Digital Nusantara): I Nyoman Widiyasa Jayananda (Project Manager / Backend Lead), I Kadek Mahesa Permana Putra (Frontend / UI-UX / QA Lead), Abdurrahman Karim (Integration Lead), dan Fido Priasa Setyono Putra (Business Analyst).
+    \item Pengguna Ekosistem \& Pengawas Akademik: Kreator 3D (\textit{Artists}), Pembeli (\textit{End Customers}), Mitra Jasa Cetak 3D (\textit{Print Providers}), Administrator Platform, Vendor Pembayaran/AI (Midtrans, Google Cloud), serta Dosen Pengampu PPL Universitas Mataram (Santi Ika Murpratiwi, S.Kom., M.T.).
 \end{itemize}
-Detail lengkap berupa \textit{Stakeholder Register} dan pemetaan \textit{Power/Interest Grid} dilampirkan pada Lampiran A.
+Detail lengkap \textit{Stakeholder Register} dan pemetaan \textit{Power/Interest Grid} dilampirkan pada Lampiran B.
 
 % ==============================================================================
 % BAGIAN 9: PERSYARATAN PERSETUJUAN PROYEK
 % ==============================================================================
+\vspace{-4pt}
 \section{Persyaratan Persetujuan Proyek (\textit{Project Approval Requirements})}
 
-Setiap keluaran fase dan produk akhir wajib memenuhi prosedur persetujuan berjenjang berikut:
-\begin{enumerate}[leftmargin=1.5em, itemsep=2pt]
-    \item Kepatuhan \textit{Definition of Done (DoD)} per Fitur: Setiap fitur dinyatakan selesai hanya jika: (a) \textit{endpoint} REST API teruji sukses dan gagal; (b) komponen antarmuka Next.js terintegrasi menangani status \textit{loading}, sukses, dan galat; (c) kontrol akses RBAC terverifikasi; (d) nol galat kritis TypeScript; (e) lulus peninjauan sejawat (\textit{peer review}); dan (f) konsisten dengan sistem desain tema gelap 3D\={e}x.
-    \item Demo Rilis Fase (\textit{Phase-Gate Demo}): Pada setiap pencapaian Milestone M1 s.d. M4, tim pengembang mendemonstrasikan irisan vertikal fungsional (\textit{vertical slice}) kepada \textit{On-Site Customer Representative} untuk memperoleh persetujuan inkremental.
-    \item Penerimaan Akhir (\textit{User Acceptance Testing} \& BAST): Persetujuan akhir proyek ditandai dengan kelulusan seluruh skenario UAT oleh perwakilan pengguna (Customer, Artist, Print Provider, Admin) serta penandatanganan Berita Acara Serah Terima (BAST) oleh Direktur Utama PT Kreasi Tiga Dimensi Indonesia selaku Sponsor.
+Setiap keluaran rilis dan produk akhir wajib memenuhi prosedur persetujuan berjenjang berikut:
+\begin{enumerate}[leftmargin=1.5em, itemsep=1.5pt, topsep=2pt]
+    \item Kriteria Kelayakan Fitur (\textit{Definition of Done}): Fitur dinyatakan tuntas apabila seluruh alur berjalan sesuai kebutuhan bisnis, pengendalian hak akses antarperan terverifikasi, antarmuka bebas galat tampilan, dan lolos peninjauan sejawat tim.
+    \item Demo Rilis Berkala: Pada pencapaian Milestone M1 s.d. M4, tim pengembang mendemonstrasikan fitur fungsional langsung kepada Ibu Rina Kusumawardhani untuk memperoleh persetujuan inkremental.
+    \item Pengujian Akhir (UAT) \& BAST: Persetujuan akhir ditandai oleh kelulusan 100\% skenario UAT oleh perwakilan pengguna (Pembeli, Kreator, Mitra Cetak, Admin) serta penandatanganan Berita Acara Serah Terima (BAST) oleh Sponsor.
 \end{enumerate}
 
+\clearpage
+\begingroup
+\setlength{\parskip}{3pt}
 % ==============================================================================
 % BAGIAN 10: KRITERIA KELUAR PROYEK
 % ==============================================================================
 \section{Kriteria Keluar (\textit{Project Exit Criteria})}
 
-\begin{itemize}[leftmargin=1.5em, itemsep=2pt]
-    \item Kriteria Penyelesaian Normal (\textit{Normal Project Closure}): Seluruh \textit{deliverable} D1 s.d. D5 telah diserahkan, 100\% kasus uji UAT berstatus lulus tanpa \textit{bug} kritis/tinggi terbuka, aplikasi berjalan aktif pada infrastruktur produksi klien, repositori kode sumber tertutup serta manual pengguna/admin diserahkan, dan BAST ditandatangani kedua belah pihak.
-    \item Kriteria Penghentian Dini (\textit{Early Termination Criteria}): Proyek dapat dihentikan sebelum jadwal selesai apabila: (1) Sponsor menerbitkan instruksi pembatalan tertulis akibat perubahan arah bisnis perusahaan; (2) terjadi kondisi \textit{force majeure} berkepanjangan yang menghalangi penyelesaian; atau (3) proyeksi biaya riil melampaui total anggaran termasuk cadangan risiko 10\% (Rp 148.500.000) tanpa persetujuan addendum anggaran dari Sponsor.
+\begin{itemize}[leftmargin=1.5em, itemsep=1pt, topsep=1pt]
+    \item Penyelesaian Normal (\textit{Normal Project Closure}): Seluruh serahan D1 s.d. D5 telah diserahkan, 100\% uji UAT dinyatakan lulus tanpa cacat kritis, sistem aktif beroperasi pada infrastruktur produksi klien, repositori kode serta manual diserahkan, dan BAST ditandatangani kedua pihak.
+    \item Penghentian Dini (\textit{Early Termination Criteria}): Proyek dapat dihentikan sebelum jadwal apabila: (1) Sponsor menerbitkan pembatalan tertulis akibat perubahan arah bisnis; (2) kondisi kahar (\textit{force majeure}) berkepanjangan menghalangi pengerjaan; atau (3) proyeksi biaya melebihi Rp 148.500.000 tanpa persetujuan addendum anggaran dari Sponsor.
 \end{itemize}
 
 % ==============================================================================
 % BAGIAN 11: PROJECT MANAGER: TANGGUNG JAWAB & WEWENANG
 % ==============================================================================
+\vspace{-6pt}
 \section{Project Manager: Penunjukan, Tanggung Jawab, dan Wewenang}
 
 Melalui dokumen ini, manajemen kedua pihak secara resmi menunjuk:
-\begin{center}
+\begin{center}\vspace{-4pt}
     I Nyoman Widiyasa Jayananda (F1D02410053) \\
-    \textit{Project Manager \& Lead Backend Architect}, PT Schryzon Digital Nusantara
-\end{center}
+    \textit{Project Manager \& Lead Architect}, PT Schryzon Digital Nusantara
+\end{center}\vspace{-4pt}
 
-Tanggung Jawab Utama: Memimpin perencanaan iterasi XP/PXP, mengelola pembagian tugas tim pengembang, mengawasi kepatuhan arsitektur monolit modular dan keamanan basis data, memastikan integrasi harian CI/CD, memantau risiko teknis maupun jadwal, serta menyusun laporan kemajuan berkala kepada Sponsor.
+Tanggung Jawab Utama: Memimpin perencanaan iterasi XP/PXP, mengoordinasikan pembagian tugas harian tim pengembang, mengawasi kepatuhan arsitektur dan keamanan sistem, memantau risiko maupun jadwal, serta menyampaikan laporan kemajuan berkala kepada Sponsor.
 
 Tingkat Wewenang yang Diberikan:
-\begin{enumerate}[leftmargin=1.5em, itemsep=1pt]
-    \item Mengatur penugasan harian, jadwal iterasi 2 mingguan, dan prioritas teknis tim rekayasa sesuai \textit{backlog} yang disepakati.
-    \item Mengelola pemanfaatan anggaran operasional proyek dalam batas Rp 135.000.000 biaya dasar serta mengajukan pencairan cadangan risiko hingga Rp 13.500.000 dengan persetujuan Sponsor apabila terjadi mitigasi risiko teknis.
-    \item Mengambil keputusan arsitektur perangkat lunak, standar pengkodean, dan aktivasi protokol \textit{feature freeze} untuk menjaga tenggat Hari ke-106.
+\begin{enumerate}[leftmargin=1.5em, itemsep=1pt, topsep=1pt]
+    \item Mengatur penugasan harian, jadwal iterasi 2 mingguan, dan prioritas teknis tim sesuai kebutuhan yang disepakati bersama perwakilan pengguna.
+    \item Mengelola anggaran operasional dalam batas Rp 135.000.000 biaya dasar serta mengajukan pencairan cadangan risiko hingga Rp 13.500.000 dengan persetujuan Sponsor untuk mitigasi risiko.
+    \item Menetapkan keputusan rancangan sistem, standar mutu pengujian, serta penguncian perubahan fitur (\textit{feature freeze}) menjelang tenggat Hari ke-106.
 \end{enumerate}
 
 % ==============================================================================
 % BAGIAN 12: NAMA, WEWENANG SPONSOR & LEMBAR PENGESAHAN
 % ==============================================================================
+\vspace{-6pt}
 \section{Nama, Wewenang Sponsor, dan Lembar Pengesahan Resmi}
 
-Sponsor Eksekutif Proyek: Ir. Hendra Wijaya, S.T., M.B.A. (Direktur Utama PT Kreasi Tiga Dimensi Indonesia), didampingi oleh Rina Kusumawardhani, S.Ds., M.M. sebagai perwakilan pengguna harian (\textit{On-Site Customer}).
+Sponsor Eksekutif Proyek: Ir. Hendra Wijaya, S.T., M.B.A. (Direktur Utama PT Kreasi Tiga Dimensi Indonesia), didampingi oleh Rina Kusumawardhani, S.Ds., M.M. selaku perwakilan pengguna harian (\textit{On-Site Customer}).
 
-Wewenang Sponsor: Mengesahkan Project Charter v1.0, menyetujui alokasi dan pencairan anggaran kontrak Rp 148.500.000, memutuskan setiap permintaan perubahan ruang lingkup (\textit{Change Request}) atau penghentian proyek, menunjuk perwakilan pengguna untuk UAT, serta menandatangani penerimaan akhir hasil proyek.
+Wewenang Sponsor: Mengesahkan Project Charter v1.0, menyetujui anggaran kontrak Rp 148.500.000, memutuskan perubahan ruang lingkup (\textit{Change Request}) atau penghentian proyek, menugaskan perwakilan pengguna dalam UAT, serta menandatangani penerimaan akhir hasil proyek.
 
-\vspace{10pt}
+\vspace{2pt}
 \noindent
+{\renewcommand{\arraystretch}{1.02}\small
 \begin{tabularx}{\textwidth}{| L{3.9cm} | L{3.8cm} | Y | C{2.5cm} |}
 \hline
 \rowcolor{tableheadergray} \thdr{Peran Penandatangan} & \thdr{Nama Lengkap} & \thdr{Jabatan / Institusi} & \thdr{Tanda Tangan} \\
 \hline
-Executive Project Sponsor & Ir. Hendra Wijaya, S.T., M.B.A. & Direktur Utama, PT Kreasi Tiga Dimensi Indonesia & \vspace{1.2cm} \\
+Executive Project Sponsor & Ir. Hendra Wijaya, S.T., M.B.A. & Direktur Utama, PT Kreasi Tiga Dimensi Indonesia & \vspace{0.42cm} \\
 \hline
-On-Site Customer / PO & Rina Kusumawardhani, S.Ds., M.M. & VP Operations, PT Kreasi Tiga Dimensi Indonesia & \vspace{1.2cm} \\
+On-Site Customer / PO & Rina Kusumawardhani, S.Ds., M.M. & \textit{VP Operations}, PT Kreasi Tiga Dimensi Indonesia & \vspace{0.42cm} \\
 \hline
-Project Manager & I Nyoman Widiyasa Jayananda & Project Manager, PT Schryzon Digital Nusantara & \vspace{1.2cm} \\
+Project Manager & I Nyoman Widiyasa Jayananda & Project Manager, PT Schryzon Digital Nusantara & \vspace{0.42cm} \\
 \hline
-\end{tabularx}
+\end{tabularx}}
 
-\vspace{12pt}
+\vspace{2pt}
+\begin{center}
+    {\small Mengetahui, \\
+    Dosen Pengampu Mata Kuliah Proyek Perangkat Lunak \\[0.42cm]
+    \underline{Santi Ika Murpratiwi, S.Kom., M.T.}}
+\end{center}
+
+\vspace{2pt}
 \noindent
+{\footnotesize
 \begin{tabularx}{\textwidth}{| Y |}
 \hline
-\rowcolor{lightslate} \textbf{Catatan Tata Kelola \& Hak Kepemilikan Intelektual:} Dokumen ini disahkan sebagai acuan dasar lingkup, jadwal, dan anggaran proyek 3D\={e}x v1.0. Setiap permohonan perubahan cakupan fitur setelah pengesahan wajib melalui mekanisme \textit{Formal Change Request} dengan persetujuan tertulis dari Executive Project Sponsor dan Project Manager. Seluruh kode sumber, skema basis data, dan aset rekayasa bersifat tertutup (\textit{proprietary}) untuk PT Kreasi Tiga Dimensi Indonesia. \\
+\rowcolor{lightslate} \textbf{Catatan Tata Kelola \& Hak Kepemilikan Intelektual:} Dokumen ini disahkan sebagai acuan dasar lingkup, jadwal, dan anggaran proyek 3D\={e}x v1.0. Setiap permohonan perubahan cakupan fitur setelah pengesahan wajib melalui mekanisme perubahan tertulis dengan persetujuan Executive Project Sponsor dan Project Manager. Seluruh kode sumber dan aset rekayasa bersifat tertutup milik PT Kreasi Tiga Dimensi Indonesia. \\
 \hline
-\end{tabularx}
+\end{tabularx}}
+\endgroup
 
 \clearpage
 
 % ==============================================================================
-% LAMPIRAN A: STAKEHOLDER REGISTER & POWER/INTEREST GRID
+% LAMPIRAN A: SKETSA ANTARMUKA AWAL PLATFORM 3DEX
 % ==============================================================================
 \appendix
+\section{Sketsa Antarmuka Awal Platform 3D\={e}x}
+
+Sketsa dan gambaran awal di bawah ini menunjukkan rencana tampilan utama platform 3D\={e}x yang akan dikembangkan dan divalidasi secara bertahap. Detail tata letak dan fitur antarmuka dapat disesuaikan berdasarkan umpan balik perwakilan pengguna pada setiap sesi demo iterasi.
+
+\begin{figure}[H]
+    \centering
+    \browserframe[13.4cm]{https://3dex.studio : Beranda \& Katalog Unggulan}{c:/Users/nyoma/Downloads/3Dex/docs/charter/assets/ui_landing.png}
+    \caption{Sketsa Halaman Utama dan Navigasi Pilar Katalog 3D\={e}x}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \browserframe[13.4cm]{https://3dex.studio/catalog/model : Penampil 3D Interaktif \& Asisten D\={e}xie}{c:/Users/nyoma/Downloads/3Dex/docs/charter/assets/ui_3d_viewer_dexie.png}
+    \caption{Sketsa Halaman Detail Aset, Penampil Geometri 3D Interaktif, dan Asisten D\={e}xie}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[H]
+    \centering
+    \browserframe[13.4cm]{https://3dex.studio/cart : Keranjang Belanja \& Ringkasan Pembayaran Midtrans}{c:/Users/nyoma/Downloads/3Dex/docs/charter/assets/ui_cart_midtrans.png}
+    \caption{Sketsa Halaman Keranjang Belanja dan Ringkasan Pembayaran Terintegrasi Midtrans}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[font=\sffamily]
+    % Outer browser window frame (14.4cm width x 6.45cm height)
+    \fill[white] (0,0) rectangle (14.4, 5.93);
+    \fill[brandnavy] (0, 5.93) rectangle (14.4, 6.45);
+    \fill[accentred!85!white] (0.28, 6.19) circle (2.3pt);
+    \fill[accentorange!85!white] (0.52, 6.19) circle (2.3pt);
+    \fill[accentgreen!85!white] (0.76, 6.19) circle (2.3pt);
+    \node[anchor=center, font=\sffamily\scriptsize, text=white] at (7.2, 6.19) {https://3dex.studio/print-services : Sketsa Antarmuka Layanan Cetak 3D \& Escrow};
+    \draw[brandnavy, line width=0.9pt] (0,0) rectangle (14.4, 6.45);
+
+    % Left sidebar (2.75cm)
+    \fill[brandnavy] (0,0) rectangle (2.75, 5.93);
+    \node[anchor=west, font=\sffamily\footnotesize\bfseries, text=white] at (0.18, 5.45) {3D\={e}x Print};
+    \node[anchor=west, font=\sffamily\fontsize{6.3}{7.5}\selectfont, text=gray!50] at (0.18, 4.88) {Beranda};
+    \node[anchor=west, font=\sffamily\fontsize{6.3}{7.5}\selectfont, text=gray!50] at (0.18, 4.38) {Katalog Model};
+    \fill[accentorange, rounded corners=2pt] (0.12, 3.68) rectangle (2.63, 4.08);
+    \node[anchor=west, font=\sffamily\fontsize{6.3}{7.5}\selectfont\bfseries, text=white] at (0.20, 3.88) {Layanan Cetak};
+    \node[anchor=west, font=\sffamily\fontsize{6.3}{7.5}\selectfont, text=gray!50] at (0.18, 3.32) {Pesanan \& Escrow};
+    \node[anchor=west, font=\sffamily\fontsize{6.3}{7.5}\selectfont, text=gray!50] at (0.18, 2.82) {Komunitas};
+
+    % Main background area
+    \fill[lightslate] (2.75, 0) rectangle (14.4, 5.93);
+
+    % Left Content Card (width 5.90cm: x=2.98..8.88)
+    \fill[white, rounded corners=3pt] (2.98, 0.25) rectangle (8.88, 5.65);
+    \draw[bordergray, rounded corners=3pt] (2.98, 0.25) rectangle (8.88, 5.65);
+    \node[anchor=west, font=\sffamily\footnotesize\bfseries, text=black] at (3.18, 5.32) {1. Konfigurasi Cetak Fisik};
+    \draw[bordergray] (3.18, 5.10) -- (8.68, 5.10);
+
+    % Mini 3D Preview box (width 1.65cm: x=3.18..4.83)
+    \fill[brandnavy, rounded corners=2pt] (3.18, 3.55) rectangle (4.83, 4.92);
+    \draw[white!80, line width=0.7pt] (3.68, 3.92) -- (4.18, 3.92) -- (4.38, 4.22) -- (3.88, 4.22) -- cycle;
+    \draw[white!80, line width=0.7pt] (3.68, 3.92) -- (3.68, 4.35) -- (4.18, 4.35) -- (4.18, 3.92);
+    \draw[white!80, line width=0.7pt] (3.68, 4.35) -- (3.88, 4.62) -- (4.38, 4.62) -- (4.38, 4.22);
+    \draw[white!80, line width=0.7pt] (4.18, 4.35) -- (4.38, 4.62);
+    \node[anchor=center, font=\sffamily\tiny, text=white] at (4.00, 3.70) {Pratinjau 3D};
+
+    % Model summary next to box (width 3.68cm: x=5.00..8.68)
+    \node[anchor=west, font=\sffamily\scriptsize\bfseries, text=black] at (5.00, 4.72) {Model: Honda Acura NSX};
+    \node[anchor=west, font=\sffamily\scriptsize, text=mutedtext] at (5.00, 4.38) {Dimensi: 180 x 82 x 49 mm};
+    \fill[lightslate, rounded corners=2pt] (5.00, 3.65) rectangle (8.68, 4.18);
+    \node[anchor=west, font=\sffamily\tiny\bfseries, text=accentteal] at (5.12, 3.99) {Estimasi Volume Sisi Klien};
+    \node[anchor=west, font=\sffamily\tiny, text=mutedtext] at (5.12, 3.77) {Tanpa G-code slicing di server};
+
+    % Parameters grid
+    \node[anchor=west, font=\sffamily\tiny\bfseries, text=mutedtext] at (3.18, 3.25) {SKALA};
+    \fill[lightslate, rounded corners=2pt] (3.18, 2.75) rectangle (5.80, 3.10);
+    \node[anchor=west, font=\sffamily\scriptsize, text=black] at (3.30, 2.92) {100\% (Standar)};
+
+    \node[anchor=west, font=\sffamily\tiny\bfseries, text=mutedtext] at (6.02, 3.25) {MATERIAL CETAK};
+    \fill[lightslate, rounded corners=2pt] (6.02, 2.75) rectangle (8.68, 3.10);
+    \node[anchor=west, font=\sffamily\scriptsize, text=black] at (6.14, 2.92) {Resin SLA / PLA+};
+
+    \node[anchor=west, font=\sffamily\tiny\bfseries, text=mutedtext] at (3.18, 2.45) {KEPADATAN INFILL};
+    \fill[lightslate, rounded corners=2pt] (3.18, 1.95) rectangle (5.80, 2.30);
+    \node[anchor=west, font=\sffamily\scriptsize, text=black] at (3.30, 2.12) {20\% (Presisi)};
+
+    \node[anchor=west, font=\sffamily\tiny\bfseries, text=mutedtext] at (6.02, 2.45) {WARNA FINISHING};
+    \fill[lightslate, rounded corners=2pt] (6.02, 1.95) rectangle (8.68, 2.30);
+    \node[anchor=west, font=\sffamily\scriptsize, text=black] at (6.14, 2.12) {Abu-Abu Matte};
+
+    % Estimated Total Footer
+    \fill[softgreen, rounded corners=2pt] (3.18, 0.50) rectangle (8.68, 1.65);
+    \draw[accentgreen!40, rounded corners=2pt] (3.18, 0.50) rectangle (8.68, 1.65);
+    \node[anchor=west, font=\sffamily\scriptsize, text=mutedtext] at (3.34, 1.32) {Perkiraan Biaya Cetak + Jasa Mitra};
+    \node[anchor=west, font=\sffamily\normalsize\bfseries, text=accentgreen] at (3.34, 0.85) {Rp 185.000};
+    \node[anchor=east, font=\sffamily\tiny, text=mutedtext] at (8.52, 0.85) {Estimasi 2 hari kerja};
+
+    % Right Content Card (width 5.05cm: x=9.12..14.17)
+    \fill[white, rounded corners=3pt] (9.12, 0.25) rectangle (14.17, 5.65);
+    \draw[bordergray, rounded corners=3pt] (9.12, 0.25) rectangle (14.17, 5.65);
+    \node[anchor=west, font=\sffamily\footnotesize\bfseries, text=black] at (9.32, 5.32) {2. Pilih Mitra \& Escrow};
+    \draw[bordergray] (9.32, 5.10) -- (13.97, 5.10);
+
+    % Selected Provider Card
+    \fill[softamber, rounded corners=2pt] (9.32, 4.02) rectangle (13.97, 4.92);
+    \draw[accentorange, line width=0.8pt, rounded corners=2pt] (9.32, 4.02) rectangle (13.97, 4.92);
+    \node[anchor=west, font=\sffamily\scriptsize\bfseries, text=black] at (9.46, 4.66) {Studio Cetak Nusantara};
+    \node[anchor=west, font=\sffamily\tiny, text=mutedtext] at (9.46, 4.40) {Mataram | Rating 4,9 | Terverifikasi};
+    \node[anchor=west, font=\sffamily\tiny\bfseries, text=accentorange] at (9.46, 4.18) {Dipilih (FDM \& SLA)};
+
+    % Alternate Provider Card
+    \fill[lightslate, rounded corners=2pt] (9.32, 3.08) rectangle (13.97, 3.85);
+    \draw[bordergray, rounded corners=2pt] (9.32, 3.08) rectangle (13.97, 3.85);
+    \node[anchor=west, font=\sffamily\scriptsize\bfseries, text=black] at (9.46, 3.60) {Bengkel Karya Presisi 3D};
+    \node[anchor=west, font=\sffamily\tiny, text=mutedtext] at (9.46, 3.30) {Surabaya | Rating 4,8 | Estimasi 3 hari};
+
+    % Escrow Flow Notice Box
+    \fill[lightslate, rounded corners=2pt] (9.32, 1.32) rectangle (13.97, 2.88);
+    \draw[bordergray, rounded corners=2pt] (9.32, 1.32) rectangle (13.97, 2.88);
+    \node[anchor=west, font=\sffamily\tiny\bfseries, text=accentteal] at (9.46, 2.64) {Jaminan Dana Sementara (Escrow)};
+    \node[anchor=west, align=left, font=\sffamily\tiny, text=black] at (9.44, 2.15) {Dana ditahan via Midtrans hingga\\barang berstatus DELIVERED \&\\dikonfirmasi oleh pembeli.};
+    \fill[accentteal, rounded corners=1.5pt] (9.46, 1.46) rectangle (10.60, 1.72);
+    \node[font=\sffamily\tiny\bfseries, text=white] at (10.03, 1.59) {DIBAYAR};
+    \node[font=\sffamily\tiny, text=black] at (10.77, 1.59) {$\rightarrow$};
+    \fill[accentorange, rounded corners=1.5pt] (10.94, 1.46) rectangle (12.22, 1.72);
+    \node[font=\sffamily\tiny\bfseries, text=white] at (11.58, 1.59) {DITAHAN};
+    \node[font=\sffamily\tiny, text=black] at (12.39, 1.59) {$\rightarrow$};
+    \fill[accentgreen, rounded corners=1.5pt] (12.56, 1.46) rectangle (13.82, 1.72);
+    \node[font=\sffamily\tiny\bfseries, text=white] at (13.19, 1.59) {CAIR};
+
+    % Primary Action Button
+    \fill[accentorange, rounded corners=3pt] (9.32, 0.50) rectangle (13.97, 1.12);
+    \node[anchor=center, font=\sffamily\scriptsize\bfseries, text=white] at (11.64, 0.81) {Ajukan \& Bayar Pesanan Cetak};
+\end{tikzpicture}
+\caption{Sketsa Rancangan Antarmuka Pemesanan Cetak 3D, Estimasi Dimensi, dan Perlindungan Escrow}
+\end{figure}
+
+\clearpage
+
+% ==============================================================================
+% LAMPIRAN B: STAKEHOLDER REGISTER & POWER/INTEREST GRID
+% ==============================================================================
 \section{Stakeholder Register (Proses 13.1) dan Power/Interest Grid}
 
 \subsection{Stakeholder Register}
-Sesuai proses 13.1 Identify Stakeholders dalam PMBOK\textsuperscript{\textregistered} Guide Edisi 6, berikut adalah daftar pemangku kepentingan beserta peran, kepentingan utama, tingkat kekuasaan/ketertarikan (\textit{Power/Interest}), serta strategi keterlibatannya:
+Berikut pemetaan peran, kepentingan utama, tingkat kekuasaan/ketertarikan (\textit{Power/Interest}), serta strategi keterlibatan pemangku kepentingan sesuai PMBOK\textsuperscript{\textregistered} Guide Edisi 6:
 
 \begin{table}[H]
 \centering
-\caption{Stakeholder Register Proyek Pengembangan Platform 3D\={e}x}
+\caption{Stakeholder Register Proyek Platform 3D\={e}x}
 \footnotesize
 \begin{tabularx}{\textwidth}{| L{2.7cm} | L{2.7cm} | L{3.6cm} | C{1.9cm} | Y |}
 \hline
 \rowcolor{tableheadergray} \thdr{Stakeholder} & \thdr{Peran dalam Proyek} & \thdr{Kepentingan Utama} & \thdr{Power / Interest} & \thdr{Strategi Keterlibatan} \\
 \hline
-Ir. Hendra Wijaya (Krea3D Corp) & Pemilik Perusahaan \& Executive Sponsor & Pertumbuhan omzet, ROI komersial, kendali anggaran \& jadwal & Tinggi / Tinggi & \textit{Manage Closely:} Libatkan dalam pengesahan charter, perubahan lingkup, dan BAST. \\
+Ir. Hendra Wijaya (Krea3D Corp) & Pemilik Perusahaan \& \textit{Executive Sponsor} & Pertumbuhan bisnis, ROI komersial, kendali jadwal \& biaya & Tinggi / Tinggi & \textit{Manage Closely:} Libatkan pada pengesahan charter, perubahan lingkup, dan BAST. \\
 \hline
-Rina Kusumawardhani (Krea3D Corp) & On-Site Customer \& Perwakilan Pengguna & Alur transaksi mulus, kemudahan operasi harian \& cetak 3D & Tinggi / Tinggi & \textit{Manage Closely:} Hadir di setiap \textit{Planning Game}, demo iterasi 2 mingguan, dan UAT. \\
+Rina Kusumawardhani (Krea3D Corp) & \textit{On-Site Customer} \& Perwakilan Pengguna & Alur beli dan cetak 3D lancar, kemudahan operasional harian & Tinggi / Tinggi & \textit{Manage Closely:} Hadir di setiap sesi perencanaan, demo dua mingguan, dan UAT. \\
 \hline
-Tim Pengembang 3D\={e}x (PT SDN, 4 Orang) & Pelaksana Teknis (PM, FE, BE, Integrasi, BA) & Spesifikasi jelas, arsitektur stabil, target 106 hari tercapai & Sedang / Tinggi & \textit{Keep Informed} / Kolaborasi Inti: Sinkronisasi harian, \textit{pair programming}, dan CI/CD. \\
+Tim Pengembang 3D\={e}x (PT SDN, 4 Orang) & Pelaksana Proyek (PM, FE, BE, Integrasi, BA) & Kebutuhan jelas, pembagian modul teratur, selesai Hari ke-106 & Sedang / Tinggi & \textit{Keep Informed} / Kolaborasi Inti: Sinkronisasi rutin, telaah silang, dan uji berkala. \\
 \hline
-Dosen Pengampu PPL (Santi Ika Murpratiwi) & Pembimbing \& Penilai Kaidah Manajemen & Kepatuhan proses PMBOK 6, XP/PXP, kelengkapan dokumen & Tinggi / Sedang & \textit{Keep Satisfied:} Penyampaian draf charter v1/v2 dan laporan milestone berkala. \\
+Dosen Pengampu PPL (Santi Ika Murpratiwi) & Pembimbing \& Penilai Kaidah Manajemen & Kepatuhan proses PMBOK 6, iterasi XP/PXP, kelengkapan charter & Tinggi / Sedang & \textit{Keep Satisfied:} Penyampaian draf charter dan laporan kemajuan milestone berkala. \\
 \hline
-3D Digital Artists & \textit{End User} Pemasok Aset Digital & Monetisasi adil, proteksi lisensi, analitik penjualan jelas & Rendah / Tinggi & \textit{Keep Informed:} Undang ke sesi uji coba UAT modul unggah model \& dasbor kreator. \\
+3D Digital Artists & Kreator Pemasok Aset Digital & Pembagian komisi adil, perlindungan lisensi, laporan penjualan jelas & Rendah / Tinggi & \textit{Keep Informed:} Libatkan pada uji coba UAT fitur unggah aset dan dasbor kreator. \\
 \hline
-3D Print Providers & Mitra Pemenuhan Produksi Fisik & Spesifikasi cetak akurat, antrean kerja rapi, file .glb otomatis, kepastian \textit{escrow} & Rendah / Tinggi & \textit{Keep Informed:} Libatkan pada UAT Provider Dashboard dan uji pelacakan kurir. \\
+3D Print Providers & Mitra Penyedia Jasa Cetak Fisik & Detail ukuran akurat, antrean order tertata, jaminan \textit{escrow} & Rendah / Tinggi & \textit{Keep Informed:} Libatkan pada uji coba dasbor mitra cetak dan input resi. \\
 \hline
-End Customers & Pembeli Aset \& Pemesan Cetak Fisik & Pratinjau WebGL lancar, pembayaran aman (\textit{escrow}), rekomendasi akurat & Rendah / Sedang & \textit{Monitor:} Pemantauan umpan balik beta dan metrik performa muat halaman. \\
+End Customers & Pembeli Aset \& Pemesan Cetak Fisik & Inspeksi 3D mulus, transaksi aman (\textit{escrow}), pencarian akurat & Rendah / Sedang & \textit{Monitor:} Pemantauan umpan balik uji beta dan kecepatan muat katalog. \\
 \hline
-Administrator Platform & Pengelola Moderasi \& Audit Keamanan & Alat moderasi proaktif, deteksi NSFW, \textit{audit log} lengkap & Sedang / Sedang & \textit{Keep Informed:} Pelatihan khusus modul KYC-lite dan pelaporan sebelum \textit{go-live}. \\
+Administrator Platform & Pengelola Moderasi \& Keamanan & Alat peninjauan konten proaktif dan catatan audit lengkap & Sedang / Sedang & \textit{Keep Informed:} Pelatihan khusus moderasi dan penanganan laporan sebelum rilis. \\
 \hline
-Vendor Pihak Ketiga (Midtrans, Google, Cloud) & Penyedia Gateway Pembayaran, AI \& Infrastruktur & Ketersediaan API, keamanan transaksi, kestabilan kuota & Tinggi / Rendah & \textit{Keep Satisfied / Monitor:} Pantau status layanan API dan patuhi ketentuan SLA vendor. \\
+Vendor Pihak Ketiga (Midtrans, Google) & Penyedia Pembayaran, AI \& Infrastruktur & Kestabilan layanan, keamanan transaksi, ketersediaan kuota & Tinggi / Rendah & \textit{Keep Satisfied / Monitor:} Pemantauan status layanan dan kepatuhan SLA vendor. \\
 \hline
 \end{tabularx}
 \end{table}
@@ -680,7 +929,6 @@ Vendor Pihak Ketiga (Midtrans, Google, Cloud) & Penyedia Gateway Pembayaran, AI 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[font=\sffamily\footnotesize]
-    % Grid boxes (13.6cm x 8.4cm -> 6.8cm x 4.2cm per quadrant)
     \fill[lightslate] (0,4.2) rectangle (6.8,8.4);
     \fill[accentteal!10] (6.8,4.2) rectangle (13.6,8.4);
     \fill[softamber] (0,0) rectangle (6.8,4.2);
@@ -690,31 +938,26 @@ Vendor Pihak Ketiga (Midtrans, Google, Cloud) & Penyedia Gateway Pembayaran, AI 
     \draw[black, line width=0.9pt] (6.8,0) -- (6.8,8.4);
     \draw[black, line width=0.9pt] (0,4.2) -- (13.6,4.2);
 
-    % Quadrant Titles (Black text outside Page 1)
     \node[anchor=north west, align=left, font=\sffamily\footnotesize, text=black] at (0.25, 8.2) {\textbf{KEEP SATISFIED}\\{\scriptsize (Pantau Kepuasan)}};
     \node[anchor=north west, align=left, font=\sffamily\footnotesize, text=black] at (7.05, 8.2) {\textbf{MANAGE CLOSELY}\\{\scriptsize (Kelola Secara Intensif)}};
     \node[anchor=north west, align=left, font=\sffamily\footnotesize, text=black] at (0.25, 4.0) {\textbf{MONITOR}\\{\scriptsize (Pantau Berkala)}};
     \node[anchor=north west, align=left, font=\sffamily\footnotesize, text=black] at (7.05, 4.0) {\textbf{KEEP INFORMED}\\{\scriptsize (Berikan Informasi Rutin)}};
 
-    % Axes Labels
     \draw[-{Stealth[length=3mm]}, line width=1.1pt, black] (-0.65, 0.2) -- (-0.65, 8.2) node[midway, sloped, above=4pt, font=\sffamily\small\bfseries, text=black] {KEKUASAAN (POWER)};
     \draw[-{Stealth[length=3mm]}, line width=1.1pt, black] (0.2, -0.55) -- (13.4, -0.55) node[midway, below=4pt, font=\sffamily\small\bfseries, text=black] {KETERTARIKAN (INTEREST)};
 
-    % Manage Closely (High Power, High Interest: x in [6.8..13.6], y in [4.2..8.4])
     \fill[accentorange] (11.2, 6.7) circle (5pt);
     \node[below=2pt, font=\sffamily\scriptsize\bfseries, text=black] at (11.2, 6.7) {Ir. Hendra (Sponsor)};
 
     \fill[accentorange] (9.1, 5.4) circle (5pt);
     \node[below=2pt, font=\sffamily\scriptsize\bfseries, text=black] at (9.1, 5.4) {Rina K. (On-Site Customer)};
 
-    % Keep Satisfied (High Power, Low-Med Interest: x in [0..6.8], y in [4.2..8.4])
     \fill[accentteal] (4.7, 6.6) circle (5pt);
     \node[below=2pt, font=\sffamily\scriptsize\bfseries, text=black] at (4.7, 6.6) {Dosen PPL (Santi Ika M.)};
 
     \fill[accentteal] (2.4, 5.3) circle (5pt);
-    \node[below=2pt, font=\sffamily\scriptsize\bfseries, text=black] at (2.4, 5.3) {Vendor API (Midtrans/Google)};
+    \node[below=2pt, font=\sffamily\scriptsize\bfseries, text=black] at (2.4, 5.3) {Vendor (Midtrans/Google)};
 
-    % Keep Informed (Low-Med Power, High Interest: x in [6.8..13.6], y in [0..4.2])
     \fill[brandnavy] (11.2, 2.75) circle (5pt);
     \node[below=2pt, font=\sffamily\scriptsize\bfseries, text=black] at (11.2, 2.75) {Tim Pengembang 3D\={e}x};
 
@@ -724,7 +967,6 @@ Vendor Pihak Ketiga (Midtrans, Google, Cloud) & Penyedia Gateway Pembayaran, AI 
     \fill[brandnavy] (11.2, 1.05) circle (5pt);
     \node[below=2pt, font=\sffamily\scriptsize\bfseries, text=black] at (11.2, 1.05) {3D Print Providers};
 
-    % Monitor (Low Power, Low-Med Interest: x in [0..6.8], y in [0..4.2])
     \fill[mutedtext] (4.7, 2.3) circle (5pt);
     \node[below=2pt, font=\sffamily\scriptsize\bfseries, text=black] at (4.7, 2.3) {End Customers};
 
@@ -742,13 +984,13 @@ Vendor Pihak Ketiga (Midtrans, Google, Cloud) & Penyedia Gateway Pembayaran, AI 
 \hline
 \rowcolor{tableheadergray} \thdr{Kuadran Strategis} & \thdr{Frekuensi} & \thdr{Kanal \& Artefak Komunikasi Utama} \\
 \hline
-Manage Closely & Mingguan / Per Fase & \textit{Planning Game}, demo rilis dua mingguan, persetujuan \textit{Change Request}, BAST. \\
+Manage Closely & Mingguan / Per Fase & Rapat perencanaan, demo rilis dua mingguan, persetujuan perubahan, dan BAST. \\
 \hline
-Keep Satisfied & Per Milestone (M1 s.d. M5) & Pengumpulan draf Charter, laporan kemajuan proyek, pemantauan kuota API SLA. \\
+Keep Satisfied & Per Milestone (M1 s.d. M5) & Penyampaian Project Charter, laporan kemajuan fase, pemantauan kuota vendor. \\
 \hline
-Keep Informed & Harian / Pra-Rilis & \textit{Daily stand-up}, GitHub PR/CI log, undangan beta UAT Artist \& Provider. \\
+Keep Informed & Rutin / Pra-Rilis & Sinkronisasi harian tim pengembang dan undangan uji coba UAT mitra sebelum rilis. \\
 \hline
-Monitor & Insidental / Pasca-Rilis & Umpan balik uji coba beta, tiket laporan penyalahgunaan, catatan audit sistem. \\
+Monitor & Berkala / Pasca-Rilis & Survei umpan balik uji beta, peninjauan laporan penyalahgunaan, catatan audit sistem. \\
 \hline
 \end{tabularx}
 \end{table}
@@ -756,24 +998,16 @@ Monitor & Insidental / Pasca-Rilis & Umpan balik uji coba beta, tiket laporan pe
 \clearpage
 
 % ==============================================================================
-% LAMPIRAN B: RINGKASAN MILESTONE, SIKLUS HYBRID XP/PXP & USER STORIES
+% LAMPIRAN C: JADWAL MILESTONE, RENCANA ITERASI & ESTIMASI ANGGARAN PERT
 % ==============================================================================
-\section{Ringkasan Milestone, Siklus Hybrid (XP/PXP), dan Daftar User Story}
+\section{Jadwal Milestone, Rencana Iterasi, dan Estimasi Anggaran PERT}
 
-\subsection{Pemilihan Siklus Hidup Proyek Hybrid}
-Pengembangan 3D\={e}x menerapkan siklus hidup Hybrid:
-\begin{enumerate}[leftmargin=1.5em, itemsep=2pt]
-    \item Inisiasi dan \textit{Project Charter} secara Prediktif: Penetapan batasan lingkup, anggaran kontrak tetap Rp 148.500.000, tata kelola risiko, dan tenggat serah terima 106 hari dilakukan di awal secara formal.
-    \item Eksekusi Pengembangan dengan Iterasi \textit{Agile Extreme Programming (XP)} \& \textit{Personal Extreme Programming (PXP)}: Karena tim beranggotakan 4 orang yang mengelola modul terpisah sekaligus berkolaborasi pada integrasi penuh, tim memadukan praktik inti XP (\textit{Planning Game}, \textit{Small Releases} per 2 hingga 3 minggu, \textit{Continuous Integration} harian, \textit{Pair Programming} pada WebGL/Midtrans/D\={e}xie, \textit{Collective Code Ownership}, dan \textit{On-Site Customer}) dengan siklus 7-langkah PXP (\textit{Requirements, Planning, Iteration Initialization, Design, Implementation, System Testing, Retrospective}) untuk pengembangan modul independen.
-    \item Akselerasi 4GT/5GT: Pemanfaatan Prisma ORM, Tailwind CSS, dan alat bantu AI berbatas kendali tinjauan manusia wajib untuk mempercepat pembuatan kode \textit{boilerplate} tanpa mengorbankan standar kualitas.
-\end{enumerate}
-
-\subsection{Bagan Gantt Jadwal Milestone (Minggu 1 s.d. 15 / 106 Hari)}
+\subsection{Siklus Hidup Hybrid (XP / PXP) dan Bagan Gantt 15 Minggu}
+Proyek menerapkan pendekatan Hybrid: inisiasi kontrak, batas lingkup, risiko, dan plafon biaya Rp 148.500.000 dikunci secara formal pada awal proyek, sedangkan eksekusi fitur berjalan menggunakan iterasi \textit{Agile Extreme Programming (XP)} dan siklus mandiri \textit{Personal Extreme Programming (PXP)} dalam lima fase rilis (106 hari kalender).
 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[font=\sffamily\scriptsize]
-    % Grid & Week headers
     \draw[bordergray] (5.10, 0.2) rectangle (15.70, 5.2);
     \foreach \w in {1,...,15} {
         \pgfmathsetmacro{\xpos}{5.10 + (\w - 0.5) * (10.60 / 15)}
@@ -782,12 +1016,11 @@ Pengembangan 3D\={e}x menerapkan siklus hidup Hybrid:
     }
     \node[anchor=west, font=\sffamily\scriptsize\bfseries, text=black] at (0, 5.45) {Fase / Aktivitas (Minggu $\rightarrow$)};
 
-    % Row labels & bars (15 weeks mapped to 10.60 width -> 1 week = 0.7067)
-    \node[anchor=west, text=black] at (0, 4.65) {Fase 1: Inisiasi, Fondasi \& Auth};
+    \node[anchor=west, text=black] at (0, 4.65) {Fase 1: Inisiasi, Fondasi \& Akun};
     \fill[accentteal, rounded corners=2pt] (5.14, 4.45) rectangle (7.22, 4.85);
     \node[white, font=\sffamily\tiny\bfseries] at (6.18, 4.65) {H1-18};
 
-    \node[anchor=west, text=black] at (0, 3.85) {Fase 2: Core Marketplace \& Midtrans};
+    \node[anchor=west, text=black] at (0, 3.85) {Fase 2: Katalog 3D \& Pembayaran};
     \fill[accentorange, rounded corners=2pt] (7.00, 3.65) rectangle (10.05, 4.05);
     \node[white, font=\sffamily\tiny\bfseries] at (8.525, 3.85) {H19-48};
 
@@ -795,156 +1028,94 @@ Pengembangan 3D\={e}x menerapkan siklus hidup Hybrid:
     \fill[mutedtext, rounded corners=2pt] (9.85, 2.85) rectangle (12.17, 3.25);
     \node[white, font=\sffamily\tiny\bfseries] at (11.01, 3.05) {H49-72};
 
-    \node[anchor=west, text=black] at (0, 2.25) {Fase 4: D\={e}xie AI \& Ekosistem Cetak};
+    \node[anchor=west, text=black] at (0, 2.25) {Fase 4: Asisten AI \& Cetak 3D};
     \fill[accentorange!85!black, rounded corners=2pt] (12.17, 2.05) rectangle (14.29, 2.45);
     \node[white, font=\sffamily\tiny\bfseries] at (13.23, 2.25) {H73-94};
 
-    \node[anchor=west, text=black] at (0, 1.45) {Fase 5: Admin, UAT \& Serah Terima};
+    \node[anchor=west, text=black] at (0, 1.45) {Fase 5: Tata Kelola Admin, UAT \& BAST};
     \fill[accentgreen, rounded corners=2pt] (14.29, 1.25) rectangle (15.66, 1.65);
     \node[white, font=\sffamily\tiny\bfseries] at (14.975, 1.45) {H95-106};
 
-    % Milestones diamonds at bottom
     \node[anchor=west, font=\sffamily\scriptsize\bfseries, text=accentred] at (0, 0.55) {Tonggak Milestone:};
     \foreach \x/\lbl in {7.22/M1 (D1), 10.05/M2 (R1), 12.17/M3 (R2), 14.29/M4 (R3), 15.65/M5 (BAST)} {
         \node[diamond, fill=accentred, inner sep=2.4pt] at (\x, 0.72) {};
         \node[below=1pt, font=\sffamily\tiny\bfseries, text=accentred] at (\x, 0.55) {\lbl};
     }
 \end{tikzpicture}
-\caption{Ringkasan Jadwal Milestone 15 Minggu (106 Hari Kalender) Selaras Iterasi XP}
+\caption{Bagan Gantt Jadwal Milestone 15 Minggu (106 Hari Kalender)}
 \end{figure}
 
-\subsection{Daftar Lengkap 26 User Story dan Alokasi Fase (Total: 106 Person-Days)}
+\subsection{Rencana Iterasi Mingguan dan Alokasi Usaha Epik Utama (106 Person-Days)}
 
-{\footnotesize
-\setlength{\tabcolsep}{4.2pt}
-\begin{longtable}{| C{1.85cm} | C{1.35cm} | L{5.55cm} | L{3.90cm} | C{0.80cm} | C{1.05cm} |}
-\caption{Daftar Lengkap User Story Platform 3D\={e}x} \\
+\begin{table}[H]
+\centering
+\caption{Rencana Iterasi XP dan Ringkasan Kebutuhan Pengguna per Fase}
+\small
+\begin{tabularx}{\textwidth}{| C{1.6cm} | L{3.3cm} | Y | L{3.8cm} | C{1.3cm} |}
 \hline
-\rowcolor{tableheadergray} \thdr{ID} & \thdr{Aktor} & \thdr{Saya ingin...} & \thdr{Sehingga...} & \thdr{Prio} & \thdr{Est. (Pd)} \\
+\rowcolor{tableheadergray} \thdr{Minggu} & \thdr{Fase / Iterasi} & \thdr{Fokus Epik \& Kebutuhan Pengguna} & \thdr{Peran Terkait} & \thdr{Est. (Pd)} \\
 \hline
-\endfirsthead
+1 s.d. 3 & Fase 1: Inisiasi \& Fondasi & Pengesahan charter, sketsa antarmuka, registrasi, login, dan pengaturan peran akses & Seluruh Aktor & 11 \\
 \hline
-\rowcolor{tableheadergray} \thdr{ID} & \thdr{Aktor} & \thdr{Saya ingin...} & \thdr{Sehingga...} & \thdr{Prio} & \thdr{Est. (Pd)} \\
+4 s.d. 7 & Fase 2: Rilis 1 (\textit{Marketplace}) & Katalog publik, penampil 3D interaktif, unggah aset kreator, keranjang, checkout Midtrans, unduhan aman & Guest, Customer, Artist, Admin & 35 \\
 \hline
-\endhead
+8 s.d. 10 & Fase 3: Rilis 2 (Komunitas) & Lini masa portofolio kreator, fitur ikuti, ulasan pembeli terverifikasi, koleksi, notifikasi & Customer, Artist & 21 \\
 \hline
-\endfoot
-US-GST-01 & Guest & Menjelajahi katalog publik dan berinteraksi dengan \textit{WebGL 3D Viewer} & Dapat menilai kualitas topologi aset sebelum mendaftar & 1 & 5 \\
+11 s.d. 13 & Fase 4: Rilis 3 (AI \& Cetak 3D) & Pencarian dan rekomendasi cerdas AI D\={e}xie, pesan cetak 3D (\textit{bounding-box}), \textit{escrow} saldo, dasbor mitra & Customer, Print Provider & 27 \\
 \hline
-US-GST-02 & Guest & Mendaftar akun baru via lokal atau Google OAuth 2.0 & Dapat mengakses keranjang dan fitur terpersonalisasi & 1 & 4 \\
+14 s.d. 15 & Fase 5: Pengujian Final \& Rilis & Dasbor analitik admin, verifikasi mitra, catatan audit, uji UAT 100\%, manual, pelatihan, serah terima & Admin, Tim Sistem, Klien & 12 \\
 \hline
-US-CUS-01 & Customer & Mengelola profil, keamanan 2FA, dan visibilitas konten NSFW & Dapat mengamankan akun dan preferensi penjelajahan & 1 & 4 \\
+\rowcolor{lightslate} \multicolumn{4}{|r|}{\textbf{Total Akumulasi Usaha Pengembangan Efektif (5 Fase, Tim Paruh Waktu)}} & \textbf{106} \\
 \hline
-US-CUS-02 & Customer & Mencari model dengan filter kata kunci maupun pencarian semantik AI & Dapat menemukan aset sesuai maksud pengguna secara cepat & 1 & 5 \\
-\hline
-US-CUS-03 & Customer & Menyusun keranjang dan melakukan pembayaran via Midtrans Snap & Dapat membeli aset digital secara aman dengan metode lokal & 1 & 7 \\
-\hline
-US-CUS-04 & Customer & Menerima \textit{presigned download URL} pasca-pembayaran & Dapat segera mengunduh aset digital yang telah dibeli & 1 & 4 \\
-\hline
-US-CUS-05 & Customer & Mengirimkan permintaan cetak 3D beserta spesifikasi material/skala (estimasi volume \textit{mesh}) & Model yang dibeli dapat diproduksi fisik dengan jaminan \textit{escrow} & 1 & 6 \\
-\hline
-US-CUS-06 & Customer & Melacak status pekerjaan cetak dan mengonfirmasi penerimaan DELIVERED secara \textit{real-time} & Mengetahui progres pengiriman dan melepas dana \textit{escrow} secara pasti & 2 & 4 \\
-\hline
-US-CUS-07 & Customer & Memberikan \textit{rating} dan ulasan pada aset maupun transaksi & Berkontribusi terhadap sinyal kualitas layanan di platform & 2 & 4 \\
-\hline
-US-CUS-08 & Customer & Mengikuti kreator dan berinteraksi di \textit{social feed} & Dapat membangun jejaring dan mengikuti karya terbaru & 3 & 5 \\
-\hline
-US-CUS-09 & Customer & Menerima notifikasi aktivitas dan mengelompokkan model ke koleksi & Dapat mengelola minat dan aktivitas komunitas & 3 & 3 \\
-\hline
-US-DEX-01 & Customer & Menerima rekomendasi personal dari D\={e}xie AI & Menemukan model relevan tanpa pencarian manual & 2 & 5 \\
-\hline
-US-ART-01 & Artist & Mengunggah berkas 3D (.glb/.gltf) dengan lisensi ganda & Dapat memonetisasi karya digital (pribadi/komersial) & 1 & 7 \\
-\hline
-US-ART-02 & Artist & Menetapkan model sebagai gratis atau berbayar & Dapat mengendalikan strategi komersial tiap aset & 1 & 4 \\
-\hline
-US-ART-03 & Artist & Membuat unggahan portofolio dengan gambar render dan \textit{caption} & Memamerkan karya dan menarik trafik ke portofolio Artist & 2 & 5 \\
-\hline
-US-ART-04 & Artist & Melihat analitik penjualan dan mengajukan pencairan dana & Dapat memantau kinerja pendapatan dan penarikan saldo & 2 & 3 \\
-\hline
-US-PRV-01 & Provider & Mengelola pesanan cetak masuk serta menerima/menolak pekerjaan & Dapat mengontrol antrean produksi mitra Print Provider & 1 & 4 \\
-\hline
-US-PRV-02 & Provider & Mengunduh berkas sumber .glb pelanggan untuk produksi & Memiliki berkas 3D akurat yang siap dicetak & 1 & 4 \\
-\hline
-US-PRV-03 & Provider & Mengisi nomor resi pengiriman dan foto bukti kerja & Customer memiliki bukti kirim sebelum konfirmasi pencairan \textit{escrow} & 1 & 4 \\
-\hline
-US-ADM-01 & Admin & Memoderasi pengajuan peran Artist dan Provider & Memastikan hanya mitra terverifikasi yang mendapat akses & 1 & 3 \\
-\hline
-US-ADM-02 & Admin & Meninjau dan menyetujui/menolak model 3D yang baru diunggah & Menjaga standar kualitas konten sebelum tayang publik & 1 & 3 \\
-\hline
-US-ADM-03 & Admin & Menangani laporan penyalahgunaan dan sengketa komunitas & Menjaga integritas dan keamanan ekosistem platform & 1 & 4 \\
-\hline
-US-ADM-04 & Admin & Memantau statistik transaksi dan kesehatan platform terpadu & Mengawasi kinerja operasional platform secara menyeluruh & 2 & 2 \\
-\hline
-US-ADM-05 & Admin & Meninjau catatan \textit{audit log} seluruh tindakan administratif & Menjamin transparansi dan akuntabilitas moderasi & 2 & 2 \\
-\hline
-US-ADM-06 & Admin & Memberi peringatan, menangguhkan, atau memblokir \textit{malicious account} & Menegakkan kepatuhan aturan komunitas & 1 & 3 \\
-\hline
-US-SYS-01 & Tim Sistem & Melaksanakan pengujian regresi penuh dan audit performa sistem & Memastikan platform stabil dan siap produksi komersial & 2 & 2 \\
-\hline
-\rowcolor{lightslate} \multicolumn{5}{|r|}{\textbf{Total Estimasi Usaha Pengembangan (26 User Story pada 5 Fase, Tim Paruh Waktu)}} & \textbf{106} \\
-\hline
-\end{longtable}
-}
-\normalsize
+\end{tabularx}
+\end{table}
 
 \clearpage
 
-% ==============================================================================
-% LAMPIRAN C: ESTIMASI ANGGARAN, PERHITUNGAN PERT & KOMPOSISI BIAYA
-% ==============================================================================
-\section{Estimasi Anggaran, Perhitungan PERT, dan Komposisi Biaya}
+\subsection{Perhitungan Metode Three-Point (PERT), Parametric, dan Komposisi Biaya}
+Estimasi biaya tenaga rekayasa dihitung secara objektif menggunakan metode \textit{Three-Point Estimation (PERT)} ($E = \frac{O + 4M + P}{6}$ dan simpangan baku $\sigma = \frac{P - O}{6}$) yang dikalikan dengan tarif rekayasa komersial Rp 1.000.000 per \textit{person-day}.
 
-\subsection{Dasar Perhitungan: Metode Three-Point (PERT) dan Parametric}
-Untuk menghasilkan anggaran yang objektif sebelum kode pertama ditulis, tim rekayasa menggunakan dua teknik estimasi standar PMBOK\textsuperscript{\textregistered} Guide Edisi 6:
-\begin{enumerate}[leftmargin=1.5em, itemsep=2pt]
-    \item \textit{Three-Point Estimation (PERT):} Menghitung perkiraan usaha efektif (\textit{person-days}) per fase berdasarkan nilai Optimis ($O$), Paling Mungkin ($M$), dan Pesimis ($P$) menggunakan rumus rata-rata berbobot:
-    \[
-        E = \frac{O + 4M + P}{6}, \qquad \sigma = \frac{P - O}{6}
-    \]
-    \item \textit{Parametric Estimation:} Mengalikan total ekspektasi usaha pengembangan ($E_{\text{total}} = 106{,}0\text{ \textit{person-days}}$) dengan tarif tenaga rekayasa komersial PT Schryzon Digital Nusantara sebesar Rp 1.000.000 per \textit{person-day}, kemudian menjumlahkannya dengan komponen infrastruktur dan cadangan risiko 10\%.
-\end{enumerate}
-
-Klarifikasi Basis Kapasitas Usaha (106 \textit{Person-Days} vs. 106 Hari Kalender):
-Angka 106 \textit{person-days} merupakan akumulasi estimasi usaha efektif tim pengembang mahasiswa (4 personil) yang bekerja secara terdistribusi/paruh waktu (\textit{part-time} sekitar 15 hingga 20 jam per minggu per personil) sepanjang rentang 106 hari kalender proyek (15 minggu), bukan proyeksi kapasitas penuh waktu (\textit{full-time}) 4 orang secara simultan.
+\noindent Klarifikasi Basis Kapasitas Usaha (106 \textit{Person-Days} vs. 106 Hari Kalender):
+Angka 106 \textit{person-days} merupakan akumulasi estimasi usaha efektif tim pengembang mahasiswa (4 personil) yang bekerja secara terdistribusi dan paruh waktu (\textit{part-time} sekitar 15 hingga 20 jam per minggu per personil) sepanjang rentang 106 hari kalender proyek (15 minggu), bukan proyeksi kapasitas kerja penuh waktu (\textit{full-time}) 4 orang secara simultan.
 
 \begin{table}[H]
 \centering
 \caption{Perhitungan Usaha dan Biaya Pengembangan Menggunakan Metode PERT}
-\begin{tabularx}{\textwidth}{| Y | C{0.85cm} | C{0.85cm} | C{0.85cm} | C{1.65cm} | C{1.05cm} | R{3.2cm} |}
+\small
+\begin{tabularx}{\textwidth}{| Y | C{0.8cm} | C{0.8cm} | C{0.8cm} | C{1.6cm} | C{1.0cm} | R{3.1cm} |}
 \hline
 \rowcolor{tableheadergray} \thdr{Fase / Modul Pengembangan} & \thdr{$O$} & \thdr{$M$} & \thdr{$P$} & \thdr{$E$ (Pd)} & \thdr{$\sigma$} & \thdr{Biaya (Parametric)} \\
 \hline
-Fase 1: Fondasi, DB \& Auth & 8 & 11 & 14 & 11,0 & 1,00 & Rp 11.000.000 \\
+Fase 1: Fondasi, Akun \& Akses & 8 & 11 & 14 & 11,0 & 1,00 & Rp 11.000.000 \\
 \hline
-Fase 2: Core Marketplace \& Midtrans & 28 & 35 & 42 & 35,0 & 2,33 & Rp 35.000.000 \\
+Fase 2: Katalog 3D \& Pembayaran & 28 & 35 & 42 & 35,0 & 2,33 & Rp 35.000.000 \\
 \hline
 Fase 3: Komunitas \& Fitur Sosial & 16 & 21 & 26 & 21,0 & 1,67 & Rp 21.000.000 \\
 \hline
-Fase 4: D\={e}xie AI \& Ekosistem Cetak & 20 & 27 & 34 & 27,0 & 2,33 & Rp 27.000.000 \\
+Fase 4: Asisten AI \& Cetak 3D & 20 & 27 & 34 & 27,0 & 2,33 & Rp 27.000.000 \\
 \hline
-Fase 5: Admin, QA Regresi \& Rilis & 9 & 12 & 15 & 12,0 & 1,00 & Rp 12.000.000 \\
+Fase 5: Admin, Uji UAT \& Serah Terima & 9 & 12 & 15 & 12,0 & 1,00 & Rp 12.000.000 \\
 \hline
 \rowcolor{lightslate} \textbf{Total Usaha Rekayasa (PERT)} & \textbf{81} & \textbf{106} & \textbf{131} & \textbf{106,0} & \textbf{8,33} & \textbf{Rp 106.000.000} \\
 \hline
 \end{tabularx}
 \end{table}
 
-\subsection{Rincian Anggaran Keseluruhan dan Komposisi Biaya}
-
 \begin{table}[H]
 \centering
 \caption{Rincian Komponen Anggaran Proyek 3D\={e}x (Disetujui Sponsor)}
-\begin{tabularx}{\textwidth}{| L{5.2cm} | Y | R{3.2cm} | C{1.5cm} |}
+\small
+\begin{tabularx}{\textwidth}{| L{5.1cm} | Y | R{3.1cm} | C{1.4cm} |}
 \hline
 \rowcolor{tableheadergray} \thdr{Komponen Biaya} & \thdr{Keterangan Rincian} & \thdr{Nilai (IDR)} & \thdr{Porsi} \\
 \hline
 1. Tenaga Pengembang Perangkat Lunak & 106 \textit{person-days} $\times$ Rp 1.000.000 (4 Personil Paruh Waktu) & Rp 106.000.000 & 71,38\% \\
 \hline
-2. Infrastruktur Cloud, VPS, MinIO S3 \& API & Hosting 12 Bulan (FE/\allowbreak BE/\allowbreak PGVector/\allowbreak MinIO), SSL, Kuota Gemini \& Midtrans & Rp 16.500.000 & 11,11\% \\
+2. Infrastruktur Cloud \& Layanan API & Hosting Server, Penyimpanan Aset 12 Bulan, SSL, Kuota AI \& Midtrans & Rp 16.500.000 & 11,11\% \\
 \hline
-3. Sistem Desain UI/UX, WebGL \& QA & Aset Desain Tema Gelap, Pengujian Regresi \& Audit Performa & Rp 7.500.000 & 5,05\% \\
+3. Desain Antarmuka, 3D \& Uji Mutu & Paket Desain Tema Gelap, Uji Penampil 3D \& Uji Regresi & Rp 7.500.000 & 5,05\% \\
 \hline
-4. Dokumentasi, Pelatihan \& Workshop UAT & Manual Pengguna/Admin, BAST, Sesi Pelatihan Staf Krea3D Corp & Rp 5.000.000 & 3,37\% \\
+4. Dokumentasi, Pelatihan \& UAT & Manual Pengguna/Admin, BAST, dan Sesi Pelatihan Staf Krea3D & Rp 5.000.000 & 3,37\% \\
 \hline
 \rowcolor{lightslate} \textbf{Subtotal Biaya Dasar} & \textbf{Total Pengeluaran Terencana} & \textbf{Rp 135.000.000} & \textbf{90,91\%} \\
 \hline
@@ -960,26 +1131,24 @@ Fase 5: Admin, QA Regresi \& Rilis & 9 & 12 & 15 & 12,0 & 1,00 & Rp 12.000.000 \
 \begin{tikzpicture}[font=\sffamily\footnotesize]
     \node[anchor=west, font=\sffamily\small\bfseries, text=black] at (0, 3.3) {Visualisasi Proporsi Komponen Anggaran (Total Rp 148.500.000)};
 
-    % Horizontal stacked bar (width 14.5 cm)
-    \fill[brandnavy] (0, 2.2) rectangle (10.35, 2.9);       % 71.38% -> 10.35
-    \fill[brandblue] (10.35, 2.2) rectangle (11.96, 2.9);   % 11.11% -> 1.61
-    \fill[accentorange] (11.96, 2.2) rectangle (12.69, 2.9);% 5.05% -> 0.73
-    \fill[accentteal] (12.69, 2.2) rectangle (13.18, 2.9);  % 3.37% -> 0.49
-    \fill[accentred] (13.18, 2.2) rectangle (14.50, 2.9);   % 9.09% -> 1.32
+    \fill[brandnavy] (0, 2.2) rectangle (10.35, 2.9);
+    \fill[brandblue] (10.35, 2.2) rectangle (11.96, 2.9);
+    \fill[accentorange] (11.96, 2.2) rectangle (12.69, 2.9);
+    \fill[accentteal] (12.69, 2.2) rectangle (13.18, 2.9);
+    \fill[accentred] (13.18, 2.2) rectangle (14.50, 2.9);
 
     \node[white, font=\sffamily\scriptsize\bfseries] at (5.17, 2.55) {Tenaga Pengembang: 71,38\% (Rp 106,0 Jt)};
     \node[white, font=\sffamily\tiny\bfseries] at (11.15, 2.55) {11,1\%};
     \node[white, font=\sffamily\tiny\bfseries] at (13.84, 2.55) {9,1\%};
 
-    % Legend (2 spacious columns inside 14.5cm width)
     \fill[brandnavy] (0, 1.3) rectangle (0.35, 1.65);
     \node[anchor=west, text=black] at (0.48, 1.48) {Tenaga Pengembang (71,38\% / Rp 106,0 Jt)};
 
     \fill[brandblue] (7.6, 1.3) rectangle (7.95, 1.65);
-    \node[anchor=west, text=black] at (8.08, 1.48) {Server, MinIO, DB \& API 12 Bln (11,11\% / Rp 16,5 Jt)};
+    \node[anchor=west, text=black] at (8.08, 1.48) {Infrastruktur \& API 12 Bln (11,11\% / Rp 16,5 Jt)};
 
     \fill[accentorange] (0, 0.7) rectangle (0.35, 1.05);
-    \node[anchor=west, text=black] at (0.48, 0.88) {UI/UX, WebGL \& QA (5,05\% / Rp 7,5 Jt)};
+    \node[anchor=west, text=black] at (0.48, 0.88) {UI/UX, Penampil 3D \& QA (5,05\% / Rp 7,5 Jt)};
 
     \fill[accentteal] (7.6, 0.7) rectangle (7.95, 1.05);
     \node[anchor=west, text=black] at (8.08, 0.88) {Pelatihan, Dokumentasi \& UAT (3,37\% / Rp 5,0 Jt)};
@@ -1002,36 +1171,36 @@ Fase 5: Admin, QA Regresi \& Rilis & 9 & 12 & 15 & 12,0 & 1,00 & Rp 12.000.000 \
 \begin{table}[H]
 \centering
 \caption{Daftar Personil Tim Inti, Peran XP, dan Tanggung Jawab}
-\begin{tabularx}{\textwidth}{| L{4.2cm} | C{2.3cm} | L{3.2cm} | Y |}
+\begin{tabularx}{\textwidth}{| L{4.3cm} | C{2.3cm} | L{3.2cm} | Y |}
 \hline
-\rowcolor{tableheadergray} \thdr{Nama Personil} & \thdr{NIM / ID} & \thdr{Peran XP} & \thdr{Domain Kepemilikan Utama} \\
+\rowcolor{tableheadergray} \thdr{Nama Personil} & \thdr{NIM / ID} & \thdr{Peran XP} & \thdr{Domain Tanggung Jawab Utama} \\
 \hline
-I Nyoman Widiyasa Jayananda (Schryzon) & F1D02410053 & PM / Tracker \& Programmer & Arsitektur Backend Express.js, Prisma PostgreSQL/pgvector, MinIO S3, D\={e}xie AI, CI/CD, Docker \& SysAdmin. \\
+I Nyoman Widiyasa Jayananda & F1D02410053 & PM / Tracker \& Programmer & Koordinasi iterasi, layanan backend, basis data terpusat, penyimpanan aset 3D, asisten AI D\={e}xie, dan tata kelola rilis. \\
 \hline
-I Kadek Mahesa Permana Putra (Vuxyn) & F1D02410052 & Programmer \& Tester (QA Lead) & Frontend Next.js App Router, \textit{Design System} Tema Gelap, WebGL 3D Viewer (Three.js), Pengujian Regresi \& Performa. \\
+I Kadek Mahesa Permana Putra & F1D02410052 & Programmer \& Tester (QA Lead) & Antarmuka halaman web, sistem tema gelap, penampil model 3D interaktif, dan pengujian kualitas UAT/performa. \\
 \hline
-Abdurrahman Karim & F1D02410031 & Programmer & Integrasi Frontend-Backend, Alur Autentikasi Google OAuth 2.0, Midtrans Snap, Modul Cetak 3D (\textit{Escrow}) \& Notifikasi. \\
+Abdurrahman Karim & F1D02410031 & Programmer & Integrasi data antarmuka ke backend, alur login Google, pembayaran Midtrans, layanan cetak 3D (\textit{escrow}), dan notifikasi. \\
 \hline
-Fido Priasa Setyono Putra & F1D02410048 & Customer Liaison / Analyst & Analisis Kebutuhan Bisnis, Penyusunan Dokumentasi Charter/UML, Koordinasi UAT \& Pelatihan Klien. \\
+Fido Priasa Setyono Putra & F1D02410048 & Customer Liaison / Analyst & Analisis kebutuhan bisnis klien, penyusunan dokumentasi Charter/UML, koordinasi uji coba pengguna, dan pelatihan klien. \\
 \hline
-Rina Kusumawardhani (Krea3D Corp) & KREA3D-PO & On-Site Customer & Penentuan prioritas \textit{User Story} pada \textit{Planning Game}, verifikasi demo rilis, dan persetujuan UAT. \\
+Rina Kusumawardhani (Krea3D Corp) & KREA3D-PO & On-Site Customer & Penentuan prioritas fitur tiap rilis, peninjauan demo dua mingguan, dan persetujuan akhir UAT. \\
 \hline
 \end{tabularx}
 \end{table}
 
 \subsection{Daftar Sarana Perangkat Keras, Perangkat Lunak, dan Infrastruktur}
 \begin{itemize}[leftmargin=1.5em, itemsep=2pt]
-    \item Perangkat Keras Tim Pengembang: 4 unit Workstation/Laptop Rekayasa (Prosesor setara Ryzen 6800H / Core i7, RAM 16 hingga 32 GB, GPU berkemampuan WebGL 2.0) untuk pengembangan lokal dan \textit{rendering} uji 3D.
-    \item Perangkat Lunak \& Alat Kolaborasi: Visual Studio Code / Antigravity IDE, Git \& GitHub Private Repository dengan GitHub Actions CI/CD, Docker \& Docker Compose, Node.js 20 LTS, PostgreSQL 16 + pgvector, MinIO Server, XeLaTeX \& PlantUML untuk dokumentasi arsitektur.
-    \item Infrastruktur Uji \& Produksi (4 Node): Server Cloud / VPS Produksi (Node Frontend, Node Backend Modular Monolith, Node Database PostgreSQL 16, Node Penyimpanan Objek MinIO S3), serta akun Sandbox \& Produksi Midtrans Snap dan Google Cloud Gemini API.
+    \item Perangkat Keras Tim Pengembang: 4 unit laptop/workstation pengembangan berprosesor multi-core (RAM 16 hingga 32 GB, dukungan grafis 3D WebGL) untuk pengerjaan dan uji tampilan model.
+    \item Perangkat Lunak \& Alat Kolaborasi: Editor pengkodean terpadu, repositori Git bersama untuk pengendalian versi kode, lingkungan runtime web dan basis data lokal, serta alat penyusunan dokumen resmi.
+    \item Infrastruktur Pengujian \& Produksi: Server cloud produksi untuk layanan web, penyimpanan berkas 3D, serta akun uji dan produksi untuk gerbang pembayaran Midtrans dan layanan AI Google.
 \end{itemize}
 
 \subsection{Matriks Tanggung Jawab (RACI Matrix)}
-Keterangan peran RACI: \textbf{R} = \textit{Responsible} (Pelaksana), \textbf{A} = \textit{Accountable} (Pemegang Akuntabilitas Tunggal per Aktivitas), \textbf{C} = \textit{Consulted} (Dimintai Masukan), \textbf{I} = \textit{Informed} (Diinformasikan). Sesuai aturan ketat RACI, setiap baris aktivitas memiliki tepat satu pemegang \textbf{A} murni tanpa pencampuran \textit{A/R} dalam satu sel.
+Keterangan peran RACI: \textbf{R} = \textit{Responsible} (Pelaksana), \textbf{A} = \textit{Accountable} (Pemegang Akuntabilitas Tunggal per Aktivitas), \textbf{C} = \textit{Consulted} (Dimintai Masukan), \textbf{I} = \textit{Informed} (Diinformasikan). Setiap baris aktivitas menetapkan tepat satu pemegang \textbf{A} murni tanpa pencampuran \textit{A/R}.
 
 \begin{table}[H]
 \centering
-\caption{Matriks RACI untuk 14 Domain Aktivitas Utama Proyek 3D\={e}x}
+\caption{Matriks RACI untuk Aktivitas Utama Proyek 3D\={e}x}
 \footnotesize
 \begin{tabularx}{\textwidth}{| Y | C{1.55cm} | C{1.55cm} | C{1.55cm} | C{1.55cm} | C{1.85cm} |}
 \hline
@@ -1039,31 +1208,31 @@ Keterangan peran RACI: \textbf{R} = \textit{Responsible} (Pelaksana), \textbf{A}
 \hline
 1. Penyusunan Project Charter v1.0 & \textbf{A} & C & C & R & C \\
 \hline
-2. Penulisan \& Prioritas User Story & R & C & C & R & \textbf{A} \\
+2. Penulisan \& Prioritas Kebutuhan Fitur & R & C & C & R & \textbf{A} \\
 \hline
-3. Desain Skema DB \& Migrasi Prisma & \textbf{A} & I & R & C & I \\
+3. Perancangan Basis Data \& Struktur Sistem & \textbf{A} & I & R & C & I \\
 \hline
-4. Implementasi REST API Modular Monolith & \textbf{A} & C & R & I & I \\
+4. Pengembangan Layanan Backend Inti & \textbf{A} & C & R & I & I \\
 \hline
-5. Desain Sistem UI/UX \& WebGL 3D Viewer & C & \textbf{A} & R & I & C \\
+5. Desain Antarmuka \& Penampil 3D Web & C & \textbf{A} & R & I & C \\
 \hline
-6. Autentikasi JWT \& Google OAuth 2.0 & \textbf{A} & I & R & I & I \\
+6. Pengelolaan Akun, Login Google \& Akses Peran & \textbf{A} & I & R & I & I \\
 \hline
-7. Integrasi Pembayaran Midtrans Snap & \textbf{A} & I & R & I & C \\
+7. Integrasi Pembayaran Midtrans & \textbf{A} & I & R & I & C \\
 \hline
-8. Penyimpanan Objek MinIO S3 (.glb) & \textbf{A} & I & R & I & I \\
+8. Penyimpanan \& Pengunduhan Berkas 3D & \textbf{A} & I & R & I & I \\
 \hline
-9. Mesin Rekomendasi D\={e}xie AI (pgvector) & \textbf{A} & R & I & I & C \\
+9. Pencarian Cerdas \& Asisten AI D\={e}xie & \textbf{A} & R & I & I & C \\
 \hline
-10. Alur Pesanan Cetak 3D \& Provider Dashboard & \textbf{A} & C & R & C & C \\
+10. Alur Cetak 3D (\textit{Escrow}) \& Dasbor Mitra & \textbf{A} & C & R & C & C \\
 \hline
-11. Fitur Komunitas, Ulasan \& Notifikasi & \textbf{A} & C & R & I & I \\
+11. Lini Masa Komunitas, Ulasan \& Notifikasi & \textbf{A} & C & R & I & I \\
 \hline
-12. Dasbor Admin, Moderasi \& Audit Log & \textbf{A} & C & R & C & I \\
+12. Dasbor Admin, Moderasi \& Catatan Audit & \textbf{A} & C & R & C & I \\
 \hline
 13. Pengujian Regresi, Performa \& UAT & C & \textbf{A} & R & R & C \\
 \hline
-14. Demo Rilis, Pelatihan \& Serah Terima & \textbf{A} & R & R & R & C / Approver \\
+14. Demo Rilis, Pelatihan \& Serah Terima Akhir & \textbf{A} & R & R & R & C / Approver \\
 \hline
 \end{tabularx}
 \end{table}
