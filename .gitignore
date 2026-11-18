@@ -17,4 +17,5 @@ _temp_restore/
 # TeX build artifacts
 docs/diagrams/tex/build/
 docs/charter/build/
+docs/wbs/build/
 *.aux
